@@ -72,6 +72,15 @@ app.use(session({
 app.use(express.static("public", { index: false }));
 app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private')));
 
+// API Route for Frontend Configuration
+// Esta rota fornece as chaves públicas necessárias para o frontend inicializar o Supabase.
+app.get('/api/config', (req, res) => {
+    res.json({
+        supabaseUrl: config.supabase.url,
+        supabaseAnonKey: config.supabase.anonKey
+    });
+});
+
 // Routes
 app.use('/api', authRoutes);
 app.use('/api', publicRoutes);
