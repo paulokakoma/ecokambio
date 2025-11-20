@@ -1,0 +1,4 @@
+{
+  "supabaseUrl": "COLOQUE_A_SUA_SUPABASE_URL_AQUI",
+  "supabaseAnonKey": "COLOQUE_A_SUA_SUPABASE_ANON_KEY_AQUI"
+}

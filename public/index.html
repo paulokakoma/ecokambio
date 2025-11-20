@@ -1598,8 +1598,9 @@
 
         async function initializeApp() {
             try {
-                const configResponse = await fetch('/api/config');
-                if (!configResponse.ok) throw new Error('Falha ao carregar a configuração do servidor.');
+                // Alterado para carregar de um ficheiro estático em vez de um endpoint de API
+                const configResponse = await fetch('/config.json');
+                if (!configResponse.ok) throw new Error('Falha ao carregar o ficheiro de configuração (config.json).');
                 const config = await configResponse.json();
                 dbClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
 
