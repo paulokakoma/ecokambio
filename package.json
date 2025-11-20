@@ -4,7 +4,7 @@
   "description": "A currency exchange application with user credits and admin notifications.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server.js --host 0.0.0.0",
     "build": "npm run build:css",
     "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
     "dev": "concurrently \"npm:build:css\" \"nodemon server.js\""
