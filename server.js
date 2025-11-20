@@ -23,13 +23,9 @@ const viewRoutes = require("./src/routes/viewRoutes");
 
 const app = express();
 
-// Criar o servidor apropriado com base no ambiente
-let server;
-if (config.isDevelopment) {
-    server = http.createServer(app); // HTTP para desenvolvimento local
-} else {
-    server = https.createServer(app); // HTTPS para produção (Railway)
-}
+// O Railway (e outras plataformas modernas) gere o SSL/TLS externamente.
+// A nossa aplicação deve sempre correr um servidor HTTP simples.
+const server = http.createServer(app);
 
 // Initialize WebSocket
 websocket.init(server);
