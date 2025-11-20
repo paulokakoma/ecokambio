@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const https = require("https"); // Importar o módulo https
 const path = require("path");
 const session = require("express-session");
 const FileStore = require('session-file-store')(session);
@@ -21,7 +22,14 @@ const adminRoutes = require("./src/routes/adminRoutes");
 const viewRoutes = require("./src/routes/viewRoutes");
 
 const app = express();
-const server = http.createServer(app);
+
+// Criar o servidor apropriado com base no ambiente
+let server;
+if (config.isDevelopment) {
+    server = http.createServer(app); // HTTP para desenvolvimento local
+} else {
+    server = https.createServer(app); // HTTPS para produção (Railway)
+}
 
 // Initialize WebSocket
 websocket.init(server);
