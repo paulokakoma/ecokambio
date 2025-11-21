@@ -14,6 +14,7 @@ const websocket = require("./src/websocket");
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
 const isAdmin = require("./src/middleware/auth");
+const enforceHttps = require("./src/middleware/security");
 
 // Routes
 const authRoutes = require("./src/routes/authRoutes");
@@ -31,6 +32,7 @@ const server = http.createServer(app);
 websocket.init(server);
 
 // Security Middleware
+app.use(enforceHttps); // Enforce HTTPS & Canonical Domain first
 app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for now to avoid breaking inline scripts/styles if any
 }));
