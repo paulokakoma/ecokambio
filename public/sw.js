@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ecokambio-cache-v1';
+const CACHE_NAME = 'ecokambio-cache-v2';
 
 // Lista de ficheiros essenciais para a aplicação funcionar offline.
 const urlsToCache = [
@@ -10,7 +10,6 @@ const urlsToCache = [
   '/privacidade.html',
   '/details.html',
   '/css/output.css',
-  '/js/main.js',
   '/assets/main-logo.svg',
   '/assets/favicon.svg',
   '/assets/visa.png',
@@ -22,16 +21,13 @@ const urlsToCache = [
 // Evento 'install': é acionado quando o service worker é instalado.
 self.addEventListener('install', event => {
   console.log('[Service Worker] Instalando...');
-  // Espera até que a cache seja aberta e todos os ficheiros essenciais sejam adicionados.
+  self.skipWaiting(); // Força o novo service worker a tornar-se ativo imediatamente.
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('[Service Worker] Cache aberta. Adicionando ficheiros essenciais.');
         return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        console.log('[Service Worker] Ficheiros essenciais adicionados à cache. Instalação completa.');
-        return self.skipWaiting(); // Força o novo service worker a tornar-se ativo imediatamente.
       })
   );
 });
@@ -50,18 +46,28 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Controla as páginas imediatamente
   );
 });
 
 // Evento 'fetch': é acionado para cada pedido de rede feito pela página.
 self.addEventListener('fetch', event => {
-  // Estratégia "Cache First": tenta responder a partir da cache primeiro.
+  // Estratégia "Network First" para navegação (HTML)
+  // Garante que o utilizador vê sempre a versão mais recente da página
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Estratégia "Cache First" para recursos estáticos (CSS, JS, Imagens)
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Se o recurso estiver na cache, retorna-o.
-        // Caso contrário, faz o pedido à rede.
         return response || fetch(event.request);
       })
   );
