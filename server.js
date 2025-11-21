@@ -85,6 +85,10 @@ app.get('/api/config', (req, res) => {
 app.use('/api', authRoutes);
 app.use('/api', publicRoutes);
 app.use('/api', adminRoutes);
+
+// Health Check
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 app.use('/', viewRoutes);
 
 // Start Server
