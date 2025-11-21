@@ -93,6 +93,30 @@ app.get('/health', (req, res) => res.status(200).send('OK'));
 
 app.use('/', viewRoutes);
 
+// 404 Handler - Catch all unhandled requests
+app.use((req, res, next) => {
+    const host = req.get('host');
+    console.log(`[404] Recurso não encontrado: ${req.method} ${req.originalUrl} | Host: ${host}`);
+
+    if (req.accepts('html')) {
+        res.status(404).send(`
+            <html>
+                <head><title>404 - Página Não Encontrada</title></head>
+                <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+                    <h1>404 - Página Não Encontrada</h1>
+                    <p>O recurso que procura não existe nesta aplicação.</p>
+                    <p><small>Host: ${host} | Path: ${req.originalUrl}</small></p>
+                    <a href="/">Voltar à Página Inicial</a>
+                </body>
+            </html>
+        `);
+    } else if (req.accepts('json')) {
+        res.status(404).json({ error: 'Not Found', path: req.originalUrl });
+    } else {
+        res.status(404).type('txt').send('Not Found');
+    }
+});
+
 // Start Server
 server.listen(config.port, '0.0.0.0', () => {
     if (config.isDevelopment) {

@@ -17,10 +17,8 @@ const subdomainMiddleware = (req, res, next) => {
     req.isAdminSubdomain = isAdminSubdomain;
     req.isMainDomain = !isAdminSubdomain;
 
-    // Debug em desenvolvimento
-    if (config.isDevelopment) {
-        console.log(`[${req.method}] ${req.path} - Host: ${host} - Admin: ${isAdminSubdomain}`);
-    }
+    // Debug em desenvolvimento e produção para diagnosticar problemas de roteamento
+    console.log(`[SubdomainMiddleware] Method: ${req.method} | Path: ${req.path} | Host: ${host} | Parts: ${JSON.stringify(parts)} | Admin: ${isAdminSubdomain}`);
 
     next();
 };
