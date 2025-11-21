@@ -569,13 +569,83 @@ const handleResourcePost = (resource, tableName) => {
     };
 };
 
+const updateSettings = async (req, res) => {
+    try {
+        // Frontend sends { settings: [...] }, extract the array
+        let settingsArray = req.body.settings || req.body;
+
+        if (!Array.isArray(settingsArray)) {
+            return res.status(400).json({ message: "Formato inválido. Esperado um array de settings." });
+        }
+
+        const settingsToUpsert = settingsArray.map(({ key, value }) => {
+            // Handle nested objects (like social_media_links) by stringifying
+            const finalValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+            return {
+                key: String(key),
+                value: finalValue
+            };
+        });
+
+        const { error: upsertError } = await supabase
+            .from('site_settings')
+            .upsert(settingsToUpsert, { onConflict: 'key' });
+
+        if (upsertError) throw upsertError;
+
+        res.status(200).json({
+            success: true,
+            message: 'Configurações atualizadas com sucesso.'
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar configurações gerais:", error);
+        handleSupabaseError(error, res);
+    }
+};
+
+const updateInformalRates = async (req, res) => {
+    try {
+        // Frontend sends { rates: [...] }, extract the array
+        const updates = req.body.rates || req.body;
+
+        if (!Array.isArray(updates)) {
+            return res.status(400).json({ message: "Formato inválido. Esperado um array de atualizações." });
+        }
+
+        // Upsert all rates
+        const ratesToUpsert = updates.map(({ provider_id, currency_pair, sell_rate }) => ({
+            provider_id: parseInt(provider_id),
+            currency_pair: String(currency_pair),
+            sell_rate: parseFloat(sell_rate) || 0
+        }));
+
+        const { error: upsertError } = await supabase
+            .from('exchange_rates')
+            .upsert(ratesToUpsert, { onConflict: 'provider_id,currency_pair' });
+
+        if (upsertError) throw upsertError;
+
+        res.status(200).json({
+            success: true,
+            message: 'Taxas informais atualizadas com sucesso.'
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar taxas informais:", error);
+        handleSupabaseError(error, res);
+    }
+};
+
 module.exports = {
     getRateProviders,
     getAffiliateLinks,
     getSupporters,
     getCurrencies,
     getSettings,
+    updateSettings,
     updateVisaSettings,
+    updateInformalRates,
     createSupporter,
     getRecentActivity,
     notifyUpdate,

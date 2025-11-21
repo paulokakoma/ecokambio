@@ -3,13 +3,23 @@ const http = require("http");
 const https = require("https"); // Importar o módulo https
 const path = require("path");
 const session = require("express-session");
+const compression = require("compression");
 const FileStore = require('session-file-store')(session);
+const app = express();
+const websocket = require("./src/websocket");
+
+// O Railway (e outras plataformas modernas) gere o SSL/TLS externamente.
+// A nossa aplicação deve sempre correr um servidor HTTP simples.
+const server = http.createServer(app);
+
+// Initialize WebSocket
+websocket.init(server);
+
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 // Config & Utils
 const config = require("./src/config/env");
-const websocket = require("./src/websocket");
 
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
@@ -22,20 +32,12 @@ const publicRoutes = require("./src/routes/publicRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const viewRoutes = require("./src/routes/viewRoutes");
 
-const app = express();
-
-// O Railway (e outras plataformas modernas) gere o SSL/TLS externamente.
-// A nossa aplicação deve sempre correr um servidor HTTP simples.
-const server = http.createServer(app);
-
-// Initialize WebSocket
-websocket.init(server);
-
 // Security Middleware
-app.use(enforceHttps); // Enforce HTTPS & Canonical Domain first
+app.use(enforceHttps);
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for now to avoid breaking inline scripts/styles if any
+    contentSecurityPolicy: false,
 }));
+app.use(compression()); // Enable Gzip compression
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,11 +46,6 @@ const limiter = rateLimit({
     legacyHeaders: false,
 });
 app.use('/api/', limiter); // Apply rate limiting to API routes
-
-// Basic Middleware
-app.set('trust proxy', 1);
-app.use(express.json());
-app.use(subdomainMiddleware);
 
 // Session Configuration
 app.use(session({
@@ -64,15 +61,21 @@ app.use(session({
     cookie: {
         secure: !config.isDevelopment,
         httpOnly: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        sameSite: config.nodeEnv === 'production' ? 'lax' : 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: 'lax',
         domain: config.isDevelopment ? undefined : config.session.cookieDomain
     }
 }));
 
-// Static Files
-app.use(express.static("public", { index: false }));
-app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private')));
+// Static Files with Caching
+const staticOptions = {
+    index: false,
+    maxAge: '1d', // Cache static files for 1 day
+    etag: true
+};
+
+app.use(express.static("public", staticOptions));
+app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), staticOptions));
 
 // API Route for Frontend Configuration
 // Esta rota fornece as chaves públicas necessárias para o frontend inicializar o Supabase.

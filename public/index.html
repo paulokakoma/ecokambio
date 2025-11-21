@@ -1,47 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
     <title>Câmbio Angola Hoje - Taxas Dólar Kwanza, Euro Kwanza | EcoKambio</title>
-    <meta name="description" content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real. Calculadora de custos de importação.">
-    <meta name="keywords" content="cambio angola, dolar kwanza, euro kwanza, ecokambio, divisas angola, taxas de cambio, mercado informal, kinguilas, preço do dolar hoje angola">
-    
+    <meta name="description"
+        content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real. Calculadora de custos de importação.">
+    <meta name="keywords"
+        content="cambio angola, dolar kwanza, euro kwanza, ecokambio, divisas angola, taxas de cambio, mercado informal, kinguilas, preço do dolar hoje angola">
+
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
-     crossorigin="anonymous"></script>
-     
+        crossorigin="anonymous"></script>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GL04FWDNFV"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-      gtag('config', 'G-GL04FWDNFV');
+        gtag('config', 'G-GL04FWDNFV');
     </script>
 
 
     <!-- Search Engine Verification Tags -->
     <meta name="msvalidate.01" content="2D497889D99F893228C134DCD65BAF51" />
     <!-- <meta name="yandex-verification" content="SEU_CODIGO_YANDEX_AQUI" /> -->
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ecokambio.com/">
     <meta property="og:title" content="Câmbio Angola Hoje - Taxas Dólar Kwanza, Euro Kwanza | EcoKambio">
-    <meta property="og:description" content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real.">
+    <meta property="og:description"
+        content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real.">
     <meta property="og:image" content="https://ecokambio.com/assets/social-share-banner.png">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://ecokambio.com/">
     <meta property="twitter:title" content="Câmbio Angola Hoje - Taxas Dólar Kwanza, Euro Kwanza | EcoKambio">
-    <meta property="twitter:description" content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real.">
+    <meta property="twitter:description"
+        content="Consulte as taxas de câmbio do dólar, euro e outras divisas em Angola. Compare o mercado formal (bancos) e informal (kinguilas) em tempo real.">
     <meta property="twitter:image" content="https://ecokambio.com/assets/social-share-banner.png">
-    
+
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
     {
@@ -68,169 +73,406 @@
     <link rel="stylesheet" href="/css/output.css">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-      as="style"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />    
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-      :root { --theme-color: #19b57f; }
-      body { font-family: "Inter", sans-serif; background-color: #f3f4f6; color: #1f2937; min-height: 100vh; }
-      .market-container { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 28px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05); }
-      /* Carousel arrows */
-      .carousel-arrow {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 30;
-        background: rgba(15, 23, 42, 0.6);
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-      @media (min-width: 768px) {
-        .carousel-arrow {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
+        :root {
+            --theme-color: #19b57f;
         }
-      }
-      .carousel-arrow:hover { background: rgba(15, 23, 42, 0.8); }
-      
-      /* Dimensões responsivas dos banners baseadas em 1500x530 */
-      .banner-container {
-        /* Proporção 3:1 para aumentar a altura relativa */
-        aspect-ratio: 3 / 1;
-        max-width: 1141px;
-        width: 100%;
-        padding: 2px; /* Reduz o espaço interno para o conteúdo */
-        box-sizing: border-box; /* Garante que o padding seja aplicado para dentro */
-      }
-      
-      .calculator-card { box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3); transition: all 0.5s ease-in-out; border-radius: 24px; }
-      .theme-bai { background-image: linear-gradient(to bottom, #0194b3, #006c6e, #b56b3e); }
-      .theme-bfa { background-image: radial-gradient(circle, #f7931e, #eb5c28); }
-      .theme-bic { background-image: linear-gradient(to right, #d42128, #2b2b2b); }
-      .theme-bpc { background-image: linear-gradient(to right, #00529b, #00417a); }
-      .theme-bci { background-color: #1f3a38; }
-      .theme-yetu { background-image: linear-gradient(135deg, #00401A, #EAA900); }
-      .theme-default { background-image: linear-gradient(to right, #3b82f6, #2563eb); }
-      .border-theme-bai { border-color: #0194b3; } .text-theme-bai { color: #0194b3; }
-      .border-theme-bfa { border-color: #f7931e; } .text-theme-bfa { color: #f7931e; }
-      .border-theme-bic { border-color: #d42128; } .text-theme-bic { color: #d42128; }
-      .border-theme-bpc { border-color: #00529b; } .text-theme-bpc { color: #00529b; }
-      .border-theme-bci { border-color: #1f3a38; } .text-theme-bci { color: #1f3a38; }
-      .border-theme-yetu { border-color: #EAA900; } .text-theme-yetu { color: #EAA900; }
-      .border-theme-default { border-color: #3b82f6; } .text-theme-default { color: #3b82f6; }
-      .border-theme-bna { border-color: #64748b; } .text-theme-bna { color: #64748b; }
-      .bg-theme-bai-faded { background-color: rgba(1, 148, 179, 0.07); }
-      .bg-theme-bfa-faded { background-color: rgba(247, 147, 30, 0.07); }
-      .bg-theme-bic-faded { background-color: rgba(212, 33, 40, 0.07); }
-      .bg-theme-bpc-faded { background-color: rgba(0, 82, 155, 0.07); }
-      .bg-theme-bci-faded { background-color: rgba(31, 58, 56, 0.07); }
-      .bg-theme-yetu-faded { background-color: rgba(234, 169, 0, 0.07); }
-      .bg-theme-default-faded { background-color: rgba(59, 130, 246, 0.07); }
-      .bg-theme-bna-faded { background-color: rgba(100, 116, 139, 0.07); }
-      .market-header { color: var(--theme-color); transition: color 0.5s ease; }
-      .tab-button { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 700; font-size: 1.25rem; }
-      .tab-active { background-color: var(--theme-color); color: white; transform: scale(1.03); box-shadow: 0 12px 30px rgba(25, 181, 127, 0.2); }
-      .tab-inactive { background-color: #e5e7eb; color: #4b5563; }
-      .tab-inactive:hover { background-color: #d1d5db; }
-      .calc-input { font-family: 'JetBrains Mono', monospace; }
-      .province-tab { border-bottom: 3px solid transparent; transition: all 0.3s ease; }
-      .province-tab-active { border-color: var(--theme-color); color: var(--theme-color); }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      @keyframes pulse {
-        50% { opacity: .6; }
-      }
-      .skeleton {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        background-color: #e5e7eb; /* gray-200 */
-        border-radius: 0.5rem; /* rounded-lg */
-      }
-      .skeleton-dark {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        background-color: #4b5563; /* gray-600 */
-        border-radius: 0.5rem; /* rounded-lg */
-      }
-      .custom-select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-      .loader { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: var(--theme-color); border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; transition: color 0.5s ease; }
-      .scrollbar-hide::-webkit-scrollbar { display: none; }
-      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      @keyframes scroll-left {
-      }
-      .animate-scroll {
-        /* Animação infinita - move 33.33% (1/3) da distância total já que temos 3 cópias */
-        animation: scroll 40s linear infinite;
-      }
-      
-      /* Otimização de performance para animação suave */
-      .scrolling-content {
-        will-change: transform;
-        transform: translateZ(0);
-      }
-            /* Carousel arrows and helpers */
+
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .market-container {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Carousel arrows */
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 30;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        @media (min-width: 768px) {
             .carousel-arrow {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                z-index: 30;
-                background: rgba(15, 23, 42, 0.6);
-                color: white;
                 width: 40px;
                 height: 40px;
                 border-radius: 8px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 700;
             }
-            .carousel-arrow:hover { background: rgba(15,23,42,0.8); }
-            .no-scrollbar::-webkit-scrollbar { display: none; }
-            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+
+        .carousel-arrow:hover {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        /* Dimensões responsivas dos banners baseadas em 1500x530 */
+        .banner-container {
+            /* Proporção 3:1 para aumentar a altura relativa */
+            aspect-ratio: 3 / 1;
+            max-width: 1141px;
+            width: 100%;
+            padding: 2px;
+            /* Reduz o espaço interno para o conteúdo */
+            box-sizing: border-box;
+            /* Garante que o padding seja aplicado para dentro */
+        }
+
+        .calculator-card {
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease-in-out;
+            border-radius: 24px;
+        }
+
+        .theme-bai {
+            background-image: linear-gradient(to bottom, #0194b3, #006c6e, #b56b3e);
+        }
+
+        .theme-bfa {
+            background-image: radial-gradient(circle, #f7931e, #eb5c28);
+        }
+
+        .theme-bic {
+            background-image: linear-gradient(to right, #d42128, #2b2b2b);
+        }
+
+        .theme-bpc {
+            background-image: linear-gradient(to right, #00529b, #00417a);
+        }
+
+        .theme-bci {
+            background-color: #1f3a38;
+        }
+
+        .theme-yetu {
+            background-image: linear-gradient(135deg, #00401A, #EAA900);
+        }
+
+        .theme-default {
+            background-image: linear-gradient(to right, #3b82f6, #2563eb);
+        }
+
+        .border-theme-bai {
+            border-color: #0194b3;
+        }
+
+        .text-theme-bai {
+            color: #0194b3;
+        }
+
+        .border-theme-bfa {
+            border-color: #f7931e;
+        }
+
+        .text-theme-bfa {
+            color: #f7931e;
+        }
+
+        .border-theme-bic {
+            border-color: #d42128;
+        }
+
+        .text-theme-bic {
+            color: #d42128;
+        }
+
+        .border-theme-bpc {
+            border-color: #00529b;
+        }
+
+        .text-theme-bpc {
+            color: #00529b;
+        }
+
+        .border-theme-bci {
+            border-color: #1f3a38;
+        }
+
+        .text-theme-bci {
+            color: #1f3a38;
+        }
+
+        .border-theme-yetu {
+            border-color: #EAA900;
+        }
+
+        .text-theme-yetu {
+            color: #EAA900;
+        }
+
+        .border-theme-default {
+            border-color: #3b82f6;
+        }
+
+        .text-theme-default {
+            color: #3b82f6;
+        }
+
+        .border-theme-bna {
+            border-color: #64748b;
+        }
+
+        .text-theme-bna {
+            color: #64748b;
+        }
+
+        .bg-theme-bai-faded {
+            background-color: rgba(1, 148, 179, 0.07);
+        }
+
+        .bg-theme-bfa-faded {
+            background-color: rgba(247, 147, 30, 0.07);
+        }
+
+        .bg-theme-bic-faded {
+            background-color: rgba(212, 33, 40, 0.07);
+        }
+
+        .bg-theme-bpc-faded {
+            background-color: rgba(0, 82, 155, 0.07);
+        }
+
+        .bg-theme-bci-faded {
+            background-color: rgba(31, 58, 56, 0.07);
+        }
+
+        .bg-theme-yetu-faded {
+            background-color: rgba(234, 169, 0, 0.07);
+        }
+
+        .bg-theme-default-faded {
+            background-color: rgba(59, 130, 246, 0.07);
+        }
+
+        .bg-theme-bna-faded {
+            background-color: rgba(100, 116, 139, 0.07);
+        }
+
+        .market-header {
+            color: var(--theme-color);
+            transition: color 0.5s ease;
+        }
+
+        .tab-button {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .tab-active {
+            background-color: var(--theme-color);
+            color: white;
+            transform: scale(1.03);
+            box-shadow: 0 12px 30px rgba(25, 181, 127, 0.2);
+        }
+
+        .tab-inactive {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .tab-inactive:hover {
+            background-color: #d1d5db;
+        }
+
+        .calc-input {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .province-tab {
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .province-tab-active {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: .6;
+            }
+        }
+
+        .skeleton {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            background-color: #e5e7eb;
+            /* gray-200 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
+        }
+
+        .skeleton-dark {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            background-color: #4b5563;
+            /* gray-600 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
+        }
+
+        .custom-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--theme-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            transition: color 0.5s ease;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes scroll-left {}
+
+        .animate-scroll {
+            /* Animação infinita - move 33.33% (1/3) da distância total já que temos 3 cópias */
+            animation: scroll 40s linear infinite;
+        }
+
+        /* Otimização de performance para animação suave */
+        .scrolling-content {
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        /* Carousel arrows and helpers */
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 30;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .carousel-arrow:hover {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
     <style>
         /* Animações para a troca de moeda */
         @keyframes slide-out-left {
-            to { transform: translateX(-20px); opacity: 0; }
+            to {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
         }
+
         @keyframes slide-out-right {
-            to { transform: translateX(20px); opacity: 0; }
+            to {
+                transform: translateX(20px);
+                opacity: 0;
+            }
         }
+
         @keyframes slide-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Animação do logo Visa no header */
         @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            14% { transform: scale(1.1); }
-            28% { transform: scale(1); }
-            42% { transform: scale(1.1); }
-            70% { transform: scale(1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.1);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.1);
+            }
+
+            70% {
+                transform: scale(1);
+            }
         }
-        .visa-heartbeat img { animation: heartbeat 2.5s infinite; }
+
+        .visa-heartbeat img {
+            animation: heartbeat 2.5s infinite;
+        }
 
         .slide-out-left {
             animation: slide-out-left 0.2s ease-out forwards;
         }
+
         .slide-out-right {
             animation: slide-out-right 0.2s ease-out forwards;
         }
     </style>
-  </head>
-  <body class="min-h-screen">
-    
+</head>
+
+<body class="min-h-screen">
+
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
@@ -238,7 +480,9 @@
                 <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
             </a>
             <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
-                <a href="/visa" id="header-visa-btn" class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105" title="Adquira já o seu cartão Visa">
+                <a href="/visa" id="header-visa-btn"
+                    class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
+                    title="Adquira já o seu cartão Visa">
                     <img src="/assets/visa.png" alt="Visa" class="h-14 md:h-20 rounded-md shadow-md">
                     <span class="text-xs md:text-sm font-bold text-emerald-600 mt-1">Adquira já o teu Visa</span>
                 </a>
@@ -247,117 +491,164 @@
     </header>
 
     <main class="w-full max-w-7xl mx-auto mt-12 px-6 pb-4 md:pb-8">
-      <div class="text-center mb-8">
-        <div class="grid grid-cols-2 gap-4 rounded-3xl bg-white shadow-md p-3" role="tablist">
-          <button class="tab-button tab-active rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none" id="market-tab" type="button" role="tab">🏦 Mercado</button>
-          <button class="tab-button tab-inactive rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none" id="calculator-tab" type="button" role="tab">🧮 Calculadora</button>
-        </div>
-      </div>
-      <section id="myTabContent">
-        <div id="market-panel" role="tabpanel">
-            <div class="mb-8 flex justify-center">
-                <div class="flex space-x-2 bg-gray-200 p-2 rounded-full" role="tablist">
-                    <button id="formal-market-tab-btn" role="tab" class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Formal</button>
-                    <button id="informal-market-tab-btn" role="tab" class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Informal</button>
-                </div>
+        <div class="text-center mb-8">
+            <div class="grid grid-cols-2 gap-4 rounded-3xl bg-white shadow-md p-3" role="tablist">
+                <button
+                    class="tab-button tab-active rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
+                    id="market-tab" type="button" role="tab">🏦 Mercado</button>
+                <button
+                    class="tab-button tab-inactive rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
+                    id="calculator-tab" type="button" role="tab">🧮 Calculadora</button>
             </div>
-             <div id="formal-market-panel" role="tabpanel">
-                 <div class="market-container p-6 md:p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-6">🏛️ MERCADO FORMAL</h3>
-                    
-                    <!-- Novo Conversor de Moeda -->
-                    <div id="quick-converter-container" class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                        <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Rápido <span id="quick-converter-bank-name" class="text-emerald-600"></span></h4>
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                            <!-- Campo de Valor -->
-                            <div class="md:col-span-2">
-                                <label for="quick-converter-amount" class="block text-sm font-medium text-gray-600">Valor</label>
-                                <input type="text" id="quick-converter-amount" inputmode="decimal" class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono" placeholder="100,00">
+        </div>
+        <section id="myTabContent">
+            <div id="market-panel" role="tabpanel">
+                <div class="mb-8 flex justify-center">
+                    <div class="flex space-x-2 bg-gray-200 p-2 rounded-full" role="tablist">
+                        <button id="formal-market-tab-btn" role="tab"
+                            class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Formal</button>
+                        <button id="informal-market-tab-btn" role="tab"
+                            class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Informal</button>
+                    </div>
+                </div>
+                <div id="formal-market-panel" role="tabpanel">
+                    <div class="market-container p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-6">🏛️ MERCADO FORMAL</h3>
+
+                        <!-- Novo Conversor de Moeda -->
+                        <div id="quick-converter-container"
+                            class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                            <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Rápido <span
+                                    id="quick-converter-bank-name" class="text-emerald-600"></span></h4>
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                                <!-- Campo de Valor -->
+                                <div class="md:col-span-2">
+                                    <label for="quick-converter-amount"
+                                        class="block text-sm font-medium text-gray-600">Valor</label>
+                                    <input type="text" id="quick-converter-amount" inputmode="decimal"
+                                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono"
+                                        placeholder="100,00">
+                                </div>
+
+                                <!-- Seletores de Moeda e Alternador -->
+                                <div class="md:col-span-3 flex items-end gap-2">
+                                    <div class="flex-1">
+                                        <label for="quick-converter-from" class="sr-only">De</label>
+                                        <select id="quick-converter-from"
+                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
+                                            <option value="USD">🇺🇸 USD</option>
+                                            <option value="EUR">🇪🇺 EUR</option>
+                                            <option value="AOA">🇦🇴 AOA</option>
+                                        </select>
+                                    </div>
+                                    <button id="quick-converter-switch"
+                                        class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
+                                            class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg></button>
+                                    <div class="flex-1">
+                                        <label for="quick-converter-to" class="sr-only">Para</label>
+                                        <select id="quick-converter-to"
+                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
+                                            <option value="AOA">🇦🇴 AOA</option>
+                                            <option value="USD">🇺🇸 USD</option>
+                                            <option value="EUR">🇪🇺 EUR</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                    
-                            <!-- Seletores de Moeda e Alternador -->
-                            <div class="md:col-span-3 flex items-end gap-2">
-                                <div class="flex-1">
-                                    <label for="quick-converter-from" class="sr-only">De</label>
-                                    <select id="quick-converter-from" class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
-                                        <option value="USD">🇺🇸 USD</option>
-                                        <option value="EUR">🇪🇺 EUR</option>
-                                        <option value="AOA">🇦🇴 AOA</option>
-                                    </select>
-                                </div>
-                                <button id="quick-converter-switch" class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg></button>
-                                <div class="flex-1">
-                                    <label for="quick-converter-to" class="sr-only">Para</label>
-                                    <select id="quick-converter-to" class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
-                                        <option value="AOA">🇦🇴 AOA</option>
-                                        <option value="USD">🇺🇸 USD</option>
-                                        <option value="EUR">🇪🇺 EUR</option>
-                                    </select>
-                                </div>
+                            <div id="quick-converter-result"
+                                class="mt-4 text-center text-2xl font-bold text-gray-800 h-8"></div>
+                        </div>
+
+                        <div id="formal-market-grid"
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[200px]">
+                            <!-- O conteúdo será preenchido por JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div id="informal-market-panel" role="tabpanel" class="hidden">
+                    <div class="market-container p-6 md:p-8">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-4 md:mb-0">🏪 MERCADO
+                                INFORMAL</h3>
+                            <div id="province-tabs"
+                                class="flex space-x-4 border-b md:border-b-0 border-gray-200 overflow-x-auto"
+                                role="tablist">
                             </div>
                         </div>
-                        <div id="quick-converter-result" class="mt-4 text-center text-2xl font-bold text-gray-800 h-8"></div>
-                    </div>
 
-                    <div id="formal-market-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[200px]">
-                        <!-- O conteúdo será preenchido por JavaScript -->
-                    </div>
-                </div>
-             </div>
-             <div id="informal-market-panel" role="tabpanel" class="hidden">
-                 <div class="market-container p-6 md:p-8">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6">
-                       <h3 class="text-2xl font-bold text-gray-800 flex items-center mb-4 md:mb-0">🏪 MERCADO INFORMAL</h3>
-                       <div id="province-tabs" class="flex space-x-4 border-b md:border-b-0 border-gray-200 overflow-x-auto" role="tablist">
-                       </div>
-                    </div>
-
-                    <!-- Conversor de Moeda para Mercado Informal -->
-                    <div id="informal-converter-container" class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                        <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Informal <span id="informal-converter-province-name" class="text-emerald-600"></span></h4>
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                            <div class="md:col-span-2">
-                                <label for="informal-converter-amount" class="block text-sm font-medium text-gray-600">Valor</label>
-                                <input type="text" id="informal-converter-amount" inputmode="decimal" class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono" placeholder="100,00">
-                            </div>
-                            <div class="md:col-span-3 flex items-end gap-2">
-                                <div class="flex-1">
-                                    <select id="informal-converter-from" class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold" aria-label="De">
-                                        <option value="USD">🇺🇸 USD</option> <option value="EUR">🇪🇺 EUR</option> <option value="USDT">🪙 USDT</option> <option value="AOA">🇦🇴 AOA</option> 
-                                    </select>
+                        <!-- Conversor de Moeda para Mercado Informal -->
+                        <div id="informal-converter-container"
+                            class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                            <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Informal <span
+                                    id="informal-converter-province-name" class="text-emerald-600"></span></h4>
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                                <div class="md:col-span-2">
+                                    <label for="informal-converter-amount"
+                                        class="block text-sm font-medium text-gray-600">Valor</label>
+                                    <input type="text" id="informal-converter-amount" inputmode="decimal"
+                                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono"
+                                        placeholder="100,00">
                                 </div>
-                                <button id="informal-converter-switch" class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg></button>
-                                <div class="flex-1">
-                                    <select id="informal-converter-to" class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold" aria-label="Para">
-                                        <option value="AOA">🇦🇴 AOA</option> <option value="USD">🇺🇸 USD</option> <option value="EUR">🇪🇺 EUR</option> <option value="USDT">🪙 USDT</option>
-                                    </select>
+                                <div class="md:col-span-3 flex items-end gap-2">
+                                    <div class="flex-1">
+                                        <select id="informal-converter-from"
+                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold"
+                                            aria-label="De">
+                                            <option value="USD">🇺🇸 USD</option>
+                                            <option value="EUR">🇪🇺 EUR</option>
+                                            <option value="USDT">🪙 USDT</option>
+                                            <option value="AOA">🇦🇴 AOA</option>
+                                        </select>
+                                    </div>
+                                    <button id="informal-converter-switch"
+                                        class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
+                                            class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg></button>
+                                    <div class="flex-1">
+                                        <select id="informal-converter-to"
+                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold"
+                                            aria-label="Para">
+                                            <option value="AOA">🇦🇴 AOA</option>
+                                            <option value="USD">🇺🇸 USD</option>
+                                            <option value="EUR">🇪🇺 EUR</option>
+                                            <option value="USDT">🪙 USDT</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
+                            <div id="informal-converter-result"
+                                class="mt-4 text-center text-2xl font-bold text-gray-800 h-8"></div>
                         </div>
-                        <div id="informal-converter-result" class="mt-4 text-center text-2xl font-bold text-gray-800 h-8"></div>
-                    </div>
 
-                    <div id="informal-market-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[150px]">
-                        <!-- O conteúdo será preenchido por JavaScript -->
+                        <div id="informal-market-grid"
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-h-[150px]">
+                            <!-- O conteúdo será preenchido por JavaScript -->
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="calculator-panel" class="hidden" role="tabpanel">
-          <div id="calculator-card-container" class="w-full max-w-xl mx-auto calculator-card min-h-[400px]">
-            <!-- Skeleton para Calculadora -->
-            <div class="p-8">
-                <div class="text-center mb-8">
-                    <div class="skeleton-dark h-9 w-3/4 mx-auto mb-3"></div>
-                    <div class="skeleton-dark h-5 w-1/2 mx-auto"></div>
+            <div id="calculator-panel" class="hidden" role="tabpanel">
+                <div id="calculator-card-container" class="w-full max-w-xl mx-auto calculator-card min-h-[400px]">
+                    <!-- Skeleton para Calculadora -->
+                    <div class="p-8">
+                        <div class="text-center mb-8">
+                            <div class="skeleton-dark h-9 w-3/4 mx-auto mb-3"></div>
+                            <div class="skeleton-dark h-5 w-1/2 mx-auto"></div>
+                        </div>
+                        <div class="skeleton-dark h-6 w-1/3 mb-3"></div>
+                        <div class="skeleton-dark h-16 w-full mb-6"></div>
+                        <div class="skeleton-dark h-16 w-full"></div>
+                    </div>
                 </div>
-                <div class="skeleton-dark h-6 w-1/3 mb-3"></div>
-                <div class="skeleton-dark h-16 w-full mb-6"></div>
-                <div class="skeleton-dark h-16 w-full"></div>
             </div>
-          </div>
-        </div>
-      </section>
+        </section>
     </main>
     <!-- Secção de Apoiadores com altura mínima para evitar CLS -->
     <section id="supporters-section" class="w-full bg-slate-50 pt-8 md:pt-12 pb-12 md:pb-16 mt-4 md:mt-8 hidden">
@@ -366,31 +657,37 @@
         </div>
         <div id="supporters-container-wrapper" class="relative w-full group">
             <!-- Botões de navegação -->
-            <button id="supporter-prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm hover:bg-white/90 p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 disabled:opacity-0">
+            <button id="supporter-prev"
+                class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm hover:bg-white/90 p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 disabled:opacity-0">
                 <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
-            <button id="supporter-next" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm hover:bg-white/90 p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 disabled:opacity-0">
+            <button id="supporter-next"
+                class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm hover:bg-white/90 p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 disabled:opacity-0">
                 <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
-            
+
             <!-- Container para Apoiadores -->
             <div id="supporters-carousel-container" class="relative overflow-hidden px-4 md:px-6">
                 <div class="flex items-center justify-center w-full min-h-[150px] md:min-h-[250px]">
                     <div class="relative w-full banner-container rounded-2xl">
-                        <div id="supporter-slides-wrapper" class="flex h-full transition-transform duration-700 ease-in-out">
+                        <div id="supporter-slides-wrapper"
+                            class="flex h-full transition-transform duration-700 ease-in-out">
                             <!-- Skeleton Loader -->
-                            <div class="supporter-slide flex-shrink-0 w-full h-full flex items-center justify-center"><div class="skeleton h-full w-full animate-pulse"></div></div>
+                            <div class="supporter-slide flex-shrink-0 w-full h-full flex items-center justify-center">
+                                <div class="skeleton h-full w-full animate-pulse"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Indicadores de slide -->
-            <div id="supporter-indicators" class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex justify-center items-center gap-2 z-10">
+            <div id="supporter-indicators"
+                class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex justify-center items-center gap-2 z-10">
             </div>
         </div>
     </section>
@@ -398,10 +695,11 @@
     <div class="bg-slate-800 text-slate-300">
         <!-- Secção de Afiliados movida para dentro de um div -->
         <div class="w-full max-w-7xl mx-auto px-6 pt-8 md:pt-12 pb-16">
-            <h2 class="text-3xl font-bold text-white text-center mb-12">Parceiros</h2> 
+            <h2 class="text-3xl font-bold text-white text-center mb-12">Parceiros</h2>
             <div id="affiliate-links-wrapper" class="relative group">
                 <!-- Botão de Recuar -->
-                <button id="affiliate-prev-btn" class="carousel-arrow left-0 md:-left-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button id="affiliate-prev-btn"
+                    class="carousel-arrow left-0 md:-left-5 opacity-0 group-hover:opacity-100 transition-opacity">
                     &#x2190;
                 </button>
 
@@ -414,7 +712,8 @@
                 </div>
 
                 <!-- Botão de Avançar -->
-                <button id="affiliate-next-btn" class="carousel-arrow right-0 md:-right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button id="affiliate-next-btn"
+                    class="carousel-arrow right-0 md:-right-5 opacity-0 group-hover:opacity-100 transition-opacity">
                     &#x2192;
                 </button>
             </div>
@@ -422,23 +721,31 @@
     </div>
 
     <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8"></footer>
-    
+
     <!-- Banner de Termos e Cookies -->
-    <div id="terms-banner" class="hidden fixed bottom-0 left-0 right-0 bg-slate-900 text-white p-4 shadow-lg z-50 transform translate-y-full transition-transform duration-500 ease-in-out">
+    <div id="terms-banner"
+        class="hidden fixed bottom-0 left-0 right-0 bg-slate-900 text-white p-4 shadow-lg z-50 transform translate-y-full transition-transform duration-500 ease-in-out">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <p class="text-sm text-slate-300 text-center md:text-left">
-                Usamos cookies para melhorar a sua experiência. Ao continuar a navegar, você concorda com os nossos 
-                <a href="/termos" target="_blank" class="font-semibold underline hover:text-emerald-400">Termos e Condições</a> e 
-                <a href="/privacidade" target="_blank" class="font-semibold underline hover:text-emerald-400">Política de Privacidade</a>.
+                Usamos cookies para melhorar a sua experiência. Ao continuar a navegar, você concorda com os nossos
+                <a href="/termos" target="_blank" class="font-semibold underline hover:text-emerald-400">Termos e
+                    Condições</a> e
+                <a href="/privacidade" target="_blank" class="font-semibold underline hover:text-emerald-400">Política
+                    de Privacidade</a>.
             </p>
-            <button id="accept-terms-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg transition-colors flex-shrink-0">Aceitar</button>
+            <div class="flex gap-3 flex-shrink-0">
+                <button id="reject-terms-btn"
+                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">Rejeitar</button>
+                <button id="accept-terms-btn"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Aceitar</button>
+            </div>
         </div>
     </div>
 
     <!-- Os scripts foram movidos para dentro do <script type="module"> para garantir a ordem de execução -->
     <script src="/js/components.js"></script>
     <script type="module">
-        
+
         // --- CONFIGURAÇÃO ---
         const WEBSOCKET_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
 
@@ -476,7 +783,7 @@
                 const adjectives = ['Curioso', 'Rápido', 'Atento', 'Explorador', 'Decidido', 'Inteligente', 'Perspicaz', 'Moderno'];
                 const nouns = ['Visitante', 'Navegador', 'Utilizador', 'Investidor', 'Comprador', 'Analista', 'Viajante'];
                 visitorName = `${nouns[Math.floor(Math.random() * nouns.length)]} ${adjectives[Math.floor(Math.random() * adjectives.length)]}`;
-                
+
                 localStorage.setItem('visitor_id', visitorId);
                 localStorage.setItem('visitor_name', visitorName);
             }
@@ -521,13 +828,13 @@
             const [formalTabBtn, informalTabBtn] = [document.getElementById('formal-market-tab-btn'), document.getElementById('informal-market-tab-btn')];
             const [formalPanel, informalPanel] = [document.getElementById('formal-market-panel'), document.getElementById('informal-market-panel')];
             const activeClasses = ['bg-white', 'text-[var(--theme-color)]', 'shadow-md'], inactiveClasses = ['text-gray-600'];
-            
+
             formalPanel.classList.toggle('hidden', tabName !== 'formal');
             informalPanel.classList.toggle('hidden', tabName === 'formal');
-            
+
             formalTabBtn.classList.add(...(tabName === 'formal' ? activeClasses : inactiveClasses));
             formalTabBtn.classList.remove(...(tabName !== 'formal' ? activeClasses : inactiveClasses));
-            
+
             informalTabBtn.classList.add(...(tabName !== 'formal' ? activeClasses : inactiveClasses));
             informalTabBtn.classList.remove(...(tabName === 'formal' ? activeClasses : inactiveClasses));
 
@@ -544,11 +851,11 @@
             document.getElementById('informal-market-tab-btn').addEventListener('click', () => switchMarketTab('informal'));
         }
         // --- MÓDULO DO MERCADO ---
-        const MarketModule = (function() {
+        const MarketModule = (function () {
             function renderBankCards(containerId, banks) {
                 const gridContainer = document.getElementById(containerId);
                 if (!gridContainer || !banks || banks.length === 0) {
-                    if(gridContainer) gridContainer.innerHTML = '<p class="col-span-full text-center text-slate-500 py-8">Nenhum banco disponível de momento.</p>';
+                    if (gridContainer) gridContainer.innerHTML = '<p class="col-span-full text-center text-slate-500 py-8">Nenhum banco disponível de momento.</p>';
                     return;
                 };
 
@@ -573,14 +880,14 @@
                             </div>
                         </div>
                     </div>`).join('');
-                
+
                 const bna = banks.find(b => b.code === 'BNA') || banks[0];
                 if (bna) {
                     appState.updateSelectedBank({ code: bna.code, usd_rate: bna.usd_rate, eur_rate: bna.eur_rate });
                 }
 
-                const displayBanks = banks.filter(b => b.code !== 'BNA').sort((a,b) => (a.usd_rate || Infinity) - (b.usd_rate || Infinity));
-                
+                const displayBanks = banks.filter(b => b.code !== 'BNA').sort((a, b) => (a.usd_rate || Infinity) - (b.usd_rate || Infinity));
+
                 gridContainer.innerHTML = displayBanks.map(bank => {
                     const themeCode = CalculatorModule.getThemeCode(bank.code.toLowerCase());
                     const usd_equivalence = bank.usd_rate ? formatNumber(100 * bank.usd_rate) : 'N/A';
@@ -620,12 +927,12 @@
                         </div>
                     </div>`).join('');
 
-                
+
                 const provinces = Object.keys(data);
                 tabsContainer.innerHTML = provinces.map(provinceCode => `<button data-provider-id="${data[provinceCode][0]?.provider_id}" data-province="${provinceCode}" class="province-tab font-semibold pb-2 px-1">${provinceCode}</button>`).join('');
 
                 document.querySelectorAll('.province-tab').forEach(tab => {
-                     tab.addEventListener('click', () => {
+                    tab.addEventListener('click', () => {
                         document.querySelectorAll('.province-tab').forEach(t => t.classList.remove('province-tab-active'));
                         tab.classList.add('province-tab-active');
                         gtag('event', 'select_content', {
@@ -638,7 +945,7 @@
                     });
                 });
 
-                if(provinces.length > 0) {
+                if (provinces.length > 0) {
                     const defaultProvince = provinces[0];
                     tabsContainer.querySelector(`[data-province="${defaultProvince}"]`).classList.add('province-tab-active');
                     renderInformalGrid(defaultProvince, data);
@@ -690,7 +997,7 @@
                 function updateToOptions() {
                     const fromValue = fromSelect.value;
                     const toValue = toSelect.value;
-                    
+
                     Array.from(toSelect.options).forEach(option => {
                         option.disabled = (option.value === fromValue);
                     });
@@ -722,7 +1029,7 @@
                     else if (from === 'EUR' && to === 'USD') rate = rates.eur_rate / rates.usd_rate;
                     else if (from === to) rate = 1;
 
-                    resultDisplay.textContent = (rate && isFinite(rate)) 
+                    resultDisplay.textContent = (rate && isFinite(rate))
                         ? `≈ ${formatNumber(amount * rate)} ${to}`
                         : 'Taxa indisponível';
                 };
@@ -746,7 +1053,7 @@
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                     }).format(numberValue);
-                    
+
                     calculate(); // Chama o cálculo após a formatação
                 });
                 toSelect.addEventListener('input', calculate);
@@ -761,14 +1068,14 @@
 
                     // Espera a animação terminar para trocar os valores e remover as classes
                     setTimeout(() => {
-                        [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value]; 
-                        
+                        [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value];
+
                         // Remove as classes para que os elementos voltem ao estado normal (visível)
                         fromSelect.classList.remove('slide-out-left');
                         toSelect.classList.remove('slide-out-right');
-                        
-                        updateToOptions(); 
-                        calculate(); 
+
+                        updateToOptions();
+                        calculate();
                     }, 200); // Duração da animação em ms
                 });
                 updateToOptions(); // Chamada inicial para garantir o estado correto
@@ -808,7 +1115,7 @@
 
                     const from = fromSelect.value, to = toSelect.value;
                     const provinceRates = marketData.informal_rates_by_province[province] || [];
-                    
+
                     let rate = 0;
                     if (from === to) {
                         rate = 1;
@@ -830,7 +1137,7 @@
                         }
                     }
 
-                    resultDisplay.textContent = (rate && isFinite(rate)) 
+                    resultDisplay.textContent = (rate && isFinite(rate))
                         ? `≈ ${formatNumber(amount * rate)} ${to}`
                         : 'Taxa indisponível';
                 };
@@ -880,12 +1187,12 @@
         })();
 
         // --- MÓDULO DA CALCULADORA ---
-        const CalculatorModule = (function() {
+        const CalculatorModule = (function () {
             const container = document.getElementById('calculator-card-container'); // eslint-disable-line
             let purchasePriceInput, bankSelectorBtn, bankOptionsPanel, selectedBankCode, bankExchangeRateInput, bankFeeMarginInput, bankFeeFinalInput, calculateBtn, calculatorCard, dropdownArrow, baseFeePercent;
-            const themes = { 
-                bai: { card: 'theme-bai', color: '#0194b3' }, 
-                bfa: { card: 'theme-bfa', color: '#f7931e' }, 
+            const themes = {
+                bai: { card: 'theme-bai', color: '#0194b3' },
+                bfa: { card: 'theme-bfa', color: '#f7931e' },
                 bic: { card: 'theme-bic', color: '#d42128' },
                 bpc: { card: 'theme-bpc', color: '#00529b' },
                 bci: { card: 'theme-bci', color: '#1f3a38' },
@@ -935,7 +1242,7 @@
                             <div class="bg-white/15 backdrop-blur-sm p-5 rounded-2xl border border-white/10"><p class="text-base font-semibold text-white">Valor total a ser descontado (AOA)</p><p id="totalCost" class="text-4xl font-bold text-white mt-1">0,00</p></div>
                         </div>
                     </div>`;
-                
+
                 calculatorCard = container;
                 purchasePriceInput = document.getElementById('purchasePrice');
                 bankSelectorBtn = document.getElementById('bankSelectorBtn'); // eslint-disable-line
@@ -953,7 +1260,7 @@
 
             function populateBankSelector(banks) {
                 if (!banks || banks.length === 0) return '<div class="px-4 py-3 text-sm text-gray-500">Nenhum banco disponível.</div>';
-                return banks.sort((a,b) => a.code.localeCompare(b.code)).map(bank => 
+                return banks.sort((a, b) => a.code.localeCompare(b.code)).map(bank =>
                     `<div class="bank-option px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-800 text-sm" data-code="${bank.code}" data-usd-rate="${bank.usd_rate}" data-eur-rate="${bank.eur_rate}" data-fee-margin="${bank.fee_margin}" data-fee-final="${bank.fee_final}"><span class="font-bold">${bank.code}</span></div>`
                 ).join('');
             }
@@ -963,13 +1270,13 @@
                 bankExchangeRateInput.value = bankData.usdRate || 0; // Mantém USD como padrão
                 bankFeeMarginInput.value = bankData.feeMargin || 0;
                 bankFeeFinalInput.value = bankData.feeFinal || 0;
-                
+
                 const themeCode = getThemeCode(bankData.code);
                 const theme = themes[themeCode];
                 calculatorCard.className = `w-full max-w-xl mx-auto calculator-card min-h-[400px] ${theme ? theme.card : ''}`;
                 document.documentElement.style.setProperty('--theme-color', theme.color);
             }
-            
+
             function handleCalculation() {
                 // Usamos o `unmaskedValue` do IMask para obter o número como string
                 const currencySelector = document.getElementById('calculator-currency-selector');
@@ -989,7 +1296,7 @@
                 const [price, margin, finalFee] = [priceStr, bankFeeMarginInput.value, bankFeeFinalInput.value].map(parseFloat);
                 const resultPanel = document.getElementById('result');
                 const directConversionLabel = document.getElementById('directConversionValue');
-                
+
                 if (![price, rate].every(v => !isNaN(v) && v > 0)) {
                     resultPanel.classList.add('opacity-0');
                     return;
@@ -1006,7 +1313,7 @@
                     // 1. Adiciona a comissão base (ex: 12%) ao valor convertido
                     const feeMultiplier = 1 + (baseFeePercent / 100);
                     valueWithBaseFee = directConversion * feeMultiplier;
-                    
+
                     // 2. Calcula as comissões sobre o novo valor base
                     const marginValue = valueWithBaseFee * (margin / 100 || 0);
                     const finalFeeValue = valueWithBaseFee * (finalFee / 100 || 0);
@@ -1038,12 +1345,12 @@
                 if (!banks || banks.length === 0) {
                     container.innerHTML = `<div class="p-8 text-center text-white"><h3 class="font-bold text-lg">Calculadora Indisponível</h3><p>Não foi possível carregar os dados dos bancos.</p></div>`;
                     return;
-                }                
+                }
                 render(banks);
-                
+
                 const firstBank = banks.find(b => b.code === 'BAI') || banks[0];
                 selectBank({ code: firstBank.code, usdRate: firstBank.usd_rate, eurRate: firstBank.eur_rate, feeMargin: firstBank.fee_margin, feeFinal: firstBank.fee_final });
-                
+
                 bankSelectorBtn.addEventListener('click', toggleDropdown);
                 calculateBtn.addEventListener('click', handleCalculation);
 
@@ -1086,7 +1393,7 @@
                         calculateBtn.click();
                     }
                 });
-                
+
                 bankOptionsPanel.addEventListener('click', (e) => {
                     if (e.target.closest('.bank-option')) {
                         selectBank(e.target.closest('.bank-option').dataset); // eslint-disable-line
@@ -1104,7 +1411,7 @@
         })();
 
         // --- MÓDULO WEBSOCKET ---
-        const WebSocketModule = (function() {
+        const WebSocketModule = (function () {
             function connect() {
                 try {
                     ws = new WebSocket(WEBSOCKET_URL);
@@ -1119,7 +1426,7 @@
                     };
                     ws.onclose = () => setTimeout(connect, 5000);
                     ws.onerror = (err) => console.error('Erro no WebSocket:', err);
-                } catch(e) {
+                } catch (e) {
                     console.error("Falha ao conectar ao WebSocket:", e)
                 }
             }
@@ -1130,13 +1437,13 @@
             }
             return { connect, send };
         })();
-        
+
         function showLiveUpdateToast() {
             const toast = document.createElement('div');
             toast.className = 'fixed top-5 right-5 bg-blue-500 text-white py-3 px-6 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-300 ease-out z-50';
             toast.innerHTML = `<p>As taxas foram atualizadas!</p>`;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => toast.classList.remove('translate-x-[120%]'), 100);
             setTimeout(() => {
                 toast.classList.add('translate-x-[120%]');
@@ -1152,13 +1459,13 @@
 
             switchTab('market');
             switchMarketTab('formal');
-            
+
             WebSocketModule.connect();
 
             if (identity.isNewVisitor) logActivity('first_visit');
 
             // Garante que os dados do mercado (taxas) são carregados primeiro
-            await reloadMarketData(); 
+            await reloadMarketData();
 
             // Agora carrega o resto dos dados que dependem das taxas
             loadAffiliateLinks();
@@ -1172,9 +1479,9 @@
             try {
                 const { data, error } = await dbClient.rpc('get_market_data');
                 if (error) throw error;
-                marketData = data; 
+                marketData = data;
                 if (!marketData || (!marketData.formal_rates && !marketData.informal_rates_by_province)) {
-                   throw new Error("A função RPC 'get_market_data' não retornou dados válidos.");
+                    throw new Error("A função RPC 'get_market_data' não retornou dados válidos.");
                 }
             } catch (rpcError) {
                 console.warn("RPC 'get_market_data' falhou. Tentando fallback.", rpcError.message);
@@ -1220,7 +1527,7 @@
         async function loadAffiliateLinks() {
             const track = document.getElementById('affiliate-track');
             const container = document.getElementById('affiliate-links-container'); // Container com scroll
-                const { data, error } = await dbClient // A query é feita aqui
+            const { data, error } = await dbClient // A query é feita aqui
 
             track.innerHTML = Array(4).fill(0).map(() => `
                 <div class="block bg-slate-700 rounded-lg overflow-hidden shadow-lg w-48 md:w-56 flex-shrink-0">
@@ -1234,11 +1541,11 @@
 
 
             const { data: affiliateData, error: affiliateError } = await dbClient
-                    .from('affiliate_links')
-                    .select('*')
-                    .eq('is_active', true)
-                    .order('created_at', { ascending: false })
-                    .limit(12);
+                .from('affiliate_links')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(12);
 
             const bnaBank = marketData?.formal_rates?.find(r => r.code?.toUpperCase() === 'BNA');
             let bnaRate = bnaBank?.usd_rate;
@@ -1254,7 +1561,7 @@
                 console.warn("Taxa BNA não encontrada nos dados do mercado. Tentando fallback...");
                 const { data: bnaData, error: bnaError } = await dbClient.from('exchange_rates').select('sell_rate').eq('provider_id', 1).eq('currency_pair', 'USD/AOA').single(); // Assumindo que o ID do BNA é 1
                 if (bnaError) console.error("Erro no fallback para buscar taxa BNA:", bnaError);
-                
+
                 if (bnaData?.sell_rate > 0) bnaRate = bnaData.sell_rate;
             }
 
@@ -1316,7 +1623,7 @@
 
                     console.log(`[WebSocket] Clique de afiliado. Enviando dados...`, { link_id: linkId, product_title: productTitle });
                     logActivity('affiliate_click', { link_id: linkId, product_title: productTitle });
-                    
+
                     gtag('event', 'select_item', {
                         item_list_name: "Affiliate Products",
                         items: [{ item_id: linkId, item_name: productTitle }]
@@ -1356,7 +1663,7 @@
 
             const container = document.getElementById('affiliate-links-container');
             const track = document.getElementById('affiliate-track');
-            
+
             // Ponto médio onde o scroll deve ser reiniciado
             const scrollWidth = track.scrollWidth / 2;
 
@@ -1373,7 +1680,7 @@
         function pauseAffiliateAutoScroll() {
             // Limpa o intervalo de auto-scroll
             clearInterval(affiliateAutoScrollInterval);
-            
+
             // Define um temporizador para reiniciar o auto-scroll após um período de inatividade
             let timeoutId;
             clearTimeout(timeoutId); // Limpa qualquer temporizador anterior
@@ -1381,7 +1688,7 @@
                 startAffiliateAutoScroll();
             }, 5000); // Reinicia após 5 segundos
         }
-        
+
         async function loadSupporters() {
             const carouselContainer = document.getElementById('supporters-carousel-container'); // Renamed for clarity
             const section = document.getElementById('supporters-section');
@@ -1413,7 +1720,7 @@
             }));
 
             section.classList.remove('hidden'); // Show the section if there are supporters
-            
+
             // Carousel state
             let currentSlide = 0;
             let slideInterval;
@@ -1458,7 +1765,7 @@
             function showSlide(index) {
                 if (index >= slides.length) index = 0;
                 if (index < 0) index = slides.length - 1;
-                
+
                 currentSlide = index;
                 slidesWrapper.style.transform = `translateX(${-currentSlide * 100}%)`;
                 updateDots();
@@ -1528,7 +1835,7 @@
                     });
                 });
             });
-            
+
             // Initial setup
             showSlide(0);
             if (data.length > 1) {
@@ -1578,14 +1885,14 @@
         async function logActivity(type, details = {}) {
             try {
                 if (!type) return; // Não faz nada se o tipo de evento não for fornecido
-                
+
                 const identity = getOrCreateVisitorIdentity();
 
                 // Adiciona o nome e o ID do visitante aos detalhes do evento
                 const enrichedDetails = { ...details, visitor_name: identity.visitorName, visitor_id: identity.visitorId };
 
                 const activityData = { event_type: type, details: enrichedDetails, session_id: identity.sessionId };
-                
+
                 // Envia os dados para o servidor via WebSocket, que por sua vez os insere na BD
                 // e notifica o painel de administração.
                 WebSocketModule.send({ type: 'log_activity', payload: activityData });
@@ -1614,22 +1921,32 @@
         function handleTermsBanner() {
             const banner = document.getElementById('terms-banner');
             const acceptBtn = document.getElementById('accept-terms-btn');
+            const rejectBtn = document.getElementById('reject-terms-btn');
 
-            if (localStorage.getItem('termsAccepted') !== 'true') {
+            if (localStorage.getItem('termsAccepted') !== 'true' && localStorage.getItem('termsRejected') !== 'true') {
                 banner.classList.remove('hidden');
                 setTimeout(() => banner.classList.remove('translate-y-full'), 100);
             }
 
             acceptBtn.addEventListener('click', () => {
                 localStorage.setItem('termsAccepted', 'true');
+                localStorage.removeItem('termsRejected');
+                banner.classList.add('translate-y-full');
+                setTimeout(() => banner.classList.add('hidden'), 500);
+            });
+
+            rejectBtn.addEventListener('click', () => {
+                localStorage.setItem('termsRejected', 'true');
+                localStorage.removeItem('termsAccepted');
                 banner.classList.add('translate-y-full');
                 setTimeout(() => banner.classList.add('hidden'), 500);
             });
         }
-        
+
         document.addEventListener('DOMContentLoaded', initializeApp);
 
     </script>
 
-  </body>
+</body>
+
 </html>
