@@ -1889,13 +1889,33 @@
                 const identity = getOrCreateVisitorIdentity();
 
                 // Adiciona o nome e o ID do visitante aos detalhes do evento
-                const enrichedDetails = { ...details, visitor_name: identity.visitorName, visitor_id: identity.visitorId };
+                const enrichedDetails = {
+                    ...details,
+                    visitor_name: identity.visitorName,
+                    visitor_id: identity.visitorId,
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                };
 
-                const activityData = { event_type: type, details: enrichedDetails, session_id: identity.sessionId };
+                const payload = {
+                    event_type: type,
+                    session_id: identity.sessionId,
+                    details: enrichedDetails
+                };
 
-                // Envia os dados para o servidor via WebSocket, que por sua vez os insere na BD
-                // e notifica o painel de administração.
-                WebSocketModule.send({ type: 'log_activity', payload: activityData });
+                // Tenta enviar via WebSocket se a conexão estiver ativa
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    WebSocketModule.send({ type: 'log_activity', payload });
+                    console.log(`[WS] Atividade '${type}' enviada.`);
+                } else {
+                    // Fallback para API HTTP
+                    console.log(`[HTTP] WebSocket não disponível. A enviar '${type}' via API.`);
+                    await fetch('/api/log-activity', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
             } catch (error) {
                 console.error('Erro ao registrar atividade:', error);
             }

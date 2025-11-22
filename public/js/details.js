@@ -10,16 +10,16 @@ async function init() {
         const response = await fetch('/api/config');
         if (!response.ok) throw new Error('Failed to load Supabase configuration.');
         const config = await response.json();
-        
+
         dbClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
 
-        
+
         // Conecta ao WebSocket
         connectWebSocket();
-        
+
         // Carrega os detalhes do produto
         await loadProductDetails();
-        
+
     } catch (error) {
         console.error('Erro na inicialização:', error);
     }
@@ -27,16 +27,16 @@ async function init() {
 
 function connectWebSocket() {
     ws = new WebSocket(WEBSOCKET_URL);
-    
+
     ws.onopen = () => {
         console.log('WebSocket conectado.');
     };
-    
+
     ws.onclose = () => {
         console.log('WebSocket desconectado. Tentando reconectar...');
         setTimeout(connectWebSocket, 1000);
     };
-    
+
     ws.onerror = (error) => {
         console.error('Erro no WebSocket:', error);
     };
@@ -45,12 +45,12 @@ function connectWebSocket() {
 async function loadProductDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
-    
+
     if (!productId) {
         showError('ID do produto não fornecido');
         return;
     }
-    
+
     try {
         // Busca os detalhes do produto
         const { data: product, error } = await dbClient
@@ -58,22 +58,22 @@ async function loadProductDetails() {
             .select('*')
             .eq('id', productId)
             .single();
-            
+
         if (error) throw error;
         if (!product) {
             showError('Produto não encontrado');
             return;
         }
-        
+
         // Registra a visualização
         window.logActivity('affiliate_view', {
             link_id: product.id,
             product_title: product.title
         });
-        
+
         // Renderiza os detalhes do produto
         renderProductDetails(product);
-        
+
     } catch (error) {
         console.error('Erro ao carregar detalhes:', error);
         showError('Erro ao carregar detalhes do produto');
@@ -83,11 +83,11 @@ async function loadProductDetails() {
 function renderProductDetails(product) {
     // Atualiza o título da página
     document.title = `${product.title} - EcoKambio`; // Mantém a consistência da marca
-    
+
     // Atualiza a imagem e título
     document.getElementById('product-image').src = product.image_url || '/assets/error-state.svg';
     document.getElementById('product-title').textContent = product.title;
-    
+
     // Atualiza o preço em USD
     const priceElement = document.getElementById('product-price');
     if (priceElement) {
@@ -97,7 +97,7 @@ function renderProductDetails(product) {
             currency: 'USD'
         }).format(totalUSD);
     }
-    
+
     // Atualiza o link de compra
     const buyButton = document.getElementById('buy-button');
     if (buyButton && product.url) {
@@ -109,7 +109,7 @@ function renderProductDetails(product) {
             });
         });
     }
-    
+
     // Atualiza o vídeo de prova, se existir
     const proofVideoContainer = document.getElementById('proof-video-container');
     if (proofVideoContainer && product.proof_video_url) {
@@ -141,7 +141,42 @@ function showError(message) {
     }
 }
 
-// A função global logActivity de main.js é esperada estar disponível.
+// Função local logActivity (main.js não é carregado nesta página)
+async function logActivity(type, details = {}) {
+    try {
+        if (!type) return;
+
+        const sessionId = sessionStorage.getItem('ek_session_id') || crypto.randomUUID();
+        const visitorId = localStorage.getItem('ek_visitor_id') || crypto.randomUUID();
+
+        const payload = {
+            event_type: type,
+            session_id: sessionId,
+            details: {
+                ...details,
+                visitor_id: visitorId,
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            }
+        };
+
+        // Tenta enviar via WebSocket se a conexão estiver ativa
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'log_activity', payload }));
+            console.log(`[WS] Atividade '${type}' enviada.`);
+        } else {
+            // Fallback para API HTTP
+            console.log(`[HTTP] WebSocket não disponível. A enviar '${type}' via API.`);
+            await fetch('/api/log-activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao registrar atividade:', error);
+    }
+}
 
 // Inicializa quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', init);
