@@ -8,5 +8,6 @@ router.post('/log-activity', publicController.logActivity);
 router.get('/visa-settings', publicController.getVisaSettings);
 router.get('/affiliate-details/:id', publicController.getAffiliateDetails);
 router.get('/status', publicController.getStatus);
+router.get('/scraped-rates', publicController.getScrapedRates);
 
 module.exports = router;

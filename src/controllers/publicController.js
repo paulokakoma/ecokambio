@@ -124,4 +124,30 @@ const getStatus = (req, res) => {
     });
 };
 
-module.exports = { getConfig, getInformalRates, logActivity, getVisaSettings, getAffiliateDetails, getStatus };
+const getScrapedRates = async (req, res) => {
+    try {
+        // Fetch rates from the last 24 hours to ensure freshness
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+        const { data, error } = await supabase
+            .from('scraper')
+            .select('*')
+            .gte('created_at', twentyFourHoursAgo)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Return data in a format compatible with the frontend
+        // We might want to deduplicate if there are multiple entries for the same bank/currency
+        // For now, returning all recent data
+        res.status(200).json({
+            lastUpdated: data.length > 0 ? data[0].created_at : new Date().toISOString(),
+            rates: data
+        });
+
+    } catch (error) {
+        handleSupabaseError(error, res);
+    }
+};
+
+module.exports = { getConfig, getInformalRates, logActivity, getVisaSettings, getAffiliateDetails, getStatus, getScrapedRates };

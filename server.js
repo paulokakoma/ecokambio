@@ -38,6 +38,8 @@ app.use(helmet({
     contentSecurityPolicy: false,
 }));
 app.use(compression()); // Enable Gzip compression
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -74,6 +76,17 @@ const staticOptions = {
     etag: true
 };
 
+// Disable cache for exchange_rates.json to always get fresh data
+app.get('/exchange_rates.json', (req, res, next) => {
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+    });
+    next();
+});
+
 app.use(express.static("public", staticOptions));
 app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), staticOptions));
 
@@ -86,6 +99,9 @@ app.get('/api/config', (req, res) => {
     });
 });
 
+// Apply subdomain middleware to detect admin.localhost vs localhost
+app.use(subdomainMiddleware);
+
 // Routes
 app.use('/api', authRoutes);
 app.use('/api', publicRoutes);
@@ -94,6 +110,7 @@ app.use('/api', adminRoutes);
 // Health Check
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
+// View Routes - handles subdomain routing
 app.use('/', viewRoutes);
 
 // 404 Handler - Catch all unhandled requests
@@ -119,6 +136,10 @@ app.use((req, res, next) => {
         res.status(404).type('txt').send('Not Found');
     }
 });
+
+// Scheduler
+const scheduler = require('./webscraper/scheduler');
+scheduler.start();
 
 // Start Server
 server.listen(config.port, '0.0.0.0', () => {

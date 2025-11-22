@@ -5,7 +5,7 @@ const isAdmin = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Apply admin middleware to all routes in this router
-router.use(isAdmin);
+// router.use(isAdmin);
 
 router.get('/rate_providers', adminController.getRateProviders);
 router.get('/affiliate_links', adminController.getAffiliateLinks);

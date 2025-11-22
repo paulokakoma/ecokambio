@@ -1191,14 +1191,14 @@
             const container = document.getElementById('calculator-card-container'); // eslint-disable-line
             let purchasePriceInput, bankSelectorBtn, bankOptionsPanel, selectedBankCode, bankExchangeRateInput, bankFeeMarginInput, bankFeeFinalInput, calculateBtn, calculatorCard, dropdownArrow, baseFeePercent;
             const themes = {
-                bai: { card: 'theme-bai', color: '#0194b3' },
-                bfa: { card: 'theme-bfa', color: '#f7931e' },
-                bic: { card: 'theme-bic', color: '#d42128' },
-                bpc: { card: 'theme-bpc', color: '#00529b' },
-                bci: { card: 'theme-bci', color: '#1f3a38' },
-                yetu: { card: 'theme-yetu', color: '#EAA900' },
+                bai: { card: 'theme-bai', color: '#0194b3' },     // BAI - Cyan blue (unchanged)
+                bfa: { card: 'theme-bfa', color: '#FF8C00' },     // BFA - Vibrant orange
+                bic: { card: 'theme-bic', color: '#E30613' },     // BIC - Brand red
+                bpc: { card: 'theme-bpc', color: '#0066B3' },     // BPC - Blue
+                bci: { card: 'theme-bci', color: '#00563F' },     // BCI - Dark green
+                yetu: { card: 'theme-yetu', color: '#FFB81C' },   // YETU - Bright gold
                 // Fallback para novos bancos: usar o tema do BPC
-                default: { card: 'theme-bpc', color: '#00529b' }
+                default: { card: 'theme-bpc', color: '#0066B3' }
             };
             let priceMask; // Variável para guardar a instância do IMask
 

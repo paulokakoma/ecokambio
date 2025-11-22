@@ -20,19 +20,97 @@ const getRateProviders = async (req, res) => {
 
         if (error) throw error;
 
+        // Se for FORMAL, buscar dados do scraper para enriquecer/atualizar
+        let scrapedRates = [];
+        if (type === 'FORMAL') {
+            const { data: scraped, error: scrapeError } = await supabase
+                .from('scraper')
+                .select('*')
+                .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+                .order('created_at', { ascending: false });
+
+            if (!scrapeError && scraped) {
+                scrapedRates = scraped;
+            }
+        }
+
+        // Helper to parse rates with various locale formats and round to 2 decimals
+        const parseRate = (value) => {
+            if (value === null || value === undefined) return null;
+
+            let str = String(value).trim();
+            // Remove any non-numeric characters except . and ,
+            str = str.replace(/[^0-9.,-]+/g, '');
+
+            if (!str) return null;
+
+            // Logic to determine decimal vs thousand separator:
+            // - If both . and , are present, the LAST one is the decimal separator
+            // - Examples: "1,095.50" -> decimal is '.', "1.095,50" -> decimal is ','
+            if (str.includes('.') && str.includes(',')) {
+                const lastDotIndex = str.lastIndexOf('.');
+                const lastCommaIndex = str.lastIndexOf(',');
+
+                if (lastDotIndex > lastCommaIndex) {
+                    // Dot is decimal, comma is thousand separator (e.g., "1,095.50")
+                    str = str.replace(/,/g, '');
+                } else {
+                    // Comma is decimal, dot is thousand separator (e.g., "1.095,50")
+                    str = str.replace(/\./g, '').replace(',', '.');
+                }
+            } else if (str.includes(',')) {
+                // Only comma present - assume it's decimal separator
+                str = str.replace(',', '.');
+            }
+            // If only dot present, it's already correct format
+
+            const num = parseFloat(str);
+            return isNaN(num) ? null : Math.round(num * 100) / 100;
+        };
+
         const formattedData = data.map(provider => {
             const rates = provider.exchange_rates;
-            const usdRateData = rates.find(r => r.currency_pair === 'USD/AOA');
-            const eurRateData = rates.find(r => r.currency_pair === 'EUR/AOA');
-            const usdtRateData = rates.find(r => r.currency_pair === 'USDT/AOA');
+            let usdRate = parseRate(rates.find(r => r.currency_pair === 'USD/AOA')?.sell_rate);
+            let eurRate = parseRate(rates.find(r => r.currency_pair === 'EUR/AOA')?.sell_rate);
+            const usdtRate = parseRate(rates.find(r => r.currency_pair === 'USDT/AOA')?.sell_rate);
+
+            // Tentar encontrar dados do scraper para este banco
+            let lastUpdated = null;
+            if (type === 'FORMAL') {
+                // Normaliza o nome/código para comparação (ex: 'BAI' -> 'BAI')
+                const providerCode = provider.code ? provider.code.toUpperCase() : '';
+
+                // Encontrar a taxa mais recente para este banco
+                const bankRates = scrapedRates.filter(r =>
+                    r.bank && r.bank.toUpperCase() === providerCode
+                );
+
+                if (bankRates.length > 0) {
+                    // Pega a data mais recente deste grupo de taxas
+                    lastUpdated = bankRates[0].created_at;
+
+                    // Encontrar USD
+                    const usdScraped = bankRates.find(r => r.currency === 'USD');
+                    if (usdScraped && usdScraped.sell) {
+                        usdRate = parseRate(usdScraped.sell);
+                    }
+
+                    // Encontrar EUR
+                    const eurScraped = bankRates.find(r => r.currency === 'EUR');
+                    if (eurScraped && eurScraped.sell) {
+                        eurRate = parseRate(eurScraped.sell);
+                    }
+                }
+            }
 
             delete provider.exchange_rates;
 
             return {
                 ...provider,
-                usd_rate: usdRateData ? usdRateData.sell_rate : null,
-                eur_rate: eurRateData ? eurRateData.sell_rate : null,
-                usdt_rate: usdtRateData ? usdtRateData.sell_rate : null
+                usd_rate: usdRate || null,
+                eur_rate: eurRate || null,
+                usdt_rate: usdtRate || null,
+                last_updated: lastUpdated
             };
         });
 
@@ -322,14 +400,23 @@ const updateStatus = async (req, res) => {
 
 const updateCell = async (req, res) => {
     const { field, value, providerId, pair } = req.body;
+
+    // Parse values to ensure correct types
+    const parsedProviderId = parseInt(providerId, 10);
+    const parsedValue = parseFloat(value);
+
+    if (isNaN(parsedProviderId)) {
+        return res.status(400).json({ message: "ID do provedor inválido." });
+    }
+
     if (field === 'sell_rate') {
         const { error: upsertError } = await supabase
             .from('exchange_rates')
             .upsert(
                 {
-                    provider_id: providerId,
+                    provider_id: parsedProviderId,
                     currency_pair: pair,
-                    sell_rate: value
+                    sell_rate: parsedValue
                 },
                 { onConflict: 'provider_id,currency_pair' }
             );
@@ -337,8 +424,8 @@ const updateCell = async (req, res) => {
     } else if (['fee_margin', 'base_fee_percent'].includes(field)) {
         const { error: updateError } = await supabase
             .from('rate_providers')
-            .update({ [field]: value })
-            .eq('id', providerId);
+            .update({ [field]: parsedValue })
+            .eq('id', parsedProviderId);
         if (updateError) return handleSupabaseError(updateError, res);
     } else {
         return res.status(400).json({ message: "Campo inválido." });
