@@ -2,11 +2,11 @@ const cron = require('node-cron');
 const { exec } = require('child_process');
 const path = require('path');
 
-// Schedule the scraper to run every day at 4:00 AM
+// Schedule the scraper to run every 4 hours
 // Cron format: Minute Hour Day Month DayOfWeek
-const SCHEDULE = '0 4 * * *';
+const SCHEDULE = '0 */4 * * *';
 
-console.log(`📅 Scheduler initialized. Scraper will run daily at 4:00 AM (${SCHEDULE})`);
+console.log(`📅 Scheduler initialized. Scraper will run every 4 hours (${SCHEDULE})`);
 
 const fs = require('fs');
 
