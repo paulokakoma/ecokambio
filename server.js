@@ -49,6 +49,10 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter); // Apply rate limiting to API routes
 
+// Trust the first proxy (Railway/Cloudflare)
+// Required for secure cookies to work correctly behind a proxy
+app.set('trust proxy', 1);
+
 // Session Configuration
 app.use(session({
     store: new FileStore({
