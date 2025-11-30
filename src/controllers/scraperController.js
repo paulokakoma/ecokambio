@@ -8,10 +8,11 @@ const supabase = require('../config/supabase');
 const getHealth = async (req, res) => {
     try {
         // Get last update from exchange_rates table
+        // Note: Using created_at as timestamp column
         const { data, error } = await supabase
             .from('exchange_rates')
-            .select('last_updated')
-            .order('last_updated', { ascending: false })
+            .select('created_at')
+            .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
@@ -19,19 +20,27 @@ const getHealth = async (req, res) => {
             throw error;
         }
 
-        const lastUpdate = data?.last_updated ? new Date(data.last_updated) : null;
+        const lastUpdate = data?.created_at ? new Date(data.created_at) : null;
         const now = new Date();
         const hoursSinceLastRun = lastUpdate
             ? (now - lastUpdate) / (1000 * 60 * 60)
             : null;
 
-        // Get count of rates per bank
-        const { data: ratesCount, error: countError } = await supabase
-            .from('exchange_rates')
-            .select('provider_id', { count: 'exact', head: false })
-            .eq('last_updated', data?.last_updated);
+        // Get count of rates per bank for the latest run
+        // We filter by rates created in the last 1 hour of the last run
+        let totalRates = 0;
+        if (lastUpdate) {
+            const timeWindowStart = new Date(lastUpdate.getTime() - 5 * 60000).toISOString(); // 5 mins before
+            const timeWindowEnd = new Date(lastUpdate.getTime() + 5 * 60000).toISOString(); // 5 mins after
 
-        const totalRates = ratesCount?.length || 0;
+            const { count, error: countError } = await supabase
+                .from('exchange_rates')
+                .select('*', { count: 'exact', head: true })
+                .gte('created_at', timeWindowStart)
+                .lte('created_at', timeWindowEnd);
+
+            totalRates = count || 0;
+        }
 
         // Determine status
         let status = 'unknown';
@@ -54,9 +63,11 @@ const getHealth = async (req, res) => {
         });
     } catch (error) {
         console.error('Error getting scraper health:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         res.status(500).json({
             status: 'error',
-            message: 'Failed to get scraper health status'
+            message: 'Failed to get scraper health status',
+            details: error.message
         });
     }
 };
@@ -101,8 +112,8 @@ const getLastResults = async (req, res) => {
         // Get latest timestamp
         const { data: latest, error: latestError } = await supabase
             .from('exchange_rates')
-            .select('last_updated')
-            .order('last_updated', { ascending: false })
+            .select('created_at')
+            .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
@@ -118,7 +129,10 @@ const getLastResults = async (req, res) => {
             });
         }
 
-        // Get all rates from that timestamp with provider info
+        // Get all rates from that timestamp (approximate window)
+        const timeWindowStart = new Date(new Date(latest.created_at).getTime() - 5 * 60000).toISOString();
+        const timeWindowEnd = new Date(new Date(latest.created_at).getTime() + 5 * 60000).toISOString();
+
         const { data: rates, error: ratesError } = await supabase
             .from('exchange_rates')
             .select(`
@@ -126,7 +140,8 @@ const getLastResults = async (req, res) => {
                 sell_rate,
                 rate_providers!inner(code, name)
             `)
-            .eq('last_updated', latest.last_updated);
+            .gte('created_at', timeWindowStart)
+            .lte('created_at', timeWindowEnd);
 
         if (ratesError) throw ratesError;
 
@@ -148,7 +163,7 @@ const getLastResults = async (req, res) => {
         });
 
         res.json({
-            timestamp: latest.last_updated,
+            timestamp: latest.created_at,
             banks: Object.values(bankResults)
         });
     } catch (error) {
