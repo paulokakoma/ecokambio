@@ -7,7 +7,7 @@
     "start": "node server.js --host 0.0.0.0",
     "build": "npm run build:css",
     "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
-    "scrape": "node cron-scraping.js",
+    "scrape": "node webscraper/cron-scraping.js",
     "scrape:puppeteer": "node webscraper/puppeteer-scraper.js",
     "scrape:all": "npm run scrape && npm run scrape:puppeteer",
     "build:prod": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify",
