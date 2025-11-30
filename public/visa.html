@@ -299,7 +299,8 @@
                                 <input type="text" id="quick-converter-amount" inputmode="decimal"
                                     class="w-full p-4 border-2 border-emerald-300 rounded-xl shadow-sm focus:ring-4 focus:ring-emerald-400/50 focus:border-emerald-500 text-xl font-mono transition-all duration-300"
                                     placeholder="Ex: 10,00">
-                                <p class="text-xs text-gray-600 font-medium">✓ Mínimo: 5,00 • Digite apenas números</p>
+                                <p class="text-xs text-gray-600 font-medium">✓ Mínimo: 5,00 • Máximo: 5.000.000 • Digite
+                                    apenas números</p>
                             </div>
 
                             <!-- Seletor de Moeda -->
@@ -736,6 +737,7 @@
 
                 const from = fromSelect.value;
                 const minAmount = 5; // Valor mínimo em USD ou EUR
+                const maxAmount = 5000000; // Valor máximo: 5 milhões
 
                 // Validação de valor mínimo
                 if (amount < minAmount) {
@@ -743,6 +745,16 @@
                     feeNotice.classList.remove('text-emerald-500');
                     feeNotice.classList.add('text-red-600');
                     resultDisplay.textContent = 'Abaixo do mínimo';
+                    headerElement.style.display = 'none'; // Oculta "Você vai pagar"
+                    return;
+                }
+
+                // Validação de valor máximo
+                if (amount > maxAmount) {
+                    feeNotice.textContent = `⚠️ Valor máximo permitido: ${maxAmount.toLocaleString('pt-AO')} ${from}`;
+                    feeNotice.classList.remove('text-emerald-500');
+                    feeNotice.classList.add('text-red-600');
+                    resultDisplay.textContent = 'Acima do máximo';
                     headerElement.style.display = 'none'; // Oculta "Você vai pagar"
                     return;
                 }
