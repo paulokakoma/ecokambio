@@ -8,11 +8,11 @@ const supabase = require('../config/supabase');
 const getHealth = async (req, res) => {
     try {
         // Get last update from exchange_rates table
-        // Note: Using created_at as timestamp column
+        // Note: Using updated_at as timestamp column
         const { data, error } = await supabase
             .from('exchange_rates')
-            .select('created_at')
-            .order('created_at', { ascending: false })
+            .select('updated_at')
+            .order('updated_at', { ascending: false })
             .limit(1)
             .single();
 
@@ -20,14 +20,14 @@ const getHealth = async (req, res) => {
             throw error;
         }
 
-        const lastUpdate = data?.created_at ? new Date(data.created_at) : null;
+        const lastUpdate = data?.updated_at ? new Date(data.updated_at) : null;
         const now = new Date();
         const hoursSinceLastRun = lastUpdate
             ? (now - lastUpdate) / (1000 * 60 * 60)
             : null;
 
         // Get count of rates per bank for the latest run
-        // We filter by rates created in the last 1 hour of the last run
+        // We filter by rates updated in the last 1 hour of the last run
         let totalRates = 0;
         if (lastUpdate) {
             const timeWindowStart = new Date(lastUpdate.getTime() - 5 * 60000).toISOString(); // 5 mins before
@@ -36,8 +36,8 @@ const getHealth = async (req, res) => {
             const { count, error: countError } = await supabase
                 .from('exchange_rates')
                 .select('*', { count: 'exact', head: true })
-                .gte('created_at', timeWindowStart)
-                .lte('created_at', timeWindowEnd);
+                .gte('updated_at', timeWindowStart)
+                .lte('updated_at', timeWindowEnd);
 
             totalRates = count || 0;
         }
@@ -112,8 +112,8 @@ const getLastResults = async (req, res) => {
         // Get latest timestamp
         const { data: latest, error: latestError } = await supabase
             .from('exchange_rates')
-            .select('created_at')
-            .order('created_at', { ascending: false })
+            .select('updated_at')
+            .order('updated_at', { ascending: false })
             .limit(1)
             .single();
 
@@ -130,8 +130,8 @@ const getLastResults = async (req, res) => {
         }
 
         // Get all rates from that timestamp (approximate window)
-        const timeWindowStart = new Date(new Date(latest.created_at).getTime() - 5 * 60000).toISOString();
-        const timeWindowEnd = new Date(new Date(latest.created_at).getTime() + 5 * 60000).toISOString();
+        const timeWindowStart = new Date(new Date(latest.updated_at).getTime() - 5 * 60000).toISOString();
+        const timeWindowEnd = new Date(new Date(latest.updated_at).getTime() + 5 * 60000).toISOString();
 
         const { data: rates, error: ratesError } = await supabase
             .from('exchange_rates')
@@ -140,8 +140,8 @@ const getLastResults = async (req, res) => {
                 sell_rate,
                 rate_providers!inner(code, name)
             `)
-            .gte('created_at', timeWindowStart)
-            .lte('created_at', timeWindowEnd);
+            .gte('updated_at', timeWindowStart)
+            .lte('updated_at', timeWindowEnd);
 
         if (ratesError) throw ratesError;
 
@@ -163,7 +163,7 @@ const getLastResults = async (req, res) => {
         });
 
         res.json({
-            timestamp: latest.created_at,
+            timestamp: latest.updated_at,
             banks: Object.values(bankResults)
         });
     } catch (error) {

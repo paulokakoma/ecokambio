@@ -210,7 +210,7 @@ const targets = [
                 provider_id: providerId,
                 currency_pair: `${rate.currency}/AOA`,
                 sell_rate: sellRate,
-                last_updated: new Date().toISOString()
+                updated_at: new Date().toISOString()
             });
         });
 
