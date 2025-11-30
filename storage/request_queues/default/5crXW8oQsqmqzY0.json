@@ -1,9 +1,0 @@
-{
-	"id": "5crXW8oQsqmqzY0",
-	"json": "{\"id\":\"5crXW8oQsqmqzY0\",\"url\":\"https://www.bfa.ao/pt/particulares/\",\"loadedUrl\":\"https://www.bfa.ao/pt/particulares/\",\"uniqueKey\":\"https://www.bfa.ao/pt/particulares\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BFA\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-11-28T19:02:01.760Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.bfa.ao/pt/particulares",
-	"url": "https://www.bfa.ao/pt/particulares/"
-}

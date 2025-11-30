@@ -1,9 +1,0 @@
-{
-	"id": "mP7WApesCLg46SF",
-	"json": "{\"id\":\"mP7WApesCLg46SF\",\"url\":\"https://www.bancoyetu.ao\",\"loadedUrl\":\"https://www.bancoyetu.ao/\",\"uniqueKey\":\"https://www.bancoyetu.ao\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"YETU\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-11-28T19:02:54.457Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.bancoyetu.ao",
-	"url": "https://www.bancoyetu.ao"
-}

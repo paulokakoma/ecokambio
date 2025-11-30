@@ -22,6 +22,9 @@ const targets = [
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             }
         },
+        // Retry configuration for failed requests
+        maxRequestRetries: 3,
+        requestHandlerTimeoutSecs: 180,
         preNavigationHooks: [async ({ page }) => {
             await page.setExtraHTTPHeaders({
                 'User-Agent':
@@ -168,25 +171,67 @@ const targets = [
         console.log(`💾 Data saved to ${outputPath}`);
 
         // --- Save to Supabase ---
-        const supabase = require('./src/config/supabase'); // Adjusted path for root execution
+        const supabase = require('../src/config/supabase'); // ✅ Fixed path
         console.log('📡 Sending data to Supabase...');
 
-        const records = allRates.map(rate => ({
-            bank: rate.bank,
-            currency: rate.currency,
-            sell: rate.sell
-        }));
+        // Get provider mappings for upsert
+        const { data: providers, error: providerError } = await supabase
+            .from('rate_providers')
+            .select('id, code')
+            .eq('type', 'FORMAL');
 
+        if (providerError) {
+            console.error('❌ Error fetching providers:', providerError);
+            process.exit(1);
+        }
+
+        const providerMap = {};
+        providers.forEach(p => {
+            providerMap[p.code] = p.id;
+        });
+
+        // Transform scraper data to exchange_rates format
+        const transformedRecords = [];
+        allRates.forEach(rate => {
+            const providerId = providerMap[rate.bank];
+            if (!providerId) {
+                console.warn(`⚠️ Provider ${rate.bank} not found in database, skipping`);
+                return;
+            }
+
+            // Convert sell rate to float
+            const sellRate = parseFloat(rate.sell.replace(/\./g, '').replace(',', '.'));
+            if (isNaN(sellRate)) {
+                console.warn(`⚠️ Invalid rate for ${rate.bank} ${rate.currency}: ${rate.sell}`);
+                return;
+            }
+
+            transformedRecords.push({
+                provider_id: providerId,
+                currency_pair: `${rate.currency}/AOA`,
+                sell_rate: sellRate,
+                last_updated: new Date().toISOString()
+            });
+        });
+
+        console.log(`📊 Transformed ${transformedRecords.length} records for upsert`);
+
+        // Upsert into exchange_rates table
         const { error } = await supabase
-            .from('scraper')
-            .insert(records);
+            .from('exchange_rates')
+            .upsert(transformedRecords, {
+                onConflict: 'provider_id,currency_pair',
+                ignoreDuplicates: false
+            });
 
         if (error) {
-            console.error('❌ Error inserting into Supabase:', error);
-            process.exit(1); // Exit with error code
+            console.error('❌ Error upserting into Supabase:', error);
+            process.exit(1);
         } else {
             console.log('✅ Data successfully saved to Supabase!');
-            process.exit(0); // Exit successfully
+            console.log(`   - Total rates: ${transformedRecords.length}`);
+            console.log(`   - Banks: ${[...new Set(allRates.map(r => r.bank))].join(', ')}`);
+            process.exit(0);
         }
     } catch (error) {
         console.error('❌ Error during save process:', error);

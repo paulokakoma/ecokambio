@@ -32,6 +32,9 @@ const publicRoutes = require("./src/routes/publicRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const viewRoutes = require("./src/routes/viewRoutes");
 
+// Scraper
+const scraperController = require("./src/controllers/scraperController");
+
 // Middleware para forçar HTTPS
 const enforceHttps = (req, res, next) => {
     // A verificação `req.secure` funciona corretamente porque `app.set('trust proxy', 1)` está ativo.
@@ -128,10 +131,15 @@ app.get('/api/config', (req, res) => {
 // Apply subdomain middleware to detect admin.localhost vs localhost
 app.use(subdomainMiddleware);
 
-// Routes
-app.use('/api', authRoutes);
-app.use('/api', publicRoutes);
-app.use('/api', adminRoutes);
+// API Routes
+app.use("/api", authRoutes);
+app.use("/api", isAdmin, adminRoutes);
+app.use("/api", publicRoutes);
+
+// Scraper API Routes
+app.get("/api/scraper/health", scraperController.getHealth);
+app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
+app.get("/api/scraper/last-results", scraperController.getLastResults);
 
 // Health Check
 app.get('/health', (req, res) => res.status(200).send('OK'));
@@ -165,16 +173,27 @@ app.use((req, res, next) => {
 
 // Scheduler
 const scheduler = require('./webscraper/scheduler');
-scheduler.start();
 
 // Start Server
 server.listen(config.port, '0.0.0.0', () => {
-    if (config.isDevelopment) {
+    console.log(`✅ Server running on port ${config.port}`);
+    console.log(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
+
+    // Start scraper scheduler in production
+    if (!config.isDevelopment) {
+        try {
+            const scraperScheduler = require('./webscraper/scheduler');
+            scraperScheduler.start();
+            console.log('📅 Scraper scheduler started (runs every 4 hours)');
+        } catch (error) {
+            console.error('⚠️  Failed to start scraper scheduler:', error.message);
+        }
+    } else {
+        console.log('ℹ️  Scraper scheduler disabled in development mode');
+        console.log('   Use: npm run scrape to test manually');
         console.log(`Servidor a correr em desenvolvimento:`);
         console.log(`  📱 Página Principal: http://localhost:${config.port}`);
         console.log(`  🔐 Admin: http://admin.localhost:${config.port}`);
-    } else {
-        console.log(`Servidor a correr em produção na porta ${config.port}`);
     }
 }).on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
