@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== ATUALIZANDO SOBRE.HTML ===\n"
+
+# Upload do arquivo
+puts "Uploading sobre.html...\n"
+spawn scp -o StrictHostKeyChecking=no /Users/av/Documents/Projetos/ecokambio-main/public/sobre.html root@$server:/root/ecokambio/public/sobre.html
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n=== VERIFICANDO NO SERVIDOR ===\n"
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# Verificar se o arquivo foi atualizado
+send "grep '5002764768' /root/ecokambio/public/sobre.html\r"
+expect "#"
+
+puts "\n=== CONCLUÍDO ===\n"
+
+interact

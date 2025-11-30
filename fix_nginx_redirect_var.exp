@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== ATUALIZANDO REDIRECT NGINX ===\n"
+
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# Atualizar configuração para usar $host em vez de $server_name no redirect
+# Isso garante que admin.ecokambio.com redirecione para https://admin.ecokambio.com
+# e não para https://ecokambio.com (se fosse o caso)
+
+puts "\n=== EDITANDO CONFIGURAÇÃO ===\n"
+send "sed -i 's/return 301 https:\\/\\/\\\$server_name\\\$request_uri;/return 301 https:\\/\\/\\\$host\\\$request_uri;/g' /etc/nginx/sites-available/ecokambio\r"
+expect "#"
+
+# Verificar mudança
+send "grep 'return 301' /etc/nginx/sites-available/ecokambio\r"
+expect "#"
+
+# Testar e Recarregar
+send "nginx -t && systemctl reload nginx\r"
+expect "#"
+
+puts "\n=== CONCLUÍDO ===\n"
+
+interact

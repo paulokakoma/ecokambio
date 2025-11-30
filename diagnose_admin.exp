@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== DIAGNOSTICANDO ADMIN REDIRECT ===\n"
+
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# 1. Ver configuração atual
+puts "\n=== CONFIGURAÇÃO NGINX ===\n"
+send "cat /etc/nginx/sites-available/ecokambio\r"
+expect "#"
+
+# 2. Testar curl localmente para ver headers
+puts "\n=== CURL LOCAL (HTTPS) ===\n"
+# Simular requisição HTTPS vinda do Nginx
+send "curl -I -H 'Host: admin.ecokambio.com' -H 'X-Forwarded-Proto: https' http://localhost:3000\r"
+expect "#"
+
+puts "\n=== CURL LOCAL (HTTP) ===\n"
+send "curl -I -H 'Host: admin.ecokambio.com' http://localhost:3000\r"
+expect "#"
+
+# 3. Ver logs do PM2
+puts "\n=== LOGS PM2 ===\n"
+send "pm2 logs --lines 50 --nostream\r"
+expect "#"
+
+puts "\n=== DIAGNÓSTICO CONCLUÍDO ===\n"
+
+interact

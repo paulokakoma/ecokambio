@@ -8,6 +8,7 @@ const config = require('../config/env');
  */
 const enforceHttps = (req, res, next) => {
     // Only enforce in production/staging, not local dev
+    /*
     if (!config.isDevelopment) {
         const proto = req.headers['x-forwarded-proto'];
         const host = req.headers['host'];
@@ -23,7 +24,7 @@ const enforceHttps = (req, res, next) => {
             return res.redirect(301, `https://${newHost}${req.url}`);
         }
     }
-
+    */
     next();
 };
 

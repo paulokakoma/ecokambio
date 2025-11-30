@@ -1,0 +1,2 @@
+spawn ssh root@212.90.120.135 cat /etc/nginx/sites-enabled/ecokambio
+root@212.90.120.135's password: 

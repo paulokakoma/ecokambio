@@ -1,0 +1,14 @@
+#!/usr/bin/expect
+
+set timeout 30
+set password "1234"
+
+# Backup and edit Nginx config
+spawn ssh root@212.90.120.135 "cp /etc/nginx/sites-enabled/ecokambio /etc/nginx/sites-enabled/ecokambio.bak && sed -i '/return 301 https/d' /etc/nginx/sites-enabled/ecokambio && sed -i '/if.*\\$scheme.*http/,+2d' /etc/nginx/sites-enabled/ecokambio && nginx -t && systemctl reload nginx"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

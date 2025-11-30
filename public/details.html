@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
+        crossorigin="anonymous"></script>
     <title>Detalhes do Produto - EcoKambio</title>
     <meta name="description"
         content="Veja os detalhes do produto, o custo estimado em Kwanzas (AOA) com base no câmbio atual do dólar, e como comprar.">
@@ -112,7 +114,7 @@
 </head>
 
 <body class="min-h-screen">
-   
+
     <header class="bg-white shadow-sm">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
@@ -306,9 +308,33 @@
                 if (error) throw error;
 
                 const settings = data.reduce((acc, { key, value }) => {
-                    acc[key] = value;
+                    try {
+                        acc[key] = JSON.parse(value);
+                    } catch (e) {
+                        acc[key] = value;
+                    }
                     return acc;
                 }, {});
+
+                // Renderiza os ícones de redes sociais globais na seção "Siga-nos"
+                const socialContainer = document.getElementById('social-links-container');
+                if (socialContainer && settings.social_media_links) {
+                    const socialIcons = {
+                        whatsapp: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png?20220228223904',
+                        instagram: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png',
+                        facebook: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Facebook_f_logo_%282019%29.svg/1024px-Facebook_f_logo_%282019%29.svg.png',
+                        tiktok: 'https://cdn4.iconfinder.com/data/icons/social-media-flat-7/64/Social-media_Tiktok-1024.png',
+                        youtube: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/1024px-YouTube_full-color_icon_%282017%29.svg.png'
+                    };
+
+                    socialContainer.innerHTML = ''; // Limpa ícones anteriores (do produto, se houver)
+
+                    Object.keys(socialIcons).forEach(key => {
+                        if (settings.social_media_links[key]) {
+                            socialContainer.innerHTML += `<a href="${settings.social_media_links[key]}" target="_blank" class="transition-transform hover:scale-110" title="${key.charAt(0).toUpperCase() + key.slice(1)}"><img src="${socialIcons[key]}" class="w-8 h-8"></a>`;
+                        }
+                    });
+                }
 
 
             } catch (error) {

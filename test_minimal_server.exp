@@ -1,0 +1,24 @@
+#!/usr/bin/expect
+
+set timeout 20
+set password "1234"
+
+# Create minimal server
+spawn ssh root@212.90.120.135 "echo \"const http = require('http'); http.createServer((req, res) => { res.writeHead(200); res.end('OK'); }).listen(3001);\" > /root/test_server.js"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+# Run it
+spawn ssh root@212.90.120.135 "nohup node /root/test_server.js > /dev/null 2>&1 &"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

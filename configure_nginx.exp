@@ -1,0 +1,72 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== CONFIGURANDO NGINX ===\n"
+
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# Criar configuração do Nginx
+puts "\n=== CRIANDO ARQUIVO DE CONFIGURAÇÃO DO NGINX ===\n"
+
+send "cat > /etc/nginx/sites-available/ecokambio << 'EOFNGINX'\r"
+send "server {\r"
+send "    listen 80;\r"
+send "    listen \[::]\:80;\r"
+send "    server_name ecokambio.com www.ecokambio.com;\r"
+send "\r"
+send "    location / {\r"
+send "        proxy_pass http://localhost:3000;\r"
+send "        proxy_http_version 1.1;\r"
+send "        proxy_set_header Upgrade \\\$http_upgrade;\r"
+send "        proxy_set_header Connection 'upgrade';\r"
+send "        proxy_set_header Host \\\$host;\r"
+send "        proxy_set_header X-Real-IP \\\$remote_addr;\r"
+send "        proxy_set_header X-Forwarded-For \\\$proxy_add_x_forwarded_for;\r"
+send "        proxy_set_header X-Forwarded-Proto \\\$scheme;\r"
+send "        proxy_cache_bypass \\\$http_upgrade;\r"
+send "    }\r"
+send "}\r"
+send "EOFNGINX\r"
+expect "#"
+
+# Criar link simbólico
+puts "\n=== ATIVANDO SITE ===\n"
+send "ln -sf /etc/nginx/sites-available/ecokambio /etc/nginx/sites-enabled/ecokambio\r"
+expect "#"
+
+# Remover site padrão
+send "rm -f /etc/nginx/sites-enabled/default\r"
+expect "#"
+
+# Testar configuração
+puts "\n=== TESTANDO CONFIGURAÇÃO DO NGINX ===\n"
+send "nginx -t\r"
+expect {
+    "successful" {
+        puts "\nConfiguração válida!"
+    }
+    "failed" {
+        puts "\nERRO na configuração!"
+    }
+}
+expect "#"
+
+# Reiniciar Nginx
+puts "\n=== REINICIANDO NGINX ===\n"
+send "systemctl restart nginx\r"
+expect "#"
+
+# Verificar status
+send "systemctl status nginx --no-pager\r"
+expect "#"
+
+puts "\n=== NGINX CONFIGURADO ===\n"
+puts "Teste acessando: http://ecokambio.com\n"
+
+interact

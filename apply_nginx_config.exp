@@ -1,0 +1,44 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== ENVIANDO CONFIGURAÇÃO CORRETA DO NGINX ===\n"
+
+# Upload do arquivo
+puts "Uploading nginx config...\n"
+spawn scp -o StrictHostKeyChecking=no /Users/av/Documents/Projetos/ecokambio-main/nginx_ecokambio.conf root@$server:/etc/nginx/sites-available/ecokambio
+expect "password:"
+send "$password\r"
+expect eof
+
+# Aplicar configuração
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+puts "\n=== TESTANDO CONFIGURAÇÃO ===\n"
+send "nginx -t\r"
+expect {
+    "successful" {
+        puts "\nConfiguração válida!"
+    }
+    "failed" {
+        puts "\nERRO na configuração!"
+        interact
+    }
+}
+expect "#"
+
+puts "\n=== REINICIANDO NGINX ===\n"
+send "systemctl reload nginx\r"
+expect "#"
+
+send "systemctl status nginx --no-pager | head -15\r"
+expect "#"
+
+puts "\n=== WEBSOCKET CORRIGIDO ===\n"
+
+interact

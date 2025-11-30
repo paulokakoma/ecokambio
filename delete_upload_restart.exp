@@ -1,0 +1,46 @@
+#!/usr/bin/expect
+
+set timeout 20
+set password "1234"
+
+# Delete remote file
+spawn ssh root@212.90.120.135 "rm -f /root/ecokambio/server.js"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+# Upload new file
+spawn scp server.js root@212.90.120.135:/root/ecokambio/server.js
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+# Restart PM2
+spawn ssh root@212.90.120.135 "pm2 restart all"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+# Verify content (should NOT find enforceHttps)
+spawn ssh root@212.90.120.135 "grep 'const enforceHttps =' /root/ecokambio/server.js"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+catch wait result
+exit [lindex $result 3]

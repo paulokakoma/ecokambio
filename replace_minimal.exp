@@ -1,0 +1,24 @@
+#!/usr/bin/expect
+
+set timeout 20
+set password "1234"
+
+# Create minimal express server
+spawn ssh root@212.90.120.135 "echo \"const express = require('express'); const app = express(); app.get('*', (req, res) => res.send('MINIMAL SERVER OK')); app.listen(3000, '0.0.0.0', () => console.log('Minimal server running'));\" > /root/ecokambio/server.js"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+# Restart PM2
+spawn ssh root@212.90.120.135 "pm2 restart all"
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

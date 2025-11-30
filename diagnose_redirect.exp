@@ -1,0 +1,34 @@
+#!/usr/bin/expect -f
+
+set timeout 60
+set password "1234"
+set server "212.90.120.135"
+
+puts "\n=== DIAGNOSTICANDO PROBLEMA DE REDIRECT LOOP ===\n"
+
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# Ver configuração atual do Nginx
+puts "\n=== CONFIGURAÇÃO ATUAL DO NGINX ===\n"
+send "cat /etc/nginx/sites-available/ecokambio\r"
+expect "#"
+
+# Ver logs de erro do Nginx
+puts "\n=== LOGS DE ERRO DO NGINX ===\n"
+send "tail -50 /var/log/nginx/error.log\r"
+expect "#"
+
+# Testar localmente
+puts "\n=== TESTANDO LOCALMENTE ===\n"
+send "curl -I http://localhost:80\r"
+expect "#"
+
+send "curl -I http://localhost:3000\r"
+expect "#"
+
+puts "\n=== DIAGNÓSTICO CONCLUÍDO ===\n"
+
+interact

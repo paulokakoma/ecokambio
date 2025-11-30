@@ -35,18 +35,12 @@ const viewRoutes = require("./src/routes/viewRoutes");
 // Scraper
 const scraperController = require("./src/controllers/scraperController");
 
-// Middleware para forçar HTTPS
-const enforceHttps = (req, res, next) => {
-    // A verificação `req.secure` funciona corretamente porque `app.set('trust proxy', 1)` está ativo.
-    // Em produção, se o pedido não for seguro, redireciona para HTTPS.
-    if (!config.isDevelopment && !req.secure) {
-        return res.redirect('https://' + req.get('host') + req.url);
-    }
-    next();
-};
+// Middleware para forçar HTTPS removido
+// const enforceHttps = ...
 
 // Security Middleware
-app.use(enforceHttps);
+// app.use(enforceHttps);
+console.log("SERVER STARTED - NO HTTPS ENFORCEMENT");
 app.use(helmet({
     contentSecurityPolicy: false,
 }));

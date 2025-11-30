@@ -1,9 +1,9 @@
 const supabase = require("../config/supabase");
 const { handleSupabaseError } = require("../utils/errorHandler");
-const { ensureStorageBucketExists } = require("../utils/storage");
 const { broadcast } = require("../websocket");
 const sharp = require("sharp");
 const path = require("path");
+const { uploadFileToS3 } = require("../config/s3");
 
 const getRateProviders = async (req, res) => {
     const { type } = req.query;
@@ -164,7 +164,14 @@ const getSettings = async (req, res) => {
         if (error) throw error;
 
         const settingsObject = data.reduce((acc, { key, value }) => {
-            acc[key] = value; return acc;
+            try {
+                // Tenta fazer parse de JSON (para objetos/arrays como social_media_links)
+                acc[key] = JSON.parse(value);
+            } catch (e) {
+                // Se falhar, usa o valor como string normal
+                acc[key] = value;
+            }
+            return acc;
         }, {});
 
         res.status(200).json(settingsObject);
@@ -181,24 +188,15 @@ const updateVisaSettings = async (req, res) => {
         if (req.file) {
             console.log("Ficheiro de imagem recebido para /api/visa-settings. A processar...");
 
-            await ensureStorageBucketExists('site-assets');
             const optimizedBuffer = await sharp(req.file.buffer)
                 .resize({ width: 800, height: 800, fit: 'inside' })
                 .webp({ quality: 85 })
                 .toBuffer();
+
             const fileName = `visa-card-image-${Date.now()}.webp`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('site-assets')
-                .upload(fileName, optimizedBuffer, {
-                    contentType: 'image/webp',
-                    upsert: true,
-                });
 
-            if (uploadError) throw uploadError;
-            const { data: urlData } = supabase.storage.from('site-assets').getPublicUrl(fileName);
-            if (!urlData?.publicUrl) throw new Error('Não foi possível obter o URL público da imagem.');
-
-            newImageUrl = urlData.publicUrl;
+            // Upload to Contabo S3
+            newImageUrl = await uploadFileToS3(optimizedBuffer, fileName, 'image/webp');
         }
 
         const settingsToUpsert = [
@@ -252,8 +250,6 @@ const createSupporter = async (req, res) => {
             }
 
             try {
-                await ensureStorageBucketExists('site-assets');
-
                 const optimizedBuffer = await sharp(file.buffer)
                     .resize({ width: 1500, height: 530, fit: 'inside' })
                     .webp({ quality: 80 })
@@ -267,22 +263,9 @@ const createSupporter = async (req, res) => {
 
                 const fileName = `supporter-${Date.now()}-${sanitizedOriginalName}.webp`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage.from('site-assets')
-                    .upload(fileName, optimizedBuffer, {
-                        contentType: 'image/webp',
-                        upsert: true,
-                    });
+                // Upload to Contabo S3
+                banner_url = await uploadFileToS3(optimizedBuffer, fileName, 'image/webp');
 
-                if (uploadError) throw uploadError;
-                if (!uploadData?.path) throw new Error('Caminho do arquivo não retornado pelo upload');
-
-                const { data: urlData } = supabase.storage
-                    .from('site-assets')
-                    .getPublicUrl(fileName);
-
-                if (!urlData?.publicUrl) throw new Error('Não foi possível obter o URL público do arquivo');
-
-                banner_url = urlData.publicUrl;
             } catch (storageError) {
                 console.error('Erro no storage:', storageError);
                 return res.status(500).json({

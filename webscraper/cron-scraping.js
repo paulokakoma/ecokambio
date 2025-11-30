@@ -206,6 +206,12 @@ const targets = [
                 return;
             }
 
+            // Validation: Check for numeric overflow (max 10,000,000)
+            if (sellRate > 10000000) {
+                console.warn(`⚠️ Rate too high for ${rate.bank} ${rate.currency}: ${sellRate} (ignoring to prevent overflow)`);
+                return;
+            }
+
             transformedRecords.push({
                 provider_id: providerId,
                 currency_pair: `${rate.currency}/AOA`,

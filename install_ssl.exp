@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set password "1234"
+set server "212.90.120.135"
+set email "admin@ecokambio.com"
+
+puts "\n=== INSTALANDO CERTIFICADO SSL ===\n"
+
+spawn ssh -o StrictHostKeyChecking=no root@$server
+expect "password:"
+send "$password\r"
+expect "#"
+
+# Executar Certbot
+puts "\n=== EXECUTANDO CERTBOT ===\n"
+send "certbot --nginx -d ecokambio.com -d www.ecokambio.com --non-interactive --agree-tos --email $email --redirect\r"
+
+expect {
+    "Successfully received certificate" {
+        puts "\n✅ SSL instalado com sucesso!"
+        exp_continue
+    }
+    "Congratulations" {
+        puts "\n🎉 Certificado SSL ativado!"
+        exp_continue
+    }
+    "error" {
+        puts "\n❌ Erro ao instalar SSL"
+    }
+    "#" {
+        puts "\nProcesso concluído"
+    }
+    timeout {
+        puts "\nTimeout durante instalação do SSL"
+    }
+}
+
+expect "#"
+
+# Verificar certificados
+puts "\n=== VERIFICANDO CERTIFICADOS ===\n"
+send "certbot certificates\r"
+expect "#"
+
+# Testar renovação
+puts "\n=== TESTANDO RENOVAÇÃO AUTOMÁTICA ===\n"
+send "certbot renew --dry-run\r"
+expect "#"
+
+puts "\n=== SSL CONFIGURADO ===\n"
+puts "Acesse: https://ecokambio.com\n"
+
+interact
