@@ -713,8 +713,13 @@
                 calculate();
             });
 
+
             const calculate = () => {
-                const amountStr = amountInput.value.replace(/\./g, '').replace(',', '.');
+                // Remove espaços, pontos (separadores de milhares) e converte vírgula em ponto
+                const amountStr = amountInput.value
+                    .replace(/\s/g, '')  // Remove espaços
+                    .replace(/\./g, '')  // Remove pontos (separador de milhares)
+                    .replace(',', '.');  // Converte vírgula decimal em ponto
                 const amount = parseFloat(amountStr);
                 const headerElement = document.getElementById('converter-header');
 
