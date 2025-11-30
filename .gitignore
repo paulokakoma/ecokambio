@@ -13,6 +13,11 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Temporary/Cache directories
+.clinic/
+storage/
+logs/
+
 # Vercel specific
 .vercel
 
