@@ -133,13 +133,17 @@ app.use(subdomainMiddleware);
 
 // API Routes
 app.use("/api", authRoutes);
-app.use("/api", isAdmin, adminRoutes);
 app.use("/api", publicRoutes);
 
-// Scraper API Routes
+// Scraper API Routes (Public)
 app.get("/api/scraper/health", scraperController.getHealth);
-app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
 app.get("/api/scraper/last-results", scraperController.getLastResults);
+
+// Scraper API Routes (Protected)
+app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
+
+// Admin API Routes (Protected)
+app.use("/api", isAdmin, adminRoutes);
 
 // Health Check
 app.get('/health', (req, res) => res.status(200).send('OK'));
