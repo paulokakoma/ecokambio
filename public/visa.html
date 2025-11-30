@@ -763,6 +763,7 @@
                     feeNotice.textContent = '';
                 }
 
+
                 const formatNumber = (num) => new Intl.NumberFormat('pt-AO', { // eslint-disable-line
                     style: 'currency',
                     currency: 'AOA',
@@ -770,9 +771,32 @@
                     maximumFractionDigits: 2
                 }).format(num);
 
+                const formattedResult = formatNumber(resultAmount);
                 resultDisplay.textContent = (resultAmount && isFinite(resultAmount))
-                    ? `≈ ${formatNumber(resultAmount)}`
+                    ? `≈ ${formattedResult}`
                     : 'Taxa indisponível';
+
+                // Ajusta o tamanho da fonte dinamicamente baseado no comprimento do texto
+                if (resultAmount && isFinite(resultAmount)) {
+                    const textLength = formattedResult.length;
+                    let fontSize;
+
+                    if (textLength <= 12) {
+                        fontSize = '3.75rem'; // 60px - valores pequenos
+                    } else if (textLength <= 15) {
+                        fontSize = '3rem'; // 48px - valores médios
+                    } else if (textLength <= 18) {
+                        fontSize = '2.5rem'; // 40px - valores grandes
+                    } else if (textLength <= 22) {
+                        fontSize = '2rem'; // 32px - valores muito grandes
+                    } else {
+                        fontSize = '1.5rem'; // 24px - valores enormes
+                    }
+
+                    resultDisplay.style.fontSize = fontSize;
+                } else {
+                    resultDisplay.style.fontSize = '2rem'; // Tamanho padrão para mensagens de erro
+                }
 
                 // Mostra "Você vai pagar" apenas quando há resultado válido
                 headerElement.style.display = (resultAmount && isFinite(resultAmount)) ? 'flex' : 'none';
