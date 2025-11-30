@@ -1,0 +1,12 @@
+# Ficheiros de configuração do Git
+.git
+.gitignore
+
+# Dependências locais que não devem ser copiadas para a imagem
+node_modules
+
+# Ficheiros de ambiente (devem ser geridos fora da imagem)
+.env
+
+# Logs e ficheiros de depuração
+npm-debug.log
