@@ -703,12 +703,28 @@
                 });
             };
 
+
             // Aplica máscara ao digitar
             amountInput.addEventListener('input', (e) => {
                 const cursorPosition = e.target.selectionStart;
                 const oldLength = e.target.value.length;
 
-                e.target.value = formatCurrencyInput(e.target.value);
+                // Formata o valor
+                let formattedValue = formatCurrencyInput(e.target.value);
+
+                // Verifica se excede o máximo (5.000.000)
+                const maxAmount = 5000000;
+                const numericValue = parseFloat(formattedValue.replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+
+                if (!isNaN(numericValue) && numericValue > maxAmount) {
+                    // Trunca para o valor máximo
+                    formattedValue = maxAmount.toLocaleString('pt-AO', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+
+                e.target.value = formattedValue;
 
                 // Ajusta posição do cursor
                 const newLength = e.target.value.length;
