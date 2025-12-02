@@ -1,0 +1,6 @@
+{
+  "watch": ["src/", "private/", "server.js"],
+  "ext": "js,json,html",
+  "ignore": ["public/css/output.css", "public/exchange_rates.json", "sessions/*"],
+  "exec": "node server.js"
+}

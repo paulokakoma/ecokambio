@@ -143,7 +143,20 @@ app.use("/api", isAdmin, adminRoutes);
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // View Routes - handles subdomain routing
-app.use('/', viewRoutes);
+// A lógica de servir os ficheiros principais (index.html vs admin.html)
+// é movida diretamente para cá para ser mais explícita e segura.
+app.get('*', (req, res, next) => {
+    // Se for uma rota de API, ignora e passa para o próximo handler (404)
+    if (req.path.startsWith('/api/')) {
+        return next();
+    }
+
+    if (req.isAdmin) {
+        res.sendFile(path.join(__dirname, 'private', 'admin.html'));
+    } else {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+});
 
 // 404 Handler - Catch all unhandled requests
 app.use((req, res, next) => {

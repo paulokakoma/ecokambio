@@ -1,0 +1,60 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Use a versão do Node.js compatível com o seu projeto
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Tailwind CSS
+        run: npm run build:css
+
+      - name: Create .env file for Production
+        run: echo "${{ secrets.ENV_FILE_PRODUCTION }}" > .env
+        shell: bash
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            # Navega para a pasta de deploy
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            # Coloca a aplicação em modo de manutenção (opcional, mas recomendado)
+            # pm2 stop ecokambio-server || true
+
+            # Sincroniza os ficheiros da aplicação
+            # O rsync é eficiente, pois só copia os ficheiros alterados.
+            rsync -avz --delete --exclude '.git' --exclude 'node_modules' --exclude 'sessions/' --exclude '.github/' /home/runner/work/ecokambio/ecokambio/ .
+
+            # Instala apenas as dependências de produção
+            npm install --production
+
+            # Reinicia a aplicação com PM2
+            # O PM2 irá ler o ecosystem.config.js para configurar o processo.
+            pm2 restart ecokambio-server --update-env
+
+            # Limpa builds antigos do PM2 (opcional)
+            pm2 flush
+            pm2 save

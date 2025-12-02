@@ -1,0 +1,9 @@
+{
+	"id": "Kr2ITdmb2XJiqPn",
+	"json": "{\"id\":\"Kr2ITdmb2XJiqPn\",\"url\":\"https://bancobai.ao/pt/cambios-e-valores\",\"loadedUrl\":\"https://bancobai.ao/pt/cambios-e-valores\",\"uniqueKey\":\"https://bancobai.ao/pt/cambios-e-valores\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BAI\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-12-02T18:41:49.455Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://bancobai.ao/pt/cambios-e-valores",
+	"url": "https://bancobai.ao/pt/cambios-e-valores"
+}

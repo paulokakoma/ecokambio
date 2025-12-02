@@ -1445,7 +1445,7 @@
                             ${eurRate > 0 ? eurRate.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 }) : '-'}
                         </span>
                     </td>
-                    <td class="border-b border-slate-200 px-4 py-3 text-sm text-slate-600">
+                    <td class="px-6 py-4">
                         <span class="inline-block min-w-[150px] px-2 text-slate-500" data-field="last_updated" data-provider-id="${bank.id}">
                             ${bank.last_updated ? new Date(bank.last_updated).toLocaleString('pt-PT', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                         </span>
