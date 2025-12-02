@@ -11,15 +11,29 @@
     <meta name="keywords"
         content="cambio angola, dolar kwanza, euro kwanza, ecokambio, divisas angola, taxas de cambio, mercado informal, kinguilas, preço do dolar hoje angola">
 
-    <!-- Google AdSense -->
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="mKkaUaIb7qgtdmOu_NnH2BqK6sUMVnhk6JPAcmNfEpA" />
+
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-N88ZM46F');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google AdSense - Deferred for performance -->
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
+    <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
         crossorigin="anonymous"></script>
-    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    <script defer custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
     </script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GL04FWDNFV"></script>
+    <!-- Google tag (gtag.js) - Deferred for performance -->
+    <script defer src="https://www.googletagmanager.com/gtag/js?id=G-GL04FWDNFV"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -145,12 +159,18 @@
         <link rel="stylesheet" href="/css/output.css">
     </noscript>
 
+    <!-- Preconnect to critical third-party origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-        as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://drkjkkpzujwnkghtdokz.supabase.co" />
+
+    <!-- Load fonts with display=swap to prevent layout shift -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
+
+    <!-- Defer Supabase client loading -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --theme-color: #19b57f;
@@ -563,23 +583,32 @@
 </head>
 
 <body class="min-h-screen">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N88ZM46F" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-7407113762962919">
     </amp-auto-ads>
 
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
-                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56" height="56"
-                    class="h-12 md:h-14 w-auto">
+                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56"
+                    height="56" class="h-12 md:h-14 w-auto">
                 <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
             </a>
             <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
                 <a href="/visa" id="header-visa-btn"
                     class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
                     title="Adquira já o seu cartão Visa">
-                    <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127" height="80"
-                        class="h-14 md:h-20 w-auto rounded-md shadow-md" style="aspect-ratio: 127/80;">
-                    <span class="text-xs md:text-sm font-bold text-emerald-600 mt-1">Adquira já o teu Visa</span>
+                    <picture>
+                        <source srcset="/assets/visa.webp" type="image/webp">
+                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127"
+                            height="80" class="h-14 md:h-20 w-auto rounded-md shadow-md" style="aspect-ratio: 127/80;"
+                            fetchpriority="high">
+                    </picture>
+                    <span class="text-xs md:text-sm font-bold text-emerald-700 mt-1">Adquira já o teu Visa</span>
                 </a>
             </nav>
         </div>
@@ -590,19 +619,22 @@
             <div class="grid grid-cols-2 gap-4 rounded-3xl bg-white shadow-md p-3" role="tablist">
                 <button
                     class="tab-button tab-active rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
-                    id="market-tab" type="button" role="tab">🏦 Mercado</button>
+                    id="market-tab" type="button" role="tab" aria-label="Ver taxas de câmbio do mercado">🏦
+                    Mercado</button>
                 <button
                     class="tab-button tab-inactive rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
-                    id="calculator-tab" type="button" role="tab">🧮 Calculadora</button>
+                    id="calculator-tab" type="button" role="tab"
+                    aria-label="Abrir calculadora de custos de importação">🧮 Calculadora</button>
             </div>
         </div>
         <section id="myTabContent">
             <div id="market-panel" role="tabpanel">
                 <div class="mb-8 flex justify-center">
                     <div class="flex space-x-2 bg-gray-200 p-2 rounded-full" role="tablist">
-                        <button id="formal-market-tab-btn" role="tab"
+                        <button id="formal-market-tab-btn" role="tab" aria-label="Ver taxas do mercado formal (bancos)"
                             class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Formal</button>
                         <button id="informal-market-tab-btn" role="tab"
+                            aria-label="Ver taxas do mercado informal (kinguilas)"
                             class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Informal</button>
                     </div>
                 </div>
@@ -862,7 +894,8 @@
                         <div id="supporter-slides-wrapper"
                             class="flex h-full transition-transform duration-700 ease-in-out">
                             <!-- Skeleton Loader -->
-                            <div id="supporter-skeleton" class="supporter-slide flex-shrink-0 w-full h-full flex items-center justify-center">
+                            <div id="supporter-skeleton"
+                                class="supporter-slide flex-shrink-0 w-full h-full flex items-center justify-center">
                                 <div class="skeleton h-full w-full animate-pulse"></div>
                             </div>
                         </div>
@@ -1080,15 +1113,15 @@
                     return `
                         <div class="p-4 rounded-xl border-l-4 border-theme-${themeCode} bg-theme-${themeCode}-faded shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full fade-in">
                             <div>
-                                <p class="font-bold text-lg text-gray-800">${bank.code}</p><p class="text-xs text-gray-500">${bank.name}</p>
+                                <p class="font-bold text-lg text-gray-800">${bank.code}</p><p class="text-xs text-gray-600">${bank.name}</p>
                                 <div class="space-y-4 mt-4">
                                     <div>
                                         <div class="flex justify-between items-baseline"><span class="text-sm font-semibold text-gray-600">${currencyFlags.USD} USD/AOA</span><span class="text-lg font-bold text-theme-${themeCode} font-mono">${formatNumber(bank.usd_rate)}</span></div>
-                                        <p class="text-xs text-gray-500 text-right">100 USD ≈ ${usd_equivalence} AOA</p>
+                                        <p class="text-xs text-gray-600 text-right">100 USD ≈ ${usd_equivalence} AOA</p>
                                     </div>
                                     <div class="pt-3 border-t border-gray-100">
                                         <div class="flex justify-between items-baseline"><span class="text-sm font-semibold text-gray-600">${currencyFlags.EUR} EUR/AOA</span><span class="text-lg font-bold text-theme-${themeCode} font-mono">${formatNumber(bank.eur_rate)}</span></div>
-                                        <p class="text-xs text-gray-500 text-right">100 EUR ≈ ${eur_equivalence} AOA</p>
+                                        <p class="text-xs text-gray-600 text-right">100 EUR ≈ ${eur_equivalence} AOA</p>
                                     </div>
                                 </div>
                             </div>
@@ -1154,16 +1187,16 @@
                         const equivalence = formatNumber(100 * item.rate);
                         return `
                             <div class="bg-gray-50 border border-gray-200 p-4 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 fade-in">
-                                <p class="text-sm text-gray-500 font-bold">${fromFlag} ${from} / ${toFlag} ${to}</p>
+                                <p class="text-sm text-gray-600 font-bold">${fromFlag} ${from} / ${toFlag} ${to}</p>
                                 <p class="text-2xl font-bold text-gray-800 mt-1">${formatNumber(item.rate)}</p>
                                 <div class="mt-3 pt-3 border-t border-gray-200">
-                                    <p class="text-xs text-gray-500">100 ${from} <span class="font-semibold">≈</span> ${equivalence} ${to}</p>
+                                    <p class="text-xs text-gray-600">100 ${from} <span class="font-semibold">≈</span> ${equivalence} ${to}</p>
                                 </div>
                             </div>`;
                     }
                     return `
                             <div class="bg-gray-50 border border-gray-200 p-4 rounded-xl opacity-60 fade-in">
-                                <p class="text-sm text-gray-500 font-bold">${fromFlag} ${from} / ${toFlag} ${to}</p>
+                                <p class="text-sm text-gray-600 font-bold">${fromFlag} ${from} / ${toFlag} ${to}</p>
                                 <p class="text-2xl font-bold text-gray-400 mt-1">N/A</p>
                                 <div class="mt-3 pt-3 border-t border-gray-200">
                                     <p class="text-xs text-gray-400">Dados indisponíveis</p>
@@ -1444,7 +1477,7 @@
             function toggleDropdown() { bankOptionsPanel.classList.toggle('hidden'); dropdownArrow.classList.toggle('rotate-180'); }
 
             function populateBankSelector(banks) {
-                if (!banks || banks.length === 0) return '<div class="px-4 py-3 text-sm text-gray-500">Nenhum banco disponível.</div>';
+                if (!banks || banks.length === 0) return '<div class="px-4 py-3 text-sm text-gray-600">Nenhum banco disponível.</div>';
                 return banks.sort((a, b) => a.code.localeCompare(b.code)).map(bank =>
                     `<div class="bank-option px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-800 text-sm" data-code="${bank.code}" data-usd-rate="${bank.usd_rate}" data-eur-rate="${bank.eur_rate}" data-fee-margin="${bank.fee_margin}" data-fee-final="${bank.fee_final}"><span class="font-bold">${bank.code}</span></div>`
                 ).join('');

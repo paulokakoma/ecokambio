@@ -92,12 +92,41 @@ app.use(session({
     }
 }));
 
-// Static Files with Caching
-const staticOptions = {
+// Static Files with Optimized Caching Strategy
+// Images: 1 year (immutable, versioned by filename)
+// CSS/JS: 7 days (can change with updates)
+// HTML: no-cache (always get fresh content)
+
+// Serve images with long-term caching
+app.use('/assets', express.static(path.join(__dirname, 'public/assets'), {
     index: false,
-    maxAge: '1d', // Cache static files for 1 day
-    etag: true
-};
+    maxAge: '365d', // 1 year
+    immutable: true,
+    etag: true,
+    setHeaders: (res, filepath) => {
+        // Images are immutable and can be cached for a long time
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+}));
+
+// Serve CSS and JS with medium-term caching
+app.use('/css', express.static(path.join(__dirname, 'public/css'), {
+    index: false,
+    maxAge: '7d',
+    etag: true,
+    setHeaders: (res, filepath) => {
+        res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+    }
+}));
+
+app.use('/js', express.static(path.join(__dirname, 'public/js'), {
+    index: false,
+    maxAge: '7d',
+    etag: true,
+    setHeaders: (res, filepath) => {
+        res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+    }
+}));
 
 // Disable cache for exchange_rates.json to always get fresh data
 app.get('/exchange_rates.json', (req, res, next) => {
@@ -110,8 +139,15 @@ app.get('/exchange_rates.json', (req, res, next) => {
     next();
 });
 
-app.use(express.static("public", staticOptions));
-app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), staticOptions));
+// Serve other static files with default caching
+const defaultStaticOptions = {
+    index: false,
+    maxAge: '1d',
+    etag: true
+};
+
+app.use(express.static("public", defaultStaticOptions));
+app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), defaultStaticOptions));
 
 // Rota para a página "Sobre"
 app.get('/sobre', (req, res) => {

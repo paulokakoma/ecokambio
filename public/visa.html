@@ -4,14 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="mKkaUaIb7qgtdmOu_NnH2BqK6sUMVnhk6JPAcmNfEpA" />
+
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-N88ZM46F');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google AdSense - Deferred for performance -->
+    <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
         crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
-        crossorigin="anonymous"></script>
-    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
-    <meta name="google-adsense-account" content="ca-pub-7407113762962919">
+    <script defer custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
     <title>Adquira o seu Cartão Visa Virtual - EcoKambio</title>
     <meta name="description"
         content="Adquira já o seu cartão Visa virtual para compras online e pagamentos de serviços internacionais. Rápido, seguro e com carregamento mínimo acessível.">
@@ -66,9 +77,13 @@
     <!-- Tailwind CSS (Build) -->
     <link href="/css/output.css" rel="stylesheet">
 
-    <!-- Fontes -->
+    <!-- Preconnect to critical third-party origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://drkjkkpzujwnkghtdokz.supabase.co">
+
+    <!-- Load fonts with display=swap to prevent layout shift -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -243,23 +258,31 @@
 </head>
 
 <body class="min-h-screen flex flex-col antialiased">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N88ZM46F" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-7407113762962919">
     </amp-auto-ads>
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
-                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola"
-                    class="h-12 md:h-14 w-auto">
-                <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
+                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56"
+                    height="56" class="h-12 md:h-14 w-auto">
+                <span class="text-lg md:text-xl font-bold text-emerald-700">EcoKambio</span>
             </a>
             <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
                 <a href="/visa" id="header-visa-btn"
                     class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
                     title="Adquira já o seu cartão Visa">
-                    <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online"
-                        class="h-14 md:h-20 rounded-md shadow-md">
-                    <span class="text-xs md:text-sm font-bold text-emerald-600 mt-1">Adquira já o teu Visa</span>
+                    <picture>
+                        <source srcset="/assets/visa.webp" type="image/webp">
+                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127"
+                            height="80" class="h-14 md:h-20 rounded-md shadow-md">
+                    </picture>
+                    <span class="text-xs md:text-sm font-bold text-emerald-700 mt-1">Adquira já o teu Visa</span>
                 </a>
             </nav>
         </div>
@@ -281,8 +304,11 @@
                 <div class="space-y-6 fade-in-up" style="animation-delay: 0.2s">
                     <!-- Imagem do Cartão -->
                     <div class="flex justify-center items-center">
-                        <img id="visa-image" src="/assets/visa.png" alt="Cartão Visa Virtual"
-                            class="max-w-md w-full rounded-2xl shadow-2xl float-animation">
+                        <picture>
+                            <source srcset="/assets/visa.webp" type="image/webp">
+                            <img id="visa-image" src="/assets/visa.png" alt="Cartão Visa Virtual" width="480"
+                                height="300" class="max-w-md w-full rounded-2xl shadow-2xl float-animation">
+                        </picture>
                     </div>
 
                     <!-- CTA Section: Info box + Button + Terms -->
@@ -647,9 +673,9 @@
 
     <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8"></footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/components.js"></script>
+    <!-- Scripts - Deferred for performance -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="/js/components.js"></script>
     <script type="module">
         async function loadVisaPageData() {
             let informalRates = { usd_rate: 0, eur_rate: 0 };
