@@ -8,8 +8,10 @@ router.get("/login", viewController.serveLogin);
 router.get("/admin", viewController.serveAdmin);
 router.get(config.admin.secretPath, viewController.serveAdminSecret);
 router.get("/sobre", viewController.serveAbout);
+router.get("/sobre-nos", viewController.serveAbout); // Alias
 router.get("/visa", viewController.serveVisa);
 router.get("/termos", viewController.serveTerms);
+router.get("/termos-e-condicoes", viewController.serveTerms); // Alias
 router.get("/privacidade", viewController.servePrivacy);
 router.get("/fundadores", viewController.serveFounders);
 router.get("/robots.txt", viewController.serveRobots);

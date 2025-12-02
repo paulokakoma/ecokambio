@@ -113,6 +113,14 @@ app.get('/exchange_rates.json', (req, res, next) => {
 app.use(express.static("public", staticOptions));
 app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), staticOptions));
 
+// Rota para a página "Sobre"
+app.get('/sobre', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sobre.html'));
+});
+
+// View Routes - handles all page rendering
+app.use('/', viewRoutes);
+
 // API Route for Frontend Configuration
 // Esta rota fornece as chaves públicas necessárias para o frontend inicializar o Supabase.
 app.get('/api/config', (req, res) => {
@@ -126,15 +134,15 @@ app.get('/api/config', (req, res) => {
 app.use(subdomainMiddleware);
 
 // API Routes
-app.use("/api", authRoutes);
-app.use("/api", publicRoutes);
+app.use("/api", authRoutes); // Contém /login, /logout, etc. Não deve ter `isAdmin` aqui.
+app.use("/api", publicRoutes); // Rotas públicas, sem `isAdmin`.
 
 // Scraper API Routes (Public)
 app.get("/api/scraper/health", scraperController.getHealth);
 app.get("/api/scraper/last-results", scraperController.getLastResults);
 
 // Scraper API Routes (Protected)
-app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
+app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // Protegida
 
 // Admin API Routes (Protected)
 app.use("/api", isAdmin, adminRoutes);
@@ -151,7 +159,12 @@ app.get('*', (req, res, next) => {
         return next();
     }
 
-    if (req.isAdmin) {
+    if (req.isAdminSubdomain) {
+        // Se for subdomínio de admin, verifica se está logado.
+        // Se não estiver e não for a página de login, redireciona.
+        if (!req.session.user && req.path !== '/login.html') {
+            return res.redirect('/login.html');
+        }
         res.sendFile(path.join(__dirname, 'private', 'admin.html'));
     } else {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
