@@ -81,6 +81,13 @@ const servePrivacy = (req, res) => {
     res.sendFile(path.join(__dirname, "../../public", "privacidade.html"));
 };
 
+const serveFounders = (req, res) => {
+    if (req.isAdminSubdomain) {
+        return res.status(404).send('Página não encontrada');
+    }
+    res.sendFile(path.join(__dirname, "../../public", "fundadores.html"));
+};
+
 const serveRobots = (req, res) => {
     res.type('text/plain');
     res.sendFile(path.join(__dirname, "../../public", "robots.txt"));
@@ -158,5 +165,6 @@ module.exports = {
     serveRobots,
     serveSitemap,
     serveBingAuth,
-    serveYandexAuth
+    serveYandexAuth,
+    serveFounders
 };

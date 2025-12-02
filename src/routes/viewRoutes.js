@@ -11,6 +11,7 @@ router.get("/sobre", viewController.serveAbout);
 router.get("/visa", viewController.serveVisa);
 router.get("/termos", viewController.serveTerms);
 router.get("/privacidade", viewController.servePrivacy);
+router.get("/fundadores", viewController.serveFounders);
 router.get("/robots.txt", viewController.serveRobots);
 router.get("/sitemap.xml", viewController.serveSitemap);
 router.get("/BingSiteAuth.xml", viewController.serveBingAuth);
