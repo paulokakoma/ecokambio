@@ -6,13 +6,20 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const requiredVars = [
     'SUPABASE_URL',
-    'SUPABASE_SERVICE_KEY',
     'SUPABASE_ANON_KEY',
     'ADMIN_PASSWORD_HASH',
     'SESSION_SECRET'
 ];
 
-const missingVars = requiredVars.filter(key => !process.env[key]);
+// Check for either service key
+if (!process.env.SUPABASE_SERVICE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    requiredVars.push('SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY)');
+}
+
+const missingVars = requiredVars.filter(key => {
+    if (key.includes(' (or ')) return false; // Already checked manually above
+    return !process.env[key];
+});
 
 if (missingVars.length > 0) {
     console.error(`Erro: Variáveis de ambiente em falta: ${missingVars.join(', ')}`);
@@ -25,7 +32,7 @@ module.exports = {
     isDevelopment: process.env.NODE_ENV !== 'production',
     supabase: {
         url: process.env.SUPABASE_URL,
-        serviceKey: process.env.SUPABASE_SERVICE_KEY,
+        serviceKey: process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
         anonKey: process.env.SUPABASE_ANON_KEY
     },
     admin: {

@@ -1,0 +1,53 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set password "1234"
+
+puts "\n🚀 Deploy COMPLETO - EcoKambio\n"
+
+# Upload server.js
+puts "📦 1/4 - Enviando server.js..."
+spawn scp -o StrictHostKeyChecking=no server.js root@212.90.120.135:/root/ecokambio-main/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+    timeout {
+        puts "Timeout em server.js"
+        exit 1
+    }
+}
+
+# Upload src/config/env.js
+puts "📦 2/4 - Enviando src/config/env.js..."
+spawn scp -o StrictHostKeyChecking=no src/config/env.js root@212.90.120.135:/root/ecokambio-main/src/config/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload public folder (recursive)
+puts "📦 3/4 - Enviando pasta public/ (CSS, HTML, Assets)..."
+spawn scp -r -o StrictHostKeyChecking=no public/ root@212.90.120.135:/root/ecokambio-main/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Restart PM2
+puts "\n🔄 4/4 - Reiniciando PM2..."
+spawn ssh -o StrictHostKeyChecking=no root@212.90.120.135 "cd /root/ecokambio-main && pm2 restart all"
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+puts "\n✅ Deploy COMPLETO concluído com sucesso!"
+puts "🌐 Verifique: https://ecokambio.com\n"

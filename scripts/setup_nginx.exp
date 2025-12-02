@@ -1,0 +1,57 @@
+#!/usr/bin/expect -f
+
+#######################################################################
+# Script Expect - Configuração Nginx Automatizada
+# Configura o Nginx no servidor Contabo
+#######################################################################
+
+set timeout 300
+set server_ip "212.90.120.135"
+set server_user "root"
+set server_pass "1234"
+
+puts "════════════════════════════════════════════════════════"
+puts " ⚙️  Configurando Nginx no Servidor"
+puts "════════════════════════════════════════════════════════\n"
+
+# Upload da configuração Nginx HTTP
+puts "📤 Fazendo upload da configuração Nginx...\n"
+spawn scp nginx_contabo_http.conf $server_user@$server_ip:/etc/nginx/sites-available/ecokambio
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    "yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n✅ Configuração enviada\n"
+
+# Ativar site e recarregar Nginx
+puts "🔧 Ativando site no Nginx...\n"
+spawn ssh $server_user@$server_ip {
+    ln -sf /etc/nginx/sites-available/ecokambio /etc/nginx/sites-enabled/ && \
+    rm -f /etc/nginx/sites-enabled/default && \
+    nginx -t && \
+    systemctl reload nginx && \
+    systemctl status nginx
+}
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n════════════════════════════════════════════════════════"
+puts " ✅ Nginx configurado com sucesso!"
+puts "════════════════════════════════════════════════════════\n"
+puts "🌐 Teste: http://ecokambio.com"
+puts "🌐 Ou: http://$server_ip\n"
+puts "📝 Próximo passo: Instalar SSL"
+puts "    Execute: expect scripts/install_ssl.exp\n"

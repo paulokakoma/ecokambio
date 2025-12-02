@@ -35,11 +35,33 @@
     <meta property="twitter:image" content="https://ecokambio.com/assets/social-share-banner.png">
 
     <!-- Favicons e Manifest -->
-    <link rel="canonical" href="https://ecokambio.com/visa.html" />
+    <link rel="canonical" href="https://ecokambio.com/visa" />
     <link rel="icon" href="/assets/favicon.ico" sizes="any">
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Cartão Visa Virtual",
+      "description": "Cartão Visa virtual pré-pago para compras online e pagamentos de serviços internacionais. Ativação rápida, 100% digital.",
+      "brand": {
+        "@type": "Brand",
+        "name": "EcoKambio"
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "USD",
+        "price": "5.00",
+        "availability": "https://schema.org/InStock",
+        "url": "https://ecokambio.com/visa"
+      },
+      "image": "https://ecokambio.com/assets/visa.png"
+    }
+    </script>
 
     <!-- Tailwind CSS (Build) -->
     <link href="/css/output.css" rel="stylesheet">
@@ -227,14 +249,16 @@
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
-                <img src="/assets/main-logo.svg" alt="EcoKambio Logo" class="h-12 md:h-14 w-auto">
+                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola"
+                    class="h-12 md:h-14 w-auto">
                 <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
             </a>
             <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
                 <a href="/visa" id="header-visa-btn"
                     class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
                     title="Adquira já o seu cartão Visa">
-                    <img src="/assets/visa.png" alt="Visa" class="h-14 md:h-20 rounded-md shadow-md">
+                    <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online"
+                        class="h-14 md:h-20 rounded-md shadow-md">
                     <span class="text-xs md:text-sm font-bold text-emerald-600 mt-1">Adquira já o teu Visa</span>
                 </a>
             </nav>

@@ -1,0 +1,96 @@
+#!/usr/bin/expect -f
+
+#######################################################################
+# Script Expect - Deploy Automatizado
+# Faz deploy completo da aplicação para o servidor Contabo
+#######################################################################
+
+set timeout 600
+set server_ip "212.90.120.135"
+set server_user "root"
+set server_pass "1234"
+set server_path "/var/www/ecokambio"
+set local_path [pwd]
+
+puts "════════════════════════════════════════════════════════"
+puts " 🚀 Deploy Automatizado - EcoKambio → Contabo"
+puts "════════════════════════════════════════════════════════\n"
+puts "📍 Servidor: $server_user@$server_ip"
+puts "📁 Destino: $server_path\n"
+
+# Fazer backup primeiro
+puts "💾 Fazendo backup no servidor...\n"
+spawn ssh $server_user@$server_ip "cd $server_path 2>/dev/null && bash scripts/backup.sh || echo 'Primeiro deploy, sem backup'"
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n⬆️  Fazendo upload dos arquivos...\n"
+
+# Upload via rsync
+spawn rsync -avz --progress \
+    --exclude=node_modules/ \
+    --exclude=.git/ \
+    --exclude=.DS_Store \
+    --exclude=logs/ \
+    --exclude=sessions/ \
+    --exclude=*.log \
+    --exclude=.env \
+    --delete \
+    $local_path/ $server_user@$server_ip:$server_path/
+
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    "yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n✅ Upload concluído\n"
+
+# Instalar dependências e build
+puts "⚙️  Instalando dependências...\n"
+spawn ssh $server_user@$server_ip "cd $server_path && npm install --production && npm run build:prod"
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n🔄 Reiniciando aplicação...\n"
+spawn ssh $server_user@$server_ip "pm2 restart ecokambio || pm2 start $server_path/server.js --name ecokambio"
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    eof
+}
+
+# Mostrar status
+puts "\n📊 Status do servidor:\n"
+spawn ssh $server_user@$server_ip "pm2 status"
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n════════════════════════════════════════════════════════"
+puts " ✅ Deploy concluído com sucesso!"
+puts "════════════════════════════════════════════════════════\n"
+puts "🌐 Acesse: http://$server_ip:3000"
+puts "📝 Ver logs: ssh $server_user@$server_ip 'pm2 logs ecokambio'\n"

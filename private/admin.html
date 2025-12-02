@@ -1437,12 +1437,12 @@
                     </td>
                     <td class="px-6 py-4">
                         <span class="editable-cell inline-block min-w-[100px] px-2" data-field="sell_rate" data-pair="USD/AOA" data-provider-id="${bank.id}">
-                            ${usdRate > 0 ? usdRate.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 }) : '-'}
+                            ${usdRate > 0 ? usdRate.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 }) : '-'}
                         </span>
                     </td>
                     <td class="px-6 py-4">
                         <span class="editable-cell inline-block min-w-[100px] px-2" data-field="sell_rate" data-pair="EUR/AOA" data-provider-id="${bank.id}">
-                            ${eurRate > 0 ? eurRate.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 }) : '-'}
+                            ${eurRate > 0 ? eurRate.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 }) : '-'}
                         </span>
                     </td>
                     <td class="border-b border-slate-200 px-4 py-3 text-sm text-slate-600">
@@ -1452,12 +1452,12 @@
                     </td>
                     <td class="px-6 py-4">
                         <span class="editable-cell inline-block min-w-[80px] px-2" data-field="fee_margin" data-provider-id="${bank.id}">
-                            ${commission.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%
+                            ${commission.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%
                         </span>
                     </td>
                     <td class="px-6 py-4">
                         <span class="editable-cell inline-block min-w-[80px] px-2" data-field="base_fee_percent" data-provider-id="${bank.id}">
-                            ${baseFee.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%
+                            ${baseFee.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%
                         </span>
                     </td>
                     <td class="px-6 py-4">
@@ -1546,7 +1546,7 @@
             let content = `<div class="relative w-full max-w-sm mx-auto"><div class="absolute -top-10 right-0 flex items-center space-x-2"><button class="edit-province-btn p-1 text-slate-400 hover:text-indigo-600" data-id="${provider.id}" data-name="${provider.name}" title="Editar Nome"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg></button><button class="delete-province-btn p-1 text-slate-400 hover:text-red-500" data-id="${provider.id}" data-name="${provider.name}" title="Apagar Província"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div><form id="informal-form" data-provider-id="${provider.id}" class="space-y-4">`;
             requiredPairs.forEach(pair => {
                 const existingRate = provider.exchange_rates.find(r => r.currency_pair === pair);
-                content += `<div><label class="block text-sm font-medium text-gray-700">${pair}</label><input type="text" data-rate-id="${existingRate?.id || ''}" data-pair="${pair}" value="${String(existingRate?.sell_rate || 0).replace('.', ',')}" class="mt-1" inputmode="decimal"></div>`;
+                content += `<div><label class="block text-sm font-medium text-gray-700">${pair}</label><input type="text" data-rate-id="${existingRate?.id || ''}" data-pair="${pair}" value="${(existingRate?.sell_rate || 0).toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}" class="mt-1" inputmode="decimal"></div>`;
             });
             content += `<div class="flex items-center space-x-4 pt-2"><button type="submit" class="btn-primary">Guardar Taxas</button></div></form></div>`;
             contentContainer.innerHTML = content;
@@ -2977,7 +2977,7 @@
 
             // Formata o valor para o input usando vírgula (pt-PT)
             if (!isNaN(originalNumber) && originalNumber !== 0) {
-                input.value = originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 });
+                input.value = originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 });
             } else {
                 input.value = '0,00';
             }
@@ -2994,10 +2994,10 @@
                 // Validar se o valor mudou
                 if (isNaN(newValue) || newValue === originalNumber) {
                     if (isCommission) {
-                        cell.textContent = `${originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
+                        cell.textContent = `${originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
                     } else {
                         cell.textContent = originalNumber > 0
-                            ? originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+                            ? originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })
                             : '-';
                     }
                     return;
@@ -3010,10 +3010,10 @@
 
                     // Atualizar o texto da célula com formatação apropriada
                     if (isCommission) {
-                        cell.textContent = `${newValue.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
+                        cell.textContent = `${newValue.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
                     } else {
                         cell.textContent = newValue > 0
-                            ? newValue.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+                            ? newValue.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })
                             : '-';
                     }
 
@@ -3022,10 +3022,10 @@
                 } catch (error) {
                     // Restaurar valor original em caso de erro
                     if (isCommission) {
-                        cell.textContent = `${originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
+                        cell.textContent = `${originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
                     } else {
                         cell.textContent = originalNumber > 0
-                            ? originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+                            ? originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })
                             : '-';
                     }
                 }
@@ -3033,10 +3033,10 @@
 
             const cancelEdit = () => {
                 if (isCommission) {
-                    cell.textContent = `${originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
+                    cell.textContent = `${originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}%`;
                 } else {
                     cell.textContent = originalNumber > 0
-                        ? originalNumber.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 8 })
+                        ? originalNumber.toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })
                         : '-';
                 }
             };

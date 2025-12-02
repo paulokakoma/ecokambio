@@ -1,0 +1,53 @@
+#!/usr/bin/expect -f
+
+# Deploy individual SEO files to Contabo VPS
+set timeout 60
+set server "212.90.120.135"
+set user "root"
+set password "1234"
+set remote_path "/root/ecokambio-main/public"
+
+puts "📦 Enviando index.html..."
+spawn scp public/index.html ${user}@${server}:${remote_path}/
+expect {
+    "password:" { send "$password\r" }
+    "yes/no" { send "yes\r"; exp_continue }
+}
+expect eof
+
+puts "📦 Enviando sitemap.xml..."
+spawn scp public/sitemap.xml ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "📦 Enviando about.html..."
+spawn scp public/about.html ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "📦 Enviando visa.html..."
+spawn scp public/visa.html ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "📦 Enviando details.html..."
+spawn scp public/details.html ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "📦 Enviando termos.html..."
+spawn scp public/termos.html ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "📦 Enviando privacidade.html..."
+spawn scp public/privacidade.html ${user}@${server}:${remote_path}/
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "🔄 Reiniciando PM2..."
+spawn ssh ${user}@${server} "pm2 restart ecosystem.config.js"
+expect "password:" { send "$password\r" }
+expect eof
+
+puts "\n✅ Deploy completo! Aguarde 10 segundos e verifique https://ecokambio.com"

@@ -1,0 +1,42 @@
+#!/usr/bin/expect -f
+
+# Deploy SEO updates to Contabo VPS
+set timeout 60
+set server "212.90.120.135"
+set user "root"
+set password "1234"
+set remote_path "/root/ecokambio-main"
+
+# Sync public folder (SEO changes)
+spawn rsync -avz --exclude 'node_modules' \
+    public/index.html \
+    public/about.html \
+    public/visa.html \
+    public/privacidade.html \
+    public/termos.html \
+    public/details.html \
+    public/sitemap.xml \
+    ${user}@${server}:${remote_path}/public/
+
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    "yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}
+
+# Restart PM2
+spawn ssh ${user}@${server} "cd ${remote_path} && pm2 restart ecosystem.config.js"
+expect {
+    "password:" {
+        send "$password\r"
+    }
+}
+
+expect eof
+puts "\n✅ Deploy concluído!"

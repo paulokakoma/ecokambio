@@ -1,0 +1,9 @@
+cd /root/ecokambio-main/public
+put public/index.html
+put public/sitemap.xml
+put public/about.html
+put public/visa.html
+put public/details.html
+put public/termos.html
+put public/privacidade.html
+bye

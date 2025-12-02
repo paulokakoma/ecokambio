@@ -14,27 +14,13 @@ const getRateProviders = async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('rate_providers')
-            .select('*, exchange_rates(currency_pair, sell_rate)')
+            .select('*, exchange_rates(currency_pair, sell_rate, updated_at)')
             .eq('type', type)
             .order('name', { ascending: true });
 
         if (error) throw error;
 
-        // Se for FORMAL, buscar dados do scraper para enriquecer/atualizar
-        let scrapedRates = [];
-        if (type === 'FORMAL') {
-            const { data: scraped, error: scrapeError } = await supabase
-                .from('scraper')
-                .select('*')
-                .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-                .order('created_at', { ascending: false });
-
-            if (!scrapeError && scraped) {
-                scrapedRates = scraped;
-            }
-        }
-
-        // Helper to parse rates with various locale formats and round to 2 decimals
+        // Helper to parse rates with various locale formats
         const parseRate = (value) => {
             if (value === null || value === undefined) return null;
 
@@ -45,61 +31,36 @@ const getRateProviders = async (req, res) => {
             if (!str) return null;
 
             // Logic to determine decimal vs thousand separator:
-            // - If both . and , are present, the LAST one is the decimal separator
-            // - Examples: "1,095.50" -> decimal is '.', "1.095,50" -> decimal is ','
             if (str.includes('.') && str.includes(',')) {
                 const lastDotIndex = str.lastIndexOf('.');
                 const lastCommaIndex = str.lastIndexOf(',');
 
                 if (lastDotIndex > lastCommaIndex) {
-                    // Dot is decimal, comma is thousand separator (e.g., "1,095.50")
                     str = str.replace(/,/g, '');
                 } else {
-                    // Comma is decimal, dot is thousand separator (e.g., "1.095,50")
                     str = str.replace(/\./g, '').replace(',', '.');
                 }
             } else if (str.includes(',')) {
-                // Only comma present - assume it's decimal separator
                 str = str.replace(',', '.');
             }
-            // If only dot present, it's already correct format
 
             const num = parseFloat(str);
             return isNaN(num) ? null : num;
         };
 
         const formattedData = data.map(provider => {
-            const rates = provider.exchange_rates;
+            const rates = provider.exchange_rates || [];
             let usdRate = parseRate(rates.find(r => r.currency_pair === 'USD/AOA')?.sell_rate);
             let eurRate = parseRate(rates.find(r => r.currency_pair === 'EUR/AOA')?.sell_rate);
             const usdtRate = parseRate(rates.find(r => r.currency_pair === 'USDT/AOA')?.sell_rate);
 
-            // Tentar encontrar dados do scraper para este banco
+            // Determine last_updated from the most recent rate update
             let lastUpdated = null;
-            if (type === 'FORMAL') {
-                // Normaliza o nome/código para comparação (ex: 'BAI' -> 'BAI')
-                const providerCode = provider.code ? provider.code.toUpperCase() : '';
-
-                // Encontrar a taxa mais recente para este banco
-                const bankRates = scrapedRates.filter(r =>
-                    r.bank && r.bank.toUpperCase() === providerCode
-                );
-
-                if (bankRates.length > 0) {
-                    // Pega a data mais recente deste grupo de taxas
-                    lastUpdated = bankRates[0].created_at;
-
-                    // Encontrar USD
-                    const usdScraped = bankRates.find(r => r.currency === 'USD');
-                    if (usdScraped && usdScraped.sell) {
-                        usdRate = parseRate(usdScraped.sell);
-                    }
-
-                    // Encontrar EUR
-                    const eurScraped = bankRates.find(r => r.currency === 'EUR');
-                    if (eurScraped && eurScraped.sell) {
-                        eurRate = parseRate(eurScraped.sell);
-                    }
+            if (rates.length > 0) {
+                // Sort by updated_at descending and take the first one
+                const sortedRates = [...rates].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+                if (sortedRates[0].updated_at) {
+                    lastUpdated = sortedRates[0].updated_at;
                 }
             }
 

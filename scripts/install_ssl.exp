@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+
+#######################################################################
+# Script Expect - Instalação SSL Automatizada
+# Instala certificado SSL via Certbot
+#######################################################################
+
+set timeout 300
+set server_ip "212.90.120.135"
+set server_user "root"
+set server_pass "1234"
+set domain "ecokambio.com"
+set email "admin@ecokambio.com"
+
+puts "════════════════════════════════════════════════════════"
+puts " 🔐 Instalando Certificado SSL (Let's Encrypt)"
+puts "════════════════════════════════════════════════════════\n"
+puts "📧 Email: $email"
+puts "🌐 Domínio: $domain, www.$domain\n"
+
+# Executar Certbot
+spawn ssh $server_user@$server_ip "certbot --nginx -d $domain -d www.$domain --non-interactive --agree-tos --email $email --redirect"
+
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    "Enter email address" {
+        send "$email\r"
+        exp_continue
+    }
+    "Please read the Terms of Service" {
+        send "Y\r"
+        exp_continue
+    }
+    "Would you be willing" {
+        send "N\r"
+        exp_continue
+    }
+    "Select the appropriate number" {
+        send "2\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n════════════════════════════════════════════════════════"
+puts " ✅ Certificado SSL instalado!"
+puts "════════════════════════════════════════════════════════\n"
+puts "🔒 Acesse: https://$domain"
+puts "🔒 Acesse: https://www.$domain\n"
+puts "📝 Certificados renovam automaticamente"
+puts "    Verifique: ssh $server_user@$server_ip 'certbot certificates'\n"

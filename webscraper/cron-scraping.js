@@ -159,14 +159,64 @@ const targets = [
     await crawler.run();
     console.log('✅ Puppeteer scraping completed');
 
+    // Helper function for bank-specific parsing
+    function parseRate(rateStr, bankLabel) {
+        if (!rateStr) return null;
+        let cleanStr = rateStr.trim();
+        try {
+            if (bankLabel === 'BAI') {
+                // BAI: "1.115,04560" -> 1115.04560 (European: dot thousands, comma decimal)
+                cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
+            } else if (bankLabel === 'BFA') {
+                // BFA: "957.122" -> 957.122 (US-like: dot decimal)
+                // No special replacement needed
+            } else if (bankLabel === 'BNA') {
+                // BNA: "911,545" or "1.055,843" (European: dot thousands, comma decimal)
+                cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
+            } else if (bankLabel === 'BIC') {
+                // BIC: "911.5450" (US-like: dot decimal)
+                // No special replacement needed
+            } else if (bankLabel === 'BCI') {
+                // BCI: Assume European if comma is present, otherwise US
+                if (cleanStr.includes(',') && !cleanStr.includes('.')) {
+                    cleanStr = cleanStr.replace(',', '.');
+                } else if (cleanStr.includes('.') && cleanStr.includes(',')) {
+                    cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
+                }
+            } else if (bankLabel === 'YETU') {
+                // YETU: "890,00" -> 890.00
+                cleanStr = cleanStr.replace(',', '.');
+            }
+            const rate = parseFloat(cleanStr);
+            return isNaN(rate) ? null : rate;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // Save results to public folder (Optional for Worker, but good for debugging/logs)
     try {
         const { items } = await Dataset.getData();
         const allRates = items.flat();
+
+        // Normalize rates for JSON output (User wants comma decimal: "911,00")
+        const normalizedRates = allRates.map(rate => {
+            const parsed = parseRate(rate.sell, rate.bank);
+            if (parsed !== null) {
+                // Format with comma decimal, preserve original precision if possible or default to string
+                // Using pt-AO locale to ensure comma decimal
+                return {
+                    ...rate,
+                    sell: parsed.toLocaleString('pt-AO', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 10 })
+                };
+            }
+            return rate; // Fallback to original if parsing fails
+        });
+
         // Note: In a Railway worker, this file won't persist to the web service, 
         // but we keep it for consistency with the original script.
         const outputPath = path.join(process.cwd(), 'public', 'exchange_rates.json');
-        const data = { lastUpdated: new Date().toISOString(), rates: allRates };
+        const data = { lastUpdated: new Date().toISOString(), rates: normalizedRates };
         await writeFile(outputPath, JSON.stringify(data, null, 2));
         console.log(`💾 Data saved to ${outputPath}`);
 
@@ -199,16 +249,18 @@ const targets = [
                 return;
             }
 
-            // Convert sell rate to float
-            const sellRate = parseFloat(rate.sell.replace(/\./g, '').replace(',', '.'));
-            if (isNaN(sellRate)) {
+            // Use specific parsing logic
+            const sellRate = parseRate(rate.sell, rate.bank);
+
+            if (sellRate === null) {
                 console.warn(`⚠️ Invalid rate for ${rate.bank} ${rate.currency}: ${rate.sell}`);
                 return;
             }
 
-            // Validation: Check for numeric overflow (max 10,000,000)
-            if (sellRate > 10000000) {
-                console.warn(`⚠️ Rate too high for ${rate.bank} ${rate.currency}: ${sellRate} (ignoring to prevent overflow)`);
+            // Validation: Check for numeric overflow (max 5,000)
+            // AOA rates are typically around 900-1200. Anything above 5000 is likely a parsing error (e.g. missing decimal).
+            if (sellRate > 5000) {
+                console.warn(`⚠️ Rate too high for ${rate.bank} ${rate.currency}: ${sellRate} (ignoring to prevent overflow/bad data)`);
                 return;
             }
 

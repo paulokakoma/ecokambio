@@ -1,0 +1,53 @@
+#!/usr/bin/expect -f
+
+#######################################################################
+# Script Expect - Instalação Remota Automatizada
+# Executa o script de instalação no servidor Contabo
+#######################################################################
+
+set timeout 600
+set server_ip "212.90.120.135"
+set server_user "root"
+set server_pass "1234"
+
+puts "════════════════════════════════════════════════════════"
+puts " 🚀 Instalação Remota no Servidor Contabo"
+puts "════════════════════════════════════════════════════════\n"
+
+# Fazer upload do script de instalação
+puts "📤 Fazendo upload do script de instalação...\n"
+spawn scp scripts/install_contabo.sh $server_user@$server_ip:/root/
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    "yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n✅ Upload concluído\n"
+
+# Conectar e executar instalação
+puts "🔧 Executando instalação no servidor...\n"
+spawn ssh $server_user@$server_ip "cd /root && bash install_contabo.sh"
+expect {
+    "password:" {
+        send "$server_pass\r"
+        exp_continue
+    }
+    "yes/no" {
+        send "yes\r"
+        exp_continue
+    }
+    eof
+}
+
+puts "\n════════════════════════════════════════════════════════"
+puts " ✅ Instalação remota concluída!"
+puts "════════════════════════════════════════════════════════\n"
+puts "📝 Próximo passo: Fazer upload dos arquivos da aplicação"
+puts "    Execute: bash scripts/deploy_to_contabo.sh\n"

@@ -1,0 +1,93 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set password "1234"
+
+puts "\n🚀 Deploy SEO - EcoKambio\n"
+
+# Upload index.html
+puts "📦 1/7 - Enviando index.html..."
+spawn scp -o StrictHostKeyChecking=no public/index.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+    timeout {
+        puts "Timeout em index.html"
+        exit 1
+    }
+}
+
+# Upload sitemap.xml
+puts "📦 2/7 - Enviando sitemap.xml..."
+spawn scp -o StrictHostKeyChecking=no public/sitemap.xml root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload about.html
+puts "📦 3/7 - Enviando about.html..."
+spawn scp -o StrictHostKeyChecking=no public/about.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload visa.html
+puts "📦 4/7 - Enviando visa.html..."
+spawn scp -o StrictHostKeyChecking=no public/visa.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload details.html
+puts "📦 5/7 - Enviando details.html..."
+spawn scp -o StrictHostKeyChecking=no public/details.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload termos.html
+puts "📦 6/7 - Enviando termos.html..."
+spawn scp -o StrictHostKeyChecking=no public/termos.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Upload privacidade.html
+puts "📦 7/7 - Enviando privacidade.html..."
+spawn scp -o StrictHostKeyChecking=no public/privacidade.html root@212.90.120.135:/root/ecokambio-main/public/
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+# Restart PM2
+puts "\n🔄 Reiniciando PM2..."
+spawn ssh -o StrictHostKeyChecking=no root@212.90.120.135 "cd /root/ecokambio-main && pm2 restart all"
+expect {
+    "password:" {
+        send "$password\r"
+        expect eof
+    }
+}
+
+puts "\n✅ Deploy concluído com sucesso!"
+puts "🌐 Verifique: https://ecokambio.com\n"

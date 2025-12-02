@@ -4,14 +4,14 @@
 DROP FUNCTION IF EXISTS public.increment_affiliate_click(integer);
 DROP FUNCTION IF EXISTS public.increment_affiliate_click(bigint);
 
-CREATE OR REPLACE FUNCTION public.increment_affiliate_click(link_id_to_inc bigint)
+CREATE OR REPLACE FUNCTION public.increment_affiliate_click(p_link_id bigint)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
   UPDATE affiliate_links
-  SET clicks = clicks + 1
-  WHERE id = link_id_to_inc;
+  SET click_count = click_count + 1
+  WHERE id = p_link_id;
 END;
 $$;
