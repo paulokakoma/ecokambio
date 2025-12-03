@@ -25,6 +25,7 @@ const config = require("./src/config/env");
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
 const isAdmin = require("./src/middleware/auth");
+const { errorHandler } = require("./src/middleware/errorHandler");
 
 // Routes
 const authRoutes = require("./src/routes/authRoutes");
@@ -60,6 +61,9 @@ app.use('/api/', limiter); // Apply rate limiting to API routes
 // Trust the first proxy (Railway/Cloudflare)
 // Required for secure cookies to work correctly behind a proxy
 app.set('trust proxy', 1);
+
+// Apply subdomain middleware early to detect admin.localhost vs localhost
+app.use(subdomainMiddleware);
 
 // Session Configuration
 // Use MemoryStore for serverless/Vercel, FileStore for local development
@@ -166,9 +170,6 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// Apply subdomain middleware to detect admin.localhost vs localhost
-app.use(subdomainMiddleware);
-
 // API Routes
 app.use("/api", authRoutes); // Contém /login, /logout, etc. Não deve ter `isAdmin` aqui.
 app.use("/api", publicRoutes); // Rotas públicas, sem `isAdmin`.
@@ -230,6 +231,9 @@ app.use((req, res, next) => {
         res.status(404).type('txt').send('Not Found');
     }
 });
+
+// Error Handling Middleware - Deve ser o último middleware
+app.use(errorHandler);
 
 // Scheduler
 const scheduler = require('./webscraper/scheduler');

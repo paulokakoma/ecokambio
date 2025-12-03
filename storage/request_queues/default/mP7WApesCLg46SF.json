@@ -1,6 +1,6 @@
 {
 	"id": "mP7WApesCLg46SF",
-	"json": "{\"id\":\"mP7WApesCLg46SF\",\"url\":\"https://www.bancoyetu.ao\",\"loadedUrl\":\"https://www.bancoyetu.ao/\",\"uniqueKey\":\"https://www.bancoyetu.ao\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"YETU\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-12-02T18:42:19.939Z\"}",
+	"json": "{\"id\":\"mP7WApesCLg46SF\",\"url\":\"https://www.bancoyetu.ao\",\"loadedUrl\":\"https://www.bancoyetu.ao/\",\"uniqueKey\":\"https://www.bancoyetu.ao\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"YETU\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-12-03T11:00:49.226Z\"}",
 	"method": "GET",
 	"orderNo": null,
 	"retryCount": 0,

@@ -1,42 +1,30 @@
 {
   "requestsFinished": 6,
   "requestsFailed": 0,
-  "requestsRetries": 1,
+  "requestsRetries": 0,
   "requestsFailedPerMinute": 0,
-  "requestsFinishedPerMinute": 2,
-  "requestMinDurationMillis": 8027,
-  "requestMaxDurationMillis": 26965,
+  "requestsFinishedPerMinute": 8,
+  "requestMinDurationMillis": 5888,
+  "requestMaxDurationMillis": 25696,
   "requestTotalFailedDurationMillis": 0,
-  "requestTotalFinishedDurationMillis": 96369,
-  "crawlerStartedAt": "2025-12-02T18:41:32.608Z",
-  "crawlerFinishedAt": "2025-12-02T18:44:04.106Z",
-  "statsPersistedAt": "2025-12-02T18:44:04.106Z",
-  "crawlerRuntimeMillis": 151738,
-  "crawlerLastStartTimestamp": 1764700892368,
+  "requestTotalFinishedDurationMillis": 106451,
+  "crawlerStartedAt": "2025-12-03T11:00:02.907Z",
+  "crawlerFinishedAt": "2025-12-03T11:00:49.515Z",
+  "statsPersistedAt": "2025-12-03T11:00:49.515Z",
+  "crawlerRuntimeMillis": 46826,
+  "crawlerLastStartTimestamp": 1764759602689,
   "requestRetryHistogram": [
-    5,
-    null,
-    1
+    6
   ],
   "statsId": 0,
   "requestAvgFailedDurationMillis": null,
-  "requestAvgFinishedDurationMillis": 16062,
-  "requestTotalDurationMillis": 96369,
+  "requestAvgFinishedDurationMillis": 17742,
+  "requestTotalDurationMillis": 106451,
   "requestsTotal": 6,
   "requestsWithStatusCode": {
     "200": 5,
     "304": 1
   },
   "errors": {},
-  "retryErrors": {
-    "/Users/av/Documents/Projetos/ecokambio-main/node_modules/@crawlee/core/crawlers/crawler_utils.js:13:11": {
-      "missing error code": {
-        "Error": {
-          "Navigation timed out after 60 seconds.": {
-            "count": 2
-          }
-        }
-      }
-    }
-  }
+  "retryErrors": {}
 }
