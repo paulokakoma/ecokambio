@@ -12,14 +12,7 @@
         content="privacidade ecokambio, proteção dados angola, lgpd angola, cookies ecokambio, segurança dados pessoais, privacidade online angola, politica privacidade">
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GL04FWDNFV"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-GL04FWDNFV');
-    </script>
+    <!-- Google tag (gtag.js) - Managed by cookie-consent.js -->
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -210,27 +203,17 @@
             }
         }
 
-        function handleTermsBanner() {
-            const banner = document.getElementById('terms-banner');
-            const acceptBtn = document.getElementById('accept-terms-btn');
-            const rejectBtn = document.getElementById('reject-terms-btn');
 
-            if (localStorage.getItem('termsAccepted') !== 'true' && localStorage.getItem('termsRejected') !== 'true') {
-                banner.classList.remove('hidden');
-                setTimeout(() => banner.classList.remove('translate-y-full'), 100);
-            }
-            acceptBtn.addEventListener('click', () => { localStorage.setItem('termsAccepted', 'true'); banner.classList.add('translate-y-full'); });
-            rejectBtn.addEventListener('click', () => { localStorage.setItem('termsRejected', 'true'); banner.classList.add('translate-y-full'); });
-        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             const configResponse = await fetch('/api/config');
             const config = await configResponse.json();
             dbClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
             loadFooterInfo();
-            handleTermsBanner();
+
         });
     </script>
+    <script src="/js/cookie-consent.js"></script>
 </body>
 
 </html>

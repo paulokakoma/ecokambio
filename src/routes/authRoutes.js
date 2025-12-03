@@ -6,7 +6,6 @@ const { loginValidationRules } = require('../middleware/authValidation');
 const { handleValidationErrors } = require('../middleware/validator');
 const catchAsync = require('../utils/catchAsync');
 
-router.post('/login', authController.login);
 router.post(
     '/login',
     loginValidationRules(),

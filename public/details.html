@@ -14,13 +14,7 @@
         content="custo importação angola, preço dolar kwanza, calcular importação angola, compras online angola, frete internacional angola, custo total kwanzas">
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GL04FWDNFV"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-GL04FWDNFV');
-    </script>
+    <!-- Google tag (gtag.js) - Managed by cookie-consent.js -->
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ecokambio.com/">
@@ -375,30 +369,7 @@
             }
         }
 
-        function handleTermsBanner() {
-            const banner = document.getElementById('terms-banner');
-            const acceptBtn = document.getElementById('accept-terms-btn');
-            const rejectBtn = document.getElementById('reject-terms-btn');
 
-            if (localStorage.getItem('termsAccepted') !== 'true' && localStorage.getItem('termsRejected') !== 'true') {
-                banner.classList.remove('hidden');
-                setTimeout(() => banner.classList.remove('translate-y-full'), 100);
-            }
-
-            acceptBtn.addEventListener('click', () => {
-                localStorage.setItem('termsAccepted', 'true');
-                localStorage.removeItem('termsRejected');
-                banner.classList.add('translate-y-full');
-                setTimeout(() => banner.classList.add('hidden'), 500);
-            });
-
-            rejectBtn.addEventListener('click', () => {
-                localStorage.setItem('termsRejected', 'true');
-                localStorage.removeItem('termsAccepted');
-                banner.classList.add('translate-y-full');
-                setTimeout(() => banner.classList.add('hidden'), 500);
-            });
-        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -408,13 +379,14 @@
                 dbClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
                 await main();
                 loadFooterInfo();
-                handleTermsBanner();
+
             } catch (error) {
                 console.error("Erro de inicialização:", error);
                 document.getElementById('details-container').innerHTML = `<div class="text-center p-8 bg-red-50 text-red-700 rounded-2xl"><strong>Erro Crítico:</strong> Não foi possível carregar a configuração da aplicação.</div>`;
             }
         });
     </script>
+    <script src="/js/cookie-consent.js"></script>
 </body>
 
 </html>

@@ -27,6 +27,7 @@ const logger = require("./src/config/logger");
 // --- Sentry Initialization ---
 // Deve ser inicializado o mais cedo possível.
 // Only initialize if DSN is provided
+let sentryInitialized = false;
 if (config.sentry.dsn) {
     Sentry.init({
         dsn: config.sentry.dsn,
@@ -38,6 +39,7 @@ if (config.sentry.dsn) {
         environment: config.isDevelopment ? 'development' : 'production',
     });
     logger.info('✅ Sentry initialized');
+    sentryInitialized = true;
 } else {
     logger.warn('⚠️  Sentry DSN not configured - error tracking disabled');
 }
@@ -56,10 +58,12 @@ const viewRoutes = require("./src/routes/viewRoutes");
 const scraperController = require("./src/controllers/scraperController");
 
 // --- Sentry Middleware ---
-// O request handler deve ser o primeiro middleware.
-app.use(Sentry.Handlers.requestHandler());
-// O tracing handler deve vir depois do request handler.
-app.use(Sentry.Handlers.tracingHandler());
+if (sentryInitialized) {
+    // O request handler deve ser o primeiro middleware.
+    app.use(Sentry.Handlers.requestHandler());
+    // O tracing handler deve vir depois do request handler.
+    app.use(Sentry.Handlers.tracingHandler());
+}
 
 // Security Middleware
 // app.use(enforceHttps);
@@ -230,8 +234,10 @@ app.get('*', (req, res, next) => {
 });
 
 // --- Sentry Error Handler ---
-// Deve ser adicionado ANTES do nosso errorHandler personalizado.
-app.use(Sentry.Handlers.errorHandler());
+if (sentryInitialized) {
+    // Deve ser adicionado ANTES do nosso errorHandler personalizado.
+    app.use(Sentry.Handlers.errorHandler());
+}
 
 // 404 Handler - Catch all unhandled requests
 app.use((req, res, next) => {
