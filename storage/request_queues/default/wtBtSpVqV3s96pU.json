@@ -1,8 +1,8 @@
 {
 	"id": "wtBtSpVqV3s96pU",
-	"json": "{\"id\":\"wtBtSpVqV3s96pU\",\"url\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"loadedUrl\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"uniqueKey\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BCI\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-12-03T11:00:34.512Z\"}",
+	"json": "{\"id\":\"wtBtSpVqV3s96pU\",\"url\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"uniqueKey\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BCI\"}}",
 	"method": "GET",
-	"orderNo": null,
+	"orderNo": 1764774182497,
 	"retryCount": 0,
 	"uniqueKey": "https://www.bci.ao/particular/conversor-de-moeda",
 	"url": "https://www.bci.ao/particular/conversor-de-moeda"

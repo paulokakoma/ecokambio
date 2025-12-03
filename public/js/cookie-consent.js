@@ -7,6 +7,7 @@ const CookieConsent = {
     GA_MEASUREMENT_ID: 'G-GL04FWDNFV', // ID do Google Analytics
 
     init() {
+        console.log('CookieConsent: init called');
         this.banner = document.getElementById('terms-banner');
         this.acceptBtn = document.getElementById('accept-terms-btn');
         this.rejectBtn = document.getElementById('reject-terms-btn');
@@ -28,6 +29,7 @@ const CookieConsent = {
     checkConsent() {
         const accepted = localStorage.getItem('termsAccepted');
         const rejected = localStorage.getItem('termsRejected');
+        console.log('CookieConsent: checkConsent', { accepted, rejected });
 
         if (accepted === 'true') {
             this.loadAnalytics();
@@ -86,7 +88,16 @@ const CookieConsent = {
     }
 };
 
+// Expose to window for debugging
+window.CookieConsent = CookieConsent;
+
 // Inicializa quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('CookieConsent: DOMContentLoaded');
+        CookieConsent.init();
+    });
+} else {
+    console.log('CookieConsent: DOM already loaded');
     CookieConsent.init();
-});
+}

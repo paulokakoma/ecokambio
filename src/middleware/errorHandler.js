@@ -1,6 +1,6 @@
 const config = require('../config/env');
 const logger = require('../config/logger');
-const Sentry = require('@sentry/node');
+
 
 /**
  * Classe de erro personalizada para erros operacionais previsíveis.
@@ -45,11 +45,7 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
-    // Em produção, envie uma resposta genérica para não expor detalhes.
-    // Envia o erro para o Sentry, mas apenas se não for um erro operacional esperado (ex: 404).
-    if (!err.isOperational) {
-        Sentry.captureException(err);
-    }
+
 
     if (err.isOperational) {
         // Se for um erro operacional (AppError), podemos confiar na mensagem.

@@ -7,7 +7,10 @@ const login = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Pedido inválido.' });
     }
 
+    console.log('Login attempt:', { passwordProvided: !!password, hashConfigured: !!config.admin.passwordHash });
+    console.log('Hash from config:', config.admin.passwordHash);
     const match = await bcrypt.compare(password, config.admin.passwordHash);
+    console.log('Password match result:', match);
 
     if (match) {
         // Use signed cookie instead of session for serverless compatibility
