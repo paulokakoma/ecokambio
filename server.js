@@ -26,15 +26,21 @@ const logger = require("./src/config/logger");
 
 // --- Sentry Initialization ---
 // Deve ser inicializado o mais cedo possível.
-Sentry.init({
-    dsn: config.sentry.dsn,
-    integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.Express({ app }),
-    ],
-    tracesSampleRate: 1.0,
-    environment: config.isDevelopment ? 'development' : 'production',
-});
+// Only initialize if DSN is provided
+if (config.sentry.dsn) {
+    Sentry.init({
+        dsn: config.sentry.dsn,
+        integrations: [
+            new Sentry.Integrations.Http({ tracing: true }),
+            new Sentry.Integrations.Express({ app }),
+        ],
+        tracesSampleRate: 1.0,
+        environment: config.isDevelopment ? 'development' : 'production',
+    });
+    logger.info('✅ Sentry initialized');
+} else {
+    logger.warn('⚠️  Sentry DSN not configured - error tracking disabled');
+}
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
 const isAdmin = require("./src/middleware/auth");

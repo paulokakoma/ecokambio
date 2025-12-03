@@ -42,5 +42,8 @@ module.exports = {
     session: {
         secret: process.env.SESSION_SECRET,
         cookieDomain: process.env.COOKIE_DOMAIN
+    },
+    sentry: {
+        dsn: process.env.SENTRY_DSN || ''
     }
 };
