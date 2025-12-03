@@ -16,12 +16,25 @@ const server = http.createServer(app);
 // Initialize WebSocket
 websocket.init(server);
 
+const Sentry = require("@sentry/node");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 // Config & Utils
 const config = require("./src/config/env");
+const logger = require("./src/config/logger");
 
+// --- Sentry Initialization ---
+// Deve ser inicializado o mais cedo possível.
+Sentry.init({
+    dsn: config.sentry.dsn,
+    integrations: [
+        new Sentry.Integrations.Http({ tracing: true }),
+        new Sentry.Integrations.Express({ app }),
+    ],
+    tracesSampleRate: 1.0,
+    environment: config.isDevelopment ? 'development' : 'production',
+});
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
 const isAdmin = require("./src/middleware/auth");
@@ -36,12 +49,14 @@ const viewRoutes = require("./src/routes/viewRoutes");
 // Scraper
 const scraperController = require("./src/controllers/scraperController");
 
-// Middleware para forçar HTTPS removido
-// const enforceHttps = ...
+// --- Sentry Middleware ---
+// O request handler deve ser o primeiro middleware.
+app.use(Sentry.Handlers.requestHandler());
+// O tracing handler deve vir depois do request handler.
+app.use(Sentry.Handlers.tracingHandler());
 
 // Security Middleware
 // app.use(enforceHttps);
-console.log("SERVER STARTED - NO HTTPS ENFORCEMENT");
 app.use(helmet({
     contentSecurityPolicy: false,
 }));
@@ -208,6 +223,10 @@ app.get('*', (req, res, next) => {
     }
 });
 
+// --- Sentry Error Handler ---
+// Deve ser adicionado ANTES do nosso errorHandler personalizado.
+app.use(Sentry.Handlers.errorHandler());
+
 // 404 Handler - Catch all unhandled requests
 app.use((req, res, next) => {
     const host = req.get('host');
@@ -240,24 +259,24 @@ const scheduler = require('./webscraper/scheduler');
 
 // Start Server
 server.listen(config.port, '0.0.0.0', () => {
-    console.log(`✅ Server running on port ${config.port}`);
-    console.log(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
+    logger.info(`✅ Server running on port ${config.port}`);
+    logger.info(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
 
     // Start scraper scheduler in production
     if (!config.isDevelopment) {
         try {
             const scraperScheduler = require('./webscraper/scheduler');
             scraperScheduler.start();
-            console.log('📅 Scraper scheduler started (runs every 4 hours)');
+            logger.info('📅 Scraper scheduler started (runs every 4 hours)');
         } catch (error) {
-            console.error('⚠️  Failed to start scraper scheduler:', error.message);
+            logger.error('⚠️  Failed to start scraper scheduler:', { message: error.message });
         }
     } else {
-        console.log('ℹ️  Scraper scheduler disabled in development mode');
-        console.log('   Use: npm run scrape to test manually');
-        console.log(`Servidor a correr em desenvolvimento:`);
-        console.log(`  📱 Página Principal: http://localhost:${config.port}`);
-        console.log(`  🔐 Admin: http://admin.localhost:${config.port}`);
+        logger.info('ℹ️  Scraper scheduler disabled in development mode');
+        logger.info('   Use: npm run scrape to test manually');
+        logger.info(`Servidor a correr em desenvolvimento:`);
+        logger.info(`  📱 Página Principal: http://localhost:${config.port}`);
+        logger.info(`  🔐 Admin: http://admin.localhost:${config.port}`);
     }
 }).on('error', (e) => {
     if (e.code === 'EADDRINUSE') {

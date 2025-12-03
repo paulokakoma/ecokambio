@@ -26,6 +26,12 @@ jobs:
       - name: Build Tailwind CSS
         run: npm run build:css
 
+      - name: Update Sitemap Last Modified Date
+        run: |
+          CURRENT_DATE=$(date -u +'%Y-%m-%d')
+          echo "Updating sitemap.xml with current date: $CURRENT_DATE"
+          sed -i "s|<lastmod>.*</lastmod>|<lastmod>$CURRENT_DATE</lastmod>|g" public/sitemap.xml
+
       - name: Create .env file for Production
         run: echo "${{ secrets.ENV_FILE_PRODUCTION }}" > .env
         shell: bash

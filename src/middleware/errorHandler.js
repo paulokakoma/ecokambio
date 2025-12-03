@@ -1,4 +1,6 @@
 const config = require('../config/env');
+const logger = require('../config/logger');
+const Sentry = require('@sentry/node');
 
 /**
  * Classe de erro personalizada para erros operacionais previsíveis.
@@ -24,12 +26,13 @@ const errorHandler = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
-    // Log detalhado do erro no console do servidor, independentemente do ambiente.
-    console.error('💥 OCORREU UM ERRO 💥', {
+    // Usa o logger Winston para registrar o erro.
+    logger.error(err.message, {
+        statusCode: err.statusCode,
         message: err.message,
         url: req.originalUrl,
         method: req.method,
-        stack: err.stack, // A stack é útil para depuração
+        stack: err.stack,
     });
 
     if (config.isDevelopment) {
@@ -43,6 +46,11 @@ const errorHandler = (err, req, res, next) => {
     }
 
     // Em produção, envie uma resposta genérica para não expor detalhes.
+    // Envia o erro para o Sentry, mas apenas se não for um erro operacional esperado (ex: 404).
+    if (!err.isOperational) {
+        Sentry.captureException(err);
+    }
+
     if (err.isOperational) {
         // Se for um erro operacional (AppError), podemos confiar na mensagem.
         return res.status(err.statusCode).json({
