@@ -975,6 +975,18 @@
 
         const currencyFlags = { USD: '🇺🇸', EUR: '🇪🇺', AOA: '🇦🇴', USDT: '🪙' };
 
+        // Safe gtag wrapper to prevent errors when GA hasn't loaded
+        function safeGtag(...args) {
+            if (typeof gtag !== 'undefined' && typeof gtag === 'function') {
+                try {
+                    gtag(...args);
+                } catch (error) {
+                    console.warn('gtag error:', error);
+                }
+            }
+        }
+
+
         // --- FUNÇÕES DE UTILIDADE ---
         function getOrCreateVisitorIdentity() {
             // Session ID: dura apenas enquanto a aba está aberta.
@@ -1020,7 +1032,7 @@
             if (tabName === 'calculator') {
                 marketPanel.classList.add('hidden'); calculatorPanel.classList.remove('hidden');
                 marketTab.classList.replace('tab-active', 'tab-inactive'); calculatorTab.classList.replace('tab-inactive', 'tab-active');
-                gtag('event', 'select_content', {
+                safeGtag('event', 'select_content', {
                     content_type: 'tab',
                     item_id: 'calculator'
                 });
@@ -1028,7 +1040,7 @@
             } else {
                 calculatorPanel.classList.add('hidden'); marketPanel.classList.remove('hidden');
                 calculatorTab.classList.replace('tab-active', 'tab-inactive'); marketTab.classList.replace('tab-inactive', 'tab-active');
-                gtag('event', 'select_content', {
+                safeGtag('event', 'select_content', {
                     content_type: 'tab',
                     item_id: 'market'
                 });
@@ -1050,7 +1062,7 @@
             informalTabBtn.classList.add(...(tabName !== 'formal' ? activeClasses : inactiveClasses));
             informalTabBtn.classList.remove(...(tabName === 'formal' ? activeClasses : inactiveClasses));
 
-            gtag('event', 'select_content', {
+            safeGtag('event', 'select_content', {
                 content_type: 'market_type',
                 item_id: tabName
             });
