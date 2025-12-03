@@ -25,7 +25,7 @@ if (!config.isDevelopment) {
             level: 'error', // Apenas erros neste ficheiro
             format: combine(timestamp(), json()),
         }),
-        new winxston.transports.File({
+        new winston.transports.File({
             filename: 'logs/combined.log', // Todos os logs a partir do nível 'info'
             format: combine(timestamp(), json()),
         })
