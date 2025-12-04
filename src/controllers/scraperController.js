@@ -193,5 +193,6 @@ function getStatusMessage(status, hours) {
 module.exports = {
     getHealth,
     triggerScraper,
+    triggerInformalScraper,
     getLastResults
 };

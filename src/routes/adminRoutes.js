@@ -31,6 +31,7 @@ router.post('/reset-stats', adminController.resetStats);
 // Scraper Management
 const scraperController = require('../controllers/scraperController');
 router.post('/scraper/trigger', scraperController.triggerScraper);
+router.post('/scraper/trigger-informal', scraperController.triggerInformalScraper);
 router.get('/scraper/health', scraperController.getHealth);
 router.get('/scraper/last-results', scraperController.getLastResults);
 
