@@ -12,7 +12,12 @@ Disallow: /node_modules/
 Disallow: /webscraper/
 
 # Bloquear URLs com parâmetros de consulta que não alteram o conteúdo principal
-Disallow: /*?*source=
+# (ex: campanhas de marketing, tracking, etc.)
+Disallow: /*?utm_source=
+Disallow: /*?utm_medium=
+Disallow: /*?utm_campaign=
+Disallow: /*?utm_term=
+Disallow: /*?utm_content=
 
 # Localização do Sitemap
 Sitemap: https://ecokambio.com/sitemap.xml
