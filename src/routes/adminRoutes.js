@@ -28,6 +28,12 @@ router.get('/weekly-activity', adminController.getWeeklyActivity);
 router.get('/event-types-stats', adminController.getEventTypeStats);
 router.post('/reset-stats', adminController.resetStats);
 
+// Scraper Management
+const scraperController = require('../controllers/scraperController');
+router.post('/scraper/trigger', scraperController.triggerScraper);
+router.get('/scraper/health', scraperController.getHealth);
+router.get('/scraper/last-results', scraperController.getLastResults);
+
 // Generic Resource Handlers
 router.post('/bank', adminController.handleResourcePost('bank', 'rate_providers'));
 router.post('/affiliate', adminController.handleResourcePost('affiliate', 'affiliate_links'));
