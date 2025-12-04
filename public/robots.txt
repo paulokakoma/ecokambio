@@ -1,7 +1,5 @@
-# Regras para todos os robôs
 User-agent: *
-
-# Bloquear áreas administrativas e de serviço
+Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /login
@@ -19,5 +17,4 @@ Disallow: /*?utm_campaign=
 Disallow: /*?utm_term=
 Disallow: /*?utm_content=
 
-# Localização do Sitemap
 Sitemap: https://ecokambio.com/sitemap.xml
