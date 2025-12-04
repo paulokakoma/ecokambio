@@ -177,12 +177,16 @@ const targets = [
                 // BIC: "911.5450" (US-like: dot decimal)
                 // No special replacement needed
             } else if (bankLabel === 'BCI') {
-                // BCI: Assume European if comma is present, otherwise US
-                if (cleanStr.includes(',') && !cleanStr.includes('.')) {
-                    cleanStr = cleanStr.replace(',', '.');
-                } else if (cleanStr.includes('.') && cleanStr.includes(',')) {
+                // BCI: Uses European format - "1.654,9865" (dot thousands, comma decimal)
+                // Remove dots (thousands), replace comma with dot (decimal)
+                if (cleanStr.includes('.') && cleanStr.includes(',')) {
+                    // Has both: "1.654,9865" → remove dots, replace comma
                     cleanStr = cleanStr.replace(/\./g, '').replace(',', '.');
+                } else if (cleanStr.includes(',')) {
+                    // Only comma: "1654,98" → replace comma with dot
+                    cleanStr = cleanStr.replace(',', '.');
                 }
+                // If only dots or no separators, leave as-is
             } else if (bankLabel === 'YETU') {
                 // YETU: "890,00" -> 890.00
                 cleanStr = cleanStr.replace(',', '.');
