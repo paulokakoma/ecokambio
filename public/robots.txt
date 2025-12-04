@@ -19,6 +19,22 @@ Disallow: /*?utm_campaign=
 Disallow: /*?utm_term=
 Disallow: /*?utm_content=
 
+# Permitir explicitamente recursos estáticos (CSS, JS, imagens)
+# Isso garante que o Google possa renderizar as páginas corretamente
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+Allow: *.css
+Allow: *.js
+Allow: *.png
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.gif
+Allow: *.svg
+Allow: *.webp
+Allow: *.woff
+Allow: *.woff2
+
 # Permitir rastreio geral
 Allow: /
 
