@@ -274,10 +274,27 @@ const targets = [
 
         console.log(`📊 Transformed ${transformedRecords.length} records for upsert`);
 
+        // ✅ Deduplicate records (keep latest value for each provider_id + currency_pair)
+        const deduplicatedRecords = [];
+        const seen = new Set();
+
+        // Iterate in reverse so we keep the LAST occurrence (most recent)
+        for (let i = transformedRecords.length - 1; i >= 0; i--) {
+            const record = transformedRecords[i];
+            const key = `${record.provider_id}-${record.currency_pair}`;
+
+            if (!seen.has(key)) {
+                seen.add(key);
+                deduplicatedRecords.unshift(record); // Add to front to maintain original order
+            }
+        }
+
+        console.log(`🔍 Deduplicated: ${transformedRecords.length} → ${deduplicatedRecords.length} records`);
+
         // Upsert into exchange_rates table
         const { error } = await supabase
             .from('exchange_rates')
-            .upsert(transformedRecords, {
+            .upsert(deduplicatedRecords, {
                 onConflict: 'provider_id,currency_pair',
                 ignoreDuplicates: false
             });
@@ -287,7 +304,7 @@ const targets = [
             process.exit(1);
         } else {
             console.log('✅ Data successfully saved to Supabase!');
-            console.log(`   - Total rates: ${transformedRecords.length}`);
+            console.log(`   - Total rates: ${deduplicatedRecords.length}`);
             console.log(`   - Banks: ${[...new Set(allRates.map(r => r.bank))].join(', ')}`);
             process.exit(0);
         }
