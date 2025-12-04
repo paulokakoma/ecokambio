@@ -64,14 +64,54 @@
         "@type": "Brand",
         "name": "EcoKambio"
       },
+      "image": "https://ecokambio.com/assets/visa.png",
       "offers": {
         "@type": "Offer",
         "priceCurrency": "USD",
         "price": "5.00",
         "availability": "https://schema.org/InStock",
-        "url": "https://ecokambio.com/visa"
-      },
-      "image": "https://ecokambio.com/assets/visa.png"
+        "url": "https://ecokambio.com/visa",
+        "seller": {
+          "@type": "Organization",
+          "name": "Moko Tech, Sociedade por Quotas",
+          "url": "https://ecokambio.com"
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "AO",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 7,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "AO"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 1,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          },
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "USD"
+          }
+        }
+      }
     }
     </script>
 
