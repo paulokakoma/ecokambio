@@ -411,8 +411,12 @@ const getDashboardStats = async (req, res) => {
         const todayStart = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0, 0, 0, 0)).toISOString();
         const todayEnd = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 23, 59, 59, 999)).toISOString();
         const monthStart = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1, 0, 0, 0, 0)).toISOString();
+
+        // Calculate current week start (Monday = start of week)
         const weekStartDate = new Date(nowUTC);
-        weekStartDate.setUTCDate(weekStartDate.getUTCDate() - 6);
+        const dayOfWeek = weekStartDate.getUTCDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+        const daysToMonday = (dayOfWeek + 6) % 7; // Days back to Monday (0 if Monday, 6 if Sunday)
+        weekStartDate.setUTCDate(weekStartDate.getUTCDate() - daysToMonday);
         weekStartDate.setUTCHours(0, 0, 0, 0);
         const weekStart = weekStartDate.toISOString();
 
