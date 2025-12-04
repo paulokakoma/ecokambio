@@ -105,6 +105,39 @@ const triggerScraper = async (req, res) => {
 };
 
 /**
+ * Manually trigger informal market scraper (angocambio.ao)
+ */
+const triggerInformalScraper = async (req, res) => {
+    try {
+        const projectRoot = path.resolve(__dirname, '../..');
+
+        // Run angocambio scraper in background
+        exec('node webscraper/angocambio-scraper.js', { cwd: projectRoot }, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Informal scraper execution error: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.error(`Informal scraper stderr: ${stderr}`);
+            }
+            console.log(`Informal scraper output: ${stdout}`);
+        });
+
+        res.json({
+            success: true,
+            message: 'Informal market scraper started. Check logs for progress.'
+        });
+    } catch (error) {
+        console.error('Error triggering informal scraper:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to trigger informal scraper'
+        });
+    }
+};
+
+
+/**
  * Get last scraper results
  */
 const getLastResults = async (req, res) => {
