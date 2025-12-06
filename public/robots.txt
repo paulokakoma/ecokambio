@@ -1,8 +1,18 @@
-# Permitir acesso total ao bot do Google AdSense
+# Permitir acesso total ao Google AdSense e bots relacionados
 User-agent: Mediapartners-Google
 Disallow:
 
-# Regras para todos os robôs
+User-agent: AdsBot-Google
+Disallow:
+
+User-agent: AdsBot-Google-Mobile
+Disallow:
+
+User-agent: Googlebot
+Disallow:
+
+User-agent: Googlebot-Image
+Disallow:
 User-agent: *
 
 # Bloquear áreas administrativas e de serviço
