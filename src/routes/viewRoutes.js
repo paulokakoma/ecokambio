@@ -19,4 +19,8 @@ router.get("/sitemap.xml", viewController.serveSitemap);
 router.get("/BingSiteAuth.xml", viewController.serveBingAuth);
 router.get("/yandex_*.html", viewController.serveYandexAuth);
 
+// Blog routes
+router.get("/blog", viewController.serveBlog);
+router.get("/blog/:slug", viewController.serveBlogArticle);
+
 module.exports = router;
