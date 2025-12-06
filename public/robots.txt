@@ -1,21 +1,31 @@
-# Permitir acesso total ao Google AdSense e bots relacionados
+# Regras específicas para Google AdSense - Acesso Total
 User-agent: Mediapartners-Google
-Disallow:
+Allow: /
 
 User-agent: AdsBot-Google
-Disallow:
+Allow: /
 
 User-agent: AdsBot-Google-Mobile
-Disallow:
+Allow: /
 
+# Regras para Googlebot - Acesso Total
 User-agent: Googlebot
-Disallow:
+Allow: /
 
 User-agent: Googlebot-Image
-Disallow:
+Allow: /
+
+# Regras para todos os outros bots
 User-agent: *
 
-# Bloquear áreas administrativas e de serviço
+# Permitir acesso à raiz e todas as páginas públicas
+Allow: /
+Allow: /blog/
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+
+# Bloquear apenas áreas administrativas e de serviço
 Disallow: /admin/
 Disallow: /api/
 Disallow: /login
@@ -24,33 +34,15 @@ Disallow: /teste.html
 Disallow: /sessions/
 Disallow: /node_modules/
 Disallow: /webscraper/
+Disallow: /storage/
 
-# Bloquear URLs com parâmetros de consulta que não alteram o conteúdo principal
-# (ex: campanhas de marketing, tracking, etc.)
+# Bloquear URLs com parâmetros UTM (tracking)
 Disallow: /*?utm_source=
 Disallow: /*?utm_medium=
 Disallow: /*?utm_campaign=
 Disallow: /*?utm_term=
 Disallow: /*?utm_content=
 
-# Permitir explicitamente recursos estáticos (CSS, JS, imagens)
-# Isso garante que o Google possa renderizar as páginas corretamente
-Allow: /css/
-Allow: /js/
-Allow: /assets/
-Allow: *.css
-Allow: *.js
-Allow: *.png
-Allow: *.jpg
-Allow: *.jpeg
-Allow: *.gif
-Allow: *.svg
-Allow: *.webp
-Allow: *.woff
-Allow: *.woff2
-
-# Permitir rastreio geral
-Allow: /
-
 # Localização do Sitemap
 Sitemap: https://ecokambio.com/sitemap.xml
+Sitemap: https://www.ecokambio.com/sitemap.xml
