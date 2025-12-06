@@ -1,3 +1,7 @@
+# Permitir acesso total ao bot do Google AdSense
+User-agent: Mediapartners-Google
+Disallow:
+
 # Regras para todos os robôs
 User-agent: *
 
