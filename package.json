@@ -8,8 +8,10 @@
     "build": "npm run build:css",
     "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch",
     "scrape": "node webscraper/cron-scraping.js",
+    "scrape:informal": "node webscraper/angocambio-scraper.js",
+    "scrape:usdt": "node webscraper/usdt-formal-scraper.js && node webscraper/usdt-informal-scraper.js",
+    "scrape:all": "node webscraper/run-all-scrapers.js",
     "scrape:puppeteer": "node webscraper/puppeteer-scraper.js",
-    "scrape:all": "npm run scrape && npm run scrape:puppeteer",
     "build:prod": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify",
     "dev": "concurrently \"tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch\" \"nodemon server.js\""
   },

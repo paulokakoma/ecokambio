@@ -1,9 +1,0 @@
-{
-	"id": "N9jTB5mErYTvgGC",
-	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"loadedUrl\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-12-04T16:38:59.906Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://www.bancobic.ao/inicio/particulares/index",
-	"url": "https://www.bancobic.ao/inicio/particulares/index"
-}

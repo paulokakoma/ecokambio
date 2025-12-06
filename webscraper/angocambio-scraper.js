@@ -29,59 +29,48 @@ const path = require('path');
 
             // Wait for page to load
             await page.waitForLoadState('networkidle', { timeout: 30000 });
-            await page.waitForTimeout(5000); // Extra wait for Angular to render
+            await page.waitForTimeout(8000); // Extra wait for Angular to render (increased from 5s to 8s)
 
             log.info('Page loaded. Extracting rates...');
 
-            // Extract rates from the page
+            // Extract rates from the page using text-based section identification
             const data = await page.evaluate(() => {
-                const extractRate = (text) => {
-                    if (!text) return null;
-                    // Remove currency symbols and whitespace, replace comma with dot
-                    const cleaned = text.replace(/[^\d,\.]/g, '').replace(',', '.');
-                    const value = parseFloat(cleaned);
-                    return isNaN(value) ? null : value;
-                };
-
-                // Try to find rate sections
-                // The page structure shows rates in a table-like format
-                // We need to identify Casa de Câmbio and Kinguila sections
-
                 const results = {
                     casaCambio: {},
                     kinguila: {}
                 };
 
-                // Look for text content containing "Casa de Câmbio" or "Kinguila"
+                // Get all text content and split by lines
                 const allText = document.body.innerText;
+                const lines = allText.split('\n').map(line => line.trim());
 
-                // Extract using regex patterns (this is a fallback approach)
-                // Format appears to be: USD 1203.983 / EUR 1401.195 for Kinguila
+                // Find Casa de Câmbio section
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
 
-                // This is a simplified extraction - may need adjustment based on actual DOM
-                const sections = document.querySelectorAll('[class*="rate"], [class*="cambio"], [class*="box"]');
-
-                sections.forEach(section => {
-                    const text = section.innerText || '';
-
-                    if (text.includes('Kinguila') || text.includes('kinguila')) {
-                        // Extract Kinguila rates
-                        const matches = text.match(/(\d+[.,]\d+)/g);
-                        if (matches && matches.length >= 2) {
-                            results.kinguila.usd = extractRate(matches[0]);
-                            results.kinguila.eur = extractRate(matches[1]);
+                    if (line === 'Casa de Câmbio') {
+                        // Look at next 10 lines for USD and EUR rates
+                        const nextLines = lines.slice(i, i + 15).join(' ');
+                        // Extract all numbers with pattern \d+\.\d+ (e.g., 1058.045)
+                        const rates = nextLines.match(/\d+\.\d+/g);
+                        if (rates && rates.length >= 2) {
+                            // First rate is USD, second is EUR
+                            results.casaCambio.usd = parseFloat(rates[0]);
+                            results.casaCambio.eur = parseFloat(rates[1]);
                         }
                     }
 
-                    if (text.includes('Casa de Câmbio') || text.includes('Casa de Cambio')) {
-                        // Extract Casa de Câmbio rates
-                        const matches = text.match(/(\d+[.,]\d+)/g);
-                        if (matches && matches.length >= 2) {
-                            results.casaCambio.usd = extractRate(matches[0]);
-                            results.casaCambio.eur = extractRate(matches[1]);
+                    if (line === 'Kinguila') {
+                        // Look at next 10 lines for USD and EUR rates
+                        const nextLines = lines.slice(i, i + 15).join(' ');
+                        const rates = nextLines.match(/\d+\.\d+/g);
+                        if (rates && rates.length >= 2) {
+                            // First rate is USD, second is EUR
+                            results.kinguila.usd = parseFloat(rates[0]);
+                            results.kinguila.eur = parseFloat(rates[1]);
                         }
                     }
-                });
+                }
 
                 return results;
             });
@@ -92,23 +81,23 @@ const path = require('path');
                 fullPage: true
             });
 
-            // Note: Since angocambio.ao doesn't show buy/sell separately,
-            // we'll use the single value as the sell rate and estimate buy as 98% of sell
+            // Note: angocambio.ao doesn't separate buy/sell rates
+            // We'll use the single value for both buy and sell
             if (data.kinguila.usd) {
                 results.kinguila.usd_sell = data.kinguila.usd;
-                results.kinguila.usd_buy = data.kinguila.usd * 0.98; // Estimate 2% spread
+                results.kinguila.usd_buy = data.kinguila.usd;
             }
             if (data.kinguila.eur) {
                 results.kinguila.eur_sell = data.kinguila.eur;
-                results.kinguila.eur_buy = data.kinguila.eur * 0.98;
+                results.kinguila.eur_buy = data.kinguila.eur;
             }
             if (data.casaCambio.usd) {
                 results.casaCambio.usd_sell = data.casaCambio.usd;
-                results.casaCambio.usd_buy = data.casaCambio.usd * 0.98;
+                results.casaCambio.usd_buy = data.casaCambio.usd;
             }
             if (data.casaCambio.eur) {
                 results.casaCambio.eur_sell = data.casaCambio.eur;
-                results.casaCambio.eur_buy = data.casaCambio.eur * 0.98;
+                results.casaCambio.eur_buy = data.casaCambio.eur;
             }
 
             log.info('✅ Extraction complete', results);

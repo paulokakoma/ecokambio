@@ -751,7 +751,7 @@
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                 </path>
                             </svg>
-                            <span>Atualizar Taxas</span>
+                            <span>Atualizar Todas as Taxas</span>
                         </button>
                         <input type="search" id="bank-search-input" placeholder="Procurar por nome ou código..."
                             class="w-full md:w-64 px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition">
@@ -1532,6 +1532,7 @@
                 allInformalProviders = data.map(p => ({
                     id: p.id,
                     name: p.name,
+                    last_updated: p.last_updated, // Timestamp of last update
                     exchange_rates: [
                         { currency_pair: 'USD/AOA', sell_rate: p.usd_rate },
                         { currency_pair: 'EUR/AOA', sell_rate: p.eur_rate },
@@ -1560,7 +1561,30 @@
             if (!provider) { contentContainer.innerHTML = '<p class="text-gray-500">Província não encontrada.</p>'; return; }
 
             const requiredPairs = ['USD/AOA', 'EUR/AOA', 'USDT/AOA']; // eslint-disable-line
-            let content = `<div class="relative w-full max-w-sm mx-auto"><div class="absolute -top-10 right-0 flex items-center space-x-2"><button class="edit-province-btn p-1 text-slate-400 hover:text-indigo-600" data-id="${provider.id}" data-name="${provider.name}" title="Editar Nome"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg></button><button class="delete-province-btn p-1 text-slate-400 hover:text-red-500" data-id="${provider.id}" data-name="${provider.name}" title="Apagar Província"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div><form id="informal-form" data-provider-id="${provider.id}" class="space-y-4">`;
+
+            // Format last updated timestamp
+            let lastUpdateText = '-';
+            if (provider.last_updated) {
+                lastUpdateText = new Date(provider.last_updated).toLocaleString('pt-PT', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            let content = `<div class="relative w-full max-w-sm mx-auto"><div class="absolute -top-10 right-0 flex items-center space-x-2"><button class="edit-province-btn p-1 text-slate-400 hover:text-indigo-600" data-id="${provider.id}" data-name="${provider.name}" title="Editar Nome"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg></button><button class="delete-province-btn p-1 text-slate-400 hover:text-red-500" data-id="${provider.id}" data-name="${provider.name}" title="Apagar Província"><svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div>`;
+
+            // Add timestamp display
+            content += `<div class="text-sm text-slate-500 text-center mb-4 -mt-2">
+                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Última atualização: <strong>${lastUpdateText}</strong></span>
+            </div>`;
+
+            content += `<form id="informal-form" data-provider-id="${provider.id}" class="space-y-4">`;
             requiredPairs.forEach(pair => {
                 const existingRate = provider.exchange_rates.find(r => r.currency_pair === pair);
                 content += `<div><label class="block text-sm font-medium text-gray-700">${pair}</label><input type="text" data-rate-id="${existingRate?.id || ''}" data-pair="${pair}" value="${(existingRate?.sell_rate || 0).toLocaleString('pt-PT', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 8 })}" class="mt-1" inputmode="decimal"></div>`;
@@ -3137,21 +3161,26 @@
             spinner.classList.remove('hidden');
 
             try {
-                const response = await fetch('/api/admin/scraper/trigger', {
+                // Execute the master scraper that runs all scrapers sequentially
+                const response = await fetch('/api/scraper/trigger', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    showToast('Scraper iniciado! Aguarde alguns minutos e atualize os bancos.', 'success');
+                // Check if the master scraper started successfully
+                if (response.ok && data.success) {
+                    const message = data.message || 'Todos os scrapers foram iniciados com sucesso!';
+                    showToast(`✅ ${message}\u003cbr\u003e\u003cbr\u003eAguarde alguns minutos e atualize a página.`, 'success');
                 } else {
-                    showToast(data.message || 'Erro ao iniciar scraper', 'error');
+                    const errorMsg = data.message || 'Erro ao executar os scrapers';
+                    showToast(`❌ ${errorMsg}`, 'error');
                 }
+
             } catch (error) {
-                console.error('Erro ao executar scraper:', error);
-                showToast('Erro ao executar scraper', 'error');
+                console.error('Erro ao executar scrapers:', error);
+                showToast('Erro ao executar scrapers', 'error');
             } finally {
                 btn.disabled = false;
                 icon.classList.remove('hidden');

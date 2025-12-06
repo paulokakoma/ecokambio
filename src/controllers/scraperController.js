@@ -1,4 +1,4 @@
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const supabase = require('../config/supabase');
 
@@ -77,30 +77,56 @@ const getHealth = async (req, res) => {
  */
 const triggerScraper = async (req, res) => {
     try {
+        const fs = require('fs');
         const projectRoot = path.resolve(__dirname, '../..');
+        console.log('📂 Project root:', projectRoot);
 
-        // Run scraper in background
-        exec('npm run scrape', { cwd: projectRoot }, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Scraper execution error: ${error.message}`);
-                return;
-            }
-            if (stderr) {
-                console.error(`Scraper stderr: ${stderr}`);
-            }
-            console.log(`Scraper output: ${stdout}`);
+        // Create logs directory if it doesn't exist
+        const logsDir = path.join(projectRoot, 'logs');
+        if (!fs.existsSync(logsDir)) {
+            fs.mkdirSync(logsDir, { recursive: true });
+        }
+
+        // Create log files for stdout and stderr
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const stdoutLog = path.join(logsDir, `scraper-${timestamp}.log`);
+        const stderrLog = path.join(logsDir, `scraper-${timestamp}.error.log`);
+
+        // Open file descriptors for logs
+        const stdoutFd = fs.openSync(stdoutLog, 'a');
+        const stderrFd = fs.openSync(stderrLog, 'a');
+
+        // Use spawn with detached mode so the process survives server restarts
+        const scriptPath = path.join(projectRoot, 'webscraper', 'run-all-scrapers.js');
+        console.log('🚀 Spawning scraper:', scriptPath);
+        console.log(`📝 Logs will be written to: ${stdoutLog}`);
+
+        const child = spawn('node', [scriptPath], {
+            cwd: projectRoot,
+            detached: true,
+            stdio: ['ignore', stdoutFd, stderrFd]  // Use file descriptors
         });
 
+        //  Unreference so parent can exit
+        child.unref();
+
+        // Close file descriptors in parent process
+        fs.close(stdoutFd, () => { });
+        fs.close(stderrFd, () => { });
+
+        console.log(`✅ Scraper process started with PID: ${child.pid}`);
+        console.log(`📁 Check logs at: ${stdoutLog}`);
+
+        // Send immediate response
         res.json({
             success: true,
-            message: 'Scraper started in background. Check logs for progress.'
+            message: 'Todos os scrapers foram iniciados (Formal, Informal, USDT Formal e USDT Informal).',
+            pid: child.pid,
+            logFile: stdoutLog
         });
     } catch (error) {
-        console.error('Error triggering scraper:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to trigger scraper'
-        });
+        console.error('❌ Error triggering scrapers:', error);
+        res.status(500).json({ success: false, message: 'Failed to start scrapers', error: error.message });
     }
 };
 
