@@ -655,20 +655,22 @@
 
 
 
-    <header class="bg-white shadow-sm">
+    <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
                 <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56"
                     height="56" class="h-12 md:h-14 w-auto">
                 <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
             </a>
+
+            <!-- Desktop Navigation -->
             <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
                 <a href="/blog"
                     class="text-slate-600 hover:text-emerald-600 font-semibold transition-colors hidden md:block">Blog</a>
                 <a href="/sobre"
                     class="text-slate-600 hover:text-emerald-600 font-semibold transition-colors hidden md:block">Sobre</a>
                 <a href="/visa" id="header-visa-btn"
-                    class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
+                    class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105 hidden md:flex"
                     title="Adquira já o seu cartão Visa">
                     <picture>
                         <source srcset="/assets/visa.webp" type="image/webp">
@@ -678,9 +680,61 @@
                     </picture>
                     <span class="text-xs md:text-sm font-bold text-emerald-700 mt-1">Adquira já o teu Visa</span>
                 </a>
+
+                <!-- Mobile Hamburger Button -->
+                <button id="mobile-menu-btn"
+                    class="md:hidden text-slate-600 hover:text-emerald-600 focus:outline-none ml-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round"
+                            stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200 shadow-lg">
+            <nav class="px-4 py-4 space-y-3">
+                <a href="/blog"
+                    class="block py-3 px-4 text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all font-semibold">
+                    📝 Blog
+                </a>
+                <a href="/sobre"
+                    class="block py-3 px-4 text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all font-semibold">
+                    ℹ️ Sobre Nós
+                </a>
+                <a href="/visa"
+                    class="block py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg transition-all font-bold text-center shadow-md hover:shadow-lg">
+                    💳 Adquira o seu Visa Virtual
+                </a>
             </nav>
         </div>
     </header>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking on a link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            });
+        });
+    </script>
 
     <!-- SEO-friendly content (hidden visually, visible to crawlers) -->
     <div class="sr-only" aria-hidden="false">
