@@ -56,8 +56,11 @@ const limiter = rateLimit({
     max: 100, // Limit each IP to 100 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
-});
-app.use('/api/', limiter); // Apply rate limiting to API routes
+})
+
+    ;
+// Legacy rate limiter for old API routes
+app.use('/api/', limiter);
 
 // Trust the first proxy (Railway/Cloudflare)
 // Required for secure cookies to work correctly behind a proxy
@@ -162,8 +165,29 @@ app.get('/sobre', (req, res) => {
 // View Routes - handles all page rendering
 app.use('/', viewRoutes);
 
-// API Route for Frontend Configuration
-// Esta rota fornece as chaves públicas necessárias para o frontend inicializar o Supabase.
+//=============================================================================
+// API ROUTES
+//=============================================================================
+
+// API v1 - New standardized API with middleware
+const apiResponse = require('./src/middleware/apiResponse');
+const apiKeyAuth = require('./src/middleware/apiKeyAuth');
+const apiV1Routes = require('./src/routes/api/v1/index');
+
+// Apply API response middleware and optional API key auth to all /api/v1 routes
+// The API key auth is optional - it doesn't block requests without a key
+// but it enables higher rate limits for those who have one
+app.use('/api/v1', apiResponse, apiKeyAuth.optional, apiV1Routes);
+
+// Legacy API routes - kept for backwards compatibility
+// These will redirect to v1 endpoints where possible
+app.get('/api/informal-rates', async (req, res, next) => {
+    // Forward to v1 endpoint
+    req.url = '/api/v1/rates/informal';
+    next('route');
+});
+
+// API Route for Frontend Configuration (legacy)
 app.get('/api/config', (req, res) => {
     res.json({
         supabaseUrl: config.supabase.url,
@@ -171,7 +195,7 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// API Routes
+// API Routes (Legacy)
 app.use("/api", authRoutes); // Contém /login, /logout, etc. Não deve ter `isAdmin` aqui.
 app.use("/api", publicRoutes); // Rotas públicas, sem `isAdmin`.
 
@@ -184,6 +208,7 @@ app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // 
 
 // Admin API Routes (Protected)
 app.use("/api", isAdmin, adminRoutes);
+
 
 // Health Check
 app.get('/health', (req, res) => res.status(200).send('OK'));

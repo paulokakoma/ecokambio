@@ -14,6 +14,8 @@ router.get("/termos", viewController.serveTerms);
 router.get("/termos-e-condicoes", viewController.serveTerms); // Alias
 router.get("/privacidade", viewController.servePrivacy);
 router.get("/fundadores", viewController.serveFounders);
+router.get("/developers", viewController.serveDevelopers);
+router.get("/api-docs", viewController.serveApiDocs);
 router.get("/robots.txt", viewController.serveRobots);
 router.get("/sitemap.xml", viewController.serveSitemap);
 router.get("/BingSiteAuth.xml", viewController.serveBingAuth);

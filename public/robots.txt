@@ -8,26 +8,17 @@ Allow: /
 User-agent: AdsBot-Google-Mobile
 Allow: /
 
-# Regras para Googlebot - Acesso Total
-User-agent: Googlebot
-Allow: /
-
-User-agent: Googlebot-Image
-Allow: /
-
-# Regras para todos os outros bots
+# Regras Gerais para todos os bots (incluindo Googlebot)
 User-agent: *
-
-# Permitir acesso à raiz e todas as páginas públicas
 Allow: /
 Allow: /blog/
 Allow: /css/
 Allow: /js/
 Allow: /assets/
 
-# Bloquear apenas áreas administrativas e de serviço
+# Bloquear apenas áreas administrativas e privadas
 Disallow: /admin/
-Disallow: /api/
+# Disallow: /api/ -> Permitir API para renderização do conteúdo (fetch)
 Disallow: /login
 Disallow: /login.html
 Disallow: /teste.html
@@ -36,7 +27,7 @@ Disallow: /node_modules/
 Disallow: /webscraper/
 Disallow: /storage/
 
-# Bloquear URLs com parâmetros UTM (tracking)
+# Bloquear URLs com parâmetros UTM (tracking) para evitar conteúdo duplicado
 Disallow: /*?utm_source=
 Disallow: /*?utm_medium=
 Disallow: /*?utm_campaign=
@@ -45,4 +36,3 @@ Disallow: /*?utm_content=
 
 # Localização do Sitemap
 Sitemap: https://ecokambio.com/sitemap.xml
-Sitemap: https://www.ecokambio.com/sitemap.xml

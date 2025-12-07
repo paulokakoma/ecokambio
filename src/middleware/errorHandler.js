@@ -26,7 +26,7 @@ const errorHandler = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
-    // Usa o logger Winston para registrar o erro.
+    // Usa o logger Winston para registrar o erro (server-side only).
     logger.error(err.message, {
         statusCode: err.statusCode,
         message: err.message,
@@ -35,29 +35,54 @@ const errorHandler = (err, req, res, next) => {
         stack: err.stack,
     });
 
+    // CRITICAL SECURITY: Never leak stack traces in production
     if (config.isDevelopment) {
-        // Em desenvolvimento, envie uma resposta de erro detalhada.
+        // Em desenvolvimento, envie uma resposta de erro detalhada (debugging).
         return res.status(err.statusCode).json({
-            status: err.status,
-            error: err,
-            message: err.message,
-            stack: err.stack,
+            success: false,
+            error: {
+                code: err.code || 'ERROR',
+                message: err.message,
+                stack: err.stack, // Only in development
+                details: err.errors || {}
+            },
+            meta: {
+                timestamp: new Date().toISOString(),
+                version: '1.0.0'
+            }
         });
     }
 
-
-
+    // PRODUCTION: Generic messages only
     if (err.isOperational) {
         // Se for um erro operacional (AppError), podemos confiar na mensagem.
         return res.status(err.statusCode).json({
-            status: err.status,
-            message: err.message,
-            ...(err.errors && { errors: err.errors }) // Inclui detalhes do erro se existirem
+            success: false,
+            error: {
+                code: err.code || 'OPERATIONAL_ERROR',
+                message: err.message,
+                details: err.errors || {}
+            },
+            meta: {
+                timestamp: new Date().toISOString(),
+                version: '1.0.0'
+            }
         });
     }
 
     // Se for um erro de programação ou desconhecido, envie uma mensagem genérica.
-    return res.status(500).json({ status: 'error', message: 'Ocorreu um erro inesperado no servidor.' });
+    // NEVER leak internal details or stack traces
+    return res.status(500).json({
+        success: false,
+        error: {
+            code: 'INTERNAL_ERROR',
+            message: 'Ocorreu um erro interno. Por favor, tente novamente mais tarde.'
+        },
+        meta: {
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+        }
+    });
 };
 
 module.exports = { errorHandler, AppError };
