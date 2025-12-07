@@ -794,6 +794,11 @@ video {
   margin-bottom: 4rem;
 }
 
+.my-12 {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
 .-mb-px {
   margin-bottom: -1px;
 }
