@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-06T23:45:50.435Z",
+  "lastUpdated": "2025-12-07T11:09:15.244Z",
   "rates": [
     {
       "bank": "BFA",
@@ -210,61 +210,6 @@
       "bank": "BCI",
       "currency": "ZAR",
       "sell": "55,115"
-    },
-    {
-      "bank": "BIC",
-      "currency": "CAD",
-      "sell": "670,523"
-    },
-    {
-      "bank": "BIC",
-      "currency": "USD",
-      "sell": "939,471"
-    },
-    {
-      "bank": "BIC",
-      "currency": "ZAR",
-      "sell": "55,027"
-    },
-    {
-      "bank": "BIC",
-      "currency": "CHF",
-      "sell": "1163,548"
-    },
-    {
-      "bank": "BIC",
-      "currency": "DKK",
-      "sell": "145,777"
-    },
-    {
-      "bank": "BIC",
-      "currency": "EUR",
-      "sell": "1132,161"
-    },
-    {
-      "bank": "BIC",
-      "currency": "GBP",
-      "sell": "1247,213"
-    },
-    {
-      "bank": "BIC",
-      "currency": "JPY",
-      "sell": "6,023"
-    },
-    {
-      "bank": "BIC",
-      "currency": "NAD",
-      "sell": "55,243"
-    },
-    {
-      "bank": "BIC",
-      "currency": "NOK",
-      "sell": "92,457"
-    },
-    {
-      "bank": "BIC",
-      "currency": "SEK",
-      "sell": "99,315"
     },
     {
       "bank": "YETU",
