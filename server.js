@@ -126,20 +126,38 @@ app.set('trust proxy', 1);
 app.use(subdomainMiddleware);
 
 // Session Configuration
-// Use MemoryStore for serverless/Vercel, FileStore for local development
+// Use PostgreSQL for production (Railway/Vercel), FileStore for local development
 let sessionStore;
-if (process.env.VERCEL || !config.isDevelopment) {
-    // In Vercel or production, use default MemoryStore (session data in memory)
-    sessionStore = undefined;
-} else {
-    // In local development, use FileStore
+
+if (config.isDevelopment) {
+    // Local development: Use FileStore
     const FileStore = require("session-file-store")(session);
     sessionStore = new FileStore({
         path: './sessions',
         ttl: 30 * 24 * 60 * 60, // 30 days
         retries: 0
     });
+    logger.info('📁 Using FileStore for sessions (development)');
+} else if (process.env.DATABASE_URL) {
+    // Production with PostgreSQL: Use PostgreSQL session store
+    const pgSession = require('connect-pg-simple')(session);
+
+    sessionStore = new pgSession({
+        conString: process.env.DATABASE_URL,
+        tableName: 'session',
+        createTableIfMissing: true,
+        ttl: 30 * 24 * 60 * 60 // 30 days
+    });
+
+    logger.info('✅ Using PostgreSQL session store for production');
+} else {
+    // Fallback to MemoryStore if no DATABASE_URL (Vercel, etc.)
+    // Note: Sessions will be lost on redeploy
+    logger.warn('⚠️  Using MemoryStore - sessions will not persist across redeploys');
+    logger.warn('   Add DATABASE_URL environment variable to persist sessions');
+    sessionStore = undefined;
 }
+
 
 app.use(session({
     store: sessionStore,
@@ -266,8 +284,29 @@ app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // 
 app.use("/api", isAdmin, adminRoutes);
 
 
-// Health Check
-app.get('/health', (req, res) => res.status(200).send('OK'));
+// Health Check - Enhanced for Railway monitoring
+app.get('/health', async (req, res) => {
+    const healthcheck = {
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: config.nodeEnv,
+        version: require('./package.json').version || '1.0.0'
+    };
+
+    // Optional: Check Supabase connectivity
+    if (req.query.detailed === 'true') {
+        try {
+            const supabase = require('./src/config/supabase');
+            const { error } = await supabase.from('exchange_rates').select('count').limit(1);
+            healthcheck.database = error ? 'disconnected' : 'connected';
+        } catch (err) {
+            healthcheck.database = 'error';
+        }
+    }
+
+    res.status(200).json(healthcheck);
+});
 
 // View Routes - handles subdomain routing
 // A lógica de servir os ficheiros principais (index.html vs admin.html)
