@@ -143,25 +143,9 @@
 <body class="min-h-screen flex flex-col">
 
 
-    <header class="bg-white shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
-            <a href="/" class="flex items-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity">
-                <img src="/assets/main-logo.svg" alt="EcoKambio" class="h-12 md:h-14 w-auto">
-                <span class="text-lg md:text-xl font-bold text-emerald-600">EcoKambio</span>
-            </a>
-            <nav class="flex-1 flex justify-end items-center space-x-4 md:space-x-8 ml-auto">
-                <a href="/visa" id="header-visa-btn"
-                    class="visa-heartbeat flex flex-col items-center text-center transition-transform duration-300 hover:scale-105"
-                    title="Adquira já o seu cartão Visa">
-                    <picture>
-                        <source srcset="/assets/visa.webp" type="image/webp">
-                        <img src="/assets/visa.png" alt="Visa" class="h-14 md:h-20 rounded-md shadow-md">
-                    </picture>
-                    <span class="text-xs md:text-sm font-bold text-emerald-600 mt-1">Adquira já o teu Visa</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+
+    <header data-include="/components/header.html" class="bg-white shadow-sm"></header>
+
 
     <main class="flex-grow w-full">
         <!-- Hero Section -->
