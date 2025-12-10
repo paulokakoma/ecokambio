@@ -9,8 +9,8 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const websocket = require("./src/websocket");
 
-// O Railway (e outras plataformas modernas) gere o SSL/TLS externamente.
-// A nossa aplicação deve sempre correr um servidor HTTP simples.
+// Plataformas modernas gerem o SSL/TLS externamente.
+// A nossa aplicação corre um servidor HTTP simples.
 const server = http.createServer(app);
 
 // Initialize WebSocket
@@ -62,7 +62,7 @@ const limiter = rateLimit({
 // Legacy rate limiter for old API routes
 app.use('/api/', limiter);
 
-// Trust the first proxy (Railway/Cloudflare)
+// Trust the first proxy (Cloudflare)
 // Required for secure cookies to work correctly behind a proxy
 app.set('trust proxy', 1);
 

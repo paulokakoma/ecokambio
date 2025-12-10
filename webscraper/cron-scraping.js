@@ -13,10 +13,10 @@ const targets = [
 ];
 
 (async () => {
-    console.log('🚀 Starting Cron Scraper (Railway Worker)...');
+    console.log('🚀 Starting Cron Scraper...');
 
     const crawler = new PuppeteerCrawler({
-        // Critical for Railway/Docker environments
+        // Critical for Docker environments
         launchContext: {
             launchOptions: {
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -217,8 +217,8 @@ const targets = [
             return rate; // Fallback to original if parsing fails
         });
 
-        // Note: In a Railway worker, this file won't persist to the web service, 
-        // but we keep it for consistency with the original script.
+        // Note: This file persists locally but not in serverless environments.
+        // The primary source of truth is Supabase.
         const outputPath = path.join(process.cwd(), 'public', 'exchange_rates.json');
         const data = { lastUpdated: new Date().toISOString(), rates: normalizedRates };
         await writeFile(outputPath, JSON.stringify(data, null, 2));

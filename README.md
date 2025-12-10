@@ -324,7 +324,7 @@ docker run -p 3000:3000 --env-file .env ecokambio
 
 ## 🌐 Deployment
 
-### Railway / Render / Heroku
+### Render / Heroku
 
 1. Conecte o repositório GitHub
 2. Configure as variáveis de ambiente no painel

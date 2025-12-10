@@ -2420,7 +2420,7 @@
 
         async function initializeApp() {
             try {
-                // Volta a usar o endpoint /api/config, que lê as variáveis de ambiente fornecidas pelo Railway
+                // Volta a usar o endpoint /api/config, que lê as variáveis de ambiente
                 const configResponse = await fetch('/api/config');
                 if (!configResponse.ok) throw new Error('Falha ao carregar a configuração do servidor.');
                 const config = await configResponse.json();
