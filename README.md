@@ -324,18 +324,12 @@ docker run -p 3000:3000 --env-file .env ecokambio
 
 ## 🌐 Deployment
 
-### Render / Heroku
+### Render
 
-1. Conecte o repositório GitHub
-2. Configure as variáveis de ambiente no painel
+1. Conecte o repositório GitHub ao Render
+2. Configure as variáveis de ambiente no painel do Render
 3. Deploy automático a cada push para `main`
-
-### Vercel
-
-```bash
-npm install -g vercel
-vercel --prod
-```
+4. Render gerencia HTTPS e scaling automaticamente
 
 ### VPS (Ubuntu/Debian)
 
