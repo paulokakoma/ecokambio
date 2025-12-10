@@ -1,0 +1,73 @@
+# Development files
+node_modules/
+.venv/
+__pycache__/
+
+# Environment files (will be configured in Railway dashboard)
+.env
+.env.local
+.env.railway
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sessions (use Railway's volume or database for production)
+sessions/
+
+# Cache and temp files
+.cache/
+.tmp/
+tmp/
+.DS_Store
+
+# Documentation and local deploy scripts
+docs/
+DEPLOY_*.md
+COMANDOS_*.md
+setup_server.sh
+PASTE_NO_SERVIDOR.sh
+*.exp
+deploy.yml
+sftp_batch.txt
+nginx*.conf
+
+# Certificates (Railway handles SSL)
+certs/
+
+# Git
+.git/
+.gitignore
+.gitkeep
+
+# Build artifacts (will be rebuilt on Railway)
+public/css/output.css
+
+# Test and debug files
+teste-api/
+storage/test/
+
+# Archives
+*.tar.gz
+*.zip
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local scripts
+run_security_test.sh
+generate-hash.js
+
+# Config files not needed in production
+tailwind.config.js
+postcss.config.js
+nodemon.json
+ecosystem.config.js
+settings.json

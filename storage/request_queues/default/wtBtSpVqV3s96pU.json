@@ -1,9 +1,0 @@
-{
-	"id": "wtBtSpVqV3s96pU",
-	"json": "{\"id\":\"wtBtSpVqV3s96pU\",\"url\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"uniqueKey\":\"https://www.bci.ao/particular/conversor-de-moeda\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BCI\"}}",
-	"method": "GET",
-	"orderNo": 1765368182881,
-	"retryCount": 0,
-	"uniqueKey": "https://www.bci.ao/particular/conversor-de-moeda",
-	"url": "https://www.bci.ao/particular/conversor-de-moeda"
-}

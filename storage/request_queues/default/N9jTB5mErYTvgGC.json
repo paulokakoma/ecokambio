@@ -1,9 +1,0 @@
-{
-	"id": "N9jTB5mErYTvgGC",
-	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\"}}",
-	"method": "GET",
-	"orderNo": 1765368182881,
-	"retryCount": 0,
-	"uniqueKey": "https://www.bancobic.ao/inicio/particulares/index",
-	"url": "https://www.bancobic.ao/inicio/particulares/index"
-}
