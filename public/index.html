@@ -1784,9 +1784,12 @@
 
             function populateBankSelector(banks) {
                 if (!banks || banks.length === 0) return '<div class="px-4 py-3 text-sm text-gray-600">Nenhum banco disponível.</div>';
-                return banks.sort((a, b) => a.code.localeCompare(b.code)).map(bank =>
-                    `<div class="bank-option px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-800 text-sm" data-code="${bank.code}" data-usd-rate="${bank.usd_rate}" data-eur-rate="${bank.eur_rate}" data-fee-margin="${bank.fee_margin}" data-fee-final="${bank.fee_final}"><span class="font-bold">${bank.code}</span></div>`
-                ).join('');
+                return banks
+                    .filter(bank => bank.code !== 'BINANCE') // Exclude Binance from dropdown
+                    .sort((a, b) => a.code.localeCompare(b.code))
+                    .map(bank =>
+                        `<div class="bank-option px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-800 text-sm" data-code="${bank.code}" data-usd-rate="${bank.usd_rate}" data-eur-rate="${bank.eur_rate}" data-fee-margin="${bank.fee_margin}" data-fee-final="${bank.fee_final}"><span class="font-bold">${bank.code}</span></div>`
+                    ).join('');
             }
 
             function selectBank(bankData) {
