@@ -44,7 +44,63 @@ const scraperController = require("./src/controllers/scraperController");
 // Security Middleware
 // app.use(enforceHttps);
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.jsdelivr.net",
+                "https://pagead2.googlesyndication.com",
+                "https://www.googletagmanager.com",
+                "https://www.google-analytics.com",
+                "https://googleads.g.doubleclick.net",
+                "https://partner.googleadservices.com",
+                "https://tpc.googlesyndication.com",
+                "https://www.google.com"
+            ],
+            scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:",
+                "https://pagead2.googlesyndication.com",
+                "https://www.google-analytics.com",
+                "https://googleads.g.doubleclick.net",
+                "https://www.google.com"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://drkjkkpzujwnkghtdokz.supabase.co",
+                "https://www.google-analytics.com",
+                "https://pagead2.googlesyndication.com",
+                "https://googleads.g.doubleclick.net",
+                "https://partner.googleadservices.com",
+                "https://ep1.adtrafficquality.google",
+                "https://ep2.adtrafficquality.google"
+            ],
+            frameSrc: [
+                "'self'",
+                "https://pagead2.googlesyndication.com",
+                "https://googleads.g.doubleclick.net",
+                "https://tpc.googlesyndication.com",
+                "https://www.google.com"
+            ],
+            childSrc: [
+                "'self'",
+                "https://pagead2.googlesyndication.com"
+            ]
+        }
+    }
 }));
 app.use(compression()); // Enable Gzip compression
 app.use(cookieParser(config.session.secret)); // Parse signed cookies
