@@ -1,0 +1,16 @@
+[33mWARN[39m [33m PuppeteerCrawler:[39m Reclaiming failed request back to the list or queue. net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda
+[90m {"id":"wtBtSpVqV3s96pU","url":"https://www.bci.ao/particular/conversor-de-moeda","retryCount":1}[39m
+[33mWARN[39m [33m PuppeteerCrawler:[39m Reclaiming failed request back to the list or queue. net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda
+[90m {"id":"wtBtSpVqV3s96pU","url":"https://www.bci.ao/particular/conversor-de-moeda","retryCount":2}[39m
+[33mWARN[39m [33m PuppeteerCrawler:[39m Reclaiming failed request back to the list or queue. net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda
+[90m {"id":"wtBtSpVqV3s96pU","url":"https://www.bci.ao/particular/conversor-de-moeda","retryCount":3}[39m
+[31mERROR[39m[33m PuppeteerCrawler:[39m Request failed and reached maximum retries. Error: net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda
+    at navigate (/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27)
+    at async Deferred.race (/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/util/Deferred.js:36:20)
+    at async CdpFrame.goto (/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:150:25)
+    at async CdpPage.goto (/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/api/Page.js:572:20)
+    at async PuppeteerCrawler._handleNavigation (/Users/av/Documents/Projetos/ecokambio-main/node_modules/@crawlee/browser/internals/browser-crawler.js:334:41)
+    at async PuppeteerCrawler._runRequestHandler (/Users/av/Documents/Projetos/ecokambio-main/node_modules/@crawlee/browser/internals/browser-crawler.js:260:13)
+    at async PuppeteerCrawler._runRequestHandler (/Users/av/Documents/Projetos/ecokambio-main/node_modules/@crawlee/puppeteer/internals/puppeteer-crawler.js:114:9)
+    at async wrap (/Users/av/Documents/Projetos/ecokambio-main/node_modules/@apify/timeout/cjs/index.cjs:54:21)[90m {"id":"wtBtSpVqV3s96pU","url":"https://www.bci.ao/particular/conversor-de-moeda","method":"GET","uniqueKey":"https://www.bci.ao/particular/conversor-de-moeda"}[39m
+[31mERROR[39m[33m PuppeteerCrawler:[39m Request failed for BCI: https://www.bci.ao/particular/conversor-de-moeda

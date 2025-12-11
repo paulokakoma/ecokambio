@@ -1,29 +1,53 @@
 {
-  "requestsFinished": 1,
-  "requestsFailed": 0,
-  "requestsRetries": 0,
+  "requestsFinished": 5,
+  "requestsFailed": 1,
+  "requestsRetries": 1,
   "requestsFailedPerMinute": 0,
-  "requestsFinishedPerMinute": 2,
-  "requestMinDurationMillis": 24185,
-  "requestMaxDurationMillis": 24185,
-  "requestTotalFailedDurationMillis": 0,
-  "requestTotalFinishedDurationMillis": 24185,
-  "crawlerStartedAt": "2025-12-11T07:49:36.086Z",
-  "crawlerFinishedAt": "2025-12-11T07:50:00.574Z",
-  "statsPersistedAt": "2025-12-11T07:50:00.574Z",
-  "crawlerRuntimeMillis": 24849,
-  "crawlerLastStartTimestamp": 1765439375725,
+  "requestsFinishedPerMinute": 5,
+  "requestMinDurationMillis": 11705,
+  "requestMaxDurationMillis": 42931,
+  "requestTotalFailedDurationMillis": 10505,
+  "requestTotalFinishedDurationMillis": 139330,
+  "crawlerStartedAt": "2025-12-11T08:03:02.188Z",
+  "crawlerFinishedAt": "2025-12-11T08:04:06.068Z",
+  "statsPersistedAt": "2025-12-11T08:04:06.068Z",
+  "crawlerRuntimeMillis": 64154,
+  "crawlerLastStartTimestamp": 1765440181914,
   "requestRetryHistogram": [
+    5,
+    null,
+    null,
     1
   ],
   "statsId": 0,
-  "requestAvgFailedDurationMillis": null,
-  "requestAvgFinishedDurationMillis": 24185,
-  "requestTotalDurationMillis": 24185,
-  "requestsTotal": 1,
+  "requestAvgFailedDurationMillis": 10505,
+  "requestAvgFinishedDurationMillis": 27866,
+  "requestTotalDurationMillis": 149835,
+  "requestsTotal": 6,
   "requestsWithStatusCode": {
-    "200": 1
+    "200": 4,
+    "304": 1
   },
-  "errors": {},
-  "retryErrors": {}
+  "errors": {
+    "/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27": {
+      "missing error code": {
+        "Error": {
+          "net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda": {
+            "count": 1
+          }
+        }
+      }
+    }
+  },
+  "retryErrors": {
+    "/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27": {
+      "missing error code": {
+        "Error": {
+          "net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda": {
+            "count": 3
+          }
+        }
+      }
+    }
+  }
 }

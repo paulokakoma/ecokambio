@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-12-11T07:49:29.594Z",
+  "lastUpdated": "2025-12-11T08:04:06.110Z",
   "rates": [
     {
       "bank": "BFA",
@@ -169,42 +169,42 @@
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1160,347"
+      "sell": "1155,033"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1331,257"
+      "sell": "1313,969"
     },
     {
       "bank": "YETU",
       "currency": "USD",
-      "sell": "996,434"
+      "sell": "987,207"
     },
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1160,347"
+      "sell": "1155,033"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1331,257"
+      "sell": "1313,969"
     },
     {
       "bank": "YETU",
       "currency": "USD",
-      "sell": "996,434"
+      "sell": "987,207"
     },
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1160,347"
+      "sell": "1155,033"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1331,257"
+      "sell": "1313,969"
     }
   ]
 }

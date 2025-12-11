@@ -1,0 +1,33 @@
+
+🚀 Iniciando execução de todos os scrapers...
+
+
+============================================================
+🏦 Executando: Mercado Formal (Bancos)
+============================================================
+
+🚀 Starting Cron Scraper...
+[32mINFO[39m [33m PuppeteerCrawler:[39m Starting the crawler.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BFA – https://www.bfa.ao/pt/particulares/
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 4 rates from BFA
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BAI – https://bancobai.ao/pt/cambios-e-valores
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 15 rates from BAI
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BIC – https://www.bancobic.ao/inicio/particulares/index
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 11 rates from BIC
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BNA – https://www.bna.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 3 rates from BNA
+[32mINFO[39m [33m PuppeteerCrawler:Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":10505,"requestAvgFinishedDurationMillis":24100,"requestsFinishedPerMinute":4,"requestsFailedPerMinute":0,"requestTotalDurationMillis":106904,"requestsTotal":5,"crawlerRuntimeMillis":60246,"retryHistogram":[4,null,null,1]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing YETU – https://www.bancoyetu.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 8 rates from YETU
+[32mINFO[39m [33m PuppeteerCrawler:[39m All requests from the queue have been processed, the crawler will shut down.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Final request statistics:[90m {"requestsFinished":5,"requestsFailed":1,"retryHistogram":[5,null,null,1],"requestAvgFailedDurationMillis":10505,"requestAvgFinishedDurationMillis":27866,"requestsFinishedPerMinute":5,"requestsFailedPerMinute":0,"requestTotalDurationMillis":149835,"requestsTotal":6,"crawlerRuntimeMillis":64155}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Error analysis:[90m {"totalErrors":1,"uniqueErrors":1,"mostCommonErrors":["1x: net::ERR_CONNECTION_RESET at https://www.bci.ao/particular/conversor-de-moeda (/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27)"]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Finished! Total 6 requests: 5 succeeded, 1 failed.[90m {"terminal":true}[39m
+✅ Puppeteer scraping completed
+💾 Data saved to /Users/av/Documents/Projetos/ecokambio-main/public/exchange_rates.json
+📡 Sending data to Supabase...
+📊 Transformed 41 records for upsert
+🔍 Deduplicated: 41 → 36 records
+✅ Data successfully saved to Supabase!
+   - Total rates: 36
+   - Banks: BFA, BAI, BIC, BNA, YETU
