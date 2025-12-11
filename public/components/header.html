@@ -1,17 +1,17 @@
 <header id="main-header" class="bg-white shadow-sm transition-all duration-300 border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-2 sm:px-3 lg:px-8 py-2 sm:py-2.5 lg:py-5 flex items-center">
+    <div class="max-w-7xl mx-auto px-2 sm:px-3 lg:px-8 py-1 sm:py-1.5 flex items-center">
         <a href="/"
-            class="flex items-center space-x-1 sm:space-x-2 md:space-x-3 hover:opacity-80 transition-all duration-200 group">
+            class="flex items-center space-x-1 sm:space-x-2 md:space-x-2.5 hover:opacity-80 transition-all duration-200 group">
             <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56"
-                height="56" class="h-7 sm:h-10 md:h-14 w-auto transition-transform duration-200 group-hover:scale-105">
-            <span class="text-sm sm:text-lg md:text-2xl font-bold text-emerald-600">EcoKambio</span>
+                height="56" class="h-5 sm:h-7 md:h-8 w-auto transition-transform duration-200 group-hover:scale-105">
+            <span class="text-xs sm:text-sm md:text-lg font-bold text-emerald-600">EcoKambio</span>
         </a>
 
         <!-- Navigation -->
         <nav
-            class="flex-1 flex justify-end items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-6 ml-1 sm:ml-auto">
+            class="flex-1 flex justify-end items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-5 ml-1 sm:ml-auto">
             <a href="/blog"
-                class="group relative px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 md:py-2.5 text-xs sm:text-sm md:text-base font-semibold text-slate-700 hover:text-emerald-600 bg-slate-50 hover:bg-emerald-50 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105 active:scale-95 border border-slate-200 hover:border-emerald-300">
+                class="group relative px-1.5 sm:px-2.5 md:px-3.5 py-0.5 sm:py-1 md:py-1.5 text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 hover:text-emerald-600 bg-slate-50 hover:bg-emerald-50 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105 active:scale-95 border border-slate-200 hover:border-emerald-300">
                 <span class="relative z-10">Blog</span>
                 <div
                     class="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300">
@@ -24,11 +24,11 @@
                 <picture>
                     <source srcset="/assets/visa.webp" type="image/webp">
                     <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127" height="80"
-                        class="h-14 sm:h-18 md:h-28 lg:h-32 xl:h-40 2xl:h-48 w-auto" style="aspect-ratio: 127/80;"
+                        class="h-10 sm:h-12 md:h-14 lg:h-17 xl:h-20 w-auto" style="aspect-ratio: 127/80;"
                         fetchpriority="high">
                 </picture>
                 <span
-                    class="text-[9px] sm:text-[10px] md:text-sm lg:text-base xl:text-lg font-semibold text-emerald-700 mt-1 sm:mt-1.5 md:mt-2">
+                    class="text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm font-semibold text-emerald-700 mt-0.5 sm:mt-1">
                     Adquira já o teu Visa</span>
             </a>
         </nav>
@@ -36,8 +36,28 @@
 
 </header>
 
+<style>
+    /* Transição suave para o efeito de glassmorphism */
+    #main-header {
+        transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #main-header.scrolled {
+        background: linear-gradient(to bottom,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0.75) 100%);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-bottom-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+    }
+</style>
+
 <script>
-    // Enhanced header scroll effect
+    // Enhanced header scroll effect with smooth transparency
     const header = document.getElementById('main-header');
     let lastScroll = 0;
 
@@ -45,11 +65,11 @@
         const currentScroll = window.pageYOffset;
 
         if (currentScroll > 20) {
-            header.classList.add('shadow-lg');
+            header.classList.add('shadow-lg', 'scrolled');
             header.classList.remove('shadow-sm');
         } else {
             header.classList.add('shadow-sm');
-            header.classList.remove('shadow-lg');
+            header.classList.remove('shadow-lg', 'scrolled');
         }
 
         lastScroll = currentScroll;

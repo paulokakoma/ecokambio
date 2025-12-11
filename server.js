@@ -126,7 +126,7 @@ app.set('trust proxy', 1);
 app.use(subdomainMiddleware);
 
 // Session Configuration
-// Use PostgreSQL for production (Railway/Vercel), FileStore for local development
+// Use PostgreSQL for production (Fly.io/Vercel), FileStore for local development
 let sessionStore;
 
 if (config.isDevelopment) {
@@ -284,7 +284,7 @@ app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // 
 app.use("/api", isAdmin, adminRoutes);
 
 
-// Health Check - Enhanced for Railway monitoring
+// Health Check - Enhanced for Fly.io monitoring
 app.get('/health', async (req, res) => {
     const healthcheck = {
         status: 'OK',

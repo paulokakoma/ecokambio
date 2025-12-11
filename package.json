@@ -14,7 +14,7 @@
     "scrape:puppeteer": "node webscraper/puppeteer-scraper.js",
     "build:prod": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify",
     "dev": "concurrently \"tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch\" \"nodemon server.js\"",
-    "railway:build": "npx playwright install --with-deps chromium && npm run build:prod"
+    "fly:build": "npx playwright install --with-deps chromium && npm run build:prod"
   },
   "keywords": [
     "express",

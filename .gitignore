@@ -1,6 +1,7 @@
 # Ficheiros de dependências e de ambiente
 node_modules
 .env
+.env.fly
 
 # Ficheiros gerados e de sessão
 public/exchange_rates.json

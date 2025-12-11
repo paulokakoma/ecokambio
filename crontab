@@ -1,0 +1,6 @@
+# Crontab para Supercronic - EcoKambio
+# Executar scraping a cada 4 horas
+0 */4 * * * cd /usr/src/app && npm run scrape:all >> /usr/src/app/logs/cron.log 2>&1
+
+# Log diário dos cron jobs ativos (apenas para monitoramento)
+0 0 * * * echo "Cron jobs ativos: $(date)" >> /usr/src/app/logs/cron-status.log
