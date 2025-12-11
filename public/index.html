@@ -1967,7 +1967,8 @@
                         eur_rate: p.exchange_rates.find(r => r.currency_pair === 'EUR/AOA')?.sell_rate || null,
                         usdt_rate: p.exchange_rates.find(r => r.currency_pair === 'USDT/AOA')?.sell_rate || null,
                         fee_margin: p.fee_margin || 0,
-                        base_fee_percent: p.base_fee_percent || 12
+                        base_fee_percent: p.base_fee_percent || 12,
+                        exchange_rates: p.exchange_rates  // Manténar o array completo para cards especiais (Binance)
                     })),
                     informal_rates_by_province: providers.filter(p => p.type === 'INFORMAL' && p.exchange_rates.length > 0)
                         .reduce((acc, p) => {
