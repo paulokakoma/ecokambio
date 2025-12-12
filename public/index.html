@@ -664,7 +664,7 @@
     <header data-include="/components/header.html" class="bg-white shadow-sm"></header>
 
     <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
 
         <!-- SEO Hero Section (Hidden from users, visible to search engines) -->
         <section class="sr-only">
@@ -682,14 +682,15 @@
             </div>
         </section>
 
-        <div class="text-center mb-8">
-            <div class="grid grid-cols-2 gap-4 rounded-3xl bg-white shadow-md p-3" role="tablist">
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 rounded-2xl sm:rounded-3xl bg-white shadow-md p-2 sm:p-3"
+                role="tablist">
                 <button
-                    class="tab-button tab-active rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
+                    class="tab-button tab-active rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3 sm:px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
                     id="market-tab" type="button" role="tab" aria-label="Ver taxas de câmbio do mercado">🏦
                     Mercado</button>
                 <button
-                    class="tab-button tab-inactive rounded-2xl py-4 px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
+                    class="tab-button tab-inactive rounded-xl sm:rounded-2xl py-3 sm:py-4 px-3 sm:px-4 md:px-8 text-sm md:text-base lg:text-lg font-bold focus:outline-none"
                     id="calculator-tab" type="button" role="tab"
                     aria-label="Abrir calculadora de custos de importação">🧮
                     Calculadora</button>
@@ -697,17 +698,17 @@
         </div>
         <section id="myTabContent">
             <div id="market-panel" role="tabpanel">
-                <div class="mb-8 flex justify-center">
+                <div class="mb-6 sm:mb-8 flex justify-center">
                     <div class="flex space-x-2 bg-gray-200 p-2 rounded-full" role="tablist">
                         <button id="formal-market-tab-btn" role="tab" aria-label="Ver taxas do mercado formal (bancos)"
-                            class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Formal</button>
+                            class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base">Formal</button>
                         <button id="informal-market-tab-btn" role="tab"
                             aria-label="Ver taxas do mercado informal (kinguilas)"
-                            class="py-2 px-8 rounded-full font-semibold transition-all duration-300">Informal</button>
+                            class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base">Informal</button>
                     </div>
                 </div>
                 <div id="formal-market-panel" role="tabpanel">
-                    <div class="market-container p-6 md:p-8">
+                    <div class="market-container p-4 sm:p-6 md:p-8">
                         <div class="mb-6">
                             <h3 class="text-2xl font-bold text-gray-800 flex items-center">🏛️ MERCADO FORMAL</h3>
                             <p id="formal-market-timestamp" class="text-sm text-gray-500 mt-1 flex items-center">
@@ -721,7 +722,7 @@
 
                         <!-- Novo Conversor de Moeda -->
                         <div id="quick-converter-container"
-                            class="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                            class="mb-6 sm:mb-8 p-4 sm:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
                             <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Rápido <span
                                     id="quick-converter-bank-name" class="text-emerald-600"></span></h4>
                             <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
