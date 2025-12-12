@@ -296,6 +296,19 @@
         .pulse-cta {
             animation: pulse-ring 2s infinite;
         }
+
+        /* Reordenar colunas em telas menores: Simulador antes do Cartão */
+        @media (max-width: 768px) {
+            .hero-grid {
+                display: flex;
+                flex-direction: column-reverse;
+            }
+        }
+
+        /* Remove arrow from select */
+        .no-arrow {
+            background-image: none !important;
+        }
     </style>
 </head>
 
@@ -320,7 +333,7 @@
             <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-200 rounded-full filter blur-3xl opacity-20 -z-10">
             </div>
             <div
-                class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
+                class="hero-grid max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
 
                 <!-- Coluna da Imagem + CTA -->
                 <div class="space-y-6 fade-in-up" style="animation-delay: 0.2s">
@@ -365,85 +378,57 @@
 
                 <!-- Coluna de Texto + Conversor -->
                 <div class="fade-in-up space-y-6" style="animation-delay: 0.1s">
-                    <!-- Header Section: Badge + Title + Description -->
+                    <!-- Header Section: Title -->
                     <div class="space-y-4">
-                        <!-- Badge -->
-                        <div
-                            class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-semibold">
-                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                            Ativação Rápida • 100% Digital
-                        </div>
-
                         <h1 id="visa-title"
-                            class="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                            Cartão Visa Virtual</h1>
-
-                        <p class="text-lg md:text-xl text-slate-600">
-                            A sua porta de entrada para o mundo digital. Adquira já o seu cartão para compras online e
-                            pagamentos de serviços em qualquer lugar do mundo.
-                        </p>
+                            class="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                            Cartão Visa</h1>
                     </div>
 
                     <!-- Simulador de Carregamento -->
                     <div id="quick-converter-container"
                         class="glass p-6 rounded-2xl shadow-2xl backdrop-blur-lg border-2 border-white/30">
                         <!-- Header do Simulador -->
-                        <div class="grid grid-cols-[auto_1fr] gap-3 items-start mb-6">
-                            <span class="text-2xl">💳</span>
-                            <div>
-                                <h4
-                                    class="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">
-                                    Simule quanto vai pagar</h4>
-                                <p class="text-sm text-slate-700 mt-1">Digite o valor que deseja carregar e veja quanto
-                                    irá pagar em Kwanzas</p>
-                            </div>
+                        <div class="mb-6">
+                            <h4
+                                class="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent flex items-center gap-2">
+                                <span class="text-2xl">💳</span>
+                                Simule quanto vai pagar
+                            </h4>
                         </div>
 
-                        <!-- Grid de Inputs - Alinhamento Perfeito -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <!-- Campo de Valor -->
-                            <div class="grid gap-2">
-                                <label for="quick-converter-amount"
-                                    class="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                                    💵 Quanto quer carregar?
-                                </label>
+                        <!-- Input Group: Valor + Moeda -->
+                        <div class="mb-6">
+                            <label class="text-sm font-semibold text-gray-800 flex items-center gap-1 mb-2">
+                                💵 Quanto quer carregar?
+                            </label>
+                            <div
+                                class="flex gap-0 border-2 border-emerald-300 rounded-xl shadow-sm focus-within:ring-4 focus-within:ring-emerald-400/50 focus-within:border-emerald-500 transition-all duration-300">
                                 <input type="text" id="quick-converter-amount" inputmode="decimal"
-                                    class="w-full p-4 border-2 border-emerald-300 rounded-xl shadow-sm focus:ring-4 focus:ring-emerald-400/50 focus:border-emerald-500 text-xl font-mono transition-all duration-300"
+                                    class="flex-1 p-4 border-0 rounded-l-xl text-xl font-mono focus:ring-0 focus:outline-none"
                                     placeholder="Ex: 10,00">
-                                <p class="text-xs text-gray-600 font-medium">✓ Mínimo: 5,00 • Máximo: 5.000.000 • Digite
-                                    apenas números</p>
-                            </div>
-
-                            <!-- Seletor de Moeda -->
-                            <div class="grid gap-2">
-                                <label for="quick-converter-from"
-                                    class="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                                    🌍 Moeda de carregamento
-                                </label>
                                 <select id="quick-converter-from"
-                                    class="custom-select w-full p-4 bg-white border-2 border-emerald-300 rounded-xl font-semibold text-lg focus:ring-4 focus:ring-emerald-400/50 focus:border-emerald-500 transition-all duration-300">
-                                    <option value="USD">🇺🇸 Dólares (USD)</option>
-                                    <option value="EUR">🇪🇺 Euros (EUR)</option>
+                                    class="no-arrow custom-select p-4 bg-white border-0 border-l-2 border-emerald-300 rounded-r-xl font-semibold text-lg focus:ring-0 focus:outline-none">
+                                    <option value="USD">🇺🇸 USD</option>
+                                    <option value="EUR">🇪🇺 EUR</option>
                                 </select>
-                                <p class="text-xs text-gray-600 font-medium opacity-0 pointer-events-none">Espaçamento
-                                </p>
                             </div>
+                            <p class="text-xs text-gray-600 font-medium mt-2">✓ Mínimo: 5,00 • Máximo: 5.000.000</p>
                         </div>
 
-                        <!-- Resultado - Centralizado e Alinhado -->
+                        <!-- Resultado -->
                         <div class="gradient-border rounded-xl p-[2px]">
-                            <div class="bg-white rounded-xl p-6">
-                                <div id="converter-header"
-                                    class="grid grid-cols-[auto_1fr] gap-2 items-center justify-center justify-items-center mb-3">
-                                    <span class="text-xl">💰</span>
-                                    <p class="font-bold text-emerald-800 text-lg">Você vai pagar</p>
+                            <div class="bg-white rounded-xl p-4">
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                    <span class="text-lg">💰</span>
+                                    <p class="font-bold text-emerald-800">Você vai pagar</p>
                                 </div>
                                 <p id="quick-converter-result"
-                                    class="font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent text-center my-3 break-words px-2"
-                                    style="font-size: clamp(1.5rem, 8vw, 3.75rem); line-height: 1.1;">
+                                    class="font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent text-center break-words"
+                                    style="font-size: clamp(1.25rem, 6vw, 2rem); line-height: 1.2;">
                                     --</p>
                                 <p id="converter-fee-notice"
-                                    class="text-sm text-emerald-600 text-center min-h-[1.25rem] font-medium"></p>
+                                    class="text-xs text-emerald-600 text-center min-h-[1rem] font-medium mt-1"></p>
                             </div>
                         </div>
                     </div>
@@ -691,9 +676,78 @@
             </div>
         </section>
 
+
     </main>
 
+
+
     <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8"></footer>
+
+    <!-- Chat Widget - DESATIVADO TEMPORARIAMENTE -->
+    <!--
+    <div id="ana-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div id="ana-chat-window"
+            class="hidden bg-white w-80 md:w-96 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden mb-4 transition-all duration-300 transform origin-bottom-right scale-95 opacity-0">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <span class="text-xl">👩‍💻</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">Ana - EcoKambio</h3>
+                        <p class="text-xs text-emerald-100 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-emerald-300 rounded-full animate-pulse"></span>
+                            Online
+                        </p>
+                    </div>
+                </div>
+                <button id="close-chat-btn" class="text-white/80 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="chat-messages" class="h-80 overflow-y-auto p-4 bg-slate-50 space-y-4">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="text-sm">👩‍💻</span>
+                    </div>
+                    <div
+                        class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 text-sm text-slate-700">
+                        <p>Olá! Sou a Ana, a assistente virtual da EcoKambio. Como posso ajudar você hoje com o seu
+                            Cartão Visa Virtual?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-slate-100">
+                <form id="chat-form" class="flex gap-2">
+                    <input type="text" id="chat-input"
+                        class="flex-1 border border-slate-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        placeholder="Digite sua pergunta..." required>
+                    <button type="submit"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-full transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <button id="open-chat-btn"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 group">
+            <span class="text-2xl">💬</span>
+            <span
+                class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap text-sm font-bold">Falar
+                com a Ana</span>
+        </button>
+    </div>
+    -->
+
 
     <!-- Scripts - Deferred for performance -->
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -762,7 +816,8 @@
             const fromSelect = document.getElementById('quick-converter-from');
             const resultDisplay = document.getElementById('quick-converter-result');
             const feeNotice = document.getElementById('converter-fee-notice');
-            const feePercent = parseFloat(settings.visa_fee_percent) || 0;
+            const feePercent = parseFloat(settings.visa_fee_percent) || 10; // Default 10% se não houver settings
+
 
             // Função para formatar o valor com máscara
             const formatCurrencyInput = (value) => {
@@ -857,13 +912,19 @@
                     return;
                 }
 
+
                 let resultAmount = 0;
                 let rate = 0;
 
                 // A lógica agora é sempre converter de USD/EUR para AOA, aplicando a taxa.
-                rate = (from === 'USD') ? rates.usd_rate : rates.eur_rate;
+                // Se não houver rates da API, usar valores padrão
+                const defaultRates = { usd_rate: 1200, eur_rate: 1300 };
+                rate = (from === 'USD')
+                    ? (rates.usd_rate || defaultRates.usd_rate)
+                    : (rates.eur_rate || defaultRates.eur_rate);
                 const convertedAmount = amount * rate;
                 resultAmount = convertedAmount * (1 + (feePercent / 100));
+
 
                 // Mostra a nota da taxa
                 const formattedFee = new Intl.NumberFormat('pt-AO', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 20 }).format(feePercent);
@@ -934,9 +995,142 @@
 
             // Carrega informações do rodapé (links sociais, etc.)
             // A função loadFooterInfo() é definida em main.js
+            // Carrega informações do rodapé (links sociais, etc.)
+            // A função loadFooterInfo() é definida em main.js
             if (typeof loadFooterInfo === 'function') loadFooterInfo();
+
+            // ==========================================
+            // CHAT WIDGET LOGIC
+            // ==========================================
+            const chatWidget = document.getElementById('ana-chat-widget');
+            const chatWindow = document.getElementById('ana-chat-window');
+            const openChatBtn = document.getElementById('open-chat-btn');
+            const closeChatBtn = document.getElementById('close-chat-btn');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const chatMessages = document.getElementById('chat-messages');
+
+            // Toggle Chat Window
+            function toggleChat() {
+                const isHidden = chatWindow.classList.contains('hidden');
+                if (isHidden) {
+                    chatWindow.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before opacity transition
+                    setTimeout(() => {
+                        chatWindow.classList.remove('opacity-0', 'scale-95');
+                        chatWindow.classList.add('opacity-100', 'scale-100');
+                        chatInput.focus();
+                    }, 10);
+                    openChatBtn.classList.add('hidden');
+                } else {
+                    chatWindow.classList.remove('opacity-100', 'scale-100');
+                    chatWindow.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        chatWindow.classList.add('hidden');
+                        openChatBtn.classList.remove('hidden');
+                    }, 300);
+                }
+            }
+
+            openChatBtn.addEventListener('click', toggleChat);
+            closeChatBtn.addEventListener('click', toggleChat);
+
+            // Add Message to UI
+            function addMessage(text, sender) {
+                const div = document.createElement('div');
+                div.className = `flex gap-3 ${sender === 'user' ? 'flex-row-reverse' : ''}`;
+
+                const avatar = sender === 'bot'
+                    ? `<div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0"><span class="text-sm">👩‍💻</span></div>`
+                    : `<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0"><span class="text-sm">👤</span></div>`;
+
+                const bubbleClass = sender === 'bot'
+                    ? 'bg-white border-slate-100 text-slate-700'
+                    : 'bg-emerald-600 text-white border-emerald-600';
+
+                // Convert URLs and internal paths to clickable links
+                const urlRegex = /(https?:\/\/[^\s]+|wa\.me\/[^\s]+|\/[a-z-]+(?:\.html)?)/g;
+                const formattedText = text.replace(urlRegex, (url) => {
+                    // If it's an internal path, don't add https://
+                    const fullUrl = url.startsWith('/') ? url : (url.startsWith('http') ? url : `https://${url}`);
+                    const displayText = url.startsWith('/') ? url.replace(/\.html$/, '') : url;
+                    return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="underline hover:text-emerald-500 font-semibold">${displayText}</a>`;
+                });
+
+                div.innerHTML = `
+                    ${avatar}
+                    <div class="${bubbleClass} p-3 rounded-2xl ${sender === 'user' ? 'rounded-tr-none' : 'rounded-tl-none'} shadow-sm border text-sm max-w-[80%]">
+                        <p>${formattedText}</p>
+                    </div>
+                `;
+
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Handle Form Submit
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Add User Message
+                addMessage(message, 'user');
+                chatInput.value = '';
+                chatInput.disabled = true;
+
+                // Add Loading Indicator
+                const loadingId = 'loading-' + Date.now();
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = loadingId;
+                loadingDiv.className = 'flex gap-3';
+                loadingDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0"><span class="text-sm">👩‍💻</span></div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 text-sm text-slate-500">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                            <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(loadingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    const response = await fetch('/api/v1/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+
+                    const data = await response.json();
+
+                    // Remove loading
+                    document.getElementById(loadingId).remove();
+
+                    if (data.response) {
+                        addMessage(data.response, 'bot');
+                    } else {
+                        addMessage("Desculpe, tive um problema ao processar sua mensagem. Pode tentar novamente?", 'bot');
+                    }
+
+                } catch (error) {
+                    console.error('Chat Error:', error);
+                    document.getElementById(loadingId).remove();
+                    addMessage("Erro de conexão. Verifique sua internet.", 'bot');
+                } finally {
+                    chatInput.disabled = false;
+                    chatInput.focus();
+                }
+            });
         });
     </script>
+
+
+
+
+
 </body>
 
 </html>

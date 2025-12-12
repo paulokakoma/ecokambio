@@ -1,105 +1,105 @@
 {
-  "lastUpdated": "2025-12-11T08:04:06.110Z",
+  "lastUpdated": "2025-12-12T16:29:27.160Z",
   "rates": [
     {
       "bank": "BFA",
       "currency": "USD",
-      "sell": "962,312"
+      "sell": "948,174"
     },
     {
       "bank": "BFA",
       "currency": "EUR",
-      "sell": "1151,612"
+      "sell": "1130,428"
     },
     {
       "bank": "BFA",
       "currency": "NAD",
-      "sell": "58,15"
+      "sell": "57,191"
     },
     {
       "bank": "BFA",
       "currency": "GBP",
-      "sell": "1318,25"
+      "sell": "1289,14"
     },
     {
       "bank": "BAI",
       "currency": "AED",
-      "sell": "262,1192"
+      "sell": "262,0969"
     },
     {
       "bank": "BAI",
       "currency": "CAD",
-      "sell": "695,2097"
+      "sell": "699,4782"
     },
     {
       "bank": "BAI",
       "currency": "CHF",
-      "sell": "1195,6989"
+      "sell": "1209,5409"
     },
     {
       "bank": "BAI",
       "currency": "CNY",
-      "sell": "136,3032"
+      "sell": "136,4435"
     },
     {
       "bank": "BAI",
       "currency": "DKK",
-      "sell": "149,9746"
+      "sell": "151,0694"
     },
     {
       "bank": "BAI",
       "currency": "EUR",
-      "sell": "1135,8758"
+      "sell": "1130,7106"
     },
     {
       "bank": "BAI",
       "currency": "GBP",
-      "sell": "1281,4927"
+      "sell": "1287,0068"
     },
     {
       "bank": "BAI",
       "currency": "JPY",
-      "sell": "6,1412"
+      "sell": "6,1712"
     },
     {
       "bank": "BAI",
       "currency": "MZN",
-      "sell": "15,2196"
+      "sell": "15,218"
     },
     {
       "bank": "BAI",
       "currency": "NAD",
-      "sell": "56,6559"
+      "sell": "57,0887"
     },
     {
       "bank": "BAI",
       "currency": "NOK",
-      "sell": "94,9366"
+      "sell": "95,1542"
     },
     {
       "bank": "BAI",
       "currency": "SEK",
-      "sell": "103,1844"
+      "sell": "103,6311"
     },
     {
       "bank": "BAI",
       "currency": "USD",
-      "sell": "962,6575"
+      "sell": "962,5523"
     },
     {
       "bank": "BAI",
       "currency": "XAF",
-      "sell": "1,7076"
+      "sell": "1,7201"
     },
     {
       "bank": "BAI",
       "currency": "ZAR",
-      "sell": "57,2976"
+      "sell": "57,0781"
     },
     {
       "bank": "BIC",
       "currency": "CAD",
-      "sell": "675,198"
+      "sell": "677,597"
     },
     {
       "bank": "BIC",
@@ -109,102 +109,87 @@
     {
       "bank": "BIC",
       "currency": "ZAR",
-      "sell": "55,648"
+      "sell": "55,059"
     },
     {
       "bank": "BIC",
       "currency": "CHF",
-      "sell": "1161,281"
+      "sell": "1174,115"
     },
     {
       "bank": "BIC",
       "currency": "DKK",
-      "sell": "145,658"
+      "sell": "146,663"
     },
     {
       "bank": "BIC",
       "currency": "EUR",
-      "sell": "1146,231"
+      "sell": "1136,091"
     },
     {
       "bank": "BIC",
       "currency": "GBP",
-      "sell": "1244,605"
+      "sell": "1251,938"
     },
     {
       "bank": "BIC",
       "currency": "JPY",
-      "sell": "5,964"
+      "sell": "6,008"
     },
     {
       "bank": "BIC",
       "currency": "NAD",
-      "sell": "55,025"
+      "sell": "55,256"
     },
     {
       "bank": "BIC",
       "currency": "NOK",
-      "sell": "92,204"
+      "sell": "92,553"
     },
     {
       "bank": "BIC",
       "currency": "SEK",
-      "sell": "100,214"
-    },
-    {
-      "bank": "BNA",
-      "currency": "USD",
-      "sell": "912,144"
-    },
-    {
-      "bank": "BNA",
-      "currency": "EUR",
-      "sell": "1076,273"
-    },
-    {
-      "bank": "BNA",
-      "currency": "ZAR",
-      "sell": "54,291"
+      "sell": "101,128"
     },
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1155,033"
+      "sell": "1196,876"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1313,969"
+      "sell": "1323,125"
     },
     {
       "bank": "YETU",
       "currency": "USD",
-      "sell": "987,207"
+      "sell": "1027,803"
     },
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1155,033"
+      "sell": "1196,876"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1313,969"
+      "sell": "1323,125"
     },
     {
       "bank": "YETU",
       "currency": "USD",
-      "sell": "987,207"
+      "sell": "1027,803"
     },
     {
       "bank": "YETU",
       "currency": "EUR",
-      "sell": "1155,033"
+      "sell": "1196,876"
     },
     {
       "bank": "YETU",
       "currency": "GBP",
-      "sell": "1313,969"
+      "sell": "1323,125"
     }
   ]
 }

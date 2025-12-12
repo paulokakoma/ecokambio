@@ -42,5 +42,16 @@ module.exports = {
     session: {
         secret: process.env.SESSION_SECRET,
         cookieDomain: process.env.COOKIE_DOMAIN
+    },
+    openai: {
+        apiKey: process.env.OPENAI_API_KEY
+    },
+    requesty: {
+        apiKey: process.env.REQUESTY_API_KEY,
+        baseUrl: process.env.REQUESTY_BASE_URL || 'https://router.requesty.ai/v1'
+    },
+    groq: {
+        apiKey: process.env.GROQ_API_KEY,
+        baseUrl: process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1'
     }
 };

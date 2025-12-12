@@ -253,6 +253,9 @@ const apiV1Routes = require('./src/routes/api/v1/index');
 // but it enables higher rate limits for those who have one
 app.use('/api/v1', apiResponse, apiKeyAuth.optional, apiV1Routes);
 
+// Claude AI Proxy (no rate limit for better UX)
+
+
 // Legacy API routes - kept for backwards compatibility
 // These will redirect to v1 endpoints where possible
 app.get('/api/informal-rates', async (req, res, next) => {

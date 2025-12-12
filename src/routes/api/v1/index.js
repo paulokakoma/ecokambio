@@ -7,6 +7,8 @@ const conversionRoutes = require('./conversion');
 const statusRoutes = require('./status');
 const keysRoutes = require('./keys');
 const authRoutes = require('./auth');
+const chatRoutes = require('./chat');
+
 
 /**
  * API v1 Router
@@ -19,6 +21,8 @@ router.use('/conversion', conversionRoutes);
 router.use('/status', statusRoutes);
 router.use('/keys', keysRoutes);
 router.use('/auth', authRoutes);
+router.use('/chat', chatRoutes);
+
 
 // API v1 Root endpoint - provides API information
 router.get('/', (req, res) => {
