@@ -773,7 +773,7 @@
 
                 // Carregar taxas informais para o conversor
                 try {
-                    const ratesResponse = await fetch('/api/informal-rates');
+                    const ratesResponse = await fetch('/api/v1/rates/informal');
                     if (ratesResponse.ok) {
                         informalRates = await ratesResponse.json(); // eslint-disable-line
                     }
