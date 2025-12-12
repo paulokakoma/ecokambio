@@ -1033,8 +1033,9 @@
                 }
             }
 
-            openChatBtn.addEventListener('click', toggleChat);
-            closeChatBtn.addEventListener('click', toggleChat);
+            // Only add event listeners if chat elements exist
+            if (openChatBtn) openChatBtn.addEventListener('click', toggleChat);
+            if (closeChatBtn) closeChatBtn.addEventListener('click', toggleChat);
 
             // Add Message to UI
             function addMessage(text, sender) {
