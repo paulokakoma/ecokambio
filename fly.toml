@@ -14,9 +14,9 @@ primary_region = 'ams' # Amsterdam - mais próximo de Angola
 [http_service]
   internal_port = 3000
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = 'off'  # Mantém máquinas rodando para alta disponibilidade
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 2  # Garante que sempre haja 2 máquinas rodando
   processes = ['app']
 
   [http_service.concurrency]
@@ -25,11 +25,17 @@ primary_region = 'ams' # Amsterdam - mais próximo de Angola
     soft_limit = 20
 
   [[http_service.checks]]
-    grace_period = '10s'
-    interval = '30s'
+    grace_period = '15s'  # Tempo após boot antes de iniciar health checks
+    interval = '20s'      # Verifica a cada 20 segundos 
     method = 'GET'
-    timeout = '5s'
+    timeout = '5s'        # Timeout de 5 segundos
     path = '/health'
+    
+  [[http_service.checks]]
+    type = 'tcp'
+    interval = '15s'      # Check TCP a cada 15 segundos
+    timeout = '3s'
+    grace_period = '10s'
 
 [mounts]
   source = 'ecokambio_sessions'
