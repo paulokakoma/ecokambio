@@ -69,13 +69,11 @@ RUN apk add --no-cache \
 # Copiar dependências de produção
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
 
-# Copiar CSS compilado
-COPY --from=builder /usr/src/app/public/css/output.css ./public/css/output.css
-
-
-
-# Copiar código da aplicação
+# Copiar código da aplicação PRIMEIRO
 COPY . .
+
+# Copiar CSS compilado POR CIMA (garantir que sobrescreve versão antiga)
+COPY --from=builder /usr/src/app/public/css/output.css ./public/css/output.css
 
 # Tornar docker-entrypoint.sh executável
 RUN chmod +x /usr/src/app/docker-entrypoint.sh
