@@ -101,6 +101,21 @@
                     estabelecesse parcerias com instituições financeiras e fornecedores de dados, garantindo a
                     qualidade e atualização constante das informações.
                 </p>
+                <p>
+                    Com formação em Gestão de Empresas e experiência prévia em consultoria empresarial, Lando
+                    desenvolveu uma capacidade única de identificar oportunidades de negócio e transformá-las em
+                    parcerias de longo prazo. Antes do EcoKambio, trabalhou com várias startups angolanas, ajudando-as a
+                    estruturar-se e a crescer de forma sustentável. Esta experiência foi fundamental para estabelecer a
+                    Moko Tech com bases sólidas desde o primeiro dia.
+                </p>
+                <p>
+                    A sua motivação para criar o EcoKambio veio de uma experiência pessoal frustrante: tentou import
+
+                    ar equipamento para um projeto e descobriu que calcular o custo real era quase impossível devido à
+                    falta de informação clara sobre taxas de câmbio. "Se eu, com formação financeira, tive dificuldades,
+                    imagine um cidadão comum", reflete Lando. Esta experiência foi o gatilho para reunir a equipa e
+                    criar a solução.
+                </p>
 
                 <h3>Alexandre Cris - Gestor de Marketing & Comunicação</h3>
                 <p>
@@ -109,6 +124,24 @@
                     Alexandre garante uma comunicação clara, impactante e visualmente envolvente. O seu trabalho foi
                     fundamental para tornar o EcoKambio numa marca reconhecida e confiável em Angola.
                 </p>
+                <p>
+                    Formado em Design Gráfico e com especialização em Marketing Digital, Alexandre trouxe para a Moko
+                    Tech uma abordagem moderna de comunicação de marca. Antes de cofundar a empresa, trabalhou em
+                    agências de publicidade em Luanda, desenvolvendo campanhas para marcas nacionais e internacionais. O
+                    seu portfólio inclui trabalhos premiados em concursos de design africanos.
+                </p>
+                <p>
+                    Para Alexandre, o EcoKambio não é apenas um projeto comercial, mas uma missão de educação
+                    financeira: "Muitos angolanos não sabem que estão a ser prejudicados por falta de informação. O
+                    nosso design não é só bonito - é funcional e educativo. Cada elemento visual tem o propósito de
+                    tornar a informação financeira compreensível para todos."
+                </p>
+                <p>
+                    Foi Alexandre quem desenhou o logotipo icónico do EcoKambio, combinando elementos que representam
+                    economia (o círculo verde simboliza crescimento sustentável) e transparência (as linhas abertas
+                    representam dados acessíveis). Este cuidado com os detalhes estende-se a todos os aspectos visuais
+                    da plataforma.
+                </p>
 
                 <h3>Paulo Kapitia - Lead Developer & Arquiteto de Software</h3>
                 <p>
@@ -116,6 +149,25 @@
                     com excelência, Paulo desenhou toda a infraestrutura técnica, garantiu a segurança dos dados e
                     mantém a plataforma EcoKambio a funcionar perfeitamente. A sua expertise em desenvolvimento web e
                     sistemas distribuídos foi crucial para criar uma solução robusta e escalável.
+                </p>
+                <p>
+                    Engenheiro de Software autodidata com mais de 8 anos de experiência, Paulo começou a programar ainda
+                    adolescente, criando pequenos programas para resolver problemas do dia a dia. Especializou-se em
+                    desenvolvimento web moderno (Python, JavaScript, React) e arquitetura de sistemas escaláveis. Antes
+                    da Moko Tech, trabalhou remotamente para empresas internacionais, ganhando experiência valiosa em
+                    padrões globais de desenvolvimento.
+                </p>
+                <p>
+                    O desafio técnico do EcoKambio era complexo: criar scrapers confiáveis que coletassem dados de
+                    múltiplas fontes (sites bancários com estruturas diferentes), processá-los em tempo real, e
+                    apresentá-los numa interface simples. "Tínhamos que ser mais rápidos e precisos que qualquer pessoa
+                    verificando manualmente", explica Paulo. A solução envolveu automação inteligente, APIs robustas e
+                    um frontend responsivo.
+                </p>
+                <p>
+                    Para Paulo, o aspecto mais gratificante do projeto é saber que o código que escreve tem impacto
+                    real: "Quando alguém economiza 50.000 Kz numa transação porque usou o EcoKambio, isso é resultado
+                    directo do nosso trabalho. Tecnologia ao serviço das pessoas - é para isso que programo."
                 </p>
 
                 <h2>A Missão da Moko Tech</h2>
@@ -166,25 +218,130 @@
                     <li>Estudantes a compreenderem o mercado financeiro angolano</li>
                 </ul>
 
-                <h2>O Futuro da Moko Tech</h2>
+                <h2>🛠️ Os Desafios Técnicos e Como Foram Superados</h2>
+                <p>
+                    Criar o EcoKambio não foi uma tarefa simples. A equipa enfrentou diversos desafios técnicos e
+                    operacionais que exigiram criatividade e perseverança.
+                </p>
+
+                <h3>Desafio #1: Web Scraping de Múltiplas Fontes</h3>
+                <p>
+                    Cada banco em Angola tem um website diferente, com estruturas HTML únicas. Criar scrapers (programas
+                    que extraem dados automaticamente) que funcionassem para todos era como construir 6 ferramentas
+                    diferentes simultaneamente.
+                </p>
+                <p>
+                    <strong>Solução:</strong> Paulo desenvolveu uma arquitetura modular onde cada banco tem o seu
+                    próprio scraper independente. Quando um banco muda o site, apenas esse módulo precisa de ser
+                    atualizado, não afetando os outros. Além disso, implementou um sistema de alertas que notifica a
+                    equipa imediatamente se algum scraper falhar, permitindo correções rápidas.
+                </p>
+
+                <h3>Desafio #2: Confiabilidade dos Dados</h3>
+                <p>
+                    Como garantir que os dados apresentados estão correctos? Um erro de 10 Kz numa taxa pode significar
+                    milhares de Kwanzas de diferença numa transação grande.
+                </p>
+                <p>
+                    <strong>Solução:</strong> Sistema de verificação cruzada - cada taxa é validada comparando com
+                    fontes múltiplas. Se houver discrepância suspeita, o sistema marca para revisão manual. Além disso,
+                    todas as taxas incluem timestamp (hora exacta da última atualização) para o usuário saber quão
+                    recente é a informação.
+                </p>
+
+                <h3>Desafio #3: Infraestrutura e Escalabilidade</h3>
+                <p>
+                    No início, quando apenas dezenas de pessoas usavam, um servidor simples era suficiente. Mas à medida
+                    que milhares começaram a aceder simultaneamente, o sistema começou a ficar lento.
+                </p>
+                <p>
+                    <strong>Solução:</strong> Migração para arquitetura cloud escalável, implementação de caching
+                    (armazenamento temporário de dados frequentemente acedidos) e otimização do código. Hoje, o
+                    EcoKambio consegue lidar com picos de milhares de utilizadores simultâneos sem perder performance.
+                </p>
+
+                <h3>Desafio #4: Sustentabilidade Financeira</h3>
+                <p>
+                    Manter servidores, domínios e uma equipa dedicada tem custos. Como oferecer o serviço gratuitamente
+                    e ainda assim manter a empresa?
+                </p>
+                <p>
+                    <strong>Solução:</strong> Modelo de monetização através de publicidade não-intrusiva (AdSense),
+                    parcerias com instituições financeiras para acesso a dados certificados, e um plano futuro de
+                    oferecer uma API premium para empresas que queiram integrar os dados do EcoKambio nos seus próprios
+                    sistemas.
+                </p>
+
+                <h2>🚀 O Futuro da Moko Tech: Visão de Longo Prazo</h2>
                 <p>
                     A equipa da Moko Tech não para por aqui. Com o sucesso do EcoKambio, a empresa planeia expandir os
-                    seus serviços:
+                    seus serviços e consolidar-se como referência em fintech angolana:
+                </p>
+
+                <h3>Próximos 12 Meses (2026)</h3>
+                <ul>
+                    <li><strong>App Mobile Nativo:</strong> Versão para Android e iOS com notificações push quando as
+                        taxas mudarem significativamente</li>
+                    <li><strong>Alertas Person
+
+                            alizados:</strong> O usuário define: "quero saber quando o USD cair abaixo de 900 AOA" e
+                        recebe notificação automática</li>
+                    <li><strong>Histórico Completo:</strong> Gráficos interativos mostrando evolução das taxas nos
+                        últimos 12 meses</li>
+                    <li><strong>Expansão para mais bancos:</strong> Incluir todos os bancos comerciais de Angola
+                        (atualmente cobre os 6 principais)</li>
+                </ul>
+
+                <h3>2-3 Anos (2027-2028)</h3>
+                <ul>
+                    <li><strong>API Empresarial:</strong> Empresas poderão integrar dados do EcoKambio nos seus sistemas
+                        ERP para automação de cálculos cambiais</li>
+                    <li><strong>Mais Moedas:</strong> Além de USD e EUR, incluir ZAR (Rand Sul-Africano), GBP (Libra) e
+                        outras divisas relevantes</li>
+                    <li><strong>Marketplace de Serviços:</strong> Conexão direta entre usuários e prestadores de
+                        serviços cambiais certificados</li>
+                    <li><strong>Educação Financeira:</strong> Cursos gratuitos online sobre literacia financeira,
+                        importação e gestão de divisas</li>
+                </ul>
+
+                <h3>Visão de 5 Anos (2030)</h3>
+                <p>
+                    "Queremos que o EcoKambio seja o super-app financeiro de refer&ecircência em Angola. Não apenas para
+                    câmbio, mas para todas as necessidades de informação financeira de um angolano", explica Lando. A
+                    visão inclui:
                 </p>
                 <ul>
-                    <li><strong>App Mobile:</strong> Versão móvel nativa para Android e iOS</li>
-                    <li><strong>Alertas Personalizados:</strong> Notificações quando as taxas atingirem valores
-                        desejados</li>
-                    <li><strong>API para Empresas:</strong> Integração de dados cambiais em sistemas empresariais</li>
-                    <li><strong>Educação Financeira:</strong> Conteúdo educativo e cursos sobre finanças pessoais</li>
-                    <li><strong>Novos Produtos:</strong> Soluções adicionais para o mercado financeiro angolano</li>
+                    <li><strong>Comparador de Seguros:</strong> Similar ao que fazemos com câmbio, mas para seguros de
+                        saúde, automóvel, vida</li>
+                    <li><strong>Comparador de Empréstimos:</strong> Taxas de juro de créditos pessoais, habitação,
+                        automóvel em todos os bancos</li>
+                    <li><strong>Calculadora de Investimentos:</strong> Comparação de rendimentos de depósitos a prazo,
+                        bilhetes do tesouro, etc.</li>
+                    <li><strong>Presença Regional:</strong> Expandir para outros países da SADC (Moçambique, Namíbia,
+                        Zâmbia) com sistemas cambiais similares</li>
                 </ul>
+
+                <p>
+                    "O objetivo final", acrescenta Paulo, "é que qualquer angolano, antes de tomar uma decisão
+                    financeira importante, pergunte: 'O que diz o EcoKambio?' Queremos ser a fonte de verdade para
+                    informação financeira."
+                </p>
 
                 <h2>Compromisso com Angola</h2>
                 <p>
                     A Moko Tech é orgulhosamente angolana. NIF 5002764768, com sede no Huambo, a empresa está
                     comprometida com o desenvolvimento tecnológico e económico de Angola. Toda a equipa acredita que a
                     tecnologia pode e deve ser uma ferramenta de transformação social positiva.
+                </p>
+                <p>
+                    "Angola tem um potencial tecnológico imenso", afirma Alexandre. "Temos jovens brillantes,
+                    criatividade e vontade de inovar. O que falta é oportunidade e exemplos de sucesso. Com o EcoKambio,
+                    queremos mostrar que é possível criar soluções de nível internacional a partir de Angola."
+                </p>
+                <p>
+                    A Moko Tech também está comprometida com a criação de emprego local e formação de jovens talentos. A
+                    empresa já orientou vários estagiários em desenvolvimento de software, design e marketing digital,
+                    contribuindo para o ecossistema tech angolano.
                 </p>
 
                 <h2>Junte-se à Revolução Financeira</h2>
