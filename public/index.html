@@ -14,8 +14,7 @@
             https://pagead2.googlesyndication.com 
             https://googleads.g.doubleclick.net
             https://cdn.jsdelivr.net 
-            https://www.gstatic.com
-            https://faves.grow.me; 
+            https://www.gstatic.com; 
         style-src 'self' 'unsafe-inline' 
             https://fonts.googleapis.com 
             https://cdnjs.cloudflare.com; 
@@ -26,8 +25,7 @@
         connect-src 'self' 
             https://drkjkkpzujwnkghtdokz.supabase.co 
             https://www.google-analytics.com
-            https://pagead2.googlesyndication.com
-            https://faves.grow.me; 
+            https://pagead2.googlesyndication.com; 
         frame-src 'self' 
             https://www.googletagmanager.com
             https://googleads.g.doubleclick.net
@@ -47,9 +45,7 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
         crossorigin="anonymous"></script>
 
-    <!-- Grow.me Engagement Script -->
-    <script
-        data-grow-initializer="">!(function () { window.growMe || ((window.growMe = function (e) { window.growMe._.push(e); }), (window.growMe._ = [])); var e = document.createElement("script"); (e.type = "text/javascript"), (e.src = "https://faves.grow.me/main.js"), (e.defer = !0), e.setAttribute("data-grow-faves-site-id", "U2l0ZTo2ZTllYWMzYy03NjljLTRmNTUtOWUyYy0wMmY4ODkxNDM4NDU="); var t = document.getElementsByTagName("script")[0]; t.parentNode.insertBefore(e, t); })();</script>
+
 
     <!-- Brand Recognition -->
     <meta property="og:site_name" content="EcoKambio">
@@ -667,7 +663,84 @@
 
 
 
-    <header data-include="/components/header.html" class="bg-white shadow-sm"></header>
+    <header id="main-header" class="bg-white shadow-sm transition-all duration-300 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-2 sm:px-3 lg:px-8 py-1 sm:py-1.5 flex items-center">
+            <a href="/"
+                class="flex items-center space-x-1 sm:space-x-2 md:space-x-2.5 hover:opacity-80 transition-all duration-200 group">
+                <img src="/assets/main-logo.svg" alt="EcoKambio - Plataforma de Taxas de Câmbio em Angola" width="56"
+                    height="56"
+                    class="h-5 sm:h-7 md:h-8 w-auto transition-transform duration-200 group-hover:scale-105">
+                <span class="text-xs sm:text-sm md:text-lg font-bold text-emerald-600">EcoKambio</span>
+            </a>
+
+            <!-- Navigation -->
+            <nav
+                class="flex-1 flex justify-end items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-5 ml-1 sm:ml-auto">
+                <a href="/blog"
+                    class="group relative px-1.5 sm:px-2.5 md:px-3.5 py-0.5 sm:py-1 md:py-1.5 text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 hover:text-emerald-600 bg-slate-50 hover:bg-emerald-50 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105 active:scale-95 border border-slate-200 hover:border-emerald-300">
+                    <span class="relative z-10">Blog</span>
+                    <div
+                        class="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300">
+                    </div>
+                </a>
+
+                <a href="/visa" id="header-visa-btn"
+                    class="visa-heartbeat flex flex-col items-center text-center transition-opacity duration-200 hover:opacity-80"
+                    title="Adquira já o seu cartão Visa">
+                    <picture>
+                        <source srcset="/assets/visa.webp" type="image/webp">
+                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127"
+                            height="80" class="h-14 sm:h-16 md:h-[78px] lg:h-[95px] xl:h-28 w-auto"
+                            style="aspect-ratio: 127/80;" fetchpriority="high">
+                    </picture>
+                    <span
+                        class="text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm font-semibold text-emerald-700 mt-0.5 sm:mt-1">
+                        Adquira já o teu Visa</span>
+                </a>
+            </nav>
+        </div>
+
+    </header>
+
+    <style>
+        /* Transição suave para o efeito de glassmorphism */
+        #main-header {
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-header.scrolled {
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0.8) 0%,
+                    rgba(255, 255, 255, 0.75) 100%);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+        }
+    </style>
+
+    <script>
+        // Enhanced header scroll effect with smooth transparency
+        const header = document.getElementById('main-header');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 20) {
+                header.classList.add('shadow-lg', 'scrolled');
+                header.classList.remove('shadow-sm');
+            } else {
+                header.classList.add('shadow-sm');
+                header.classList.remove('shadow-lg', 'scrolled');
+            }
+
+            lastScroll = currentScroll;
+        }, { passive: true });
+    </script>
 
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
@@ -1283,7 +1356,58 @@
 
     </main>
 
-    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8"></footer>
+    <footer class="bg-slate-800 text-slate-400 mt-16 py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Main Footer Content -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-6 border-b border-slate-700">
+
+                <!-- Brand Section -->
+                <div class="text-center md:text-left">
+                    <h3 class="text-white font-bold text-lg mb-3">EcoKambio</h3>
+                    <p class="text-slate-400 text-sm">Plataforma de Taxas de Câmbio em Angola</p>
+                    <div id="social-media-links"
+                        class="flex justify-center md:justify-start items-center space-x-4 mt-4">
+                        <!-- Os links sociais serão carregados aqui pelo main.js -->
+                    </div>
+                </div>
+
+                <!-- Links Section -->
+                <div class="text-center">
+                    <h3 class="text-white font-semibold text-sm mb-3">Links Úteis</h3>
+                    <nav class="flex flex-col space-y-2 text-sm">
+                        <a href="/sobre" class="text-slate-400 hover:text-white transition-colors">Sobre Nós</a>
+                        <a href="/fundadores.html"
+                            class="text-slate-400 hover:text-white transition-colors">Fundadores</a>
+                        <a href="/developers.html"
+                            class="text-slate-400 hover:text-white transition-colors">Developers</a>
+                    </nav>
+                </div>
+
+                <!-- Legal Section -->
+                <div class="text-center md:text-right">
+                    <h3 class="text-white font-semibold text-sm mb-3">Legal</h3>
+                    <nav class="flex flex-col space-y-2 text-sm">
+                        <a href="/termos" class="text-slate-400 hover:text-white transition-colors">Termos e
+                            Condições</a>
+                        <a href="/privacidade" class="text-slate-400 hover:text-white transition-colors">Política de
+                            Privacidade</a>
+                    </nav>
+                    <div id="footer-contact-info" class="mt-4 text-slate-400 text-xs">
+                        <!-- Informações de contato carregadas via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="py-6 text-center">
+                <p class="text-slate-500 text-xs">
+                    © <span id="current-year">2025</span> EcoKambio · Moko Tech, Sociedade por Quotas (NIF: 5002764768)
+                </p>
+            </div>
+
+            <script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>
+        </div>
+    </footer>
 
     <!-- Banner de Termos e Cookies -->
     <div id="terms-banner"
@@ -2617,6 +2741,19 @@
 
         async function initializeApp() {
             try {
+                // Verificar se a biblioteca Supabase está disponível
+                if (typeof supabase === 'undefined') {
+                    console.warn('Biblioteca Supabase ainda não carregada. A aguardar...');
+                    // Aguardar até 3 segundos pela biblioteca
+                    for (let i = 0; i < 30; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        if (typeof supabase !== 'undefined') break;
+                    }
+                    if (typeof supabase === 'undefined') {
+                        throw new Error('Biblioteca Supabase não disponível após timeout');
+                    }
+                }
+
                 // Volta a usar o endpoint /api/config, que lê as variáveis de ambiente
                 const configResponse = await fetch('/api/config');
                 if (!configResponse.ok) throw new Error('Falha ao carregar a configuração do servidor.');
@@ -2628,8 +2765,49 @@
 
             } catch (error) {
                 console.error("Erro de inicialização:", error);
-                document.body.innerHTML = `<div class="p-8 m-8 text-center bg-red-100 text-red-800 rounded-lg"><strong>Erro Crítico:</strong> Não foi possível carregar a configuração da aplicação. (${error.message})</div>`;
+
+                // Em vez de substituir todo o body, mostra uma notificação discreta
+                // Isto mantém o HTML semântico visível para motores de busca
+                showErrorNotification(error.message);
+
+                // Tenta novamente após 5 segundos (apenas uma vez)
+                if (!window.initRetried) {
+                    window.initRetried = true;
+                    console.log('A tentar reinicializar em 5 segundos...');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 5000);
+                }
             }
+        }
+
+        function showErrorNotification(message) {
+            // Remove notificação anterior se existir
+            const existingNotification = document.getElementById('error-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Cria uma notificação não-invasiva no topo da página
+            const notification = document.createElement('div');
+            notification.id = 'error-notification';
+            notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4';
+            notification.innerHTML = `
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg" role="alert">
+                    <div class="flex items-start">
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">Erro de Carregamento</p>
+                            <p class="text-xs mt-1">Houve um problema ao carregar alguns recursos. A página irá recarregar automaticamente.</p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-2 text-red-700 hover:text-red-900">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertBefore(notification, document.body.firstChild);
         }
 
 

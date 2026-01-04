@@ -367,8 +367,22 @@
                 loadFooterInfo();
 
             } catch (error) {
-                console.error("Erro de inicialização:", error);
-                document.getElementById('details-container').innerHTML = `<div class="text-center p-8 bg-red-50 text-red-700 rounded-2xl"><strong>Erro Crítico:</strong> Não foi possível carregar a configuração da aplicação.</div>`;
+                console.error('Erro ao carregar configuração:', error);
+                // Mostra notificação de erro em vez de substituir a página inteira
+                const container = document.getElementById('details-container');
+                if (container) {
+                    const notification = document.createElement('div');
+                    notification.className = 'text-center p-6 bg-red-50 border border-red-200 text-red-700 rounded-2xl mx-4 my-4';
+                    notification.innerHTML = `
+                        <p class="font-bold text-sm">Erro de Carregamento</p>
+                        <p class="text-xs mt-2">Não foi possível carregar os detalhes. Por favor, tente novamente mais tarde.</p>
+                        <a href="/" class="inline-block mt-4 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700">
+                            Voltar à Página Inicial
+                        </a>
+                    `;
+                    container.innerHTML = '';
+                    container.appendChild(notification);
+                }
             }
         });
     </script>
