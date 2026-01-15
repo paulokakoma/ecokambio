@@ -1,0 +1,9 @@
+{
+	"id": "Kr2ITdmb2XJiqPn",
+	"json": "{\"id\":\"Kr2ITdmb2XJiqPn\",\"url\":\"https://bancobai.ao/pt/cambios-e-valores\",\"uniqueKey\":\"https://bancobai.ao/pt/cambios-e-valores\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BAI\"}}",
+	"method": "GET",
+	"orderNo": 1767988802732,
+	"retryCount": 0,
+	"uniqueKey": "https://bancobai.ao/pt/cambios-e-valores",
+	"url": "https://bancobai.ao/pt/cambios-e-valores"
+}

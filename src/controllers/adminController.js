@@ -672,6 +672,82 @@ const updateInformalRates = async (req, res) => {
     }
 };
 
+/**
+ * Google Sheets Integration - Export Sales Data as CSV
+ * Protected by SHEETS_SYNC_TOKEN for secure automated data sync
+ * Used by: Google Sheets IMPORTDATA function
+ */
+const exportSalesAuto = async (req, res) => {
+    const config = require('../config/env');
+    const { token } = req.query;
+
+    // 1. SECURITY CHECK: Verify token
+    if (!token || token !== config.sheetsSyncToken) {
+        console.warn('[SECURITY] Tentativa de acesso não autorizada ao export de vendas');
+        return res.status(401).send('Acesso Negado: Token inválido.');
+    }
+
+    try {
+        // 2. FETCH DATA from Supabase View
+        const { data, error } = await supabase
+            .from('view_relatorio_influenciadores')
+            .select('*')
+            .order('data_venda', { ascending: false });
+
+        if (error) throw error;
+
+        // 3. CONVERT TO CSV FORMAT
+        if (!data || data.length === 0) {
+            // If no data, return empty CSV with headers
+            const csvHeaders = 'data_venda,cliente_telefone,plano,valor,cupom,status\n';
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            return res.status(200).send(csvHeaders);
+        }
+
+        // Get headers from the first object
+        const headers = Object.keys(data[0]);
+        let csvContent = headers.join(',') + '\n';
+
+        // Add rows
+        data.forEach(row => {
+            const values = headers.map(header => {
+                let value = row[header];
+
+                // Handle null/undefined
+                if (value === null || value === undefined) {
+                    return '';
+                }
+
+                // Handle dates (format as YYYY-MM-DD)
+                if (header === 'data_venda' && value) {
+                    const date = new Date(value);
+                    value = date.toISOString().split('T')[0];
+                }
+
+                // Escape commas and quotes in CSV
+                value = String(value);
+                if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                    value = '"' + value.replace(/"/g, '""') + '"';
+                }
+
+                return value;
+            });
+            csvContent += values.join(',') + '\n';
+        });
+
+        // 4. SEND CSV RESPONSE
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="ecoflix_vendas.csv"');
+        res.status(200).send(csvContent);
+
+        console.log(`[SHEETS SYNC] Exportadas ${data.length} vendas para Google Sheets`);
+
+    } catch (err) {
+        console.error('[SHEETS SYNC ERROR]', err);
+        res.status(500).send('Erro no servidor ao exportar dados');
+    }
+};
+
 module.exports = {
     getRateProviders,
     getAffiliateLinks,
@@ -691,5 +767,6 @@ module.exports = {
     getWeeklyActivity,
     getEventTypeStats,
     resetStats,
-    handleResourcePost
+    handleResourcePost,
+    exportSalesAuto
 };

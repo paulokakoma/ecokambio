@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMAC Signature Test - EcoKambio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button.danger {
+            background: #e74c3c;
+        }
+
+        button.danger:hover {
+            background: #c0392b;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔐 HMAC Signature Test Tool</h1>
+        <p>Esta página testa a implementação da assinatura digital HMAC nos endpoints do EcoFlix.</p>
+
+        <!-- Test 1: Valid Request -->
+        <div class="test-section">
+            <h2>✅ Test 1: Valid Signed Request</h2>
+            <p>Envia um pedido OTP com assinatura HMAC válida.</p>
+            <input type="tel" class="phone-input" id="phone1" placeholder="+244912345678" value="+244912345678">
+            <button onclick="testValidRequest()">Enviar OTP (com HMAC)</button>
+            <div id="result1" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 2: Invalid Signature -->
+        <div class="test-section">
+            <h2>❌ Test 2: Invalid Signature</h2>
+            <p>Envia um pedido com assinatura HMAC inválida (simulando ataque).</p>
+            <input type="tel" class="phone-input" id="phone2" placeholder="+244912345678" value="+244912345678">
+            <button class="danger" onclick="testInvalidSignature()">Enviar com Assinatura Errada</button>
+            <div id="result2" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 3: Missing Signature -->
+        <div class="test-section">
+            <h2>⚠️ Test 3: Missing Signature</h2>
+            <p>Envia um pedido sem assinatura HMAC.</p>
+            <input type="tel" class="phone-input" id="phone3" placeholder="+244912345678" value="+244912345678">
+            <button class="danger" onclick="testMissingSignature()">Enviar sem HMAC</button>
+            <div id="result3" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 4: Expired Request -->
+        <div class="test-section">
+            <h2>⏰ Test 4: Expired Request (Replay Attack)</h2>
+            <p>Envia um pedido com timestamp antigo (> 5 minutos).</p>
+            <input type="tel" class="phone-input" id="phone4" placeholder="+244912345678" value="+244912345678">
+            <button class="danger" onclick="testExpiredRequest()">Enviar Pedido Antigo</button>
+            <div id="result4" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Test 5: Tampered Data -->
+        <div class="test-section">
+            <h2>🔧 Test 5: Tampered Data</h2>
+            <p>Envia um pedido válido mas modifica os dados depois de assinar (simulando adulteração).</p>
+            <input type="tel" class="phone-input" id="phone5" placeholder="+244912345678" value="+244912345678">
+            <button class="danger" onclick="testTamperedData()">Enviar com Dados Modificados</button>
+            <div id="result5" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script src="/js/hmacSigner.js"></script>
+    <script>
+        function showResult(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.className = `result ${type}`;
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        // Test 1: Valid Request
+        async function testValidRequest() {
+            const phone = document.getElementById('phone1').value;
+            try {
+                const data = { phone: phone };
+                const response = await window.HMACSign.securePost('/api/ecoflix/auth/send-otp', data);
+                const result = await response.json();
+
+                if (response.ok) {
+                    showResult('result1',
+                        `✅ SUCCESS!\n\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}`,
+                        'success'
+                    );
+                } else {
+                    showResult('result1',
+                        `❌ FAILED\n\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showResult('result1', `❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2: Invalid Signature
+        async function testInvalidSignature() {
+            const phone = document.getElementById('phone2').value;
+            try {
+                const data = { phone: phone };
+                const timestamp = Date.now().toString();
+
+                const response = await fetch('/api/ecoflix/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-signature': 'invalid_signature_12345abcdef',
+                        'x-timestamp': timestamp
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResult('result2',
+                    `Expected Error:\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}`,
+                    response.ok ? 'error' : 'info'
+                );
+            } catch (error) {
+                showResult('result2', `ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 3: Missing Signature
+        async function testMissingSignature() {
+            const phone = document.getElementById('phone3').value;
+            try {
+                const data = { phone: phone };
+
+                const response = await fetch('/api/ecoflix/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResult('result3',
+                    `Expected Error:\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}`,
+                    response.ok ? 'error' : 'info'
+                );
+            } catch (error) {
+                showResult('result3', `ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4: Expired Request
+        async function testExpiredRequest() {
+            const phone = document.getElementById('phone4').value;
+            try {
+                const data = { phone: phone };
+                // Use timestamp from 10 minutes ago
+                const oldTimestamp = (Date.now() - 10 * 60 * 1000).toString();
+
+                // Generate signature with old timestamp
+                const payload = `${oldTimestamp}${JSON.stringify(data)}`;
+                const SECRET_KEY = 'ecokambio_segredo_super_dificil_2024_hmac_sha256_protection';
+                const signature = await window.HMACSign.hmacSHA256(payload, SECRET_KEY);
+
+                const response = await fetch('/api/ecoflix/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-signature': signature,
+                        'x-timestamp': oldTimestamp
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResult('result4',
+                    `Expected Error:\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}`,
+                    response.ok ? 'error' : 'info'
+                );
+            } catch (error) {
+                showResult('result4', `ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 5: Tampered Data
+        async function testTamperedData() {
+            const phone = document.getElementById('phone5').value;
+            try {
+                // Sign with original data
+                const originalData = { phone: phone };
+                const headers = await window.HMACSign.signRequest(originalData);
+
+                // But send different data!
+                const tamperedData = { phone: '+244999999999' };
+
+                const response = await fetch('/api/ecoflix/auth/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...headers
+                    },
+                    body: JSON.stringify(tamperedData)
+                });
+
+                const result = await response.json();
+                showResult('result5',
+                    `Expected Error:\nStatus: ${response.status}\nResponse: ${JSON.stringify(result, null, 2)}\n\nSigned: ${phone}\nSent: +244999999999`,
+                    response.ok ? 'error' : 'info'
+                );
+            } catch (error) {
+                showResult('result5', `ERROR: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

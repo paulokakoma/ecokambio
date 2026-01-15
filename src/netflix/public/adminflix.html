@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoFlix Admin - Gestão de Streaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .nav-item.active {
+            background-color: #e50914;
+            color: white;
+        }
+
+        .nav-item {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-livre {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-ocupado {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-expirado {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-manutencao {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+
+        .badge-sucesso {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-pendente {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+
+        .badge-cancelado {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .panel {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            min-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden bg-gray-50">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- SIDEBAR (Desktop) -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <span class="text-2xl font-bold text-red-600">EcoFlix<span
+                    class="text-gray-400 text-xs ml-1">Admin</span></span>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <div id="nav-dashboard" onclick="switchTab('dashboard')"
+                class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-home w-5 text-center"></i> Visão Geral
+            </div>
+            <div id="nav-stock" onclick="switchTab('stock')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-database w-5 text-center"></i> Inventário & Contas
+            </div>
+            <div id="nav-sales" onclick="switchTab('sales')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-shopping-cart w-5 text-center"></i> Vendas
+            </div>
+            <div id="nav-customers" onclick="switchTab('customers')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-users w-5 text-center"></i> Clientes
+            </div>
+            <div id="nav-integrations" onclick="switchTab('integrations')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-plug w-5 text-center"></i> Integrações
+            </div>
+            <div id="nav-maintenance" onclick="switchTab('maintenance')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-tools w-5 text-center"></i> Manutenção
+            </div>
+        </nav>
+
+        <div class="p-4 border-t border-gray-100">
+            <button onclick="logout()"
+                class="flex items-center gap-2 text-gray-500 hover:text-red-600 px-4 py-2 text-sm font-medium w-full transition-colors">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- MOBILE HEADER -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 px-4 h-16 flex items-center justify-between">
+        <span class="text-xl font-bold text-red-600">EcoFlix</span>
+        <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-gray-600">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"
+        onclick="this.classList.add('hidden')">
+        <div class="bg-white w-64 h-full pt-16 p-4 space-y-2">
+            <div onclick="switchTab('dashboard')" class="p-3 font-bold border-b">Visão Geral</div>
+            <div onclick="switchTab('stock')" class="p-3 font-bold border-b">Inventário</div>
+            <div onclick="switchTab('sales')" class="p-3 font-bold border-b">Vendas</div>
+            <div onclick="logout()" class="p-3 text-red-600 font-bold mt-4">Sair</div>
+        </div>
+    </div>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50">
+
+            <!-- 1. DASHBOARD -->
+            <div id="panel-dashboard" class="panel">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h1>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <!-- Cards -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase">Perfis Disponíveis</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="dash-free">12</h3>
+                            </div>
+                            <div class="p-2 bg-green-100 rounded-lg text-green-600"><i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs text-gray-500"><span
+                                class="text-green-600 font-bold mr-1">+4</span> hoje</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase">Perfis Vendidos</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="dash-sold">84</h3>
+                            </div>
+                            <div class="p-2 bg-blue-100 rounded-lg text-blue-600"><i class="fas fa-user-check"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs text-gray-500"><span
+                                class="text-blue-600 font-bold mr-1">87%</span> ocupação</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-red-100 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-red-500 rounded-bl-full -mr-8 -mt-8 opacity-20">
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-red-600 uppercase font-bold">A Expirar (48h)</p>
+                                <h3 class="text-3xl font-bold text-red-600 mt-2">3</h3>
+                            </div>
+                            <div class="p-2 bg-red-100 rounded-lg text-red-600"><i class="fas fa-clock"></i></div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs text-red-500">Renovar urgente!</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase">Receita Hoje</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2">22.500 Kz</h3>
+                            </div>
+                            <div class="p-2 bg-purple-100 rounded-lg text-purple-600"><i class="fas fa-coins"></i></div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs text-gray-500">5 vendas</div>
+                    </div>
+                </div>
+                <!-- Gráfico e Atividade -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Vendas Semanais</h3>
+                        <div class="h-64 bg-gray-50 rounded flex items-center justify-center text-gray-400"><canvas
+                                id="salesChart"></canvas></div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Atividade Recente</h3>
+                        <ul class="space-y-4" id="recent-activity-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. STOCK (INVENTÁRIO) -->
+            <div id="panel-stock" class="panel hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Inventário de Contas Netflix</h1>
+                    <div class="flex gap-2">
+                        <button onclick="downloadCsv()"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg"><i
+                                class="fas fa-file-csv"></i> Exportar Vendas</button>
+                        <button onclick="showSheetsInfo()"
+                            class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm border border-green-300"><i
+                                class="fas fa-table"></i> Google Sheets</button>
+                        <button onclick="openAccountModal('create')"
+                            class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg"><i
+                                class="fas fa-plus"></i> Nova Conta Mãe</button>
+                    </div>
+                </div>
+
+                <!-- STOCK STATS CARDS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="inventory-stats-container">
+                    <!-- Loaded via JS -->
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 w-10"></th>
+                                    <th class="px-6 py-3">Email da Conta</th>
+                                    <th class="px-6 py-3">Senha</th>
+                                    <th class="px-6 py-3">Renovação</th>
+                                    <th class="px-6 py-3">Ocupação (Slots)</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100" id="stock-table-body">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. VENDAS -->
+            <div id="panel-sales" class="panel hidden">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Histórico de Vendas</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 flex gap-4">
+                        <input type="text" placeholder="Procurar Ref ou Telefone..."
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 md:w-80 pl-10">
+                        <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5">
+                            <option>Todos os Estados</option>
+                            <option>Pago</option>
+                            <option>Pendente</option>
+                        </select>
+                    </div>
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3">ID</th>
+                                <th class="px-6 py-3">Cliente</th>
+                                <th class="px-6 py-3">Plano</th>
+                                <th class="px-6 py-3">Referência</th>
+                                <th class="px-6 py-3">Data</th>
+                                <th class="px-6 py-3">Estado</th>
+                                <th class="px-6 py-3 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="sales-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. CLIENTES -->
+            <div id="panel-customers" class="panel hidden">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Base de Clientes</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3">Nome / Telefone</th>
+                                <th class="px-6 py-3">Total Gasto (LTV)</th>
+                                <th class="px-6 py-3">Compras</th>
+                                <th class="px-6 py-3">Última Compra</th>
+                                <th class="px-6 py-3">Status Atual</th>
+                                <th class="px-6 py-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="customers-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. INTEGRAÇÕES (SMS / TWILIO) -->
+            <div id="panel-integrations" class="panel hidden">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Configuração de Notificações (SMS)</h1>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Configuração Twilio -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-red-100 p-2 rounded text-red-600"><i class="fas fa-comment-alt"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Integração Twilio</h3>
+                            </div>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
+                                </div>
+                            </label>
+                        </div>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Account SID</label>
+                                <input type="text" value="AC3491823..."
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border bg-gray-50 text-gray-500 font-mono text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Auth Token</label>
+                                <input type="password" value="****************"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border bg-gray-50 text-gray-500 font-mono text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Número de Envio (From)</label>
+                                <input type="text" value="+1234567890"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border">
+                            </div>
+                            <button type="button"
+                                onclick="showToast('Configurações Twilio salvas com sucesso!', 'success')"
+                                class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded text-sm font-bold w-full">Salvar
+                                Credenciais</button>
+                        </form>
+                    </div>
+
+                    <!-- Templates de Mensagem -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="font-bold text-lg mb-4">Templates de Mensagem</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Novo Acesso (Venda)</label>
+                                <textarea
+                                    class="w-full border border-gray-300 rounded-md p-2 text-sm text-gray-600 h-24"
+                                    rows="3">EcoFlix: Seu acesso Netflix chegou!
+Login: {email}
+Senha: {senha}
+Perfil: {perfil} | PIN: {pin}
+Validade: 30 dias.</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Aviso de Expiração</label>
+                                <textarea class="w-full border border-gray-300 rounded-md p-2 text-sm text-gray-600"
+                                    rows="2">EcoFlix: A sua conta expira em 2 dias. Renove agora para manter o seu perfil e histórico.</textarea>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded text-xs text-blue-700 flex items-start gap-2">
+                                <i class="fas fa-info-circle mt-0.5"></i>
+                                <p>Use as variáveis {email}, {senha}, {pin} para personalizar.</p>
+                            </div>
+                            <button type="button" onclick="showToast('Templates atualizados!', 'success')"
+                                class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded text-sm font-bold w-full">Salvar
+                                Templates</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. MANUTENÇÃO -->
+            <div id="panel-maintenance" class="panel hidden">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Central de Problemas</h1>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="font-bold text-lg mb-4">Reportar Conta Bloqueada</h3>
+                        <form class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700">Conta Mãe</label><select
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border">
+                                    <option>netflix01@eco.ao</option>
+                                    <option>netflix02@eco.ao</option>
+                                </select></div>
+                            <div><label class="block text-sm font-medium text-gray-700">Problema</label><select
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border">
+                                    <option>Senha Incorreta</option>
+                                    <option>Bloqueio Residência</option>
+                                </select></div>
+                            <button
+                                class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded">Registar
+                                Incidente</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="font-bold text-lg mb-4">Alertas Recentes</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-3 bg-yellow-50 text-yellow-800 rounded text-sm"><i
+                                    class="fas fa-exclamation-triangle mr-3"></i><span>Conta netflix03@eco.ao reportou
+                                    erro de senha 3x.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DE EDIÇÃO DE PERFIL -->
+    <div id="profileModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+            id="profileModalContent">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Gerir Perfil</h3>
+                <button onclick="closeModal('profile')" class="text-gray-400 hover:text-gray-600"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="editAccountId">
+                <input type="hidden" id="editProfileIndex">
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Nome</label><input type="text"
+                        id="editProfileName" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm" readonly>
+                </div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">PIN (4 Dígitos)</label>
+                    <div class="flex gap-2"><input type="text" id="editProfilePin"
+                            class="w-full border border-gray-300 rounded-lg p-2.5 text-sm font-mono tracking-widest text-center"
+                            maxlength="4"><button onclick="generateRandomPin()"
+                            class="bg-gray-100 hover:bg-gray-200 px-3 rounded border border-gray-300"><i
+                                class="fas fa-random text-gray-500"></i></button></div>
+                </div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Estado</label><select
+                        id="editProfileStatus" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                        onchange="toggleClientFields()">
+                        <option value="AVAILABLE">Livre</option>
+                        <option value="SOLD">Vendido</option>
+                        <option value="EXPIRED">Expirado</option>
+                        <option value="MAINTENANCE">Manutenção</option>
+                    </select></div>
+                <div id="clientFields">
+                    <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label><input
+                            type="text" id="editProfileClient"
+                            class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                            placeholder="Ex: João (923...)"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Data de Expiração</label><input
+                            type="text" id="editProfileExpires"
+                            class="w-full border border-gray-300 rounded-lg p-2.5 text-sm" placeholder="DD/MM"></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-between">
+                <button onclick="resetProfileSlot()"
+                    class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-4 py-2 rounded"><i
+                        class="fas fa-trash-alt mr-1"></i> Libertar</button>
+                <div class="flex gap-3"><button onclick="closeModal('profile')"
+                        class="text-gray-600 hover:text-gray-900 text-sm font-medium px-4 py-2">Cancelar</button><button
+                        onclick="saveProfile()"
+                        class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-4 py-2 rounded shadow">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO: MODAL DE CONTA MÃE -->
+    <div id="accountModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+            id="accountModalContent">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900" id="accountModalTitle">Nova Conta Mãe</h3>
+                <button onclick="closeModal('account')" class="text-gray-400 hover:text-gray-600"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="manageAccountId">
+                <input type="hidden" id="manageAccountMode"> <!-- create/edit -->
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email da Conta Netflix</label>
+                    <input type="email" id="accEmail" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                        placeholder="email@exemplo.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha de Acesso</label>
+                    <input type="text" id="accPass"
+                        class="w-full border border-gray-300 rounded-lg p-2.5 text-sm font-mono" placeholder="Senha123">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Próximo Pagamento (Renovação)</label>
+                    <input type="text" id="accRenewal" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                        placeholder="Ex: 15/03 ou 'Amanhã'">
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-between">
+                <button onclick="deleteAccount()" id="btnDeleteAccount"
+                    class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-4 py-2 rounded hidden">
+                    <i class="fas fa-trash-alt mr-1"></i> Apagar Conta
+                </button>
+                <div class="flex gap-3 ml-auto">
+                    <button onclick="closeModal('account')"
+                        class="text-gray-600 hover:text-gray-900 text-sm font-medium px-4 py-2">Cancelar</button>
+                    <button onclick="saveAccount()"
+                        class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-4 py-2 rounded shadow">Salvar
+                        Conta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA COM API REAL -->
+    <script>
+        const API_BASE = '/api/ecoflix';
+        let stockData = [];
+        let ordersData = [];
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (e) { }
+            sessionStorage.removeItem('admin_session_alive');
+            window.location.href = '/login.html';
+        }
+
+        // ============================================================================
+        // TOAST NOTIFICATIONS
+        // ============================================================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            // Ícone e Cor baseada no tipo
+            let icon = 'check-circle';
+            let colorClass = 'bg-gray-800'; // Default dark
+
+            if (type === 'success') { icon = 'check-circle'; colorClass = 'bg-gray-900'; }
+            if (type === 'error') { icon = 'exclamation-circle'; colorClass = 'bg-red-600'; }
+            if (type === 'info') { icon = 'info-circle'; colorClass = 'bg-blue-600'; }
+
+            toast.className = `toast ${colorClass} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3`;
+            toast.innerHTML = `<i class="fas fa-${icon} text-lg"></i> <span class="font-medium text-sm">${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animação de entrada
+            requestAnimationFrame(() => { toast.classList.add('show'); });
+
+            // Remover após 4 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => { container.removeChild(toast); }, 300);
+            }, 4000);
+        }
+
+        // ============================================================================
+        // API HELPERS
+        // ============================================================================
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const res = await fetch(`${API_BASE}${endpoint}`, options);
+
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/login.html?redirect=/netflix/adminflix.html';
+                    throw new Error('Sessão expirada. Redirecionando...');
+                }
+
+                // Check for JSON content type
+                const contentType = res.headers.get('content-type');
+                let data;
+                if (contentType && contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    if (!res.ok) throw new Error(text || 'Erro (resposta não-JSON)');
+                    data = { success: true, message: text };
+                }
+
+                if (!res.ok) throw new Error(data.message || 'Erro na API');
+                return data;
+            } catch (err) {
+                console.error('API Error:', err);
+                if (err.message !== 'Sessão expirada. Redirecionando...') {
+                    if (!endpoint.includes('/notifications')) {
+                        showToast('Erro: ' + err.message, 'error');
+                    }
+                }
+                throw err;
+            }
+        }
+
+        // ============================================================================
+        // DASHBOARD
+        // ============================================================================
+        async function loadDashboard() {
+            try {
+                const { data } = await apiCall('/admin/dashboard');
+                document.getElementById('dash-free').innerText = data.freeProfiles || 0;
+                document.getElementById('dash-sold').innerText = data.soldProfiles || 0;
+            } catch (e) {
+                console.error('Dashboard load error:', e);
+            }
+        }
+
+        // ============================================================================
+        // STOCK MANAGEMENT
+        // ============================================================================
+        async function loadStock() {
+            try {
+                const { data } = await apiCall('/admin/stock');
+                stockData = data || [];
+                renderStock();
+            } catch (e) {
+                console.error('Stock load error:', e);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'AVAILABLE': return 'badge-livre';
+                case 'SOLD': return 'badge-ocupado';
+                case 'EXPIRED': return 'badge-expirado';
+                case 'MAINTENANCE': return 'badge-manutencao';
+                default: return 'badge-livre';
+            }
+        }
+
+        function getStatusLabel(status) {
+            switch (status) {
+                case 'AVAILABLE': return 'LIVRE';
+                case 'SOLD': return 'VENDIDO';
+                case 'EXPIRED': return 'EXPIROU';
+                case 'MAINTENANCE': return 'MANUTENÇÃO';
+                default: return status;
+            }
+        }
+
+        function formatRenewal(date) {
+            if (!date) return { text: 'N/A', color: 'text-gray-500' };
+            const renewal = new Date(date);
+            const today = new Date();
+            const diff = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
+
+            if (diff <= 0) return { text: 'Expirado', color: 'text-red-600' };
+            if (diff <= 2) return { text: `${diff} Dia${diff > 1 ? 's' : ''}`, color: 'text-red-600' };
+            if (diff <= 7) return { text: `${diff} Dias`, color: 'text-yellow-600' };
+            return { text: `${diff} Dias`, color: 'text-green-600' };
+        }
+
+        function renderStock() {
+            document.getElementById('stock-table-body').innerHTML = stockData.map((acc, accIdx) => {
+                const profiles = acc.profiles || [];
+                const renewal = formatRenewal(acc.renewal_date);
+
+                return `
+                <tr class="bg-white hover:bg-gray-50 transition cursor-pointer border-b border-gray-100">
+                    <td class="px-6 py-4 text-center text-blue-600" onclick="toggleDetails('details-${acc.id}')"><i class="fas fa-chevron-down"></i></td>
+                    <td class="px-6 py-4 font-medium text-gray-900">${acc.email}</td>
+                    <td class="px-6 py-4 font-mono text-gray-500"><span class="bg-gray-100 px-2 py-1 rounded">${acc.password}</span></td>
+                    <td class="px-6 py-4 font-bold ${renewal.color}"><i class="fas fa-exclamation-circle mr-1"></i> ${renewal.text}</td>
+                    <td class="px-6 py-4"><div class="w-24 bg-gray-200 rounded-full h-2.5 mb-1"><div class="bg-blue-600 h-2.5 rounded-full" style="width: ${(acc.occupied / acc.total) * 100}%"></div></div><span class="text-xs text-gray-500">${acc.occupied}/${acc.total} Ocupados</span></td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-2">
+                        <button onclick="viewRecovery('${acc.id}')" class="text-gray-500 hover:text-gray-700" title="Ver Recuperação"><i class="fas fa-key"></i></button>
+                        <button onclick="openAccountModal('edit', ${accIdx})" class="text-blue-600 font-medium text-xs hover:underline">Editar</button>
+                    </td>
+                </tr>
+                <tr id="details-${acc.id}" class="bg-gray-50 border-b border-gray-200 hidden">
+                    <td colspan="6" class="p-4">
+                        <div class="bg-white rounded border border-gray-200 p-4">
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-3 ml-1">Gerir Perfis (PINs)</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                ${profiles.map((p, profIdx) => `
+                                    <div onclick="openProfileModal('${acc.id}', '${p.id}')" class="cursor-pointer border rounded p-3 text-center transition hover:shadow-md ${p.status === 'EXPIRED' ? 'bg-red-50 border-red-200' : (p.status === 'AVAILABLE' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200')}">
+                                        <div class="text-xs font-bold ${p.status === 'EXPIRED' ? 'text-red-800' : 'text-gray-800'}">${p.name} <i class="fas fa-pencil-alt ml-1 text-[10px] opacity-50"></i></div>
+                                        <div class="text-lg font-bold text-gray-800">PIN: ${p.pin || '----'}</div>
+                                        <div class="text-[10px] text-gray-500 truncate h-4">${p.client_phone || '-'}</div>
+                                        <span class="${getStatusClass(p.status)} px-2 py-0.5 rounded text-[10px] font-bold block mt-1">${getStatusLabel(p.status)}</span>
+                                        <div class="text-[9px] text-gray-400 mt-1 h-3">${p.expires_at ? 'Exp: ' + new Date(p.expires_at).toLocaleDateString('pt-PT') : ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        async function viewRecovery(id) {
+            try {
+                const { data } = await apiCall(`/admin/accounts/${id}/recovery`);
+                alert(`RECUPERAÇÃO\n\nEmail: ${data.recovery_email || 'N/A'}\nSenha: ${data.recovery_password || 'N/A'}`);
+            } catch (e) {
+                // Error shown by apiCall
+            }
+        }
+
+        // ============================================================================
+        // MODAL FUNCTIONS
+        // ============================================================================
+        function showModal(id, contentId) {
+            const el = document.getElementById(id); const content = document.getElementById(contentId);
+            el.classList.remove('hidden');
+            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        function closeModal(type) {
+            const id = type === 'account' ? 'accountModal' : 'profileModal';
+            const contentId = type === 'account' ? 'accountModalContent' : 'profileModalContent';
+            const content = document.getElementById(contentId);
+            content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => document.getElementById(id).classList.add('hidden'), 200);
+        }
+
+        // ============================================================================
+        // ACCOUNT MODAL
+        // ============================================================================
+        let currentAccountIdx = null;
+
+        function openAccountModal(mode, accIdx = null) {
+            document.getElementById('manageAccountMode').value = mode;
+            const btnDelete = document.getElementById('btnDeleteAccount');
+            currentAccountIdx = accIdx;
+
+            if (mode === 'edit' && accIdx !== null) {
+                const acc = stockData[accIdx];
+                document.getElementById('accountModalTitle').innerText = "Editar Conta Mãe";
+                document.getElementById('manageAccountId').value = acc.id;
+                document.getElementById('accEmail').value = acc.email;
+                document.getElementById('accPass').value = acc.password;
+                document.getElementById('accRenewal').value = acc.renewal_date || '';
+                btnDelete.classList.remove('hidden');
+            } else {
+                document.getElementById('accountModalTitle').innerText = "Nova Conta Mãe";
+                document.getElementById('manageAccountId').value = "";
+                document.getElementById('accEmail').value = "";
+                document.getElementById('accPass').value = "";
+                document.getElementById('accRenewal').value = "";
+                btnDelete.classList.add('hidden');
+            }
+            showModal('accountModal', 'accountModalContent');
+        }
+
+        async function saveAccount() {
+            const mode = document.getElementById('manageAccountMode').value;
+            const id = document.getElementById('manageAccountId').value;
+            const email = document.getElementById('accEmail').value;
+            const password = document.getElementById('accPass').value;
+            const renewal_date = document.getElementById('accRenewal').value;
+
+            if (!email || !password) return showToast("Preencha email e senha!", 'error');
+
+            try {
+                if (mode === 'create') {
+                    await apiCall('/admin/accounts', 'POST', { email, password, renewal_date });
+                    showToast("Conta Mãe criada com sucesso!", 'success');
+                } else {
+                    await apiCall(`/admin/accounts/${id}`, 'PUT', { email, password, renewal_date });
+                    showToast("Conta Mãe atualizada com sucesso!", 'success');
+                }
+                await loadStock();
+                closeModal('account');
+            } catch (e) {
+                // Error already shown by apiCall
+            }
+        }
+
+        async function deleteAccount() {
+            const id = document.getElementById('manageAccountId').value;
+            if (!confirm("Apagar esta conta e todos os perfis?")) return;
+
+            try {
+                await apiCall(`/admin/accounts/${id}`, 'DELETE');
+                await loadStock();
+                closeModal('account');
+                showToast("Conta Mãe removida com sucesso.", 'info');
+            } catch (e) {
+                // Error already shown
+            }
+        }
+
+        // ============================================================================
+        // PROFILE MODAL
+        // ============================================================================
+        let currentProfileId = null;
+
+        function openProfileModal(accountId, profileId) {
+            currentProfileId = profileId;
+
+            // Find profile in stockData
+            let profile = null;
+            for (const acc of stockData) {
+                if (acc.id === accountId) {
+                    profile = acc.profiles.find(p => p.id === profileId);
+                    break;
+                }
+            }
+
+            if (!profile) return showToast('Perfil não encontrado', 'error');
+
+            document.getElementById('editAccountId').value = accountId;
+            document.getElementById('editProfileIndex').value = profileId;
+            document.getElementById('editProfileName').value = profile.name;
+            document.getElementById('editProfilePin').value = profile.pin || '';
+            document.getElementById('editProfileStatus').value = profile.status;
+            document.getElementById('editProfileClient').value = profile.client_phone || '';
+            document.getElementById('editProfileExpires').value = profile.expires_at ? profile.expires_at.split('T')[0] : '';
+            toggleClientFields();
+            showModal('profileModal', 'profileModalContent');
+        }
+
+        function toggleClientFields() {
+            const status = document.getElementById('editProfileStatus').value;
+            const fields = document.getElementById('clientFields');
+            const pinInput = document.getElementById('editProfilePin');
+
+            if (status === 'AVAILABLE') {
+                fields.classList.add('opacity-50', 'pointer-events-none');
+            } else {
+                fields.classList.remove('opacity-50', 'pointer-events-none');
+
+                // Auto-generate PIN if SOLD and Empty
+                if (status === 'SOLD' && !pinInput.value) {
+                    generateRandomPin();
+                }
+            }
+        }
+
+        function generateRandomPin() {
+            document.getElementById('editProfilePin').value = Math.floor(1000 + Math.random() * 9000);
+        }
+
+        async function resetProfileSlot() {
+            if (!confirm("Resetar este perfil? O cliente será removido.")) return;
+            const profileId = document.getElementById('editProfileIndex').value;
+
+            try {
+                await apiCall(`/admin/profiles/${profileId}`, 'PUT', { status: 'AVAILABLE' });
+                await loadStock();
+                closeModal('profile');
+                showToast("Perfil libertado com sucesso!", 'info');
+            } catch (e) {
+                // Error already shown
+            }
+        }
+
+        async function saveProfile() {
+            const profileId = document.getElementById('editProfileIndex').value;
+            const status = document.getElementById('editProfileStatus').value;
+            const pin = document.getElementById('editProfilePin').value;
+            const client_phone = document.getElementById('editProfileClient').value;
+            const expires_at = document.getElementById('editProfileExpires').value;
+
+            try {
+                await apiCall(`/admin/profiles/${profileId}`, 'PUT', {
+                    status,
+                    pin,
+                    client_phone: status !== 'AVAILABLE' ? client_phone : null,
+                    expires_at: status !== 'AVAILABLE' ? expires_at : null
+                });
+                await loadStock();
+                await loadStock();
+                closeModal('profile');
+                if (status === 'SOLD') {
+                    showToast(`Perfil vendido! SMS enviado para ${client_phone}`, 'success');
+                } else {
+                    showToast("Perfil atualizado com sucesso!", 'success');
+                }
+            } catch (e) {
+                // Error already shown
+            }
+        }
+
+        // ============================================================================
+        // ORDERS
+        // ============================================================================
+        async function loadOrders() {
+            try {
+                const { data } = await apiCall('/admin/orders');
+                ordersData = data || [];
+                renderSales();
+            } catch (e) {
+                console.error('Orders load error:', e);
+            }
+        }
+
+        function renderSales() {
+            document.getElementById('sales-table-body').innerHTML = ordersData.map(s => {
+                const statusClass = s.status === 'PAID' ? 'badge-sucesso' : (s.status === 'PENDING' ? 'badge-pendente' : 'badge-cancelado');
+                const statusLabel = s.status === 'PAID' ? 'PAGO' : (s.status === 'PENDING' ? 'PENDENTE' : s.status);
+                const date = new Date(s.created_at).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                return `<tr class="bg-white hover:bg-gray-50 border-b border-gray-100">
+                    <td class="px-6 py-4 font-mono text-gray-500 text-xs">#${s.id.slice(0, 8)}</td>
+                    <td class="px-6 py-4 font-medium"><div>${s.user?.name || 'Cliente'}</div><div class="text-xs text-gray-400">${s.phone || s.user?.phone || '-'}</div></td>
+                    <td class="px-6 py-4 text-xs font-bold text-gray-600">${s.plan_type} (${Number(s.amount).toLocaleString()} Kz)</td>
+                    <td class="px-6 py-4 font-mono text-xs">${s.reference_id || '-'}</td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">${date}</td>
+                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusLabel}</span></td>
+                    <td class="px-6 py-4 text-right">
+                        ${s.status === 'PENDING' ? `<button onclick="confirmPayment('${s.id}')" class="text-green-600 hover:text-green-800 text-xs font-bold">Confirmar</button>` : ''}
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function confirmPayment(orderId) {
+            if (!confirm('Confirmar pagamento manualmente?')) return;
+            try {
+                await apiCall(`/admin/orders/${orderId}/confirm`, 'POST');
+                await loadOrders();
+                await loadStock();
+                await loadDashboard();
+                showToast('Pagamento confirmado com sucesso!', 'success');
+            } catch (e) {
+                // Error already shown
+            }
+        }
+
+        // ============================================================================
+        // CUSTOMERS (from orders data)
+        // ============================================================================
+        function renderCustomers() {
+            // Aggregate customers from orders
+            const customerMap = new Map();
+            ordersData.forEach(o => {
+                const phone = o.phone || o.user?.phone;
+                if (!phone) return;
+
+                if (!customerMap.has(phone)) {
+                    customerMap.set(phone, {
+                        name: o.user?.name || 'Cliente',
+                        phone,
+                        ltv: 0,
+                        orders: 0,
+                        last: o.created_at,
+                        hasPaid: false
+                    });
+                }
+                const c = customerMap.get(phone);
+                if (o.status === 'PAID') {
+                    c.ltv += Number(o.amount);
+                    c.hasPaid = true;
+                }
+                c.orders++;
+                if (new Date(o.created_at) > new Date(c.last)) c.last = o.created_at;
+            });
+
+            const customers = Array.from(customerMap.values());
+
+            document.getElementById('customers-table-body').innerHTML = customers.map(c => {
+                const statusClass = c.hasPaid ? 'badge-sucesso' : 'badge-pendente';
+                const status = c.hasPaid ? 'Ativo' : 'Pendente';
+                const last = new Date(c.last).toLocaleDateString('pt-PT');
+
+                return `<tr class="bg-white hover:bg-gray-50 border-b border-gray-100">
+                    <td class="px-6 py-4 font-medium"><div>${c.name}</div><div class="text-xs text-gray-400">${c.phone}</div></td>
+                    <td class="px-6 py-4 font-bold text-green-600">${c.ltv.toLocaleString()} Kz</td>
+                    <td class="px-6 py-4 text-xs">${c.orders} pedidos</td>
+                    <td class="px-6 py-4 text-xs text-gray-500">${last}</td>
+                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${status}</span></td>
+                    <td class="px-6 py-4 text-right"><button class="text-blue-600 hover:text-blue-800 text-xs font-bold">Ver Perfil</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============================================================================
+        // ACTIVITY (static for now)
+        // ============================================================================
+        function renderActivity() {
+            const mockActivity = [
+                { type: "info", title: "Sistema Iniciado", desc: "Admin conectado à API", time: "Agora", icon: "fa-check", color: "green" }
+            ];
+            document.getElementById('recent-activity-list').innerHTML = mockActivity.map(a =>
+                `<li class="flex items-start gap-3 text-sm"><div class="bg-${a.color}-100 p-1.5 rounded-full text-${a.color}-600 mt-0.5"><i class="fas ${a.icon} text-xs"></i></div><div><p class="font-medium text-gray-900">${a.title}</p><p class="text-gray-500 text-xs">${a.desc}</p><p class="text-gray-400 text-[10px]">${a.time}</p></div></li>`
+            ).join('');
+        }
+
+        // ============================================================================
+        // POLLING / NOTIFICATIONS
+        // ============================================================================
+        let lastNotificationCheck = Date.now();
+
+        async function pollNotifications() {
+            try {
+                // Poll backend
+                const data = await apiCall(`/admin/notifications?since=${lastNotificationCheck}`);
+
+                if (data.events && data.events.length > 0) {
+                    let shouldReload = false;
+
+                    data.events.forEach(event => {
+                        const icon = event.type === 'USER' ? 'user-plus' : 'dollar-sign';
+                        const type = event.type === 'USER' ? 'info' : 'success';
+
+                        showToast(event.message, type);
+
+                        // Add to activity list
+                        const activityList = document.getElementById('recent-activity-list');
+                        if (activityList) {
+                            const color = event.type === 'USER' ? 'blue' : 'green';
+                            const iconClass = event.type === 'USER' ? 'fa-user' : 'fa-coins';
+                            const html = `<li class="flex items-start gap-3 text-sm animate-fade-in"><div class="bg-${color}-100 p-1.5 rounded-full text-${color}-600 mt-0.5"><i class="fas ${iconClass} text-xs"></i></div><div><p class="font-medium text-gray-900">${event.type === 'USER' ? 'Novo Cliente' : 'Pagamento'}</p><p class="text-gray-500 text-xs">${event.message}</p><p class="text-gray-400 text-[10px]">Agora</p></div></li>`;
+                            activityList.insertAdjacentHTML('afterbegin', html);
+                            if (activityList.children.length > 5) activityList.lastElementChild.remove();
+                        }
+
+                        if (event.type === 'ORDER' || event.type === 'USER') shouldReload = true;
+                    });
+
+                    // Update timestamp
+                    lastNotificationCheck = data.timestamp;
+
+                    // Refresh Data if needed
+                    if (shouldReload) {
+                        await loadDashboard(); // Update money/count
+                        await loadOrders();    // Update orders list
+                        await loadStock();     // Update stock usage
+                        renderCustomers();     // Update customer list from orders
+                    }
+                } else {
+                    // Just update timestamp even if empty to move window forward
+                    lastNotificationCheck = data.timestamp;
+                }
+            } catch (e) {
+                console.warn('Polling silent fail:', e);
+            }
+        }
+
+        // Start Polling (every 5 seconds)
+        setInterval(pollNotifications, 5000);
+
+        // ============================================================================
+        // EXPORT FUNCTIONS
+        // ============================================================================
+        function downloadCsv() {
+            window.location.href = '/api/ecoflix/admin/export-csv';
+        }
+
+        function showSheetsInfo() {
+            const token = "VER_NO_ENV (SHEETS_SYNC_TOKEN)";
+            const url = window.location.origin + "/api/ecoflix/admin/export-sales-auto?token=" + token;
+            // Simple alert for now as requested
+            alert("Copie a fórmula para o Google Sheets (Célula A1):\n\n=IMPORTDATA(\"" + url + "\")\n\n(Nota: Substitua o token no URL pelo valor definido no .env)");
+        }
+
+        async function loadInventoryStats() {
+            try {
+                const { data } = await apiCall('/admin/inventory-stats');
+                const container = document.getElementById('inventory-stats-container');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase font-bold">Livre (Mobile)</div>
+                        <div class="text-2xl font-bold text-green-600">${data.mobile_available}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase font-bold">Livre (TV)</div>
+                        <div class="text-2xl font-bold text-green-600">${data.tv_available}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <div class="text-xs text-gray-500 uppercase font-bold">Vendidos</div>
+                        <div class="text-2xl font-bold text-blue-600">${data.sold}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                         <div class="text-xs text-gray-500 uppercase font-bold">Suspensos</div>
+                        <div class="text-2xl font-bold text-red-600">${data.suspended}</div>
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Stats load error:', e);
+            }
+        }
+
+        // ============================================================================
+        // INIT & NAV
+        // ============================================================================
+        window.onload = async function () {
+            await loadDashboard();
+            await loadStock();
+            await loadInventoryStats(); // Newly added
+            // await loadOrders(); // Assuming this function exists or will be added, keeping logic consistent
+            // renderCustomers(); // Assuming exists
+            // renderActivity(); // Assuming exists
+
+            // Chart
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'],
+                    datasets: [{ label: 'Vendas (Kz)', data: [12000, 19000, 3000, 5000, 20000, 30000, 45000], borderColor: '#e50914', tension: 0.4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('text-gray-600'); });
+            const activeNav = document.getElementById('nav-' + tabId);
+            activeNav.classList.add('active');
+            activeNav.classList.remove('text-gray-600');
+            document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
+            document.getElementById('panel-' + tabId).classList.remove('hidden');
+        }
+
+        function toggleDetails(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        // === SECURITY: Auto-logout when tab closes ===
+        // We use sessionStorage because it survives reloads but is CLEARED when the tab/window is closed.
+
+        async function checkSessionIntegrity() {
+            const isSessionActive = sessionStorage.getItem('admin_session_alive');
+
+            if (!isSessionActive) {
+                // sessionStorage is empty, meaning this is a NEW tab or the tab was closed and reopened.
+                // We should invalidate any existing server-side session to force a fresh login.
+                console.log('New tab detected (Session Storage empty). Forcing session verification...');
+
+                try {
+                    // Check if we actually have a server session
+                    const check = await fetch('/api/ecoflix/admin/dashboard', { method: 'GET' });
+
+                    if (check.ok) {
+                        // Server thinks we are logged in, but this is a fresh tab.
+                        // User requested "logout on tab close", so we kill the session.
+                        console.log('Killing lingering session from closed tab...');
+                        await fetch('/api/logout', { method: 'POST' });
+                        window.location.href = '/login.html?reason=tab_closed';
+                        return;
+                    }
+                } catch (e) {
+                    // Network error or already logged out
+                }
+            }
+
+            // Mark session as active for this specific tab
+            sessionStorage.setItem('admin_session_alive', 'true');
+        }
+
+        // Run check immediately
+        checkSessionIntegrity();
+
+        // Additional security: logout on visibility change (tab switch/minimize) - Optional
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                sessionStorage.setItem('admin_last_hidden', Date.now().toString());
+            } else if (document.visibilityState === 'visible') {
+                const lastHidden = sessionStorage.getItem('admin_last_hidden');
+                if (lastHidden) {
+                    const hiddenDuration = Date.now() - parseInt(lastHidden);
+                    // Logout if hidden for more than 30 minutes
+                    if (hiddenDuration > 30 * 60 * 1000) {
+                        window.location.href = '/login.html?redirect=/netflix/adminflix.html&reason=timeout';
+                    }
+                }
+            }
+        });
+    </script>
+    <script src="/js/components.js"></script>
+</body>
+
+</html>

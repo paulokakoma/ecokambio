@@ -6,6 +6,9 @@ const serveIndex = (req, res) => {
     if (req.isAdminSubdomain) {
         return res.redirect('/admin');
     }
+    if (req.isAdminFlixSubdomain) {
+        return res.redirect('/adminflix');
+    }
     res.sendFile(path.join(__dirname, "../../public", "index.html"));
 };
 
@@ -65,6 +68,22 @@ const serveVisa = (req, res) => {
         return res.status(404).send('Página não encontrada');
     }
     res.sendFile(path.join(__dirname, "../../public", "visa.html"));
+};
+
+const serveNetflix = (req, res) => {
+    if (req.isAdminSubdomain) {
+        return res.status(404).send('Página não encontrada');
+    }
+    res.sendFile(path.join(__dirname, "../../public/netflix", "index.html"));
+};
+
+const serveAdminFlix = (req, res) => {
+    // Check signed cookie for admin authentication
+    if (req.signedCookies.admin_auth !== 'true') {
+        return res.redirect('/login');
+    }
+
+    res.sendFile(path.join(__dirname, "../../src/netflix/public", "adminflix.html"));
 };
 
 const serveTerms = (req, res) => {
@@ -174,13 +193,18 @@ module.exports = {
     serveAdminSecret,
     serveAbout,
     serveVisa,
+    serveNetflix,
+    serveAdminFlix,
     serveTerms,
     servePrivacy,
     serveRobots,
     serveSitemap,
     serveBingAuth,
     serveYandexAuth,
-    serveFounders
+    serveBingAuth,
+    serveYandexAuth,
+    serveFounders,
+    serveNetflix
 };
 
 // Blog routes
@@ -213,6 +237,8 @@ module.exports = {
     serveBingAuth,
     serveYandexAuth,
     serveFounders,
+    serveNetflix,
+    serveAdminFlix,
     serveDevelopers,
     serveApiDocs,
     serveBlog,

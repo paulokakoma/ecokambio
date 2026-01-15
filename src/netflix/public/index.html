@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoFlix - Streaming Angola</title>
+
+    <!-- Tailwind CSS (Framework de Estilo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Ícones (Font Awesome) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Fontes (Inter para texto, Bebas Neue para títulos) -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* === CONFIGURAÇÃO DE TEMA (Variáveis CSS) === */
+        :root {
+            --bg-color: #141414;
+            --text-color: #ffffff;
+            --card-bg: #1f1f1f;
+            --card-border: #333;
+            --brand-color: #e50914;
+            /* Vermelho Netflix */
+            --input-bg: #333;
+            --nav-bg: rgba(0, 0, 0, 0.9);
+            --watermark-opacity: 0.15;
+            --text-muted: #9ca3af;
+            --bg-accent: rgba(0, 0, 0, 0.2);
+        }
+
+
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+
+
+        /* Navbar Premium com Glassmorphism */
+        .glass-nav {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Cartões de Planos Premium */
+        .netflix-card {
+            background: linear-gradient(135deg, rgba(31, 31, 31, 0.9) 0%, rgba(20, 20, 20, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .netflix-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(229, 9, 20, 0.08) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .netflix-card:hover::before {
+            opacity: 1;
+        }
+
+        .netflix-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(229, 9, 20, 0.2),
+                0 0 80px rgba(229, 9, 20, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: rgba(229, 9, 20, 0.3);
+        }
+
+        /* Botões Premium */
+        .btn-primary {
+            background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Inputs Premium */
+        .input-theme {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .input-theme:focus {
+            border-color: var(--brand-color);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.1), 0 4px 12px rgba(229, 9, 20, 0.2);
+        }
+
+        /* Utilitários */
+        .check-icon {
+            color: #46d369;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .cross-icon {
+            color: var(--brand-color);
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .text-brand {
+            color: var(--brand-color);
+        }
+
+        .bg-accent {
+            background-color: var(--bg-accent);
+        }
+
+        /* Loader de Carregamento */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--brand-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Animação suave de entrada */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 300px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            animation: slideIn 0.3s forwards;
+        }
+
+        .toast.success {
+            border-left: 4px solid #46d369;
+        }
+
+        .toast.error {
+            border-left: 4px solid #e50914;
+        }
+
+        .toast.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        /* Payment Button Styles - Premium */
+        .payment-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .payment-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .payment-btn:hover::before {
+            opacity: 1;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .payment-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .payment-btn-orange {
+            background: linear-gradient(135deg, #FF8C42 0%, #F87B1E 50%, #E8690B 100%);
+        }
+
+        .payment-btn-blue {
+            background: linear-gradient(135deg, #5D9CCA 0%, #4A8BB8 50%, #3A7AA6 100%);
+        }
+
+        .payment-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .payment-btn-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .payment-btn-icon img,
+        .payment-btn-icon svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .payment-btn-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .payment-btn-text h3 {
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .payment-btn-arrow {
+            color: white;
+            font-size: 18px;
+            opacity: 0.8;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-btn:hover .payment-btn-arrow {
+            transform: translateX(4px);
+        }
+
+        /* Enhanced Payment Method Button Styles */
+        .payment-method-btn {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .payment-method-btn:hover {
+            transform: translateY(-8px) scale(1.03);
+            filter: brightness(1.15) drop-shadow(0 16px 40px rgba(0, 0, 0, 0.5));
+        }
+
+        .payment-method-btn:active {
+            transform: translateY(-4px) scale(1.01);
+            filter: brightness(1.05) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4));
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+    <div id="toast-container" class="toast-container"></div>
+
+
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav fixed w-full z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3">
+                    <!-- LOGO ESTILO NETFLIX -->
+                    <div class="cursor-pointer" onclick="goHome()" title="Voltar ao Início">
+                        <h1 class="text-5xl font-black"
+                            style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; color: #E50914; letter-spacing: 0.15em; text-shadow: 3px 3px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
+                            ECOFLIX</h1>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="startLoginFlow()"
+                        class="text-sm font-bold text-white hover:text-gray-300 transition flex items-center gap-2 border border-white/20 px-3 py-1.5 rounded bg-white/10 hover:bg-white/20">
+                        <i class="fas fa-user"></i> Minha Conta
+                    </button>
+                    <button onclick="openHelpModal()"
+                        class="text-sm font-medium text-muted hover:text-brand transition flex items-center gap-2">
+                        <i class="far fa-question-circle"></i> Ajuda
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="h-20"></div> <!-- Espaçador para o navbar fixo -->
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-4 pt-4 pb-8">
+        <div class="text-center animate-fade-in">
+            <h2
+                class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-brand-color via-red-500 to-red-800 bg-clip-text text-transparent inline-block">
+                Paga com Visa, Assiste Netflix
+            </h2>
+        </div>
+    </section>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl relative z-10" id="app">
+
+        <!-- TELA 1: CATÁLOGO DE PLANOS -->
+        <div id="step-catalog" class="block animate-fade-in">
+            <div class="text-center mb-12 mt-4">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Planos para todos os ecrãs.</h1>
+                <p class="text-xl text-muted">Escolha a melhor opção para si. Cancele quando quiser.</p>
+            </div>
+
+            <!-- GRID DE 3 COLUNAS -->
+            <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
+
+                <!-- 1. PLANO ECONÓMICO -->
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6">
+                    <div
+                        class="absolute top-0 right-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
+                        ECONÓMICO</div>
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold mb-1">Pessoal Económico</h3>
+                        <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-bold opacity-80">4.500 Kz</span>
+                            <span class="text-xs text-muted">/mês</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700/20 my-4 pt-4">
+                        <p class="text-muted text-xs font-bold mb-2 uppercase">Dispositivos Permitidos:</p>
+                        <div class="flex flex-col gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-mobile-alt text-lg w-6 text-center text-brand"></i><span
+                                    class="text-sm">Telemóvel</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-tablet-alt text-lg w-6 text-center text-brand"></i><span
+                                    class="text-sm">Tablet</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-laptop text-lg w-6 text-center text-brand"></i><span
+                                    class="text-sm">Computador</span></div>
+                            <div class="flex items-center gap-3 opacity-40"><i
+                                    class="fas fa-tv text-lg w-6 text-center"></i><span
+                                    class="text-sm line-through">Smart TV</span></div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>1 Ecrã de cada
+                                vez</span></li>
+                        <li class="flex items-start"><i class="fas fa-times cross-icon mt-0.5"></i> <span>Não funciona
+                                na TV</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Qualidade
+                                Máxima (4K)</span></li>
+                    </ul>
+                    <button onclick="selectPlan('ECONOMICO', 4500)"
+                        class="w-full border border-gray-500 text-muted hover:text-white hover:border-white font-bold py-3 rounded-sm shadow-sm transition hover:bg-gray-500/10 relative z-10 cursor-pointer">
+                        Selecionar Económico
+                    </button>
+                </div>
+
+                <!-- 2. PLANO RECOMENDADO (ULTRA) -->
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6 transform md:-translate-y-2 border-t-4 border-t-current shadow-2xl"
+                    style="border-top-color: var(--brand-color)">
+                    <div class="absolute top-0 right-0 bg-brand-color text-white text-[10px] font-bold px-3 py-1 rounded-bl"
+                        style="background-color: var(--brand-color)">RECOMENDADO</div>
+                    <div class="mb-4">
+                        <h3 class="text-2xl font-bold mb-1 text-brand">Pessoal Ultra</h3>
+                        <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold">6.500 Kz</span>
+                            <span class="text-xs text-muted">/mês</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700/20 my-4 pt-4">
+                        <p class="text-xs font-bold mb-2 uppercase opacity-80">Todos os Dispositivos:</p>
+                        <div class="flex flex-col gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-tv text-lg w-6 text-center text-brand"></i><span
+                                    class="text-sm font-bold" style="color: var(--text-color)">Smart TV 4K</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-laptop text-lg w-6 text-center"></i><span
+                                    class="text-sm">Computador</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-mobile-alt text-lg w-6 text-center"></i><span
+                                    class="text-sm">Telemóvel / Tablet</span></div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>1 Ecrã de cada
+                                vez</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>PIN de Perfil
+                                Privado</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Funciona em
+                                Tudo</span></li>
+                    </ul>
+                    <button onclick="selectPlan('ULTRA', 6500)"
+                        class="w-full btn-primary font-bold py-3 rounded-sm shadow-lg text-lg relative z-10 cursor-pointer">
+                        Selecionar Ultra
+                    </button>
+                </div>
+
+                <!-- 3. PLANO FAMÍLIA (PREMIUM) -->
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6">
+                    <div
+                        class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
+                        FAMÍLIA</div>
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold mb-1">Conta Inteira</h3>
+                        <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-bold opacity-80">18.000 Kz</span>
+                            <span class="text-xs text-muted">/mês</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700/20 my-4 pt-4">
+                        <p class="text-muted text-xs font-bold mb-2 uppercase">Exclusividades:</p>
+                        <div class="flex flex-col gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-user-circle text-lg w-6 text-center"></i><span
+                                    class="text-sm font-bold" style="color: var(--text-color)">5 Perfis
+                                    Diferentes</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-users text-lg w-6 text-center"></i><span class="text-sm">4 Ecrãs
+                                    Simultâneos</span></div>
+                            <div class="flex items-center gap-3"><i
+                                    class="fas fa-home text-lg w-6 text-center"></i><span
+                                    class="text-sm">Multi-Residência</span></div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Conta 100%
+                                Exclusiva</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Crie perfis
+                                para a família</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Altere a
+                                senha</span></li>
+                    </ul>
+                    <button onclick="selectPlan('FAMILIA', 18000)"
+                        class="w-full bg-white text-black hover:bg-gray-200 border border-gray-300 font-bold py-3 rounded-sm transition relative z-10 cursor-pointer">
+                        Selecionar Família
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECÇÃO DE FAQ -->
+            <div class="mt-16 max-w-3xl mx-auto border-t border-gray-700/30 pt-8">
+                <h3 class="text-xl font-medium text-muted mb-6 text-center">Perguntas Frequentes</h3>
+                <div class="space-y-3">
+                    <div class="netflix-card p-5 cursor-pointer transition hover:bg-accent group"
+                        onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-lg">Qual a diferença entre o Económico e o Ultra?</span>
+                            <i
+                                class="fas fa-plus text-xl text-muted group-hover:text-brand transition-transform duration-300"></i>
+                        </div>
+                        <div
+                            class="hidden mt-4 text-muted text-sm leading-relaxed border-t border-gray-700/50 pt-4 animate-fade-in">
+                            A qualidade é a mesma: ambos são <strong>4K Ultra HDR</strong>.<br>
+                            A diferença está nos dispositivos: <strong>Económico</strong> não funciona na TV.
+                            <strong>Ultra</strong> funciona em Smart TVs e todos os outros dispositivos.
+                        </div>
+                    </div>
+
+                    <div class="netflix-card p-5 cursor-pointer transition hover:bg-accent group"
+                        onclick="toggleFaq(this)">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-lg text-brand">O que inclui o Plano Família?</span>
+                            <i
+                                class="fas fa-plus text-xl text-muted group-hover:text-brand transition-transform duration-300"></i>
+                        </div>
+                        <div
+                            class="hidden mt-4 text-muted text-sm leading-relaxed border-t border-gray-700/50 pt-4 animate-fade-in">
+                            O <strong>Plano Família (18.000 Kz)</strong> entrega uma conta <strong>100%
+                                exclusiva</strong>. Vantagens: Privacidade total (mude a senha), 5 perfis separados, e 4
+                            ecrãs em simultâneo.
+                        </div>
+                    </div>
+
+                    <div class="netflix-card p-5 cursor-pointer transition hover:bg-accent group"
+                        onclick="toggleFaq(this)">
+                        <div class="flex justify-center items-center">
+                            <span class="font-medium text-lg text-brand">Pagamentos e Entrega</span>
+                            <i
+                                class="fas fa-plus text-xl text-muted group-hover:text-brand transition-transform duration-300 ml-auto"></i>
+                        </div>
+                        <div
+                            class="hidden mt-4 text-muted text-sm leading-relaxed border-t border-gray-700/50 pt-4 animate-fade-in">
+                            Aceitamos <strong>Multicaixa Express, Referência e Unitel Money</strong>.
+                            <br><br>
+                            Todos os pagamentos são <strong>confirmados automaticamente e de imediato</strong>.
+                            Assim que pagar, o sistema envia as credenciais da sua conta para o seu <strong>WhatsApp ou
+                                SMS</strong> em segundos.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 2: AUTENTICAÇÃO (Telefone) -->
+        <div id="step-checkout" class="hidden">
+            <button onclick="goBack('step-catalog')"
+                class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition"><i
+                    class="fas fa-arrow-left"></i> Voltar aos planos</button>
+            <div class="netflix-card p-8 max-w-lg mx-auto rounded-md shadow-2xl">
+                <span class="text-muted text-xs font-bold tracking-widest uppercase mb-2 block">PASSO 2 DE 4</span>
+                <h2 class="text-3xl font-bold mb-6">Autenticação</h2>
+                <div class="bg-accent p-4 rounded mb-8 flex justify-between items-center border border-gray-500/20">
+                    <div>
+                        <div class="text-sm text-muted">Plano Selecionado</div>
+                        <div class="font-bold" id="selected-plan-name">Pessoal</div>
+                    </div>
+                    <div class="font-bold text-xl text-brand" id="selected-plan-price">4.500 Kz</div>
+                </div>
+                <form id="auth-form" onsubmit="event.preventDefault(); initiateAuth();">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-muted mb-2 font-medium">Número de Telemóvel</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3.5 text-muted font-bold">+244</span>
+                                <input type="tel" id="phone-input" placeholder="9XX XXX XXX" required maxlength="11"
+                                    oninput="formatPhoneNumber(this)"
+                                    class="w-full input-theme pl-16 pr-4 py-3.5 rounded font-medium text-lg">
+                            </div>
+                            <p class="text-xs text-muted mt-2">Enviaremos um código de verificação por SMS.</p>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-send-otp"
+                        class="w-full mt-8 btn-primary font-bold py-4 rounded text-lg shadow-lg flex justify-center items-center gap-3">
+                        <span>Continuar</span>
+                        <i class="fas fa-chevron-right text-sm"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TELA 3: VERIFICAÇÃO OTP -->
+        <div id="step-otp" class="hidden">
+            <button onclick="goBack('step-checkout')"
+                class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition"><i
+                    class="fas fa-arrow-left"></i> Alterar Número</button>
+            <div class="netflix-card p-8 max-w-lg mx-auto rounded-md shadow-2xl text-center">
+                <span class="text-muted text-xs font-bold tracking-widest uppercase mb-2 block">PASSO 3 DE 4</span>
+                <h2 class="text-3xl font-bold mb-2">Código de Verificação</h2>
+                <p class="text-muted mb-8">Insira o código enviado para <span id="display-phone"
+                        class="font-bold text-white">...</span></p>
+
+                <form id="otp-form" onsubmit="event.preventDefault(); submitOtp();">
+                    <div class="flex justify-center gap-4 mb-8">
+                        <input type="tel" inputmode="numeric" id="otp-code" maxlength="4" placeholder="0000"
+                            autocomplete="one-time-code" pattern="[0-9]*"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" autofocus
+                            class="w-64 text-center text-3xl tracking-[0.5em] input-theme py-4 rounded font-bold relative z-20">
+                    </div>
+
+                    <button type="submit" id="btn-verify-otp"
+                        class="w-full btn-primary font-bold py-4 rounded text-lg shadow-lg flex justify-center items-center gap-3">
+                        <span>Verificar Código</span>
+                    </button>
+                </form>
+                <div class="mt-6">
+                    <button onclick="resendOtp()" class="text-sm text-muted hover:text-brand underline">Reenviar
+                        Código</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 4: MÉTODO DE PAGAMENTO -->
+        <div id="step-payment-method" class="hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="netflix-card p-6 rounded-md shadow-2xl">
+                    <span class="text-muted text-xs font-bold tracking-widest uppercase mb-2 block">PASSO 4 DE 4</span>
+                    <h2 class="text-3xl font-bold mb-6">Resumo e Pagamento</h2>
+
+                    <!-- Order Summary & Coupon -->
+                    <div class="bg-accent p-5 rounded-lg border border-gray-500/20 mb-8">
+                        <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-500/20">
+                            <div>
+                                <div class="text-sm text-muted">Plano Selecionado</div>
+                                <div class="font-bold text-lg" id="summary-plan-name">Pessoal</div>
+                            </div>
+                            <div class="font-bold text-xl text-white" id="summary-original-price">4.500 Kz</div>
+                        </div>
+
+                        <!-- Coupon Input -->
+                        <div class="mb-4">
+                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Cupom / Código de
+                                Parceiro</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="coupon-input" placeholder="Ex: PANDORA"
+                                    class="input-theme flex-1 px-3 py-2 rounded uppercase font-bold text-sm tracking-wide">
+                                <button onclick="applyCoupon()" id="btn-apply-coupon"
+                                    class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 py-2 rounded text-sm transition">
+                                    Aplicar
+                                </button>
+                            </div>
+                            <p id="coupon-message" class="text-xs mt-2 hidden"></p>
+                        </div>
+
+                        <!-- Total Final -->
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-muted font-bold text-sm uppercase">Total a Pagar</span>
+                            <span class="font-bold text-2xl text-brand" id="summary-total-price">4.500 Kz</span>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-6 text-sm">Selecione como prefere pagar a sua subscrição:</p>
+
+                    <!-- Payment Method Buttons -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in">
+                        <!-- Express Payment Button -->
+                        <div onclick="selectPaymentMethod('MCX_PUSH')" class="payment-btn payment-btn-orange group">
+                            <div class="payment-btn-content">
+                                <div class="payment-btn-icon bg-white/20">
+                                    <img src="assets/payment-methods/express.png" alt="MCX"
+                                        class="w-full h-full object-contain">
+                                </div>
+                                <div class="payment-btn-text">
+                                    <h3>Multicaixa Express</h3>
+                                    <p class="text-xs text-white/80 font-medium">Pagamento Automático</p>
+                                </div>
+                            </div>
+                            <div class="payment-btn-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Pagamento por Referência Button -->
+                        <div onclick="selectPaymentMethod('REFERENCE')" class="payment-btn payment-btn-blue group">
+                            <div class="payment-btn-content">
+                                <div class="payment-btn-icon bg-white/20">
+                                    <img src="assets/payment-methods/referencia.png" alt="REF"
+                                        class="w-full h-full object-contain">
+                                </div>
+                                <div class="payment-btn-text">
+                                    <h3>Pagamento por Referência</h3>
+                                    <p class="text-xs text-white/80 font-medium">Multicaixa / ATM / Internet Banking</p>
+                                </div>
+                            </div>
+                            <div class="payment-btn-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Unitel Money Button -->
+                        <div onclick="selectPaymentMethod('UNITEL_MONEY')" class="payment-btn group"
+                            style="background: linear-gradient(135deg, #F58220 0%, #FDB913 100%);">
+                            <div class="payment-btn-content">
+                                <div class="payment-btn-icon bg-white/90">
+                                    <img src="assets/payment-methods/unitelmoney.png" alt="Unitel Money"
+                                        class="w-full h-full object-contain">
+                                </div>
+                                <div class="payment-btn-text">
+                                    <h3 class="text-black drop-shadow-sm">Unitel Money</h3>
+                                    <p class="text-xs text-black/70 font-bold">Carteira Digital</p>
+                                </div>
+                            </div>
+                            <div class="payment-btn-arrow text-black">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-900/20 border border-blue-900/30 p-4 rounded-lg text-sm text-muted">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                        Todos os métodos são seguros e processados instantaneamente
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 5: CONFIRMAÇÃO PAGAMENTO (Referência) -->
+        <div id="step-payment-ref" class="hidden">
+            <div class="netflix-card rounded-md p-8 max-w-md mx-auto text-center shadow-2xl">
+                <div class="mb-6 flex justify-center"><i class="fas fa-receipt text-4xl text-muted animate-pulse"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Pagamento por Referência</h2>
+                <p class="text-muted text-sm mb-8">Utilize o Multicaixa Express ou um ATM.</p>
+
+                <div class="bg-accent p-6 rounded border border-gray-500/20 mb-8 text-left space-y-4">
+                    <div class="flex justify-between items-center pb-4 border-b border-gray-500/20">
+                        <span class="text-muted text-sm uppercase">Entidade</span>
+                        <div class="flex items-center gap-3"><span class="font-mono text-xl">00024</span><i
+                                onclick="copyToClip('00024')"
+                                class="far fa-copy text-muted hover:text-brand cursor-pointer"></i></div>
+                    </div>
+                    <div class="flex justify-between items-center pb-4 border-b border-gray-500/20">
+                        <span class="text-muted text-sm uppercase">Referência</span>
+                        <div class="flex items-center gap-3"><span class="font-mono text-xl font-bold text-brand"
+                                id="ref-display">...</span><i onclick="copyToClipRef()"
+                                class="far fa-copy text-muted hover:text-brand cursor-pointer"></i></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-muted text-sm uppercase">Valor</span>
+                        <span class="font-bold text-xl" id="pay-amount">...</span>
+                    </div>
+                </div>
+
+                <div class="text-left text-xs text-muted mb-6 bg-blue-900/20 border border-blue-900/30 p-3 rounded">
+                    <p class="mb-1">⚠️ A referência expira em 24 horas.</p>
+                    <p class="text-blue-400 font-bold">🕒 A entrega será feita num período de até 12 horas após a
+                        confirmação.</p>
+                </div>
+
+                <!-- Link para Simulador (Desenvolvimento) -->
+                <a href="/netflix/mock_bank.html" target="_blank"
+                    class="block w-full text-center btn-primary font-bold py-3 rounded text-white shadow-lg mt-4 transition transform hover:scale-[1.02]">
+                    <i class="fas fa-external-link-alt mr-2"></i> Abrir Simulador Multicaixa
+                </a>
+            </div>
+        </div>
+
+        <!-- TELA 6: WAITING PAYMENT (Novo) -->
+        <div id="step-waiting-payment" class="hidden">
+            <div class="netflix-card rounded-md p-8 max-w-md mx-auto text-center shadow-2xl">
+                <div class="mb-6 flex justify-center">
+                    <div class="loader w-16 h-16 border-4"></div>
+                </div>
+                <h2 class="text-2xl font-bold mb-4">A aguardar confirmação...</h2>
+                <div class="text-5xl font-bold text-brand mb-4" id="payment-timer">60</div>
+                <p class="text-muted text-sm mb-6">Por favor, aceite o pagamento no seu telemóvel agora.</p>
+
+                <div class="bg-blue-900/20 border border-blue-900/30 p-4 rounded text-left text-xs text-muted mb-6">
+                    <p class="font-bold text-blue-400 mb-2"><i class="fas fa-info-circle mr-1"></i> Não recebeu a
+                        notificação?</p>
+                    <p>1. Abra o Multicaixa Express</p>
+                    <p>2. Vá a <strong>"Operações por Autorizar"</strong></p>
+                    <p>3. Autorize o pagamento pendente da <strong>EcoFix/AppyPay</strong></p>
+                </div>
+
+                <button onclick="checkStatusManual()" class="text-brand text-sm hover:underline cursor-pointer">
+                    Já paguei, verificar agora
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA 5B: CONFIRMAÇÃO PAGAMENTO (PUSH) -->
+        <div id="step-payment-push" class="hidden">
+            <div class="netflix-card rounded-md p-8 max-w-md mx-auto text-center shadow-2xl">
+                <div class="mb-6 flex justify-center"><i
+                        class="fas fa-mobile-alt text-4xl text-brand animate-pulse"></i></div>
+                <h2 class="text-2xl font-bold mb-4">Verifique o seu telemóvel</h2>
+                <p class="text-muted text-lg mb-8">Enviamos um pedido de pagamento para <b>Multicaixa Express</b>.</p>
+
+                <div class="loader mx-auto mb-8"></div>
+
+                <p class="text-sm text-muted">A aguardar confirmação...</p>
+            </div>
+        </div>
+
+        <!-- TELA 6: SUCESSO -->
+        <div id="step-success" class="hidden">
+            <div class="netflix-card rounded-md max-w-lg mx-auto shadow-2xl overflow-hidden border-0">
+                <div class="bg-gradient-to-r from-green-900 to-black p-8 text-center border-b border-white/10 relative">
+                    <div class="absolute inset-0 bg-brand opacity-10"></div>
+                    <i class="fas fa-check-circle text-5xl text-[#46d369] mb-4 relative z-10"></i>
+                    <h2 class="text-2xl font-bold text-white relative z-10">Tudo Pronto!</h2>
+                    <p class="text-gray-300 text-sm mt-1 relative z-10">Os dados foram enviados para o seu WhatsApp ou
+                        SMS.</p>
+                </div>
+                <div class="p-8 text-center">
+                    <p class="text-gray-300 mb-2">Pagamento recebido com sucesso.</p>
+                    <h3 class="text-xl font-bold mb-6 text-white leading-relaxed">As credenciais da sua conta Netflix
+                        foram enviadas por SMS.</h3>
+
+                    <div class="bg-accent/50 p-6 rounded-lg border border-white/10 mb-8">
+                        <i class="fas fa-sms text-4xl text-brand mb-3"></i>
+                        <p class="text-sm text-muted">Verifique as mensagens do seu telemóvel.</p>
+                    </div>
+
+                    <div class="mt-8 flex gap-4 justify-center">
+                        <button onclick="goHome()" class="btn-primary px-8 py-3 rounded font-bold shadow-lg w-full">
+                            Voltar ao Início
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 7: DASHBOARD / MINHA ASSINATURA -->
+        <div id="step-dashboard" class="hidden">
+            <div class="max-w-4xl mx-auto animate-fade-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold">Minha Assinatura</h2>
+                    <button onclick="logout()" class="text-sm text-muted hover:text-white"><i
+                            class="fas fa-sign-out-alt"></i> Sair</button>
+                </div>
+
+                <div id="dashboard-loading" class="text-center py-12 hidden">
+                    <div class="loader mx-auto mb-4"></div>
+                    <p class="text-muted">A carregar detalhes...</p>
+                </div>
+
+                <div id="dashboard-content" class="hidden space-y-6">
+                    <!-- Status Card -->
+                    <div
+                        class="netflix-card p-6 rounded-md shadow-lg border-l-4 border-l-brand relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-xs text-muted uppercase font-bold mb-1">PLANO ATUAL</div>
+                                <h3 class="text-2xl font-bold mb-1" id="dash-plan-name">Pessoal Ultra</h3>
+                                <p class="text-sm text-[#46d369] font-bold flex items-center gap-1">
+                                    <i class="fas fa-check-circle"></i> <span id="dash-status">Ativo</span>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-muted uppercase font-bold mb-1">EXPIRA EM</div>
+                                <div class="text-xl font-bold text-white" id="dash-days-left">28 Dias</div>
+                                <div class="text-xs text-muted" id="dash-expires-date">12/05/2026</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credentials Card -->
+                    <div class="netflix-card p-6 rounded-md shadow-lg">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold flex items-center gap-2">
+                                <i class="fas fa-key text-brand"></i> Credenciais de Acesso
+                            </h3>
+                            <button onclick="toggleCredentials()" id="btn-toggle-creds"
+                                class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-white transition">
+                                <i class="fas fa-eye"></i> Revelar
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                            <!-- Blur Overlay for Security -->
+                            <div id="creds-blur"
+                                class="absolute inset-0 bg-gray-900/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded transition-opacity duration-300">
+                                <i class="fas fa-lock text-3xl text-gray-500 mb-2"></i>
+                                <p class="text-sm text-gray-400">Clique em "Revelar" para ver</p>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="bg-black/40 p-3 rounded border border-gray-700">
+                                <label class="text-xs text-muted uppercase font-bold block mb-1">Email Netflix</label>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-mono text-white select-all" id="dash-email">...</span>
+                                    <i onclick="copyText('dash-email')"
+                                        class="far fa-copy text-muted hover:text-white cursor-pointer"></i>
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="bg-black/40 p-3 rounded border border-gray-700">
+                                <label class="text-xs text-muted uppercase font-bold block mb-1">Palavra-passe</label>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-mono text-white select-all" id="dash-password">********</span>
+                                    <i onclick="copyText('dash-password')"
+                                        class="far fa-copy text-muted hover:text-white cursor-pointer"></i>
+                                </div>
+                            </div>
+
+                            <!-- Profile -->
+                            <div class="bg-black/40 p-3 rounded border border-gray-700 border-l-4 border-l-blue-500">
+                                <label class="text-xs text-muted uppercase font-bold block mb-1">Seu Perfil</label>
+                                <div class="font-bold text-lg text-white" id="dash-profile">...</div>
+                            </div>
+
+                            <!-- PIN -->
+                            <div class="bg-black/40 p-3 rounded border border-gray-700 border-l-4 border-l-blue-500">
+                                <label class="text-xs text-muted uppercase font-bold block mb-1">PIN do Perfil</label>
+                                <div class="font-mono text-xl text-white font-bold tracking-widest" id="dash-pin">...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="mt-6 bg-red-900/20 border border-red-900/30 p-3 rounded text-xs text-red-200 flex gap-2 items-start">
+                            <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                            <div>
+                                <strong>Importante:</strong> Não altere a palavra-passe ou o nome do perfil.
+                                O sistema deteta alterações e pode bloquear o acesso.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="startRenewal()"
+                            class="netflix-card p-4 rounded hover:bg-gray-800 transition flex items-center justify-center gap-3 border border-gray-700 hover:border-brand">
+                            <i class="fas fa-sync-alt text-brand"></i>
+                            <span class="font-bold">Renovar / Estender (+30 Dias)</span>
+                        </button>
+
+                        <button onclick="reportProblem()"
+                            class="netflix-card p-4 rounded hover:bg-gray-800 transition flex items-center justify-center gap-3 border border-gray-700 hover:border-gray-500">
+                            <i class="fas fa-headset text-muted"></i>
+                            <span class="font-bold text-muted">Reportar Problema</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="dashboard-empty" class="hidden text-center py-12">
+                    <i class="fas fa-ghost text-4xl text-muted mb-4 opacity-50"></i>
+                    <h3 class="text-xl font-bold mb-2">Sem assinatura ativa</h3>
+                    <p class="text-muted mb-6">Ainda não tem uma assinatura ativa ou ela expirou há muito tempo.</p>
+                    <button onclick="goHome()" class="btn-primary px-6 py-2 rounded font-bold">Ver Planos</button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-12 text-center border-t border-gray-500/20">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="text-muted mb-4">Dúvidas? Ligue +244 938 948 994</p>
+            <div class="flex justify-center gap-6 text-xs text-muted mb-4">
+                <a href="termos.html" class="hover:underline">Termos de Uso</a>
+                <a href="/privacidade.html" class="hover:underline">Privacidade</a>
+            </div>
+            <p class="text-muted text-[10px] opacity-60">&copy; 2026 EcoKambio Serviços Digitais.</p>
+        </div>
+    </footer>
+
+    <!-- HMAC Signer for API Security -->
+    <script src="/js/hmacSigner.js"></script>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        const API_BASE = '/api/ecoflix';
+
+        // Estado da aplicação
+        let currentOrder = null;
+        let selectedPlanType = null;
+        let selectedPlanPrice = null;
+        let finalPrice = null;
+        let appliedCoupon = null;
+        let userPhone = null; // Armazena o telefone validado
+        let pollingInterval = null;
+        let countdownInterval = null;
+        let isLoginMode = false; // Flag for Login vs Buy flow
+
+
+
+        // === NOTIFICAÇÕES (TOAST) ===
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${icon}"></i><span class="toast-message">${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 3000);
+        }
+
+        // === NAVEGAÇÃO E UX ===
+        const formatKz = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " Kz";
+
+        function showScreen(screenId) {
+            document.querySelectorAll('#app > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function selectPlan(planKey, price) {
+            // Keys passed from HTML: 'ECONOMICO', 'ULTRA', 'FAMILIA'
+            isLoginMode = false;
+            selectedPlanType = planKey;
+            selectedPlanPrice = price;
+
+            let planTitle = '';
+            if (planKey === 'ECONOMICO') planTitle = 'Pessoal Económico (4K)';
+            else if (planKey === 'ULTRA') planTitle = 'Pessoal Ultra (4K)';
+            else planTitle = 'Conta Família (4K)';
+
+            document.getElementById('selected-plan-name').innerText = planTitle;
+            document.getElementById('selected-plan-price').innerText = formatKz(price);
+            showScreen('step-checkout');
+        }
+
+        function startLoginFlow() {
+            isLoginMode = true;
+            document.getElementById('selected-plan-name').innerText = 'Acesso à Conta';
+            document.getElementById('selected-plan-price').innerText = '-';
+            showScreen('step-checkout');
+        }
+
+        function goBack(screenId) {
+            if (pollingInterval) clearInterval(pollingInterval);
+            showScreen(screenId);
+        }
+
+        function goHome() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            document.getElementById('auth-form').reset();
+            document.getElementById('otp-form').reset();
+            currentOrder = null;
+            userPhone = null;
+            isLoginMode = false; // Reset flag
+            showScreen('step-catalog');
+        }
+
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 9) value = value.slice(0, 9);
+            if (value.length > 6) value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6);
+            else if (value.length > 3) value = value.slice(0, 3) + ' ' + value.slice(3);
+            input.value = value;
+        }
+
+        function copyToClip(text) {
+            navigator.clipboard.writeText(text);
+            const el = event.currentTarget || event.target;
+            // Visual feedback logic
+            el.style.color = '#46d369';
+            setTimeout(() => { el.style.color = ''; }, 1000);
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text);
+            showToast('Copiado!', 'success');
+        }
+
+        function copyToClipRef() {
+            const text = document.getElementById('ref-display').innerText.replace(/\s/g, '');
+            copyToClip(text);
+        }
+
+        function toggleFaq(element) {
+            const answer = element.querySelector('div:last-child');
+            const icon = element.querySelector('i');
+            answer.classList.toggle('hidden');
+            icon.classList.toggle('rotate-45');
+        }
+
+        // === LÓGICA DE AUTENTICAÇÃO ===
+        async function initiateAuth() {
+            const btn = document.getElementById('btn-send-otp');
+            const originalText = btn.innerHTML;
+            const input = document.getElementById('phone-input');
+            const phoneClean = input.value.replace(/\D/g, '');
+
+            if (phoneClean.length !== 9) {
+                showToast('Por favor, insira um número válido (9 dígitos).', 'error');
+                return;
+            }
+
+            userPhone = '+244' + phoneClean; // Formato E.164-ish
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div>';
+
+            try {
+                const data = { phone: userPhone };
+
+                // Generate HMAC signature
+                const hmacHeaders = await window.HMACSign.signRequest(data);
+
+                const response = await fetch(`${API_BASE}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Erro ao enviar SMS');
+
+                // Sucesso -> Mostrar OTP Screen
+                document.getElementById('display-phone').innerText = userPhone;
+                showScreen('step-otp');
+                showToast(`Código enviado para ${userPhone}`, 'success');
+
+                // Em Dev, mostrar código no console/alert para facilitar
+                if (result.devCode) console.log('DEV OTP:', result.devCode);
+
+            } catch (error) {
+                console.error('Auth error:', error);
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function submitOtp() {
+            // === DEV MODE: OTP VERIFICATION COMMENTED OUT ===
+            // Automatically skip to payment method selection for design work
+
+            /* PRODUCTION CODE - UNCOMMENT WHEN READY: */
+            const btn = document.getElementById('btn-verify-otp');
+            const originalText = btn.innerHTML;
+            const code = document.getElementById('otp-code').value;
+
+            if (!code || code.length !== 4) {
+                showToast('Código inválido. Insira 4 dígitos.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div>';
+
+            try {
+                const data = { phone: userPhone, code };
+                const hmacHeaders = await window.HMACSign.signRequest(data);
+
+                const response = await fetch(`${API_BASE}/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Código incorreto');
+
+                // SAVE TOKEN
+                if (result.token) {
+                    localStorage.setItem('ecoflix_token', result.token);
+                }
+
+                // ROUTING BASED ON MODE
+                if (isLoginMode) {
+                    loadDashboard();
+                } else {
+                    // Buying Flow (Already selected plan)
+                    showScreen('step-payment-method');
+                    showToast('Autenticação confirmada!', 'success');
+
+                    // Initialize Summary
+                    finalPrice = selectedPlanPrice;
+                    document.getElementById('summary-plan-name').innerText = document.getElementById('selected-plan-name').innerText;
+                    document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+                    document.getElementById('summary-total-price').innerText = formatKz(finalPrice);
+                }
+
+            } catch (error) {
+                console.error('Verify error:', error);
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+            /**/
+        }
+
+        async function resendOtp() {
+            if (!userPhone) return;
+            showToast('A reenviar código...', 'info');
+            try {
+                const data = { phone: userPhone };
+                const hmacHeaders = await window.HMACSign.signRequest(data);
+
+                const response = await fetch(`${API_BASE}/auth/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Falha ao reenviar');
+                showToast('Novo código enviado!', 'success');
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        // === PAGAMENTO ===
+        async function selectPaymentMethod(method) {
+            // Initiate Order
+            // Show loading if needed
+
+            try {
+                const token = localStorage.getItem('ecoflix_token');
+
+                // Determine Endpoint
+                const endpoint = isRenewal ? '/subscription/renew' : '/orders/create';
+
+                const requestData = {
+                    phone: userPhone,
+                    plan_type: selectedPlanType,
+                    payment_method: method,
+                    coupon_code: appliedCoupon
+                };
+
+                const hmacHeaders = await window.HMACSign.signRequest(requestData);
+
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Erro ao criar pedido');
+
+                currentOrder = result.data; // { order_id, reference, entity, amount, transaction_id }
+
+                if (method === 'REFERENCE') {
+                    document.getElementById('ref-display').innerText = currentOrder.reference;
+                    document.getElementById('pay-amount').innerText = formatKz(currentOrder.amount);
+                    showScreen('step-payment-ref');
+                    startPaymentPolling(currentOrder.reference);
+                } else if (method === 'MCX_PUSH') {
+                    showScreen('step-waiting-payment');
+                    startCountdown(60); // 60 seconds as requested
+                    startPaymentPolling(currentOrder.reference || currentOrder.transaction_id); // Use valid identifier
+                }
+
+            } catch (error) {
+                console.error('Payment Init Error:', error);
+                showToast('Erro ao iniciar pagamento: ' + error.message, 'error');
+            }
+        }
+
+        // === COUPON LOGIC ===
+        async function applyCoupon() {
+            const input = document.getElementById('coupon-input');
+            const msg = document.getElementById('coupon-message');
+            const btn = document.getElementById('btn-apply-coupon');
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            msg.className = 'text-xs mt-2 hidden';
+
+            try {
+                const data = { code };
+                const hmacHeaders = await window.HMACSign.signRequest(data);
+
+                const response = await fetch(`${API_BASE}/coupons/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                msg.classList.remove('hidden');
+                if (result.success) {
+                    msg.classList.remove('text-red-500');
+                    msg.classList.add('text-[#46d369]');
+                    msg.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${result.data.message}`;
+
+                    appliedCoupon = result.data.code;
+                    input.classList.add('border-[#46d369]');
+
+                    // Apply Discount
+                    if (result.data.discount > 0) {
+                        const discount = parseFloat(result.data.discount);
+                        finalPrice = Math.max(0, selectedPlanPrice - discount);
+                        updateSummary(finalPrice);
+                    }
+                } else {
+                    msg.classList.remove('text-[#46d369]');
+                    msg.classList.add('text-red-500');
+                    msg.innerHTML = `<i class="fas fa-times-circle mr-1"></i> ${result.message}`;
+
+                    // Reset
+                    appliedCoupon = null;
+                    finalPrice = selectedPlanPrice;
+                    updateSummary(finalPrice);
+                    input.classList.remove('border-[#46d369]');
+                }
+            } catch (error) {
+                console.error('Coupon error:', error);
+                msg.innerText = 'Erro ao validar cupom';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Aplicar';
+            }
+        }
+
+        function updateSummary(price) {
+            document.getElementById('summary-total-price').innerText = formatKz(price);
+            document.getElementById('pay-amount').innerText = formatKz(price); // Update for reference screen too
+        }
+
+
+        function startCountdown(duration) {
+            const timerEl = document.getElementById('payment-timer');
+            let remaining = duration;
+            timerEl.innerText = remaining;
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                remaining--;
+                timerEl.innerText = remaining;
+
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    timerEl.innerText = "0";
+                    // Optional: Show expired message or keep polling
+                }
+            }, 1000);
+        }
+
+        async function checkStatusManual() {
+            if (!currentOrder) return;
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> A verificar...';
+            btn.disabled = true;
+
+            try {
+                // Use existing polling/check logic
+                // But perform a single check here
+                const reference = (currentOrder.reference || currentOrder.transaction_id || '').toString().replace(/\s/g, '');
+                const response = await fetch(`${API_BASE}/orders/${reference}/status`);
+                const data = await response.json();
+
+                if (data.success && data.status === 'PAID') {
+                    if (pollingInterval) clearInterval(pollingInterval);
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    showPaymentSuccess(data.credentials);
+                } else {
+                    showToast('Pagamento ainda não confirmado via AppyPay.', 'info');
+                }
+            } catch (e) {
+                console.error('Manual check error:', e);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+
+        function startPaymentPolling(referenceRaw) {
+            let attempts = 0;
+            const maxAttempts = 300;
+            const reference = referenceRaw.toString().replace(/\s/g, ''); // Ensure clean ref
+
+            pollingInterval = setInterval(async () => {
+                attempts++;
+                if (attempts > maxAttempts) {
+                    clearInterval(pollingInterval);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/orders/${reference}/status`);
+                    const data = await response.json();
+
+                    if (data.success && data.status === 'PAID') {
+                        clearInterval(pollingInterval);
+                        showPaymentSuccess(data.credentials);
+                    }
+                } catch (e) {
+                    console.error('Polling error:', e);
+                }
+            }, 2000);
+        }
+
+        function showPaymentSuccess(credentials) {
+            showScreen('step-success');
+        }
+
+        // === MODAL DE AJUDA ===
+        function openHelpModal() {
+            document.getElementById('help-modal').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').classList.add('hidden');
+        }
+
+        function scrollToFaq() {
+            closeHelpModal();
+            document.querySelector('.mt-16').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ... existing state ...
+        let isRenewal = false;
+
+        // ... existing code ...
+
+        // === DASHBOARD LOGIC ===
+        async function loadDashboard() {
+            showScreen('step-dashboard');
+            document.getElementById('dashboard-loading').classList.remove('hidden');
+            document.getElementById('dashboard-content').classList.add('hidden');
+            document.getElementById('dashboard-empty').classList.add('hidden');
+
+            try {
+                const token = localStorage.getItem('ecoflix_token');
+                const response = await fetch(`${API_BASE}/subscription/credentials`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+
+                document.getElementById('dashboard-loading').classList.add('hidden');
+
+                if (data.success && data.data) {
+                    const sub = data.data;
+                    window.currentSubscription = sub; // STORE FOR REPORTING
+
+                    // Populate UI
+                    document.getElementById('dash-plan-name').innerText = sub.plan === 'FAMILIA' ? 'Conta Família' : `Pessoal ${sub.plan}`;
+
+                    const daysLeft = Math.ceil((new Date(sub.expires_at) - new Date()) / (1000 * 60 * 60 * 24));
+                    document.getElementById('dash-days-left').innerText = daysLeft > 0 ? `${daysLeft} Dias` : 'Expirado';
+                    document.getElementById('dash-days-left').className = daysLeft > 5 ? 'text-xl font-bold text-white' : 'text-xl font-bold text-red-500';
+
+                    document.getElementById('dash-expires-date').innerText = new Date(sub.expires_at).toLocaleDateString('pt-PT');
+
+                    document.getElementById('dash-status').innerText = daysLeft >= 0 ? 'Ativo' : 'Expirado';
+
+                    // Credentials
+                    document.getElementById('dash-email').innerText = sub.email;
+                    document.getElementById('dash-password').innerText = sub.password; // Hidden by blur initially
+                    document.getElementById('dash-profile').innerText = sub.profile_name;
+                    document.getElementById('dash-pin').innerText = sub.pin;
+
+                    // Store plan for renewal
+                    selectedPlanType = sub.plan;
+                    // Set price
+                    if (sub.plan === 'ECONOMICO') selectedPlanPrice = 4500;
+                    else if (sub.plan === 'ULTRA') selectedPlanPrice = 6500;
+                    else selectedPlanPrice = 18000;
+
+                    document.getElementById('dashboard-content').classList.remove('hidden');
+                } else {
+                    document.getElementById('dashboard-empty').classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Dash error:', error);
+                document.getElementById('dashboard-loading').classList.add('hidden');
+                document.getElementById('dashboard-empty').classList.remove('hidden');
+            }
+        }
+
+        function toggleCredentials() {
+            const blur = document.getElementById('creds-blur');
+            const btn = document.getElementById('btn-toggle-creds');
+
+            if (blur.classList.contains('hidden')) {
+                blur.classList.remove('hidden');
+                btn.innerHTML = '<i class="fas fa-eye"></i> Revelar';
+            } else {
+                blur.classList.add('hidden');
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('ecoflix_token');
+            goHome();
+        }
+
+        function startRenewal() {
+            isRenewal = true;
+            // Pre-set summary for renewal
+            document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
+            document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+            document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
+
+            showScreen('step-payment-method');
+            showToast('Selecione o método de pagamento para renovar.', 'info');
+        }
+
+    </script>
+
+    <!-- MODAL: REPORT PROBLEM -->
+    <div id="reportModal"
+        class="fixed inset-0 bg-black bg-opacity-70 hidden z-[200] flex items-center justify-center p-4">
+        <div class="bg-white text-gray-800 rounded-xl overflow-hidden w-full max-w-sm">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold">Reportar Problema</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4 space-y-4">
+                <p class="text-xs text-gray-500">Selecione o problema. Vamos resolver em até 24h.</p>
+
+                <select id="issueType"
+                    class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm text-gray-700">
+                    <option value="PASSWORD_INCORRECT">Senha incorreta</option>
+                    <option value="SCREEN_LIMIT">Tela cheia (Limite de telas)</option>
+                    <option value="LOCKED">Conta bloqueada / Pediu código</option>
+                    <option value="OTHER">Outro</option>
+                </select>
+
+                <textarea id="issueDesc" rows="3"
+                    class="w-full bg-gray-50 border border-gray-200 rounded p-2 text-sm text-gray-700"
+                    placeholder="Detalhes opcionais..."></textarea>
+            </div>
+            <div class="p-4 bg-gray-50 flex gap-2">
+                <button onclick="closeReportModal()"
+                    class="flex-1 py-2 text-sm font-medium text-gray-600">Cancelar</button>
+                <button onclick="submitIssue()"
+                    class="flex-1 py-2 text-sm font-bold bg-red-600 text-white rounded hover:bg-red-700">Enviar
+                    Reporte</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ... existing state ...
+        let currentReportSubId = null;
+
+        function reportProblem() {
+            // Check if we have subscription data loaded. 
+            // In loadDashboard logic, we populate the UI but don't strictly store 'currentSub' globally except 'selectedPlanType'.
+            // However, the button is on the dashboard, so dashboard MUST be loaded.
+            // We need to store sub ID in loadDashboard.
+
+            // Wait, loadDashboard has `const sub = data.data;`. We need global access to `sub.id` or similar.
+            // Let's assume we update loadDashboard locally to store it or access DOM if needed.
+            // Better: Let's modify loadDashboard to store `window.currentSubscription = sub;`
+
+            if (!window.currentSubscription) {
+                return showToast('Erro: Assinatura não carregada.', 'error');
+            }
+
+            currentReportSubId = window.currentSubscription.id;
+            document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        async function submitIssue() {
+            const type = document.getElementById('issueType').value;
+            const desc = document.getElementById('issueDesc').value;
+
+            if (!currentReportSubId) return;
+
+            closeReportModal();
+
+            try {
+                const token = localStorage.getItem('ecoflix_token');
+                const response = await fetch('/api/ecoflix/subscription/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        subscription_id: currentReportSubId,
+                        issue_type: type,
+                        description: desc
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message || 'Reporte enviado!', 'success');
+                } else {
+                    showToast('Erro: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Erro ao enviar reporte.', 'error');
+            }
+        }
+    </script>
+    <!-- MODAL DE AJUDA -->
+    <div id="help-modal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeHelpModal()"></div>
+
+        <!-- Modal Content -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm px-4">
+            <div class="netflix-card rounded-md shadow-2xl p-0 overflow-hidden border border-gray-700">
+                <div class="bg-gray-800/50 p-4 flex justify-between items-center border-b border-gray-700">
+                    <h3 class="font-bold text-lg">Central de Ajuda</h3>
+                    <button onclick="closeHelpModal()"
+                        class="text-muted hover:text-white transition relative z-10 cursor-pointer"><i
+                            class="fas fa-times"></i></button>
+                </div>
+
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-headset text-3xl text-brand"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Como podemos ajudar?</h4>
+                    <p class="text-muted text-sm mb-6">Nossa equipa está disponível 24/7 para ajudar com assinaturas e
+                        suporte técnico.</p>
+
+                    <div class="space-y-3">
+                        <a href="https://wa.me/244938948994" target="_blank"
+                            class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 rounded transition relative z-10 cursor-pointer">
+                            <i class="fab fa-whatsapp text-xl"></i> <span>Conversar no WhatsApp</span>
+                        </a>
+                        <button onclick="scrollToFaq()"
+                            class="w-full border border-gray-600 hover:border-white text-muted hover:text-white font-medium py-3 rounded transition relative z-10 cursor-pointer">
+                            Ver Perguntas Frequentes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800/30 p-4 text-center border-t border-gray-700">
+                    <p class="text-xs text-muted">Ligue para: <a href="tel:+244938948994"
+                            class="text-white font-mono hover:text-brand hover:underline transition-colors">+244 938 948
+                            994</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE TERMOS DE USO -->
+    <div id="terms-modal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999999;">
+        <!-- Backdrop -->
+        <div
+            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); pointer-events: none;">
+        </div>
+
+        <!-- Modal Content Container -->
+        <div
+            style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; pointer-events: none;">
+            <!-- Actual Modal Box -->
+            <div
+                style="background: #1f1f1f; border-radius: 12px; border: 1px solid #444; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.8); pointer-events: auto; overflow: hidden;">
+                <!-- Header -->
+                <div style="background: rgba(31, 31, 31, 0.95); padding: 20px; border-bottom: 1px solid #444;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-file-contract" style="font-size: 24px; color: #e50914;"></i>
+                        <h3 style="font-size: 20px; font-weight: bold; color: white; margin: 0;">Termos de Uso</h3>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 24px;">
+                    <p style="color: #9ca3af; font-size: 14px; margin-bottom: 16px; line-height: 1.6;">
+                        Antes de continuar, é necessário ler e aceitar nossos Termos de Uso. Estes termos descrevem seus
+                        direitos e responsabilidades ao usar o serviço EcoFlix.
+                    </p>
+
+                    <div
+                        style="background: rgba(31, 31, 31, 0.5); border-radius: 8px; padding: 16px; margin-bottom: 20px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: #9ca3af; font-size: 12px; line-height: 1.6;">
+                            <strong style="color: white;">1. Aceitação dos Termos:</strong> Ao usar o EcoFlix, você
+                            concorda com estes termos.<br><br>
+                            <strong style="color: white;">2. Serviço:</strong> Fornecemos intermediação para assinaturas
+                            de streaming.<br><br>
+                            <strong style="color: white;">3. Pagamentos:</strong> Processados via Multicaixa Express,
+                            Referência ou Unitel Money.<br><br>
+                            <strong style="color: white;">4. Responsabilidades:</strong> Você é responsável pela
+                            confidencialidade das credenciais.<br><br>
+                            <a href="termos.html" target="_blank"
+                                style="color: #e50914; text-decoration: underline; cursor: pointer;">Ver termos
+                                completos →</a>
+                        </p>
+                    </div>
+
+                    <!-- Checkbox -->
+                    <label
+                        style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; cursor: pointer;">
+                        <input type="checkbox" id="terms-checkbox"
+                            style="width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #e50914;">
+                        <span style="color: #d1d5db; font-size: 14px; cursor: pointer; user-select: none;">
+                            Li e concordo com os <a href="termos.html" target="_blank"
+                                style="color: #e50914; text-decoration: underline;">Termos de Uso</a>
+                        </span>
+                    </label>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" id="decline-terms-btn"
+                            style="flex: 1; padding: 12px 16px; background: #374151; color: white; font-weight: 500; border-radius: 8px; border: none; cursor: pointer; transition: background 0.3s;"
+                            onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#374151'">
+                            Recusar
+                        </button>
+                        <button type="button" id="accept-terms-btn" disabled
+                            style="flex: 1; padding: 12px 16px; background: #e50914; color: white; font-weight: bold; border-radius: 8px; border: none; cursor: not-allowed; transition: all 0.3s; opacity: 0.4;">
+                            Aceitar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === MODAL DE TERMOS LOGIC (TEMPORARILY DISABLED) ===
+        // Auto-accept terms to prevent blocking the page
+        // TODO: Fix modal interactivity issue
+        localStorage.setItem('ecoflix_terms_accepted', 'true');
+
+        function checkTermsAcceptance() {
+            // Temporarily disabled - auto-accepting terms
+            localStorage.setItem('ecoflix_terms_accepted', 'true');
+            return;
+
+            /* COMMENTED OUT UNTIL FIXED
+            const accepted = localStorage.getItem('ecoflix_terms_accepted');
+            if (!accepted || accepted !== 'true') {
+                const modal = document.getElementById('terms-modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            }
+            */
+        }
+
+        function acceptTerms() {
+            localStorage.setItem('ecoflix_terms_accepted', 'true');
+            const modal = document.getElementById('terms-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            showToast('Termos aceitos. Bem-vindo ao EcoFlix!', 'success');
+        }
+
+        function declineTerms() {
+            if (confirm('Você precisa aceitar os Termos para continuar. Deseja sair?')) {
+                window.location.href = 'about:blank';
+            }
+        }
+
+        // Initialize Terms Check and Event Listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('terms-checkbox');
+            const acceptBtn = document.getElementById('accept-terms-btn');
+            const declineBtn = document.getElementById('decline-terms-btn');
+
+            // Checkbox event
+            if (checkbox && acceptBtn) {
+                checkbox.addEventListener('change', function (e) {
+                    if (e.target.checked) {
+                        acceptBtn.disabled = false;
+                        acceptBtn.style.cursor = 'pointer';
+                        acceptBtn.style.opacity = '1';
+                    } else {
+                        acceptBtn.disabled = true;
+                        acceptBtn.style.cursor = 'not-allowed';
+                        acceptBtn.style.opacity = '0.4';
+                    }
+                });
+            }
+
+            // Button events
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', acceptTerms);
+            }
+            if (declineBtn) {
+                declineBtn.addEventListener('click', declineTerms);
+            }
+
+            // Auto-accept terms (modal disabled)
+            localStorage.setItem('ecoflix_terms_accepted', 'true');
+
+            // COMMENTED OUT - prevents page blocking
+            // setTimeout(checkTermsAcceptance, 500);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</body>
+
+
+</html>

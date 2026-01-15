@@ -29,7 +29,8 @@
         frame-src 'self' 
             https://www.googletagmanager.com
             https://googleads.g.doubleclick.net
-            https://tpc.googlesyndication.com;">
+            https://tpc.googlesyndication.com
+            https://ep2.adtrafficquality.google;">
 
     <meta name="description"
         content="EcoKambio: Consulte taxas de câmbio em Angola hoje. Dólar, euro e outras divisas em tempo real. Compare cotações de bancos (BAI, BFA, BPC, BIC) e mercado informal (kinguilas). Calculadora grátis de custos de importação.">
@@ -684,19 +685,45 @@
                     </div>
                 </a>
 
-                <a href="/visa" id="header-visa-btn"
-                    class="visa-heartbeat flex flex-col items-center text-center transition-opacity duration-200 hover:opacity-80"
-                    title="Adquira já o seu cartão Visa">
-                    <picture>
-                        <source srcset="/assets/visa.webp" type="image/webp">
-                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online" width="127"
-                            height="80" class="h-14 sm:h-16 md:h-[78px] lg:h-[95px] xl:h-28 w-auto"
-                            style="aspect-ratio: 127/80;" fetchpriority="high">
-                    </picture>
-                    <span
-                        class="text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm font-semibold text-emerald-700 mt-0.5 sm:mt-1">
-                        Adquira já o teu Visa</span>
-                </a>
+                <!-- Promo Cards - Visa & Netflix -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/visa.html"
+                        class="flex flex-col items-center group transition-transform hover:scale-105 duration-300">
+                        <img src="/assets/visa.png" alt="Cartão Visa Virtual" class="h-16 w-auto object-contain"
+                            loading="lazy">
+                        <span class="text-[11px] font-semibold text-emerald-700 mt-1">Adquira já o teu Visa</span>
+                    </a>
+                    <a href="/netflix/index.html"
+                        class="flex flex-col items-center group transition-transform hover:scale-105 duration-300">
+                        <img src="/assets/netflix.png" alt="Netflix Angola" class="h-16 w-auto object-contain"
+                            loading="lazy">
+                        <span class="text-[11px] font-semibold text-red-600 mt-1">Netflix Angola</span>
+                    </a>
+                </div>
+
+                <!-- Card Carousel Container (Mobile) -->
+                <div class="md:hidden relative overflow-hidden" style="width: 180px; height: 140px;">
+                    <!-- Visa Card -->
+                    <a href="/visa" id="header-visa-card"
+                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-100"
+                        title="Adquira já o seu cartão Visa">
+                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online"
+                            class="w-full h-auto object-contain px-2" style="max-width: 170px; max-height: 110px;"
+                            fetchpriority="high">
+                        <span class="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-emerald-700 mt-1">
+                            Adquira já o teu Visa</span>
+                    </a>
+
+                    <!-- Netflix Card -->
+                    <a href="/netflix" id="header-netflix-card"
+                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-0 pointer-events-none"
+                        title="Netflix Angola">
+                        <img src="/assets/netflix.png" alt="Netflix com EcoKambio"
+                            class="w-full h-auto object-contain px-2" style="max-width: 170px; max-height: 110px;">
+                        <span class="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-red-600 mt-1">
+                            Netflix Angola</span>
+                    </a>
+                </div>
             </nav>
         </div>
 
@@ -2814,6 +2841,35 @@
 
         document.addEventListener('DOMContentLoaded', initializeApp);
 
+    </script>
+    <script>
+        // Header card carousel rotation
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentCardIndex = 0;
+            const cards = ['header-visa-card', 'header-netflix-card'];
+
+            function rotateCards() {
+                // Hide current card
+                const currentCard = document.getElementById(cards[currentCardIndex]);
+                if (currentCard) {
+                    currentCard.style.opacity = '0';
+                    currentCard.style.pointerEvents = 'none';
+                }
+
+                // Move to next card
+                currentCardIndex = (currentCardIndex + 1) % cards.length;
+
+                // Show next card
+                const nextCard = document.getElementById(cards[currentCardIndex]);
+                if (nextCard) {
+                    nextCard.style.opacity = '1';
+                    nextCard.style.pointerEvents = 'auto';
+                }
+            }
+
+            // Rotate every 4 seconds
+            setInterval(rotateCards, 4000);
+        });
     </script>
     <script src="/js/cookie-consent.js"></script>
 

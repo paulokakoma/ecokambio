@@ -1,0 +1,70 @@
+Error: supabase.from(...).select(...).eq(...).eq(...).eq(...).gte is not a function
+Stack: TypeError: supabase.from(...).select(...).eq(...).eq(...).eq(...).gte is not a function
+    at gte (/Users/av/Documents/Projetos/ecokambio-main/src/netflix/controller.js:430:14)
+    at fn (/Users/av/Documents/Projetos/ecokambio-main/src/utils/catchAsync.js:8:21)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:175:3)
+    at router (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:646:15
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:265:14)
+    at Function.handle (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:175:3)
+    at router (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:646:15
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:265:14)
+    at Function.handle (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:175:3)
+    at router (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:646:15
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:265:14)
+    at Function.handle (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:175:3)
+    at router (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at serveStatic (/Users/av/Documents/Projetos/ecokambio-main/node_modules/serve-static/index.js:75:16)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at session (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express-session/index.js:487:7)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/src/middleware/subdomain.js:36:5)
+    at Layer.handle [as handle_request] (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:328:13)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/av/Documents/Projetos/ecokambio-main/node_modules/express/lib/router/index.js:280:10)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express-rate-limit/dist/index.cjs:942:7
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at /Users/av/Documents/Projetos/ecokambio-main/node_modules/express-rate-limit/dist/index.cjs:825:5
+User lookup start
+User found: {"id":1,"phone":"+244900000000","verified_at":"2026-01-09T20:04:46.287Z"}
+Signing JWT with secret val: super-secret-jwt-key-change-me
+Success

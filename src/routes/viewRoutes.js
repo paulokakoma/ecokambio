@@ -10,6 +10,8 @@ router.get(config.admin.secretPath, viewController.serveAdminSecret);
 router.get("/sobre", viewController.serveAbout);
 router.get("/sobre-nos", viewController.serveAbout); // Alias
 router.get("/visa", viewController.serveVisa);
+router.get("/netflix", viewController.serveNetflix);
+router.get("/adminflix", viewController.serveAdminFlix);
 router.get("/termos", viewController.serveTerms);
 router.get("/termos-e-condicoes", viewController.serveTerms); // Alias
 router.get("/privacidade", viewController.servePrivacy);

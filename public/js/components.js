@@ -15,9 +15,27 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(path);
                 el.innerHTML = await response.text();
+
+                // Executar scripts encontrados no HTML do componente
+                const scripts = el.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+
+                    // Copiar atributos (src, type, etc.)
+                    Array.from(oldScript.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
+                    });
+
+                    // Copiar conteúdo interno
+                    newScript.textContent = oldScript.textContent;
+
+                    // Substituir e executar
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+
             } catch (error) {
                 console.error(`Falha ao carregar o componente de '${path}':`, error);
-                el.innerHTML = `<p class="text-red-500 text-center">Erro ao carregar o rodapé.</p>`;
+                el.innerHTML = `<p class="text-red-500 text-center">Erro ao carregar o componente.</p>`;
             }
         }
     });

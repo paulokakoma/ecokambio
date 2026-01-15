@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Multicaixa (Mock)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .bank-gradient {
+            background: linear-gradient(135deg, #0052cc 0%, #003380 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-300">
+        <!-- Header Multicaixa -->
+        <div class="bg-[#0052cc] p-6 text-white text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-[#0052cc] to-[#003380] opacity-90"></div>
+            <div class="relative z-10">
+                <i class="fas fa-credit-card text-4xl mb-3 shadow-xl"></i>
+                <h1 class="text-xl font-bold tracking-wider uppercase">Pagamento por Referência</h1>
+                <p class="text-xs opacity-70 mt-1 font-mono">Simulador ATM / AppyPay</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 space-y-6">
+
+            <!-- Step 1: Input Reference -->
+            <div id="step-1">
+                <div class="space-y-4">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Entidade</label>
+                        <div
+                            class="bg-gray-100 p-3 rounded font-mono font-bold text-gray-700 text-lg border border-gray-200">
+                            90000
+                        </div>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Referência</label>
+                        <input type="tel" id="reference" maxlength="11" placeholder="000 000 000"
+                            class="w-full bg-white border-2 border-gray-300 p-3 rounded font-mono text-xl text-center focus:border-blue-600 focus:outline-none transition font-bold text-gray-800">
+                    </div>
+                    <button onclick="checkReference()" id="btn-check"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded shadow transition transform active:scale-95">
+                        CONSULTAR
+                    </button>
+                    <div id="error-msg" class="text-center text-red-500 text-xs font-bold hidden animate-pulse">
+                        Referência não encontrada.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Confirm Payment -->
+            <div id="step-2" class="hidden space-y-6 animate-fade-in">
+                <div class="bg-blue-50 p-4 rounded border border-blue-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-500 uppercase">Beneficiário</span>
+                        <span class="font-bold text-sm text-gray-800">ECOFLIX ANGOLA</span>
+                    </div>
+                    <div class="border-t border-blue-200 my-2"></div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs text-gray-500 uppercase">Valor a Pagar</span>
+                        <span class="font-bold text-2xl text-blue-800" id="display-amount">...</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="processPayment()" id="btn-pay"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <span>CONFIRMAR PAGAMENTO</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button onclick="reset()" class="w-full text-gray-400 text-xs hover:text-gray-600">
+                        Cancelar Operação
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div id="step-3" class="hidden text-center py-4">
+                <div
+                    class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <i class="fas fa-check text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Sucesso!</h3>
+                <p class="text-sm text-gray-500 mb-6">Operação realizada com sucesso.</p>
+                <div class="bg-gray-50 p-3 rounded text-xs text-gray-400 border border-gray-100">
+                    Talão Nº: <span class="font-mono">ATM-2026-X89</span>
+                </div>
+                <button onclick="window.close()" class="mt-6 text-blue-600 font-bold text-sm hover:underline">
+                    Fechar Simulador
+                </button>
+            </div>
+
+        </div>
+
+        <div class="bg-gray-100 p-2 text-center">
+            <p class="text-[10px] text-gray-400 font-mono">SECURE MOCK ENVIRONMENT // APPYPAY</p>
+        </div>
+    </div>
+
+    <script>
+        const refInput = document.getElementById('reference');
+        let currentOrder = null;
+
+        // Formatação
+        refInput.addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 9) v = v.slice(0, 9);
+            if (v.length > 6) v = v.slice(0, 3) + ' ' + v.slice(3, 6) + ' ' + v.slice(6);
+            else if (v.length > 3) v = v.slice(0, 3) + ' ' + v.slice(3);
+            e.target.value = v;
+        });
+
+        function formatKz(val) {
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " Kz";
+        }
+
+        function reset() {
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('error-msg').classList.add('hidden');
+            refInput.value = '';
+            currentOrder = null;
+        }
+
+        async function checkReference() {
+            const rawRef = refInput.value.replace(/\s/g, '');
+            const btn = document.getElementById('btn-check');
+
+            if (rawRef.length !== 9) {
+                document.getElementById('error-msg').innerText = 'Referência inválida (9 dígitos)';
+                document.getElementById('error-msg').classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            document.getElementById('error-msg').classList.add('hidden');
+
+            try {
+                // Fetch Order Info
+                const res = await fetch(`/api/ecoflix/orders/${rawRef}/status`);
+                const data = await res.json();
+
+                if (!res.ok || !data.success) throw new Error('Referência não encontrada');
+
+                if (data.status === 'PAID') throw new Error('Esta referência já foi paga!');
+
+                currentOrder = {
+                    reference: rawRef,
+                    amount: data.amount,
+                    plan: data.plan_type
+                };
+
+                // Show Confirm Screen
+                document.getElementById('display-amount').innerText = formatKz(currentOrder.amount);
+
+                document.getElementById('step-1').classList.add('hidden');
+                document.getElementById('step-2').classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('error-msg').innerText = error.message;
+                document.getElementById('error-msg').classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'CONSULTAR';
+            }
+        }
+
+        async function processPayment() {
+            if (!currentOrder) return;
+            const btn = document.getElementById('btn-pay');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+            try {
+                // Trigger Webhook
+                const res = await fetch('/api/ecoflix/test/simulate-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reference: currentOrder.reference,
+                        amount: currentOrder.amount,
+                        status: 'paid'
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Falha no processamento');
+
+                // Success
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-3').classList.remove('hidden');
+
+            } catch (error) {
+                alert('Erro: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = 'CONFIRMAR PAGAMENTO';
+            }
+        }
+    </script>
+</body>
+
+</html>

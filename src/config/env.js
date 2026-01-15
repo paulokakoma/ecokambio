@@ -53,5 +53,7 @@ module.exports = {
     groq: {
         apiKey: process.env.GROQ_API_KEY,
         baseUrl: process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1'
-    }
+    },
+    sheetsSyncToken: process.env.SHEETS_SYNC_TOKEN,
+    apiSecretKey: process.env.API_SECRET_KEY
 };

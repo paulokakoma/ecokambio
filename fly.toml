@@ -2,7 +2,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
 app = 'ecokambio'
-primary_region = 'ams' # Amsterdam - mais próximo de Angola
+primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms)
 
 [build]
   dockerfile = 'Dockerfile'
@@ -11,18 +11,20 @@ primary_region = 'ams' # Amsterdam - mais próximo de Angola
   NODE_ENV = 'production'
   PORT = '3000'
 
+# --- DEFINIÇÃO DOS PROCESSOS ---
+[processes]
+  web = "npm start"           # O servidor Express/API
+  worker = "npm run worker"   # O processador de filas BullMQ
+
+# --- CONFIGURAÇÃO DE REDE (SÓ PARA O WEB) ---
 [http_service]
+  processes = ['web'] 
   internal_port = 3000
   force_https = true
-  auto_stop_machines = 'off'  # Mantém máquinas rodando para alta disponibilidade
+  auto_stop_machines = 'off'
   auto_start_machines = true
-  min_machines_running = 2  # Garante que sempre haja 2 máquinas rodando
-  processes = ['app']
+  min_machines_running = 1 # Reduzido para 1 se quiser poupar, ou mantém 2 para HA
 
-  [http_service.concurrency]
-    type = 'connections'
-    hard_limit = 25
-    soft_limit = 20
 
   [[http_service.checks]]
     grace_period = '15s'  # Tempo após boot antes de iniciar health checks

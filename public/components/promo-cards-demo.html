@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cards Promocionais - Visa & Netflix | EcoKambio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .demo-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Cards Promocionais - Visa & Netflix */
+        .promo-cards-section {
+            margin-bottom: 3rem;
+        }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .promo-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+        }
+
+        .promo-card {
+            position: relative;
+            text-decoration: none;
+            display: block;
+        }
+
+        .promo-card-inner {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.5s ease;
+        }
+
+        @media (min-width: 640px) {
+            .promo-card-inner {
+                border-radius: 1.75rem;
+                padding: 2.5rem;
+            }
+        }
+
+        .promo-card:hover .promo-card-inner {
+            transform: scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Visa Card Styling */
+        .visa-card .promo-card-inner {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #4f46e5 100%);
+        }
+
+        /* Netflix Card Styling */
+        .netflix-card .promo-card-inner {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #4c0519 100%);
+        }
+
+        /* Background Patterns */
+        .bg-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.1;
+        }
+
+        .bg-circle-1 {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 16rem;
+            height: 16rem;
+            background: white;
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+
+        .bg-circle-2 {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 12rem;
+            height: 12rem;
+            background: rgba(147, 197, 253, 0.5);
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+
+        .netflix-card .bg-circle-1 {
+            background: #dc2626;
+        }
+
+        .netflix-card .bg-circle-2 {
+            background: #7f1d1d;
+        }
+
+        /* Content Area */
+        .card-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-logo img {
+            height: 2rem;
+            width: auto;
+        }
+
+        @media (min-width: 640px) {
+            .card-logo img {
+                height: 2.5rem;
+            }
+        }
+
+        .card-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+        }
+
+        .card-badge span {
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        @media (min-width: 640px) {
+            .card-badge span {
+                font-size: 0.875rem;
+            }
+        }
+
+        .netflix-card .card-badge {
+            background: rgba(220, 38, 38, 0.2);
+        }
+
+        .netflix-card .card-badge span {
+            color: #ef4444;
+        }
+
+        /* Title */
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-title {
+                font-size: 1.875rem;
+            }
+        }
+
+        /* Description */
+        .card-description {
+            color: #dbeafe;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-description {
+                font-size: 1rem;
+            }
+        }
+
+        .netflix-card .card-description {
+            color: #d1d5db;
+        }
+
+        /* Features List */
+        .features-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .visa-card .feature-icon {
+            color: #86efac;
+        }
+
+        .netflix-card .feature-icon {
+            color: #fca5a5;
+        }
+
+        /* Footer */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-cta {
+            color: white;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-cta {
+                font-size: 1.25rem;
+            }
+        }
+
+        .card-price {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            transition: background 0.3s;
+        }
+
+        .promo-card:hover .card-price {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .netflix-card .card-price {
+            background: rgba(220, 38, 38, 0.2);
+        }
+
+        .netflix-card:hover .card-price {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        .card-price span {
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Decorative Elements */
+        .deco-element {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 4rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 0.5rem;
+            opacity: 0.8;
+            transform: rotate(12deg);
+            transition: transform 0.5s;
+        }
+
+        .promo-card:hover .deco-element {
+            transform: rotate(6deg);
+        }
+
+        .netflix-deco {
+            font-size: 2.5rem;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            opacity: 0.2;
+            transition: opacity 0.5s;
+        }
+
+        .promo-card:hover .netflix-deco {
+            opacity: 0.3;
+        }
+
+        /* EcoFlix Logo */
+        .ecoflix-logo {
+            color: #dc2626;
+            font-size: 2rem;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        @media (min-width: 640px) {
+            .ecoflix-logo {
+                font-size: 2.25rem;
+            }
+        }
+
+        /* Glassmorphism Border Effect */
+        .promo-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        @media (min-width: 640px) {
+            .promo-card::before {
+                border-radius: 1.75rem;
+            }
+        }
+
+        .promo-card:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🎯 Cards Promocionais</h1>
+            <p>Componentes visuais para promover Visa Virtual e Netflix no EcoKambio</p>
+        </div>
+
+        <!-- Promo Cards Section -->
+        <div class="promo-cards-section">
+            <div class="promo-grid">
+
+                <!-- Card Visa Virtual -->
+                <a href="/visa.html" class="promo-card visa-card">
+                    <div class="promo-card-inner">
+                        <!-- Background Pattern -->
+                        <div class="bg-pattern">
+                            <div class="bg-circle-1"></div>
+                            <div class="bg-circle-2"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="card-content">
+                            <!-- Header -->
+                            <div class="card-header">
+                                <div class="card-logo">
+                                    <img src="/assets/visa.png" alt="Visa Virtual"
+                                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 60%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2230%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EVISA%3C/text%3E%3C/svg%3E'">
+                                </div>
+                                <div class="card-badge">
+                                    <span>Virtual</span>
+                                </div>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 class="card-title">Cartão Visa Virtual</h3>
+
+                            <!-- Description -->
+                            <p class="card-description">
+                                Compre online em qualquer lugar do mundo. Ative seu cartão em minutos!
+                            </p>
+
+                            <!-- Features -->
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Ativação instantânea
+                                </li>
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Compras internacionais
+                                </li>
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    100% seguro
+                                </li>
+                            </ul>
+
+                            <!-- Footer -->
+                            <div class="card-footer">
+                                <span class="card-cta">Pedir agora →</span>
+                                <div class="card-price">
+                                    <span>Desde 15.000 Kz</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Decorative Element -->
+                        <div class="deco-element"></div>
+                    </div>
+                </a>
+
+                <!-- Card Netflix -->
+                <a href="/netflix/index.html" class="promo-card netflix-card">
+                    <div class="promo-card-inner">
+                        <!-- Background Pattern -->
+                        <div class="bg-pattern">
+                            <div class="bg-circle-1"></div>
+                            <div class="bg-circle-2"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="card-content">
+                            <!-- Header -->
+                            <div class="card-header">
+                                <div class="card-logo">
+                                    <span class="ecoflix-logo">ECOFLIX</span>
+                                </div>
+                                <div class="card-badge">
+                                    <span>Novo</span>
+                                </div>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 class="card-title">Netflix Angola</h3>
+
+                            <!-- Description -->
+                            <p class="card-description">
+                                Assista sem cartão internacional. Pagamento em Kwanzas via Multicaixa!
+                            </p>
+
+                            <!-- Features -->
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Qualidade 4K Ultra HDR
+                                </li>
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    TV, Telemóvel, Tablet, PC
+                                </li>
+                                <li class="feature-item">
+                                    <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Entrega em 12 horas
+                                </li>
+                            </ul>
+
+                            <!-- Footer -->
+                            <div class="card-footer">
+                                <span class="card-cta">Ver planos →</span>
+                                <div class="card-price">
+                                    <span>A partir 4.500 Kz</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Decorative Element -->
+                        <div class="netflix-deco">📺</div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div
+            style="background: white; border-radius: 1rem; padding: 2rem; margin-top: 3rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <h2 style="color: #1f2937; margin-bottom: 1rem;">📋 Como usar:</h2>
+            <ol style="color: #4b5563; line-height: 1.8; padding-left: 1.5rem;">
+                <li>Copie o conteúdo de <code
+                        style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">promo-cards.html</code></li>
+                <li>Cole na página <code
+                        style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">index.html</code> logo após a
+                    seção hero ou onde desejar</li>
+                <li>Certifique-se de que os links apontam para as páginas corretas (<code
+                        style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">/visa.html</code> e <code
+                        style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">/netflix/index.html</code>)
+                </li>
+                <li>Os cards são totalmente responsivos e funcionam em mobile, tablet e desktop</li>
+            </ol>
+        </div>
+    </div>
+</body>
+
+</html>

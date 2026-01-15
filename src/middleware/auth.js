@@ -6,7 +6,10 @@ const isAdmin = (req, res, next) => {
         return res.status(403).send('Acesso ao admin apenas via subdomínio admin.');
     }
 
-    // Check signed cookie instead of session
+    // Check Redis-backed session
+    if (req.session && req.session.admin) return next();
+
+    // Legacy/Backup check (migration support)
     if (req.signedCookies.admin_auth === 'true') return next();
 
     // Para chamadas de API, retornar JSON 401 em vez de redirecionar (evita sucesso falso no frontend)

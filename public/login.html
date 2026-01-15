@@ -61,12 +61,18 @@
                 <p class="mt-2 text-center text-sm text-slate-600">Por favor, insira a senha de administrador.</p>
             </div>
             <form id="login-form" class="mt-8 space-y-6">
-                <div class="rounded-md shadow-sm -space-y-px">
+                <div class="rounded-md shadow-sm space-y-4">
+                    <div>
+                        <label for="username" class="sr-only">Usuário</label>
+                        <input id="username" name="username" type="text" required
+                            class="appearance-none rounded-md relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                            placeholder="Usuário" autocomplete="off">
+                    </div>
                     <div>
                         <label for="password" class="sr-only">Senha</label>
                         <input id="password" name="password" type="password" required
                             class="appearance-none rounded-md relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Senha">
+                            placeholder="Senha" autocomplete="off">
                     </div>
                 </div>
 
@@ -87,6 +93,7 @@
     <script src="/js/components.js"></script>
     <script>
         const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const errorDiv = document.getElementById('error-message');
         const submitButton = loginForm.querySelector('button[type="submit"]');
@@ -98,6 +105,7 @@
             submitButton.disabled = true;
             submitButton.textContent = 'Verificando...';
 
+            const username = usernameInput.value.trim();
             const password = passwordInput.value;
             errorDiv.textContent = '';
 
@@ -106,11 +114,23 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ password }),
+                    body: JSON.stringify({ username, password }),
                 });
 
                 if (response.ok) {
-                    window.location.href = '/admin';
+                    const data = await response.json();
+
+                    // Use redirect from backend if provided
+                    if (data.redirect) {
+                        sessionStorage.setItem('admin_session_alive', 'true');
+                        window.location.href = data.redirect;
+                    } else {
+                        // Fallback to URL parameter or default
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || '/admin';
+                        sessionStorage.setItem('admin_session_alive', 'true');
+                        window.location.href = redirectUrl;
+                    }
                 } else {
                     const data = await response.json().catch(() => ({ message: 'Ocorreu um erro. Tente novamente.' }));
                     errorDiv.textContent = data.message || 'Senha incorreta.';
@@ -124,6 +144,22 @@
                 submitButton.textContent = 'Entrar';
             }
         });
+
+        // Limpar campos sensíveis quando o usuário sair da página
+        const clearFields = () => {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            errorDiv.textContent = '';
+        };
+
+        // Limpar ao sair da página (funciona na maioria dos navegadores)
+        window.addEventListener('beforeunload', clearFields);
+
+        // Limpar quando a página é escondida (mobile e alguns navegadores modernos)
+        window.addEventListener('pagehide', clearFields);
+
+        // Limpar quando o usuário navega para outra página
+        window.addEventListener('unload', clearFields);
     </script>
 </body>
 

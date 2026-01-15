@@ -8,6 +8,16 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const app = express();
 const websocket = require("./src/websocket");
+const { initSentry, Sentry } = require('./src/config/sentry');
+const { redisClient } = require('./src/config/redis');
+const RedisStore = require('connect-redis').default;
+
+// Initialize Sentry
+initSentry();
+
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 
 // Plataformas modernas gerem o SSL/TLS externamente.
 // A nossa aplicação corre um servidor HTTP simples.
@@ -35,6 +45,7 @@ const authRoutes = require("./src/routes/authRoutes");
 const publicRoutes = require("./src/routes/publicRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const viewRoutes = require("./src/routes/viewRoutes");
+const ecoflixRoutes = require("./src/netflix/routes");
 
 // Scraper
 const scraperController = require("./src/controllers/scraperController");
@@ -50,24 +61,30 @@ app.use(helmet({
             scriptSrc: [
                 "'self'",
                 "'unsafe-inline'",
+                "'unsafe-eval'",
                 "https://cdn.jsdelivr.net",
+                "https://cdn.tailwindcss.com",
                 "https://pagead2.googlesyndication.com",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
                 "https://googleads.g.doubleclick.net",
                 "https://partner.googleadservices.com",
                 "https://tpc.googlesyndication.com",
-                "https://www.google.com"
+                "https://www.google.com",
+                "https://ep1.adtrafficquality.google",
+                "https://ep2.adtrafficquality.google"
             ],
             scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
             styleSrc: [
                 "'self'",
                 "'unsafe-inline'",
-                "https://fonts.googleapis.com"
+                "https://fonts.googleapis.com",
+                "https://cdnjs.cloudflare.com"
             ],
             fontSrc: [
                 "'self'",
-                "https://fonts.gstatic.com"
+                "https://fonts.gstatic.com",
+                "https://cdnjs.cloudflare.com"
             ],
             imgSrc: [
                 "'self'",
@@ -95,11 +112,15 @@ app.use(helmet({
                 "https://tpc.googlesyndication.com",
                 "https://www.google.com"
             ],
-            childSrc: [
-                "'self'",
-                "https://pagead2.googlesyndication.com"
-            ]
-        }
+            childSrc: ["'self'", "https://pagead2.googlesyndication.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: config.isDevelopment ? null : []
+        },
+    },
+    hsts: config.isDevelopment ? false : {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
     }
 }));
 app.use(compression()); // Enable Gzip compression
@@ -109,7 +130,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 1000, // Limit each IP to 1000 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
 })
@@ -126,44 +147,32 @@ app.set('trust proxy', 1);
 app.use(subdomainMiddleware);
 
 // Session Configuration
-// Use PostgreSQL for production (Fly.io/Vercel), FileStore for local development
 let sessionStore;
 
-if (config.isDevelopment) {
-    // Local development: Use FileStore
+if (config.isDevelopment && !process.env.REDIS_URL) {
+    // Local development without Redis env: Use FileStore
     const FileStore = require("session-file-store")(session);
     sessionStore = new FileStore({
         path: './sessions',
         ttl: 30 * 24 * 60 * 60, // 30 days
         retries: 0
     });
-    logger.info('📁 Using FileStore for sessions (development)');
-} else if (process.env.DATABASE_URL) {
-    // Production with PostgreSQL: Use PostgreSQL session store
-    const pgSession = require('connect-pg-simple')(session);
-
-    sessionStore = new pgSession({
-        conString: process.env.DATABASE_URL,
-        tableName: 'session',
-        createTableIfMissing: true,
-        ttl: 30 * 24 * 60 * 60 // 30 days
-    });
-
-    logger.info('✅ Using PostgreSQL session store for production');
+    logger.info('📁 Using FileStore for sessions');
 } else {
-    // Fallback to MemoryStore if no DATABASE_URL (Vercel, etc.)
-    // Note: Sessions will be lost on redeploy
-    logger.warn('⚠️  Using MemoryStore - sessions will not persist across redeploys');
-    logger.warn('   Add DATABASE_URL environment variable to persist sessions');
-    sessionStore = undefined;
+    // Redis Store (Prod or Dev with Redis)
+    sessionStore = new RedisStore({
+        client: redisClient,
+        prefix: 'ecokambio:sess:',
+    });
+    logger.info('✅ Using Redis session store');
 }
 
 
 app.use(session({
     store: sessionStore,
     secret: config.session.secret,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     rolling: true,
     cookie: {
         secure: !config.isDevelopment,
@@ -231,6 +240,12 @@ const defaultStaticOptions = {
 app.use(express.static("public", defaultStaticOptions));
 app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), defaultStaticOptions));
 
+// EcoFlix Module Static Files
+app.use('/netflix', express.static(path.join(__dirname, 'src/netflix/public'), {
+    index: ['index.html'],
+    maxAge: config.isDevelopment ? '0' : '1d'
+}));
+
 // Rota para a página "Sobre"
 app.get('/sobre', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'sobre.html'));
@@ -283,7 +298,14 @@ app.get("/api/scraper/last-results", scraperController.getLastResults);
 // Scraper API Routes (Protected)
 app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // Protegida
 
-// Admin API Routes (Protected)
+// EcoFlix Module API Routes (Public & Protected mixed - handles its own auth)
+app.use("/api/ecoflix", ecoflixRoutes);
+
+// Google Sheets Integration - Token-based auth (must be before isAdmin middleware)
+const adminController = require('./src/controllers/adminController');
+app.get('/api/admin/export-sales-auto', adminController.exportSalesAuto);
+
+// Admin API Routes (Protected globally)
 app.use("/api", isAdmin, adminRoutes);
 
 
@@ -358,39 +380,48 @@ app.use((req, res, next) => {
     }
 });
 
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
+
 // Error Handling Middleware - Deve ser o último middleware
 app.use(errorHandler);
+
+// EcoFlix Queues (Producers)
+require('./src/netflix/services/queue.service');
+require('./src/netflix/services/sms_queue.service');
 
 // Scheduler
 const scheduler = require('./webscraper/scheduler');
 
-// Start Server
-server.listen(config.port, '0.0.0.0', () => {
-    logger.info(`✅ Server running on port ${config.port}`);
-    logger.info(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
+// Start Server only if run directly
+if (require.main === module) {
+    server.listen(config.port, '0.0.0.0', () => {
+        logger.info(`✅ Server running on port ${config.port}`);
+        logger.info(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
 
-    // Start scraper scheduler in production
-    if (!config.isDevelopment) {
-        try {
-            const scraperScheduler = require('./webscraper/scheduler');
-            scraperScheduler.start();
-            logger.info('📅 Scraper scheduler started (runs every 4 hours)');
-        } catch (error) {
-            logger.error('⚠️  Failed to start scraper scheduler:', { message: error.message });
+        // Start scraper scheduler in production
+        if (!config.isDevelopment) {
+            try {
+                const scraperScheduler = require('./webscraper/scheduler');
+                scraperScheduler.start();
+                logger.info('📅 Scraper scheduler started (runs every 4 hours)');
+            } catch (error) {
+                logger.error('⚠️  Failed to start scraper scheduler:', { message: error.message });
+            }
+        } else {
+            logger.info('ℹ️  Scraper scheduler disabled in development mode');
+            logger.info('   Use: npm run scrape to test manually');
+            logger.info(`Servidor a correr em desenvolvimento:`);
+            logger.info(`  📱 Página Principal: http://localhost:${config.port}`);
+            logger.info(`  🔐 Admin: http://admin.localhost:${config.port}`);
         }
-    } else {
-        logger.info('ℹ️  Scraper scheduler disabled in development mode');
-        logger.info('   Use: npm run scrape to test manually');
-        logger.info(`Servidor a correr em desenvolvimento:`);
-        logger.info(`  📱 Página Principal: http://localhost:${config.port}`);
-        logger.info(`  🔐 Admin: http://admin.localhost:${config.port}`);
-    }
-}).on('error', (e) => {
-    if (e.code === 'EADDRINUSE') {
-        console.error(`\n❌ ERRO: A porta ${config.port} já está em uso.`);
-        console.error('   Verifique se outra instância do servidor já não está a correr e tente novamente.');
-        process.exit(1);
-    }
-});
+    }).on('error', (e) => {
+        if (e.code === 'EADDRINUSE') {
+            console.error(`\n❌ ERRO: A porta ${config.port} já está em uso.`);
+            console.error('   Verifique se outra instância do servidor já não está a correr e tente novamente.');
+            process.exit(1);
+        }
+    });
+}
 
 module.exports = app;

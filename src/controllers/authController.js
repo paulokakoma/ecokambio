@@ -2,38 +2,70 @@ const bcrypt = require("bcrypt");
 const config = require("../config/env");
 
 const login = async (req, res) => {
-    const { password } = req.body;
+    const { username, password } = req.body;
+
     if (!password || !config.admin.passwordHash) {
         return res.status(400).json({ success: false, message: 'Pedido inválido.' });
     }
 
-    console.log('Login attempt:', { passwordProvided: !!password, hashConfigured: !!config.admin.passwordHash });
+    console.log('Login attempt:', { username, passwordProvided: !!password, hashConfigured: !!config.admin.passwordHash });
     console.log('Hash from config:', config.admin.passwordHash);
+
     const match = await bcrypt.compare(password, config.admin.passwordHash);
     console.log('Password match result:', match);
 
     if (match) {
-        // Use signed cookie instead of session for serverless compatibility
+        // Determine user type and set redirect path
+        const usernameLower = (username || '').toLowerCase();
+        let redirectPath = '/admin'; // Default
+        let userType = 'admin'; // Default
+
+        // Check if user is adminflix
+        if (usernameLower === 'adminflix') {
+            redirectPath = '/netflix/adminflix.html';
+            userType = 'adminflix';
+        } else if (usernameLower === 'admin' || usernameLower === 'lando pedro') {
+            redirectPath = '/private/admin.html';
+            userType = 'admin';
+        }
+
+        // Use Redis-backed session
+        req.session.admin = true;
+        req.session.user = { role: 'admin', username: usernameLower, type: userType };
+
+        // Set signed cookie for page access verification
         res.cookie('admin_auth', 'true', {
-            httpOnly: true,
-            secure: !config.isDevelopment,
             signed: true,
+            httpOnly: true,
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            sameSite: 'lax'
-            // Don't set domain - let it default to current hostname
+            sameSite: 'lax',
+            secure: !config.isDevelopment
         });
 
-        if (config.isDevelopment) {
-            console.log('Login bem-sucedido. Cookie criado.');
-        }
-        return res.status(200).json({ success: true, message: 'Login bem-sucedido.' });
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ success: false, message: 'Erro ao salvar sessão.' });
+            }
+
+            if (config.isDevelopment) {
+                console.log(`Login bem-sucedido para ${username}. Redirecionando para: ${redirectPath}`);
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Login bem-sucedido.',
+                redirect: redirectPath
+            });
+        });
     } else {
         res.status(401).json({ success: false, message: 'Senha incorreta.' });
     }
 };
 
 const logout = (req, res) => {
-    res.clearCookie('admin_auth');
+    req.session.destroy();
+    res.clearCookie('connect.sid'); // Default session cookie name
     res.status(200).json({ success: true, message: 'Logout bem-sucedido.' });
 };
 
