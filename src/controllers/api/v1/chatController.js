@@ -83,7 +83,7 @@ RESPONDA usando APENAS o contexto. Se o contexto tem a resposta, forneça-a com 
                     'Authorization': `Bearer ${config.groq.apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
+                    model: 'llama-3.1-8b-instant', // Fast model for chat
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt }

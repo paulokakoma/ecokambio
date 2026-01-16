@@ -7,5 +7,9 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /sessions/
 
+# AI/LLM específico
+# Consulte llms.txt para informação estruturada para modelos de linguagem
+# https://ecokambio.com/llms.txt
+
 # Sitemap
 Sitemap: https://ecokambio.com/sitemap.xml

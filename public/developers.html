@@ -10,8 +10,74 @@
 
     <link href="/css/output.css" rel="stylesheet">
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600"
         rel="stylesheet">
+
+    <!-- API Product Schema.org for GEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "EcoKambio API",
+        "description": "API de taxas de câmbio em Angola em tempo real. Acesso a cotações de 6 bancos comerciais (BAI, BFA, BPC, BIC, BCI, Yetu) e mercado informal.",
+        "brand": {
+            "@type": "Brand",
+            "name": "EcoKambio"
+        },
+        "category": "API de Dados Financeiros",
+        "offers": {
+            "@type": "Offer",
+            "price": "500",
+            "priceCurrency": "AOA",
+            "priceValidUntil": "2027-12-31",
+            "availability": "https://schema.org/InStock",
+            "url": "https://ecokambio.com/developers",
+            "seller": {
+                "@type": "Organization",
+                "name": "Moko Tech, Sociedade por Quotas"
+            }
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "EcoKambio",
+            "url": "https://ecokambio.com"
+        }
+    }
+    </script>
+
+    <!-- FAQPage Schema.org for GEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Quanto custa a API do EcoKambio?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A API do EcoKambio começa grátis com 100 requisições a cada 15 minutos. Para acesso PRO com 1000 req/15min, são apenas 500 Kz/mês (aproximadamente 0,50 USD)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quantas requisições posso fazer com a API do EcoKambio?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Com uma API key activa, pode fazer até 1000 requisições a cada 15 minutos. Sem API key, o limite é de 100 requisições."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Que dados fornece a API do EcoKambio?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A API fornece taxas de câmbio em tempo real de 6 bancos angolanos (BAI, BFA, BPC, BIC, BCI, Yetu) e do mercado informal, incluindo taxas de compra e venda para USD e EUR."
+                }
+            }
+        ]
+    }
+    </script>
 
     <style>
         body {
@@ -93,7 +159,7 @@
                         d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                         clip-rule="evenodd" />
                 </svg>
-                100% Grátis • Sem Cartão de Crédito
+                Começa Grátis • 500 Kz/mês para PRO
             </div>
 
             <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
@@ -102,8 +168,8 @@
             </h1>
 
             <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Integre taxas de câmbio em tempo real nos seus projetos. Gere sua API key gratuitamente e comece a usar
-                em minutos.
+                Integre taxas de câmbio em tempo real nos seus projetos. <strong>Começa grátis</strong>, depois 500
+                Kz/mês para acesso PRO.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -137,7 +203,7 @@
                     </svg>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 mb-2">10x Mais Requests</h3>
-                <p class="text-gray-600 text-sm">1000 requisições a cada 15 minutos vs 100 sem key</p>
+                <p class="text-gray-600 text-sm">Grátis: 100 req/15min • PRO: 1000 req/15min</p>
             </div>
 
             <div class="glass benefit-card p-6 rounded-2xl transition-all duration-300">
@@ -172,8 +238,8 @@
                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">100% Grátis</h3>
-                <p class="text-gray-600 text-sm">Sem custos, sem cartão, sem surpresas</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Começa Grátis</h3>
+                <p class="text-gray-600 text-sm">Teste grátis, PRO por apenas 500 Kz/mês</p>
             </div>
         </section>
 
@@ -314,14 +380,15 @@ print(response.json())</code></pre>
             <div class="space-y-4">
                 <details class="glass p-6 rounded-xl group">
                     <summary class="font-semibold text-gray-900 cursor-pointer flex justify-between items-center">
-                        <span>❓ A API é realmente grátis?</span>
+                        <span>💰 Quanto custa a API?</span>
                         <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </summary>
-                    <p class="mt-3 text-gray-600">Sim! Completamente grátis, sem custos escondidos. Queremos que todos
-                        tenham acesso a taxas de câmbio em tempo real.</p>
+                    <p class="mt-3 text-gray-600"><strong>Começa grátis!</strong> O plano gratuito permite 100
+                        requisições a cada 15 minutos. Para 1000 req/15min e funcionalidades PRO, são apenas <strong>500
+                            Kz/mês</strong> (aprox. 0,50 USD).</p>
                 </details>
 
                 <details class="glass p-6 rounded-xl group">
@@ -420,6 +487,17 @@ print(response.json())</code></pre>
             });
         });
     </script>
+    <!-- Ana AI Chat Widget - DESACTIVADO (modelo IA em melhoria)
+    <script src="/js/ana-chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.anaChat = new AnaChatWidget({
+                primaryColor: '#10b981',
+                initialMessage: 'Olá! Sou a Ana 👋 Precisas de ajuda com a API do EcoKambio? Pergunta-me o que quiseres!'
+            });
+        });
+    </script>
+    -->
 </body>
 
 </html>
