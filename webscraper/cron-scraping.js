@@ -2,13 +2,24 @@ const { PuppeteerCrawler, Dataset } = require('crawlee');
 const { writeFile } = require('fs/promises');
 const path = require('path');
 
+// Rotate user agents to avoid detection
+const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+];
+
+const getRandomUserAgent = () => userAgents[Math.floor(Math.random() * userAgents.length)];
+
 // Targets – same as Crawlee scraper
 const targets = [
     { url: 'https://bancobai.ao/pt/cambios-e-valores', label: 'BAI' },
     { url: 'https://www.bfa.ao/pt/particulares/', label: 'BFA' },
     { url: 'https://www.bancobic.ao/inicio/particulares/index', label: 'BIC' },
     { url: 'https://www.bna.ao', label: 'BNA' },
-    { url: 'https://www.bci.ao/particular/conversor-de-moeda', label: 'BCI' },
+    // BCI: Use homepage and navigate to rates (more reliable than direct URL)
+    { url: 'https://www.bci.ao/', label: 'BCI' },
     { url: 'https://www.bancoyetu.ao', label: 'YETU' },
 ];
 
@@ -16,19 +27,57 @@ const targets = [
     console.log('🚀 Starting Cron Scraper...');
 
     const crawler = new PuppeteerCrawler({
-        // Critical for Docker environments
+        // Critical for Docker environments + stealth options
         launchContext: {
             launchOptions: {
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-infobars',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--window-size=1920,1080'
+                ],
+                ignoreHTTPSErrors: true
             }
         },
         // Retry configuration for failed requests
-        maxRequestRetries: 3,
-        requestHandlerTimeoutSecs: 180,
-        preNavigationHooks: [async ({ page }) => {
+        maxRequestRetries: 5, // Increased retries
+        requestHandlerTimeoutSecs: 240, // Increased timeout
+        navigationTimeoutSecs: 90, // Default navigation timeout
+
+        // Add delay between retries to avoid rate limiting
+        retryOnBlocked: true,
+
+        preNavigationHooks: [async ({ page, request }) => {
+            const userAgent = getRandomUserAgent();
+
+            // Set user agent
+            await page.setUserAgent(userAgent);
+
+            // Set realistic viewport
+            await page.setViewport({ width: 1920, height: 1080 });
+
+            // Set extra HTTP headers to look more like a real browser
             await page.setExtraHTTPHeaders({
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0'
+            });
+
+            // Hide webdriver flag
+            await page.evaluateOnNewDocument(() => {
+                Object.defineProperty(navigator, 'webdriver', { get: () => false });
+                Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+                Object.defineProperty(navigator, 'languages', { get: () => ['pt-PT', 'pt', 'en-US', 'en'] });
             });
         }],
 
@@ -101,22 +150,68 @@ const targets = [
                         }).filter(r => r !== null);
                     });
                 } else if (label === 'BCI') {
-                    await page.waitForSelector('table', { timeout: 15000 });
-                    rates = await page.evaluate(() => {
-                        const table = document.querySelector('table');
-                        const rows = table.querySelectorAll('tr');
-                        return Array.from(rows, row => {
-                            const cols = row.querySelectorAll('td');
-                            if (cols.length >= 3) {
-                                return {
-                                    bank: 'BCI',
-                                    currency: cols[0]?.innerText.trim(),
-                                    sell: cols[2]?.innerText.trim()
-                                };
+                    // BCI: Wait longer and try to find rates on homepage
+                    log.info('BCI: Waiting for page to fully load...');
+
+                    // Wait for page load
+                    await page.waitForNetworkIdle({ timeout: 30000 }).catch(() => { });
+
+                    // Try multiple selectors for BCI rates
+                    const selectors = ['table', '.exchange-rates', '.cambio', '.taxas', '[class*="rate"]', '[class*="cambio"]'];
+                    let foundSelector = null;
+
+                    for (const selector of selectors) {
+                        try {
+                            await page.waitForSelector(selector, { timeout: 5000 });
+                            foundSelector = selector;
+                            log.info(`BCI: Found selector: ${selector}`);
+                            break;
+                        } catch (e) {
+                            // Continue trying
+                        }
+                    }
+
+                    if (foundSelector) {
+                        rates = await page.evaluate(() => {
+                            const results = [];
+
+                            // Try to find exchange rate information in tables
+                            const tables = document.querySelectorAll('table');
+                            tables.forEach(table => {
+                                const rows = table.querySelectorAll('tr');
+                                rows.forEach(row => {
+                                    const cols = row.querySelectorAll('td');
+                                    if (cols.length >= 3) {
+                                        const currency = cols[0]?.innerText.trim();
+                                        const sell = cols[2]?.innerText.trim();
+                                        if (currency && sell && ['USD', 'EUR', 'ZAR', 'GBP'].some(c => currency.includes(c))) {
+                                            results.push({
+                                                bank: 'BCI',
+                                                currency: currency.split(' ')[0], // Get just the currency code
+                                                sell: sell
+                                            });
+                                        }
+                                    }
+                                });
+                            });
+
+                            // Also try to find rates in text elements
+                            const allText = document.body.innerText;
+                            const usdMatch = allText.match(/USD[^\d]*(\d+[,.]\d+)/i);
+                            const eurMatch = allText.match(/EUR[^\d]*(\d+[,.]\d+)/i);
+
+                            if (usdMatch && results.length === 0) {
+                                results.push({ bank: 'BCI', currency: 'USD', sell: usdMatch[1] });
                             }
-                            return null;
-                        }).filter(r => r !== null);
-                    });
+                            if (eurMatch && results.length === 0) {
+                                results.push({ bank: 'BCI', currency: 'EUR', sell: eurMatch[1] });
+                            }
+
+                            return results;
+                        });
+                    } else {
+                        log.warn('BCI: No exchange rate selectors found, skipping');
+                    }
                 } else if (label === 'YETU') {
                     await page.waitForSelector('span.text-white', { timeout: 15000 });
                     rates = await page.evaluate(() => {
@@ -153,6 +248,7 @@ const targets = [
             userData: { label: t.label },
             ...(t.label === 'BFA' && { navigationTimeoutSecs: 120 }),
             ...(t.label === 'BNA' && { navigationTimeoutSecs: 120 }),
+            ...(t.label === 'BCI' && { navigationTimeoutSecs: 180 }), // Extra time for BCI
         }))
     );
 

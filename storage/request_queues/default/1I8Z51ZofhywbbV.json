@@ -1,6 +1,6 @@
 {
 	"id": "1I8Z51ZofhywbbV",
-	"json": "{\"id\":\"1I8Z51ZofhywbbV\",\"url\":\"https://angocambio.ao/home\",\"loadedUrl\":\"https://angocambio.ao/home\",\"uniqueKey\":\"https://angocambio.ao/home\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-19T20:31:53.646Z\"}",
+	"json": "{\"id\":\"1I8Z51ZofhywbbV\",\"url\":\"https://angocambio.ao/home\",\"loadedUrl\":\"https://angocambio.ao/home\",\"uniqueKey\":\"https://angocambio.ao/home\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-24T20:48:27.958Z\"}",
 	"method": "GET",
 	"orderNo": null,
 	"retryCount": 0,
