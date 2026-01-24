@@ -107,7 +107,15 @@ router.post("/supporter", upload.single('banner_image'), async (req, res) => {
             website_url: website_url.trim(), 
             is_active: is_active === 'true',
             display_order: parseInt(display_order, 10) || 0,
-            ...(banner_url && { logo_url: banner_url })
+            ...(banner_url && { logo_url: banner_url }),
+            // Partner extended fields
+            ...(req.body.partner_type && { partner_type: req.body.partner_type }),
+            ...(req.body.affiliate_link && { affiliate_link: req.body.affiliate_link }),
+            ...(req.body.monthly_fee && { monthly_fee: parseInt(req.body.monthly_fee, 10) || 0 }),
+            ...(req.body.start_date && { start_date: req.body.start_date }),
+            ...(req.body.end_date && { end_date: req.body.end_date }),
+            ...(req.body.referral_code && { referral_code: req.body.referral_code.trim() }),
+            ...(req.body.referral_url && { referral_url: req.body.referral_url.trim() })
         };
 
         let result;

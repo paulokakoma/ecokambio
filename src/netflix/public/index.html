@@ -396,9 +396,9 @@
                 <div class="flex items-center gap-3">
                     <!-- LOGO ESTILO NETFLIX -->
                     <div class="cursor-pointer" onclick="goHome()" title="Voltar ao Início">
-                        <h1 class="text-5xl font-black"
-                            style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; color: #E50914; letter-spacing: 0.15em; text-shadow: 3px 3px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
-                            ECOFLIX</h1>
+                        <h1 class="text-4xl font-black"
+                            style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 3px 3px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
+                            <span style="color: #E50914;">NETFLIX</span> <span style="color: #46d369;">ECOFLIX</span></h1>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -707,10 +707,9 @@
                             <div class="font-bold text-xl text-white" id="summary-original-price">4.500 Kz</div>
                         </div>
 
-                        <!-- Coupon Input -->
+                        <!-- Referral Code Input -->
                         <div class="mb-4">
-                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Cupom / Código de
-                                Parceiro</label>
+                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Código de Indicação</label>
                             <div class="flex gap-2">
                                 <input type="text" id="coupon-input" placeholder="Ex: PANDORA"
                                     class="input-theme flex-1 px-3 py-2 rounded uppercase font-bold text-sm tracking-wide">
@@ -1405,7 +1404,7 @@
                 }
             } catch (error) {
                 console.error('Coupon error:', error);
-                msg.innerText = 'Erro ao validar cupom';
+                msg.innerText = 'Código de indicação inválido';
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Aplicar';

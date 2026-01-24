@@ -70,6 +70,15 @@ router.post('/admin/orders/:id/confirm', isAdmin, catchAsync(ecoflixController.c
 // Security & Recovery (Admin)
 router.get('/admin/accounts/:id/recovery', isAdmin, catchAsync(ecoflixController.getRecoveryData));
 
+// Influencer/Referral Code Stats (Admin) - Legacy
+router.get('/admin/influencer-stats', isAdmin, catchAsync(ecoflixController.getInfluencerStats));
+
+// Partner/Affiliate Management (Admin)
+router.get('/admin/partners', isAdmin, catchAsync(ecoflixController.getPartnerStats));
+router.post('/admin/partners', isAdmin, catchAsync(ecoflixController.createPartner));
+router.post('/admin/partners/:id/pay', isAdmin, catchAsync(ecoflixController.markPartnerPaid));
+router.get('/admin/sales-origin-chart', isAdmin, catchAsync(ecoflixController.getSalesOriginChart));
+
 // ============================================================================
 // CRON JOBS (Internal / Automated)
 // ============================================================================

@@ -28,6 +28,9 @@ router.get('/weekly-activity', adminController.getWeeklyActivity);
 router.get('/event-types-stats', adminController.getEventTypeStats);
 router.post('/reset-stats', adminController.resetStats);
 
+// Partner click tracking
+router.post('/partner-click/:id', adminController.trackPartnerClick);
+
 // Scraper Management
 const scraperController = require('../controllers/scraperController');
 router.post('/scraper/trigger', scraperController.triggerScraper);

@@ -1229,40 +1229,99 @@
             </div>
         </div>
 
-        <!-- Modal: Apoiadores -->
+        <!-- Modal: Parceiros (expandido) -->
         <div id="supporter-modal"
             class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-40 p-4">
-            <div class="modal-content bg-white rounded-lg shadow-xl p-8 w-full max-w-lg transform scale-95">
-                <h3 id="supporter-modal-title" class="text-2xl font-bold text-slate-800 mb-6">Adicionar Novo Apoiador
+            <div
+                class="modal-content bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+                <h3 id="supporter-modal-title" class="text-2xl font-bold text-slate-800 mb-6">Adicionar Novo Parceiro
                 </h3>
-                <form id="supporter-form" class="space-y-4" enctype="multipart/form-data">
+                <form id="supporter-form" class="space-y-5" enctype="multipart/form-data">
                     <input type="hidden" id="supporter_id" name="supporter_id">
-                    <div><label for="supporter_name" class="block text-sm font-medium text-slate-700">Nome do
-                            Apoiador</label><input type="text" name="supporter_name" id="supporter_name" class="mt-1"
-                            required></div>
-                    <div><label for="supporter_website_url" class="block text-sm font-medium text-slate-700">URL do
-                            Website</label><input type="url" name="supporter_website_url" id="supporter_website_url"
-                            class="mt-1" required></div>
+
+                    <!-- Nome do Parceiro -->
+                    <div>
+                        <label for="supporter_name" class="block text-sm font-medium text-slate-700">Nome do
+                            Parceiro</label>
+                        <input type="text" name="supporter_name" id="supporter_name" class="mt-1" required
+                            placeholder="Ex: Bybit Angola">
+                    </div>
+
+                    <!-- Código de Referência e Link -->
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4">
+                        <h4 class="text-sm font-bold text-indigo-800 mb-3 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                </path>
+                            </svg>
+                            Dados de Referência
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="supporter_referral_code"
+                                    class="block text-sm font-medium text-slate-700">Código de Referência</label>
+                                <div class="mt-1 flex">
+                                    <input type="text" name="supporter_referral_code" id="supporter_referral_code"
+                                        class="flex-1 rounded-l-md border-r-0" placeholder="Ex: B9RRL4K">
+                                    <button type="button" onclick="copySupporterField('supporter_referral_code')"
+                                        class="px-3 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 transition-colors"
+                                        title="Copiar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="supporter_referral_url"
+                                    class="block text-sm font-medium text-slate-700">Link de Referência</label>
+                                <div class="mt-1 flex">
+                                    <input type="url" name="supporter_referral_url" id="supporter_referral_url"
+                                        class="flex-1 rounded-l-md border-r-0"
+                                        placeholder="https://bybit.com/ref=B9RRL4K">
+                                    <button type="button" onclick="copySupporterField('supporter_referral_url')"
+                                        class="px-3 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 transition-colors"
+                                        title="Copiar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banner Image -->
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Imagem do Banner</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                            <div class="w-40 h-40"><label for="supporter_banner"
-                                    class="cursor-pointer flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"><svg
-                                        class="w-8 h-8 text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg"
+                            <div class="w-40 h-40">
+                                <label for="supporter_banner"
+                                    class="cursor-pointer flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-8 h-8 text-gray-400 mb-2" xmlns="http://www.w3.org/2000/svg"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 16a4 4 0 01-4-4V6a4 4 0 014-4h1.586a1 1 0 01.707.293l1.414 1.414a1 1 0 00.707.293H12a4 4 0 014 4v1.586a1 1 0 00.293.707l1.414 1.414a1 1 0 01.293.707V16a4 4 0 01-4 4H7z" />
-                                    </svg><span id="supporter_banner_name" class="text-center px-2">Escolher
-                                        imagem...</span><input type="file" id="supporter_banner" name="supporter_banner"
-                                        class="hidden" accept="image/*"></label></div>
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span id="supporter_banner_name" class="text-center px-2">Escolher imagem...</span>
+                                    <input type="file" id="supporter_banner" name="supporter_banner" class="hidden"
+                                        accept="image/*">
+                                </label>
+                            </div>
                             <div id="supporter_banner_preview"
                                 class="w-40 h-40 border rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
                                 <span class="text-gray-400 text-sm">Prévia</span>
                             </div>
                         </div>
-                        <p class="mt-2 text-xs text-gray-500">Tamanho recomendado: 1500x530 pixels. A imagem será
-                            otimizada.</p>
+                        <p class="mt-2 text-xs text-gray-500">Tamanho recomendado: 1500x530 pixels.</p>
                     </div>
+
+                    <!-- Progress Bar -->
                     <div id="supporter-upload-progress-container" class="hidden pt-2">
                         <p id="supporter-upload-progress-text" class="text-center text-sm text-slate-600 mb-2"></p>
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -1271,12 +1330,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-end space-x-4 pt-4"><button type="button" class="btn-secondary"
-                            data-modal-hide="supporter-modal">Cancelar</button><button type="submit"
-                            id="save-supporter-btn" class="btn-primary">Adicionar</button></div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end space-x-4 pt-4">
+                        <button type="button" class="btn-secondary" data-modal-hide="supporter-modal">Cancelar</button>
+                        <button type="submit" id="save-supporter-btn" class="btn-primary">Adicionar</button>
+                    </div>
                 </form>
             </div>
         </div>
+
 
         <!-- Modal: Confirmação de Exclusão -->
         <div id="delete-confirm-modal"
@@ -1354,6 +1417,23 @@
             document.getElementById('toast-message').textContent = message;
             toast.classList.remove('translate-x-[120%]');
             setTimeout(() => toast.classList.add('translate-x-[120%]'), 3000);
+        }
+
+        // Função para copiar campos do formulário de parceiros para o clipboard
+        function copySupporterField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field || !field.value) {
+                showError('Nenhum valor para copiar');
+                return;
+            }
+            navigator.clipboard.writeText(field.value).then(() => {
+                showToast('Copiado para a área de transferência!');
+                // Visual feedback - briefly highlight the field
+                field.classList.add('ring-2', 'ring-green-500');
+                setTimeout(() => field.classList.remove('ring-2', 'ring-green-500'), 1000);
+            }).catch(() => {
+                showError('Erro ao copiar');
+            });
         }
 
         function showError(message) {
@@ -2354,7 +2434,7 @@
             const bannerNameSpan = document.getElementById('supporter_banner_name');
 
             // Define o título e o texto do botão com base na ação (adicionar ou editar)
-            document.getElementById('supporter-modal-title').textContent = supporterData ? 'Editar Apoiador' : 'Adicionar Novo Apoiador';
+            document.getElementById('supporter-modal-title').textContent = supporterData ? 'Editar Parceiro' : 'Adicionar Novo Parceiro';
             const saveBtn = form.querySelector('#save-supporter-btn');
             saveBtn.textContent = supporterData ? 'Guardar Alterações' : 'Adicionar';
 
@@ -2369,24 +2449,24 @@
 
             if (supporterData) {
                 // Preenche os campos com os dados do apoiador
-                // Usa setTimeout para garantir que o reset foi processado antes de preencher
                 setTimeout(() => {
                     const idField = form.querySelector('#supporter_id');
                     const nameField = form.querySelector('#supporter_name');
-                    const websiteUrlField = form.querySelector('#supporter_website_url');
                     const bannerField = form.querySelector('#supporter_banner');
+                    const referralCodeField = form.querySelector('#supporter_referral_code');
+                    const referralUrlField = form.querySelector('#supporter_referral_url');
 
                     if (idField) idField.value = supporterData.id || '';
                     if (nameField) nameField.value = supporterData.name || '';
-                    if (websiteUrlField) websiteUrlField.value = supporterData.website_url || '';
+                    if (referralCodeField) referralCodeField.value = supporterData.referral_code || '';
+                    if (referralUrlField) referralUrlField.value = supporterData.referral_url || '';
 
                     // Se já existe um banner, mostra a prévia e torna o campo de upload opcional
-                    if (supporterData.banner_url) {
-                        bannerPreview.innerHTML = `<img src="${supporterData.banner_url}" class="w-full h-full object-contain" alt="Banner atual">`;
+                    if (supporterData.logo_url || supporterData.banner_url) {
+                        bannerPreview.innerHTML = `<img src="${supporterData.logo_url || supporterData.banner_url}" class="w-full h-full object-contain" alt="Banner atual">`;
                         bannerNameSpan.textContent = 'Banner atual';
                         if (bannerField) bannerField.required = false;
                     } else {
-                        // Se não houver banner, mostra preview padrão e o campo de upload é obrigatório
                         bannerPreview.innerHTML = '<span class="text-gray-400">Prévia</span>';
                         bannerNameSpan.textContent = 'Escolher imagem...';
                         if (bannerField) bannerField.required = true;
@@ -2412,21 +2492,18 @@
             try {
                 // Validação dos campos
                 const name = form.querySelector('#supporter_name').value.trim();
-                const websiteUrl = form.querySelector('#supporter_website_url').value.trim();
                 // @ts-ignore
                 const bannerFile = form.querySelector('#supporter_banner').files[0];
                 const supporterId = form.querySelector('#supporter_id').value;
+                const referralCode = form.querySelector('#supporter_referral_code')?.value?.trim() || '';
+                const referralUrl = form.querySelector('#supporter_referral_url')?.value?.trim() || '';
 
                 if (!name) {
-                    showError('O nome do apoiador é obrigatório');
-                    return;
-                }
-                if (!websiteUrl) {
-                    showError('O URL do website é obrigatório');
+                    showError('O nome do parceiro é obrigatório');
                     return;
                 }
                 if (!supporterId && !bannerFile) {
-                    showError('O banner é obrigatório para novos apoiadores');
+                    showError('O banner é obrigatório para novos parceiros');
                     return;
                 }
 
@@ -2438,11 +2515,14 @@
                 progressContainer.classList.remove('hidden');
                 progressBar.style.width = '0%';
                 progressText.textContent = 'A iniciar...';
+
                 // Criar FormData para enviar o arquivo
                 const formData = new FormData();
                 formData.append('name', name);
-                formData.append('website_url', websiteUrl);
+                formData.append('website_url', referralUrl || 'https://ecokambio.ao'); // Use referral URL or default
                 formData.append('is_active', 'true');
+                formData.append('referral_code', referralCode);
+                formData.append('referral_url', referralUrl);
 
                 // Adiciona o ID se estiver editando
                 if (supporterId) {

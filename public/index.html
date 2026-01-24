@@ -207,7 +207,13 @@
 }
 </script>
     <link rel="canonical" href="https://ecokambio.com/" />
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+
+    <!-- Favicons - Essencial para SEO Google -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+
     <link rel="manifest" href="/manifest.json">
     <!-- 1. CSS Crítico: Incorpore aqui o CSS mínimo para a primeira dobra da página -->
     <style>
@@ -687,14 +693,8 @@
                     </div>
                 </a>
 
-                <!-- Promo Cards - Visa & Netflix -->
+                <!-- Promo Cards - Netflix Only -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="/visa.html"
-                        class="flex flex-col items-center group transition-transform hover:scale-105 duration-300">
-                        <img src="/assets/visa.png" alt="Cartão Visa Virtual" class="h-16 w-auto object-contain"
-                            loading="lazy">
-                        <span class="text-[11px] font-semibold text-emerald-700 mt-1">Adquira já o teu Visa</span>
-                    </a>
                     <a href="/netflix/index.html"
                         class="flex flex-col items-center group transition-transform hover:scale-105 duration-300">
                         <img src="/assets/netflix.png" alt="Netflix Angola" class="h-16 w-auto object-contain"
@@ -703,22 +703,11 @@
                     </a>
                 </div>
 
-                <!-- Card Carousel Container (Mobile) -->
+                <!-- Card Container (Mobile) - Netflix Only -->
                 <div class="md:hidden relative overflow-hidden" style="width: 180px; height: 140px;">
-                    <!-- Visa Card -->
-                    <a href="/visa" id="header-visa-card"
-                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-100"
-                        title="Adquira já o seu cartão Visa">
-                        <img src="/assets/visa.png" alt="Cartão Visa Virtual para compras online"
-                            class="w-full h-auto object-contain px-2" style="max-width: 170px; max-height: 110px;"
-                            fetchpriority="high">
-                        <span class="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-emerald-700 mt-1">
-                            Adquira já o teu Visa</span>
-                    </a>
-
                     <!-- Netflix Card -->
                     <a href="/netflix" id="header-netflix-card"
-                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-0 pointer-events-none"
+                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-100"
                         title="Netflix Angola">
                         <img src="/assets/netflix.png" alt="Netflix com EcoKambio"
                             class="w-full h-auto object-contain px-2" style="max-width: 170px; max-height: 110px;">
@@ -1056,51 +1045,11 @@
             </div>
         </section>
 
-        <!-- Key Facts Section for GEO/LLM Citability -->
-        <section
-            class="mt-8 sm:mt-12 bg-gradient-to-r from-slate-50 to-emerald-50/30 rounded-2xl p-6 sm:p-8 border border-slate-200"
-            itemscope itemtype="https://schema.org/FinancialService">
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <span>📊</span> Sobre o EcoKambio
-            </h2>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-700">
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Fundação</span>
-                    <p class="font-semibold" itemprop="foundingDate">2023 por Moko Tech (Huambo, Angola)</p>
-                </div>
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Bancos Monitorizados</span>
-                    <p class="font-semibold">BAI, BFA, BPC, BIC, BCI, Yetu</p>
-                </div>
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Utilizadores Mensais</span>
-                    <p class="font-semibold">+50.000 únicos</p>
-                </div>
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Cálculos Realizados</span>
-                    <p class="font-semibold">+100.000 na calculadora</p>
-                </div>
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Moedas Suportadas</span>
-                    <p class="font-semibold">USD, EUR → AOA (Kwanza)</p>
-                </div>
-                <div class="bg-white/60 p-4 rounded-xl">
-                    <span class="text-sm font-medium text-slate-500">Custo</span>
-                    <p class="font-semibold text-emerald-600" itemprop="priceRange">100% Gratuito</p>
-                </div>
-            </div>
-            <p class="mt-4 text-sm text-slate-600" itemprop="description">
-                EcoKambio é a principal plataforma de taxas de câmbio em Angola, desenvolvida por angolanos para
-                angolanos.
-                Monitoriza taxas de 6 bancos comerciais em tempo real e compara com o mercado informal.
-            </p>
-        </section>
-
     </main>
     <!-- Secção de Apoiadores com altura mínima para evitar CLS -->
     <section id="supporters-section" class="w-full bg-slate-50 pt-8 md:pt-12 pb-12 md:pb-16 mt-4 md:mt-8">
         <div class="w-full max-w-7xl mx-auto">
-            <h2 class="text-4xl font-bold text-slate-800 text-center mb-12">Apoiadores</h2>
+            <h2 class="text-4xl font-bold text-slate-800 text-center mb-12">Parceiros</h2>
         </div>
         <div id="supporters-container-wrapper" class="relative w-full group">
             <!-- Botões de navegação -->
@@ -1143,7 +1092,7 @@
     <div class="bg-slate-800 text-slate-300">
         <!-- Secção de Afiliados movida para dentro de um div -->
         <div class="w-full max-w-7xl mx-auto px-6 pt-8 md:pt-12 pb-16">
-            <h2 class="text-3xl font-bold text-white text-center mb-12">Parceiros</h2>
+            <h2 class="text-3xl font-bold text-white text-center mb-12">Produtos</h2>
             <div id="affiliate-links-wrapper" class="relative group">
                 <!-- Botão de Recuar -->
                 <button id="affiliate-prev-btn"
@@ -2612,7 +2561,7 @@
 
             const bannersHTML = data.map((supporter, index) => `
                 <div class="supporter-slide flex-shrink-0 w-full h-full px-6" data-slide="${index}">
-                    <a href="${supporter.website_url}" target="_blank" rel="noopener sponsored"
+                    <a href="${supporter.referral_url || supporter.affiliate_link || supporter.website_url}" target="_blank" rel="noopener sponsored"
                        class="supporter-link block w-full h-full"
                        data-supporter-id="${supporter.id}" data-supporter-name="${supporter.name}">
                         <div class="relative w-full h-full bg-white flex items-center justify-center overflow-hidden rounded-2xl shadow-xl">
@@ -2885,35 +2834,7 @@
         document.addEventListener('DOMContentLoaded', initializeApp);
 
     </script>
-    <script>
-        // Header card carousel rotation
-        document.addEventListener('DOMContentLoaded', function () {
-            let currentCardIndex = 0;
-            const cards = ['header-visa-card', 'header-netflix-card'];
-
-            function rotateCards() {
-                // Hide current card
-                const currentCard = document.getElementById(cards[currentCardIndex]);
-                if (currentCard) {
-                    currentCard.style.opacity = '0';
-                    currentCard.style.pointerEvents = 'none';
-                }
-
-                // Move to next card
-                currentCardIndex = (currentCardIndex + 1) % cards.length;
-
-                // Show next card
-                const nextCard = document.getElementById(cards[currentCardIndex]);
-                if (nextCard) {
-                    nextCard.style.opacity = '1';
-                    nextCard.style.pointerEvents = 'auto';
-                }
-            }
-
-            // Rotate every 4 seconds
-            setInterval(rotateCards, 4000);
-        });
-    </script>
+    <!-- Card rotation removed - only Netflix promo now -->
     <script src="/js/cookie-consent.js"></script>
     <!-- Ana AI Chat Widget - DESACTIVADO (modelo IA em melhoria)
     <script src="/js/ana-chat.js"></script>

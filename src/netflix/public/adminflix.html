@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoFlix Admin - Gestão de Streaming</title>
+
+    <!-- SECURITY: Prevent caching of admin pages -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="robots" content="noindex, nofollow">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -137,6 +144,10 @@
             <div id="nav-customers" onclick="switchTab('customers')"
                 class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
                 <i class="fas fa-users w-5 text-center"></i> Clientes
+            </div>
+            <div id="nav-partners" onclick="switchTab('partners')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i class="fas fa-handshake w-5 text-center"></i> Parceiros
             </div>
             <div id="nav-integrations" onclick="switchTab('integrations')"
                 class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
@@ -407,6 +418,64 @@ Validade: 30 dias.</textarea>
                                 class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded text-sm font-bold w-full">Salvar
                                 Templates</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. PARCEIROS/AFILIADOS -->
+            <div id="panel-partners" class="panel hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Gestão de Parceiros</h1>
+                    <button onclick="openPartnerModal()"
+                        class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-plus"></i> Novo Parceiro
+                    </button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <p class="text-xs font-medium text-gray-500 uppercase">Total Parceiros</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1" id="partner-count">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                        <p class="text-xs font-medium text-gray-500 uppercase">Parceiros Ativos</p>
+                        <h3 class="text-2xl font-bold text-green-600 mt-1" id="partner-active">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-red-100">
+                        <p class="text-xs font-medium text-red-600 uppercase font-bold">Total Pendente</p>
+                        <h3 class="text-2xl font-bold text-red-600 mt-1" id="partner-pending">0 Kz</h3>
+                    </div>
+                </div>
+
+                <!-- Partners Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3">Parceiro</th>
+                                <th class="px-6 py-3">Código</th>
+                                <th class="px-6 py-3 text-center">Vendas Mobile</th>
+                                <th class="px-6 py-3 text-center">Vendas TV</th>
+                                <th class="px-6 py-3 text-right">Total a Pagar</th>
+                                <th class="px-6 py-3 text-center">Último Pag.</th>
+                                <th class="px-6 py-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="partners-table-body">
+                            <!-- Filled via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sales Origin Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Origem das Vendas</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="salesOriginChart"></canvas>
+                        </div>
+                        <div id="sales-origin-legend" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
@@ -1146,9 +1215,164 @@ Validade: 30 dias.</textarea>
             activeNav.classList.remove('text-gray-600');
             document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
             document.getElementById('panel-' + tabId).classList.remove('hidden');
+
+            // Load data for specific tabs
+            if (tabId === 'partners') loadPartners();
         }
 
         function toggleDetails(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        // ============================================================================
+        // PARTNERS MANAGEMENT
+        // ============================================================================
+        let partnersData = [];
+        let salesOriginChart = null;
+
+        async function loadPartners() {
+            try {
+                const { summary, data } = await apiCall('/admin/partners');
+                partnersData = data || [];
+
+                // Update summary cards
+                document.getElementById('partner-count').innerText = summary.total_partners || 0;
+                document.getElementById('partner-active').innerText = summary.active_partners || 0;
+                document.getElementById('partner-pending').innerText = formatKz(summary.total_commission_pending || 0);
+
+                renderPartners();
+                loadSalesOriginChart();
+            } catch (e) {
+                console.error('Partners load error:', e);
+            }
+        }
+
+        function formatKz(val) {
+            return new Intl.NumberFormat('pt-AO').format(val) + ' Kz';
+        }
+
+        function renderPartners() {
+            const tbody = document.getElementById('partners-table-body');
+            if (partnersData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">Nenhum parceiro cadastrado</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = partnersData.map(p => {
+                const commMobile = (p.sales_mobile || 0) * (p.commission_mobile || 500);
+                const commTV = (p.sales_tv || 0) * (p.commission_tv || 700);
+                const totalCalc = commMobile + commTV;
+                const totalDue = p.total_commission_due || totalCalc;
+                const lastPaid = p.last_paid_at ? new Date(p.last_paid_at).toLocaleDateString('pt-PT') : 'Nunca';
+
+                return `
+                <tr class="bg-white hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">${p.partner_name}</div>
+                        <div class="text-xs text-gray-400">${p.inventory_tag || 'Sem lote'}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-gray-100 px-3 py-1 rounded font-mono font-bold text-gray-800">${p.code}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="font-bold text-lg">${p.sales_mobile || 0}</span>
+                        <span class="text-xs text-gray-400 block">${p.commission_mobile || 500} Kz/un</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="font-bold text-lg">${p.sales_tv || 0}</span>
+                        <span class="text-xs text-gray-400 block">${p.commission_tv || 700} Kz/un</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <span class="font-bold text-lg ${totalDue > 0 ? 'text-red-600' : 'text-green-600'}">${formatKz(totalDue)}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center text-gray-500 text-sm">${lastPaid}</td>
+                    <td class="px-6 py-4 text-right">
+                        ${totalDue > 0 ? `<button onclick="payPartner('${p.code}', ${totalDue})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold"><i class="fas fa-check mr-1"></i>Pagar</button>` : '<span class="text-green-600 text-xs font-bold"><i class="fas fa-check-circle"></i> Pago</span>'}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        async function payPartner(code, amount) {
+            if (!confirm(`Confirmar pagamento de ${formatKz(amount)} ao parceiro ${code}?`)) return;
+
+            try {
+                await apiCall(`/admin/partners/${code}/pay`, 'POST', { amount_paid: amount });
+                showToast('Pagamento registado com sucesso!', 'success');
+                loadPartners(); // Reload data
+            } catch (e) {
+                // Error shown by apiCall
+            }
+        }
+
+        async function loadSalesOriginChart() {
+            try {
+                const { data } = await apiCall('/admin/sales-origin-chart');
+
+                // Destroy old chart if exists
+                if (salesOriginChart) salesOriginChart.destroy();
+
+                const ctx = document.getElementById('salesOriginChart').getContext('2d');
+                salesOriginChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(d => d.label),
+                        datasets: [{
+                            data: data.map(d => d.value),
+                            backgroundColor: data.map(d => d.color),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                // Render custom legend
+                const legend = document.getElementById('sales-origin-legend');
+                legend.innerHTML = data.map(d => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 rounded" style="background-color: ${d.color}"></div>
+                            <span class="font-medium">${d.label}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold">${d.value} vendas</span>
+                            <span class="text-xs text-gray-500 block">${formatKz(d.revenue)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Sales origin chart error:', e);
+            }
+        }
+
+        function openPartnerModal() {
+            const code = prompt('Código do parceiro (ex: PANDORA):');
+            if (!code) return;
+
+            const name = prompt('Nome do parceiro (ex: Chelcia Pandora):');
+            if (!name) return;
+
+            const commMobile = prompt('Comissão por venda Mobile (Kz):', '500');
+            const commTV = prompt('Comissão por venda TV (Kz):', '700');
+
+            createPartner(code, name, parseInt(commMobile) || 500, parseInt(commTV) || 700);
+        }
+
+        async function createPartner(code, partner_name, commission_mobile, commission_tv) {
+            try {
+                await apiCall('/admin/partners', 'POST', { code, partner_name, commission_mobile, commission_tv });
+                showToast('Parceiro criado com sucesso!', 'success');
+                loadPartners();
+            } catch (e) {
+                // Error shown by apiCall
+            }
+        }
 
         // === SECURITY: Auto-logout when tab closes ===
         // We use sessionStorage because it survives reloads but is CLEARED when the tab/window is closed.

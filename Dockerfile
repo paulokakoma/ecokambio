@@ -52,7 +52,7 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-# Instalar dependências do sistema + Supercronic
+# Instalar dependências do sistema + Supercronic (detecta arquitetura automaticamente)
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -62,8 +62,13 @@ RUN apk add --no-cache \
     ttf-freefont \
     wget \
     curl \
+    && ARCH=$(uname -m) \
+    && if [ "$ARCH" = "x86_64" ]; then SUPERCRONIC_ARCH="amd64"; \
+       elif [ "$ARCH" = "aarch64" ]; then SUPERCRONIC_ARCH="arm64"; \
+       else SUPERCRONIC_ARCH="amd64"; fi \
+    && echo "Downloading Supercronic for $SUPERCRONIC_ARCH" \
     && wget -q -O /usr/local/bin/supercronic \
-    https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-amd64 \
+    "https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-${SUPERCRONIC_ARCH}" \
     && chmod +x /usr/local/bin/supercronic
 
 # Copiar dependências de produção

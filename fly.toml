@@ -13,8 +13,8 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
 
 # --- DEFINIÇÃO DOS PROCESSOS ---
 [processes]
-  web = "npm start"           # O servidor Express/API
-  worker = "npm run worker"   # O processador de filas BullMQ
+  web = "/usr/src/app/docker-entrypoint.sh"  # Inicia Supercronic + servidor Express
+  worker = "npm run worker"                   # O processador de filas BullMQ
 
 # --- CONFIGURAÇÃO DE REDE (SÓ PARA O WEB) ---
 [http_service]

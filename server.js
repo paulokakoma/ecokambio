@@ -246,6 +246,26 @@ app.use('/netflix', express.static(path.join(__dirname, 'src/netflix/public'), {
     maxAge: config.isDevelopment ? '0' : '1d'
 }));
 
+// ============================================================================
+// SECURITY: Disable caching for admin pages (prevent login data in cache)
+// ============================================================================
+const noCacheHeaders = (req, res, next) => {
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, private',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+    });
+    next();
+};
+
+// Apply no-cache to all admin-related routes
+app.use('/login', noCacheHeaders);
+app.use('/login.html', noCacheHeaders);
+app.use('/admin', noCacheHeaders);
+app.use('/netflix/adminflix.html', noCacheHeaders);
+app.use('/api/ecoflix/admin', noCacheHeaders);
+
 // Rota para a página "Sobre"
 app.get('/sobre', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'sobre.html'));
@@ -348,6 +368,12 @@ app.get('*', (req, res, next) => {
         if (!req.session.user && req.path !== '/login.html') {
             return res.redirect('/login.html');
         }
+        // SECURITY: Prevent caching of admin pages
+        res.set({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, private',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
         res.sendFile(path.join(__dirname, 'private', 'admin.html'));
     } else {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));

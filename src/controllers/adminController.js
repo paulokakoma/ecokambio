@@ -3,7 +3,6 @@ const { handleSupabaseError } = require("../utils/errorHandler");
 const { broadcast } = require("../websocket");
 const sharp = require("sharp");
 const path = require("path");
-const { uploadFileToS3 } = require("../config/s3");
 
 const getRateProviders = async (req, res) => {
     const { type } = req.query;
@@ -156,8 +155,19 @@ const updateVisaSettings = async (req, res) => {
 
             const fileName = `visa-card-image-${Date.now()}.webp`;
 
-            // Upload to Contabo S3
-            newImageUrl = await uploadFileToS3(optimizedBuffer, fileName, 'image/webp');
+            // Upload to Supabase Storage
+            const { data: uploadData, error: uploadError } = await supabase.storage.from('site-assets')
+                .upload(fileName, optimizedBuffer, {
+                    contentType: 'image/webp',
+                    upsert: true,
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage.from('site-assets').getPublicUrl(fileName);
+            if (!urlData?.publicUrl) throw new Error('Não foi possível obter o URL público do arquivo');
+
+            newImageUrl = urlData.publicUrl;
         }
 
         const settingsToUpsert = [
@@ -191,12 +201,18 @@ const updateVisaSettings = async (req, res) => {
 };
 
 const createSupporter = async (req, res) => {
-    const { id, name, website_url, is_active, display_order } = req.body;
+    const {
+        id, name, website_url, is_active, display_order,
+        // Partner management fields
+        partner_type, affiliate_link, monthly_fee, start_date, end_date,
+        // Referral fields
+        referral_code, referral_url
+    } = req.body;
     let banner_url;
 
     try {
-        if (!name || !website_url) {
-            return res.status(400).json({ message: "Nome e URL do website são obrigatórios." });
+        if (!name) {
+            return res.status(400).json({ message: "Nome do parceiro é obrigatório." });
         }
 
         if (req.file) {
@@ -224,8 +240,19 @@ const createSupporter = async (req, res) => {
 
                 const fileName = `supporter-${Date.now()}-${sanitizedOriginalName}.webp`;
 
-                // Upload to Contabo S3
-                banner_url = await uploadFileToS3(optimizedBuffer, fileName, 'image/webp');
+                // Upload to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabase.storage.from('site-assets')
+                    .upload(fileName, optimizedBuffer, {
+                        contentType: 'image/webp',
+                        upsert: true,
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = supabase.storage.from('site-assets').getPublicUrl(fileName);
+                if (!urlData?.publicUrl) throw new Error('Não foi possível obter o URL público do arquivo');
+
+                banner_url = urlData.publicUrl;
 
             } catch (storageError) {
                 console.error('Erro no storage:', storageError);
@@ -237,9 +264,18 @@ const createSupporter = async (req, res) => {
 
         const supporterData = {
             name: name.trim(),
-            website_url: website_url.trim(),
-            is_active: is_active === 'true',
+            website_url: website_url?.trim() || referral_url?.trim() || 'https://ecokambio.ao',
+            is_active: is_active === 'true' || is_active === true,
             display_order: parseInt(display_order, 10) || 0,
+            // Partner fields
+            partner_type: partner_type || 'affiliate',
+            affiliate_link: affiliate_link?.trim() || null,
+            monthly_fee: parseInt(monthly_fee, 10) || 0,
+            start_date: start_date || null,
+            end_date: end_date || null,
+            // Referral fields
+            referral_code: referral_code?.trim() || null,
+            referral_url: referral_url?.trim() || null,
             ...(banner_url && { logo_url: banner_url })
         };
 
@@ -284,7 +320,7 @@ const createSupporter = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: `Apoiador ${id ? 'atualizado' : 'adicionado'} com sucesso.`,
+            message: `Parceiro ${id ? 'atualizado' : 'adicionado'} com sucesso.`,
             data: result
         });
     } catch (error) {
@@ -292,6 +328,29 @@ const createSupporter = async (req, res) => {
         handleSupabaseError(error, res);
     }
 };
+
+// Track clicks on partner banners
+const trackPartnerClick = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Increment click counter
+        const { error } = await supabase.rpc('increment_supporter_clicks', { supporter_id: parseInt(id, 10) });
+
+        if (error) {
+            // Fallback: manual increment if RPC doesn't exist
+            const { data: current } = await supabase.from('supporters').select('clicks').eq('id', id).single();
+            const newClicks = (current?.clicks || 0) + 1;
+            await supabase.from('supporters').update({ clicks: newClicks }).eq('id', id);
+        }
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Erro ao registrar clique:', error);
+        res.status(200).json({ success: true }); // Don't fail for tracking
+    }
+};
+
 
 const getRecentActivity = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 25;
@@ -758,6 +817,7 @@ module.exports = {
     updateVisaSettings,
     updateInformalRates,
     createSupporter,
+    trackPartnerClick,
     getRecentActivity,
     notifyUpdate,
     addProvince,

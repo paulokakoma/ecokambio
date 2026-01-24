@@ -107,3 +107,12 @@ module.exports = {
     },
     runNow: runScraper // Export for testing purposes
 };
+
+// Auto-start in production when this module is imported
+// This ensures the cron job runs even if start() is never explicitly called
+if (process.env.NODE_ENV === 'production') {
+    job.start();
+    const msg = `🚀 AUTO-START: Scheduler automatically started in production at ${new Date().toISOString()}`;
+    console.log(msg);
+    logToFile(msg);
+}
