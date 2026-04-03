@@ -5,10 +5,24 @@
 
 class AnaChatWidget {
     constructor(options = {}) {
+        const scriptTag = document.currentScript || document.querySelector('script[src*="ana-chat.js"]');
+        let dataOptions = {};
+        if (scriptTag) {
+            dataOptions = {
+                initialMessage: scriptTag.dataset.initialMessage,
+                quickActions: scriptTag.dataset.quickActions ? JSON.parse(scriptTag.dataset.quickActions) : null
+            };
+        }
+
         this.options = {
             position: options.position || 'bottom-right',
             primaryColor: options.primaryColor || '#10b981',
-            initialMessage: options.initialMessage || 'Olá! Sou a Ana, assistente virtual da EcoKambio. Como posso ajudar? 😊',
+            initialMessage: dataOptions.initialMessage || options.initialMessage || 'Olá! Sou a Ana, assistente virtual da EcoKambio. Como posso ajudar? 😊',
+            quickActions: dataOptions.quickActions || options.quickActions || [
+                { text: '💳 Preço Visa', question: 'Quanto custa o cartão Visa?' },
+                { text: '📊 Câmbio', question: 'Como funciona o câmbio?' },
+                { text: '🏢 Sobre nós', question: 'Quem é a EcoKambio?' }
+            ],
             ...options
         };
         this.isOpen = false;
@@ -22,7 +36,9 @@ class AnaChatWidget {
         this.createWidget();
         this.attachEventListeners();
         // Add initial bot message
-        this.addMessage('bot', this.options.initialMessage);
+        setTimeout(() => {
+            this.addMessage('bot', this.options.initialMessage);
+        }, 1000);
     }
 
     createStyles() {
@@ -294,6 +310,10 @@ class AnaChatWidget {
     }
 
     createWidget() {
+        const quickActionsHtml = this.options.quickActions.map(action => 
+            `<button class="ana-quick-btn" data-question="${action.question}">${action.text}</button>`
+        ).join('');
+
         const widget = document.createElement('div');
         widget.className = 'ana-chat-widget';
         widget.innerHTML = `
@@ -312,9 +332,7 @@ class AnaChatWidget {
                 </div>
                 <div class="ana-chat-messages" id="ana-messages"></div>
                 <div class="ana-quick-actions">
-                    <button class="ana-quick-btn" data-question="Quanto custa o cartão Visa?">💳 Preço Visa</button>
-                    <button class="ana-quick-btn" data-question="Como funciona o câmbio?">📊 Câmbio</button>
-                    <button class="ana-quick-btn" data-question="Quem é a EcoKambio?">🏢 Sobre nós</button>
+                    ${quickActionsHtml}
                 </div>
                 <div class="ana-chat-input-area">
                     <input type="text" class="ana-chat-input" placeholder="Escreva a sua pergunta..." id="ana-input">

@@ -193,43 +193,6 @@ module.exports = {
     serveAdminSecret,
     serveAbout,
     serveVisa,
-    serveNetflix,
-    serveAdminFlix,
-    serveTerms,
-    servePrivacy,
-    serveRobots,
-    serveSitemap,
-    serveBingAuth,
-    serveYandexAuth,
-    serveBingAuth,
-    serveYandexAuth,
-    serveFounders,
-    serveNetflix
-};
-
-// Blog routes
-const serveBlog = (req, res) => {
-    if (req.isAdminSubdomain) {
-        return res.status(404).send('Página não encontrada');
-    }
-    res.sendFile(path.join(__dirname, "../../public/blog", "index.html"));
-};
-
-const serveBlogArticle = (req, res) => {
-    if (req.isAdminSubdomain) {
-        return res.status(404).send('Página não encontrada');
-    }
-    const articleSlug = req.params.slug;
-    res.sendFile(path.join(__dirname, "../../public/blog", `${articleSlug}.html`));
-};
-
-module.exports = {
-    serveIndex,
-    serveLogin,
-    serveAdmin,
-    serveAdminSecret,
-    serveAbout,
-    serveVisa,
     serveTerms,
     servePrivacy,
     serveRobots,
@@ -240,7 +203,5 @@ module.exports = {
     serveNetflix,
     serveAdminFlix,
     serveDevelopers,
-    serveApiDocs,
-    serveBlog,
-    serveBlogArticle
+    serveApiDocs
 };

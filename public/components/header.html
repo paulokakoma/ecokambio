@@ -10,26 +10,43 @@
         <!-- Navigation -->
         <nav
             class="flex-1 flex justify-end items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-5 ml-1 sm:ml-auto">
-            <!-- Promo Cards - Netflix Only -->
-            <div class="hidden md:flex items-center space-x-4">
-                <a href="/netflix/index.html"
+            <!-- Promo Cards - Netflix & Visa -->
+            <div class="hidden md:flex items-center space-x-6">
+                <!-- Netflix Card -->
+                <a href="/netflix"
                     class="flex flex-col items-center group transition-transform hover:scale-105 duration-300">
-                    <img src="/assets/netflix.png" alt="Netflix Angola" class="h-16 w-auto object-contain"
+                    <img src="/assets/netflix.png" alt="Netflix Angola" class="h-14 w-auto object-contain"
                         loading="lazy">
                     <span class="text-[11px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                 </a>
+                
+                <!-- Visa Card -->
+                <a href="/visa"
+                    class="flex flex-col items-center group transition-transform hover:scale-105 duration-300 border-l border-gray-100 pl-4">
+                    <img src="/assets/visa.png" alt="Visa Virtual" class="h-14 w-auto object-contain"
+                        loading="lazy">
+                    <span class="text-[11px] font-semibold text-indigo-600 mt-1">Visa Virtual</span>
+                </a>
             </div>
 
-            <!-- Card Container (Mobile) - Netflix Only -->
-            <div class="md:hidden relative overflow-hidden" style="width: 180px; height: 140px;">
+            <!-- Card Container (Mobile) - Rotating Content -->
+            <div class="md:hidden relative overflow-hidden" style="width: 170px; height: 120px;">
                 <!-- Netflix Card -->
                 <a href="/netflix" id="header-netflix-card"
                     class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-100"
                     title="Netflix Angola">
                     <img src="/assets/netflix.png" alt="Netflix com EcoKambio" class="w-full h-auto object-contain px-2"
-                        style="max-width: 170px; max-height: 110px;">
-                    <span class="text-[9px] sm:text-[10px] md:text-[11px] font-semibold text-red-600 mt-1">
-                        Netflix Angola</span>
+                        style="max-width: 160px; max-height: 90px;">
+                    <span class="text-[9px] font-semibold text-red-600 mt-1">Netflix Angola</span>
+                </a>
+
+                <!-- Visa Card -->
+                <a href="/visa" id="header-visa-card"
+                    class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-0 pointer-events-none translate-x-full"
+                    title="Visa Virtual">
+                    <img src="/assets/visa.png" alt="Visa Virtual" class="w-full h-auto object-contain px-2"
+                        style="max-width: 160px; max-height: 90px;">
+                    <span class="text-[9px] font-semibold text-indigo-600 mt-1 text-nowrap">Visa Virtual</span>
                 </a>
             </div>
         </nav>
@@ -54,18 +71,27 @@
         border-bottom-color: rgba(255, 255, 255, 0.3);
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
     }
+
+    .header-card.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+    }
+
+    .header-card.inactive {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-100%);
+    }
 </style>
 
 <script>
     (function () {
         // Enchanced header scroll effect
         const header = document.getElementById('main-header');
-        let lastScroll = 0;
-
         if (header) {
             window.addEventListener('scroll', () => {
                 const currentScroll = window.pageYOffset;
-
                 if (currentScroll > 20) {
                     header.classList.add('shadow-lg', 'scrolled');
                     header.classList.remove('shadow-sm');
@@ -73,10 +99,42 @@
                     header.classList.add('shadow-sm');
                     header.classList.remove('shadow-lg', 'scrolled');
                 }
-
-                lastScroll = currentScroll;
             }, { passive: true });
         }
-        // Card rotation removed - only Netflix promo now
+
+        // Automatic Card Rotation (Mobile Only)
+        const netflixCard = document.getElementById('header-netflix-card');
+        const visaCard = document.getElementById('header-visa-card');
+        let currentCard = 0; // 0 for Netflix, 1 for Visa
+
+        if (netflixCard && visaCard) {
+            setInterval(() => {
+                if (currentCard === 0) {
+                    // Switch to Visa
+                    netflixCard.style.opacity = '0';
+                    netflixCard.style.transform = 'translateX(-20px)';
+                    netflixCard.style.pointerEvents = 'none';
+
+                    setTimeout(() => {
+                        visaCard.style.opacity = '1';
+                        visaCard.style.transform = 'translateX(0)';
+                        visaCard.style.pointerEvents = 'auto';
+                    }, 500);
+                    currentCard = 1;
+                } else {
+                    // Switch to Netflix
+                    visaCard.style.opacity = '0';
+                    visaCard.style.transform = 'translateX(20px)';
+                    visaCard.style.pointerEvents = 'none';
+
+                    setTimeout(() => {
+                        netflixCard.style.opacity = '1';
+                        netflixCard.style.transform = 'translateX(0)';
+                        netflixCard.style.pointerEvents = 'auto';
+                    }, 500);
+                    currentCard = 0;
+                }
+            }, 6000); // 6 seconds per card
+        }
     })();
 </script>

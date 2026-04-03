@@ -5,7 +5,7 @@ const router = express.Router();
 const ratesRoutes = require('./rates');
 const conversionRoutes = require('./conversion');
 const statusRoutes = require('./status');
-const keysRoutes = require('./keys');
+// const keysRoutes = require('./keys');
 const authRoutes = require('./auth');
 const chatRoutes = require('./chat');
 
@@ -19,7 +19,7 @@ const chatRoutes = require('./chat');
 router.use('/rates', ratesRoutes);
 router.use('/conversion', conversionRoutes);
 router.use('/status', statusRoutes);
-router.use('/keys', keysRoutes);
+// router.use('/keys', keysRoutes);
 router.use('/auth', authRoutes);
 router.use('/chat', chatRoutes);
 
