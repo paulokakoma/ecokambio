@@ -9,7 +9,7 @@ entity: Moko Tech, Sociedade por Quotas
 nif: 5002764768
 location: Huambo, Município da Caála, Angola
 founded: 2023
-contact: ecokambio@gmail.com
+contact: suporte@ecokambio.com
 phone: +244938948994
 website: https://ecokambio.com
 

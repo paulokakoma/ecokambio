@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- SEO & Metadata -->
+
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
@@ -45,8 +47,7 @@
 
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
-        crossorigin="anonymous"></script>
+    
 
 
 
@@ -214,6 +215,8 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="shortcut icon" href="/favicon.ico">
 
+    <!-- PWA & Assets -->
+
     <link rel="manifest" href="/manifest.json">
     <!-- 1. CSS Crítico: Incorpore aqui o CSS mínimo para a primeira dobra da página -->
     <style>
@@ -231,6 +234,26 @@
             z-index: 1000;
             background-color: #fff;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05)
+        }
+
+        /* 🎡 Carrossel de Produtos Infinito */
+        #affiliate-links-container {
+            overflow: hidden !important;
+        }
+
+        #affiliate-track {
+            display: flex;
+            width: max-content;
+            animation: scroll-infinite 40s linear infinite;
+        }
+
+        #affiliate-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll-infinite {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
     </style>
     <!-- 2. Carregue o resto do CSS de forma não-bloqueante -->
@@ -255,6 +278,8 @@
         :root {
             --theme-color: #19b57f;
         }
+
+        /* --- Custom Styles --- */
 
         body {
             font-family: "Inter", sans-serif;
@@ -490,26 +515,60 @@
             }
         }
 
-        @keyframes pulse {
-            50% {
-                opacity: .6;
-            }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes loadedFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .skeleton {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            position: relative;
+            overflow: hidden;
             background-color: #e5e7eb;
-            /* gray-200 */
             border-radius: 0.5rem;
-            /* rounded-lg */
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 1.5s infinite;
         }
 
         .skeleton-dark {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            position: relative;
+            overflow: hidden;
             background-color: #4b5563;
-            /* gray-600 */
             border-radius: 0.5rem;
-            /* rounded-lg */
+        }
+
+        .skeleton-dark::after {
+            content: "";
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0, 
+                rgba(255, 255, 255, 0.15) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+
+        .loaded-fade-in {
+            animation: loadedFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .custom-select {
@@ -659,6 +718,68 @@
         .slide-out-right {
             animation: slide-out-right 0.2s ease-out forwards;
         }
+
+        /* --- Estilos para Cards de Produtos Mock --- */
+        .product-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12);
+            border-color: #cbd5e1;
+        }
+        .product-image-container {
+            position: relative;
+            height: 160px;
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover .product-image {
+            transform: scale(1.1);
+        }
+        .category-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 10;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .product-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .product-price {
+            font-family: 'JetBrains Mono', monospace;
+            color: #10b981;
+            font-weight: 700;
+        }
+        /* Cores de Badges por Categoria */
+        .badge-eletronicos { background: #3b82f6; color: white; }
+        .badge-computadores { background: #6366f1; color: white; }
+        .badge-televisores { background: #ec4899; color: white; }
+        .badge-eletrodomesticos { background: #10b981; color: white; }
+        .badge-telemoveis { background: #f59e0b; color: white; }
     </style>
 </head>
 
@@ -671,6 +792,8 @@
 
 
 
+
+    <!-- START: Main Header & Navigation -->
 
     <header id="main-header" class="bg-white shadow-sm transition-all duration-300 border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-2 sm:px-3 lg:px-8 py-1 sm:py-1.5 flex items-center">
@@ -694,7 +817,7 @@
                             loading="lazy">
                         <span class="text-[11px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                     </a>
-                    
+
                     <!-- Visa Card -->
                     <a href="/visa"
                         class="flex flex-col items-center group transition-transform hover:scale-105 duration-300 border-l border-gray-100 pl-4">
@@ -710,8 +833,8 @@
                     <a href="/netflix" id="header-netflix-card"
                         class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-100"
                         title="Netflix Angola">
-                        <img src="/assets/netflix.png" alt="Netflix com EcoKambio" class="w-full h-auto object-contain px-2"
-                            style="max-width: 160px; max-height: 90px;">
+                        <img src="/assets/netflix.png" alt="Netflix com EcoKambio"
+                            class="w-full h-auto object-contain px-2" style="max-width: 160px; max-height: 90px;">
                         <span class="text-[9px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                     </a>
 
@@ -747,6 +870,8 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
         }
     </style>
+
+    <!-- Header Scroll & Card Rotation Logic -->
 
     <script>
         (function () {
@@ -801,6 +926,8 @@
     <!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
 
+        <!-- START: Market vs Calculator Tabs -->
+
         <!-- SEO Hero Section (Hidden from users, visible to search engines) -->
         <section class="sr-only">
             <h1>Taxas de Câmbio em Angola Hoje - Dólar e Euro</h1>
@@ -832,6 +959,7 @@
             </div>
         </div>
         <section id="myTabContent">
+            <!-- START: Market Panel (Formal, Informal, Products) -->
             <div id="market-panel" role="tabpanel">
                 <div class="mb-6 sm:mb-8 flex justify-center">
                     <div class="flex space-x-2 bg-gray-200 p-2 rounded-full" role="tablist">
@@ -840,8 +968,12 @@
                         <button id="informal-market-tab-btn" role="tab"
                             aria-label="Ver taxas do mercado informal (kinguilas)"
                             class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base">Informal</button>
+                        <button id="products-market-tab-btn" role="tab"
+                            aria-label="Ver produtos disponíveis"
+                            class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base text-gray-600">Produtos</button>
                     </div>
                 </div>
+                <!-- Section: Formal Market -->
                 <div id="formal-market-panel" role="tabpanel">
                     <div class="market-container p-4 sm:p-6 md:p-8">
                         <div class="mb-6">
@@ -972,6 +1104,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Section: Informal Market -->
                 <div id="informal-market-panel" role="tabpanel" class="hidden">
                     <div class="market-container p-4 sm:p-6 md:p-8">
                         <div class="mb-6">
@@ -1066,7 +1199,77 @@
                         </div>
                     </div>
                 </div>
+                </div>
+                <!-- Section: EcoKambio Products (Visa, Netflix) -->
+                <div id="products-market-panel" role="tabpanel" class="hidden">
+                    <div class="market-container p-4 sm:p-6 md:p-10">
+                        <!-- Cabeçalho da Secção -->
+                        <div class="mb-12 text-center">
+                            <h3 class="text-3xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
+                                🛍️ <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">NOSSOS PRODUTOS</span>
+                            </h3>
+                            <p class="text-slate-500 mt-2 max-w-lg mx-auto">Explora a nossa seleção de serviços digitais e produtos eletrónicos de alta qualidade.</p>
+                        </div>
+
+                        <!-- Serviços Digitais (Visa & Netflix) -->
+                        <div class="mb-16">
+                            <h4 class="text-sm font-bold text-slate-400 uppercase letter-spacing-widest mb-6 flex items-center">
+                                <span class="mr-2">⚡</span> Serviços Digitais
+                                <div class="flex-grow h-px bg-slate-100 ml-4"></div>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                                <!-- Visa Virtual Card -->
+                                <a href="/visa" class="group bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-left relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
+                                    <div class="relative z-10 flex items-center gap-5 mb-6">
+                                        <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-indigo-200">💳</div>
+                                        <div>
+                                            <h4 class="font-bold text-xl text-slate-800">Visa Virtual</h4>
+                                            <span class="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded">INSTANTÂNEO</span>
+                                        </div>
+                                    </div>
+                                    <p class="relative z-10 text-slate-600 text-sm mb-6 leading-relaxed">Obtém o teu cartão em minutos. Compra na Amazon, Shein e paga Netflix sem complicações.</p>
+                                    <div class="relative z-10 flex items-center justify-between">
+                                        <span class="text-indigo-600 font-bold text-sm flex items-center group-hover:gap-2 transition-all">Começar agora <span class="ml-2">→</span></span>
+                                    </div>
+                                </a>
+
+                                <!-- EcoFlix Card -->
+                                <a href="/netflix" class="group bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-left relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
+                                    <div class="relative z-10 flex items-center gap-5 mb-6">
+                                        <div class="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-red-200">🎬</div>
+                                        <div>
+                                            <h4 class="font-bold text-xl text-slate-800">EcoFlix</h4>
+                                            <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">PARTILHADO</span>
+                                        </div>
+                                    </div>
+                                    <p class="relative z-10 text-slate-600 text-sm mb-6 leading-relaxed">A melhor experiência de streaming em Angola. Contas seguras com pagamento local via IBAN.</p>
+                                    <div class="relative z-10 flex items-center justify-between">
+                                        <span class="text-red-600 font-bold text-sm flex items-center group-hover:gap-2 transition-all">Ver planos <span class="ml-2">→</span></span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Produtos Físicos (Mock) -->
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-400 uppercase letter-spacing-widest mb-6 flex items-center">
+                                <span class="mr-2">📦</span> Hardware & Eletrónicos
+                                <div class="flex-grow h-px bg-slate-100 ml-4"></div>
+                            </h4>
+                            <div id="dynamic-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Os produtos serão carregados aqui dinamicamente via JS -->
+                                <div class="col-span-full py-12 text-center text-slate-400">
+                                    <div class="animate-spin inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mb-2"></div>
+                                    <p class="text-xs">A carregar o catálogo...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <!-- START: Calculator Section (Import Costs) -->
             <div id="calculator-panel" class="hidden" role="tabpanel">
                 <div id="calculator-card-container" class="w-full max-w-xl mx-auto calculator-card min-h-[400px]">
                     <!-- Skeleton para Calculadora -->
@@ -1085,6 +1288,7 @@
 
     </main>
     <!-- Secção de Apoiadores com altura mínima para evitar CLS -->
+    <!-- START: Partners/Supporters Carousel Section -->
     <section id="supporters-section" class="w-full bg-slate-50 pt-8 md:pt-12 pb-12 md:pb-16 mt-4 md:mt-8">
         <div class="w-full max-w-7xl mx-auto">
             <h2 class="text-4xl font-bold text-slate-800 text-center mb-12">Parceiros</h2>
@@ -1129,6 +1333,7 @@
 
     <div class="bg-slate-800 text-slate-300">
         <!-- Secção de Afiliados movida para dentro de um div -->
+        <!-- START: Products/Affiliates Carousel Section -->
         <div class="w-full max-w-7xl mx-auto px-6 pt-8 md:pt-12 pb-16">
             <h2 class="text-3xl font-bold text-white text-center mb-12">Produtos</h2>
             <div id="affiliate-links-wrapper" class="relative group">
@@ -1157,169 +1362,12 @@
 
     </section>
 
-    <!-- 🎯 Como Usar o EcoKambio -->
-    <section
-        class="mt-16 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 md:p-12 border-2 border-emerald-200">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">🚀 Como Usar o EcoKambio</h2>
-            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                Em apenas 3 passos simples, você pode comparar taxas e calcular custos de importação em tempo real
-            </p>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div class="bg-white rounded-2xl p-6 shadow-md border-t-4 border-emerald-500">
-                <div
-                    class="flex items-center justify-center w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full mb-4 mx-auto text-2xl font-bold">
-                    1
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 text-center mb-3">Escolha o Mercado</h3>
-                <p class="text-gray-600 text-center">
-                    Selecione entre <strong>Mercado Formal</strong> (bancos oficiais) ou <strong>Mercado
-                        Informal</strong> (kinguilas) para ver as taxas atualizadas.
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl p-6 shadow-md border-t-4 border-teal-500">
-                <div
-                    class="flex items-center justify-center w-16 h-16 bg-teal-100 text-teal-600 rounded-full mb-4 mx-auto text-2xl font-bold">
-                    2
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 text-center mb-3">Compare as Taxas</h3>
-                <p class="text-gray-600 text-center">
-                    Veja instantaneamente qual banco ou cambista oferece a melhor cotação para Dólar (USD), Euro (EUR)
-                    ou Kwanza (AOA).
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl p-6 shadow-md border-t-4 border-blue-500">
-                <div
-                    class="flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4 mx-auto text-2xl font-bold">
-                    3
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 text-center mb-3">Use a Calculadora</h3>
-                <p class="text-gray-600 text-center">
-                    Calcule automaticamente o custo total de importação incluindo taxas bancárias, comissões e conversão
-                    de moeda.
-                </p>
-            </div>
-        </div>
-
-        <div class="mt-10 bg-white rounded-xl p-6 max-w-3xl mx-auto border border-emerald-300">
-            <h3 class="text-lg font-bold text-gray-900 mb-3">💡 Para quê serve o EcoKambio?</h3>
-            <ul class="space-y-3 text-gray-700">
-                <li class="flex items-start">
-                    <span class="text-emerald-600 mr-2 font-bold">✓</span>
-                    <span><strong>Importadores:</strong> Calcule custos reais antes de fazer encomendas no AliExpress,
-                        Amazon ou Alibaba</span>
-                </li>
-                <li class="flex items-start">
-                    <span class="text-emerald-600 mr-2 font-bold">✓</span>
-                    <span><strong>Viajantes:</strong> Saiba quanto vai custar sua viagem internacional em Kwanzas</span>
-                </li>
-                <li class="flex items-start">
-                    <span class="text-emerald-600 mr-2 font-bold">✓</span>
-                    <span><strong>Empresários:</strong> Compare taxas de diferentes bancos para otimizar operações
-                        cambiais</span>
-                </li>
-                <li class="flex items-start">
-                    <span class="text-emerald-600 mr-2 font-bold">✓</span>
-                    <span><strong>Estudantes:</strong> Entenda o mercado financeiro angolano de forma simples e
-                        visual</span>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- ❓ FAQs -->
-    <section class="mt-16">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">❓ Perguntas Frequentes</h2>
-            <p class="text-lg text-gray-600">Tire suas dúvidas sobre câmbio em Angola</p>
-        </div>
-
-        <div class="max-w-4xl mx-auto space-y-4">
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>As taxas do EcoKambio são em tempo real?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    Sim! Nossas taxas são atualizadas constantemente através de scraping automático dos sites oficiais
-                    dos bancos e monitorização do mercado informal. A última atualização é sempre exibida em cada seção.
-                </div>
-            </details>
-
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>O EcoKambio faz transações de câmbio?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    Não. O EcoKambio é uma plataforma de <strong>informação e comparação</strong> de taxas. Não
-                    realizamos transações cambiais. Fornecemos dados para você tomar decisões informadas sobre onde
-                    trocar sua moeda.
-                </div>
-            </details>
-
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>É seguro usar o mercado informal (kinguilas)?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    O mercado informal oferece taxas melhores, mas vem com riscos (notas falsas, falta de comprovativo).
-                    Recomendamos o mercado formal para grandes valores e transações empresariais.
-                </div>
-            </details>
-
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>Como funciona a calculadora de importação?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    A calculadora converte o preço do produto (em USD ou EUR) para Kwanzas e adiciona automaticamente:
-                    (1) Taxa de câmbio do banco selecionado, (2) Comissão base de carregamento (geralmente 12%), (3)
-                    Taxa bancária (~2.8%). Assim você sabe o valor TOTAL que vai pagar.
-                </div>
-            </details>
-
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>O serviço é gratuito?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    Sim, 100% gratuito! O EcoKambio é um projeto da <strong>Moko Tech</strong> para democratizar
-                    informação financeira em Angola. Não cobramos nada e nunca cobraremos pelo acesso às taxas e
-                    calculadoras.
-                </div>
-            </details>
-
-            <details class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden group">
-                <summary
-                    class="px-6 py-4 cursor-pointer font-bold text-gray-900 hover:bg-gray-50 transition-colors flex justify-between items-center">
-                    <span>Posso confiar nas informações do EcoKambio?</span>
-                    <span class="text-emerald-600 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="px-6 pb-4 text-gray-700">
-                    Absolutamente! Todos os dados do mercado formal vêm diretamente dos sites oficiais dos bancos (BAI,
-                    BFA, BPC, BIC). Os dados do mercado informal são coletados de fontes verificadas e atualizados
-                    regularmente. Somos transparentes sobre nossas fontes e metodologia.
-                </div>
-            </details>
-        </div>
-    </section>
 
 
     </main>
 
+    <!-- START: Footer Section -->
     <footer class="bg-slate-800 text-slate-400 mt-16 py-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Footer Content -->
@@ -1342,8 +1390,8 @@
                         <a href="/sobre" class="text-slate-400 hover:text-white transition-colors">Sobre Nós</a>
                         <a href="/fundadores.html"
                             class="text-slate-400 hover:text-white transition-colors">Fundadores</a>
-                        <a href="/developers.html"
-                            class="text-slate-400 hover:text-white transition-colors">Developers</a>
+                        <a href="/faq.html"
+                            class="text-slate-400 hover:text-white transition-colors">FAQ</a>
                     </nav>
                 </div>
 
@@ -1395,6 +1443,7 @@
 
     <!-- Os scripts foram movidos para dentro do <script type="module"> para garantir a ordem de execução -->
     <script src="/js/components.js"></script>
+    <!-- START: Main Application Module Script -->
     <script type="module">
 
         // --- CONFIGURAÇÃO ---
@@ -1504,18 +1553,40 @@
         }
 
         function switchMarketTab(tabName) {
-            const [formalTabBtn, informalTabBtn] = [document.getElementById('formal-market-tab-btn'), document.getElementById('informal-market-tab-btn')];
-            const [formalPanel, informalPanel] = [document.getElementById('formal-market-panel'), document.getElementById('informal-market-panel')];
+            const formalTabBtn = document.getElementById('formal-market-tab-btn');
+            const informalTabBtn = document.getElementById('informal-market-tab-btn');
+            const productsTabBtn = document.getElementById('products-market-tab-btn');
+            
+            const formalPanel = document.getElementById('formal-market-panel');
+            const informalPanel = document.getElementById('informal-market-panel');
+            const productsPanel = document.getElementById('products-market-panel');
+            
             const activeClasses = ['bg-white', 'text-[var(--theme-color)]', 'shadow-md'], inactiveClasses = ['text-gray-600'];
 
-            formalPanel.classList.toggle('hidden', tabName !== 'formal');
-            informalPanel.classList.toggle('hidden', tabName === 'formal');
+            // Painéis
+            if (formalPanel) formalPanel.classList.toggle('hidden', tabName !== 'formal');
+            if (informalPanel) informalPanel.classList.toggle('hidden', tabName !== 'informal');
+            if (productsPanel) {
+                productsPanel.classList.toggle('hidden', tabName !== 'products');
+                if (tabName === 'products') loadProducts(); // Carrega produtos via JSON
+            }
 
-            formalTabBtn.classList.add(...(tabName === 'formal' ? activeClasses : inactiveClasses));
-            formalTabBtn.classList.remove(...(tabName !== 'formal' ? activeClasses : inactiveClasses));
-
-            informalTabBtn.classList.add(...(tabName !== 'formal' ? activeClasses : inactiveClasses));
-            informalTabBtn.classList.remove(...(tabName === 'formal' ? activeClasses : inactiveClasses));
+            // Botões
+            [
+                { btn: formalTabBtn, name: 'formal' },
+                { btn: informalTabBtn, name: 'informal' },
+                { btn: productsTabBtn, name: 'products' }
+            ].forEach(({ btn, name }) => {
+                if (!btn) return;
+                const isSelected = tabName === name;
+                if (isSelected) {
+                    btn.classList.add(...activeClasses);
+                    btn.classList.remove(...inactiveClasses);
+                } else {
+                    btn.classList.remove(...activeClasses);
+                    btn.classList.add(...inactiveClasses);
+                }
+            });
 
             safeGtag('event', 'select_content', {
                 content_type: 'market_type',
@@ -1528,6 +1599,7 @@
             document.getElementById('calculator-tab').addEventListener('click', () => switchTab('calculator'));
             document.getElementById('formal-market-tab-btn').addEventListener('click', () => switchMarketTab('formal'));
             document.getElementById('informal-market-tab-btn').addEventListener('click', () => switchMarketTab('informal'));
+            document.getElementById('products-market-tab-btn').addEventListener('click', () => switchMarketTab('products'));
         }
         // --- MÓDULO DO MERCADO ---
         const MarketModule = (function () {
@@ -2266,6 +2338,12 @@
             }
 
             document.querySelectorAll('.loader-container').forEach(el => el.style.display = 'none');
+            const mainContent = document.getElementById('myTabContent');
+            if (mainContent) {
+                mainContent.classList.remove('loaded-fade-in');
+                void mainContent.offsetWidth; // Force reflow
+                mainContent.classList.add('loaded-fade-in');
+            }
             MarketModule.init(marketData);
             const banksForCalculator = marketData.formal_rates?.filter(bank => bank.code !== 'BNA') || [];
             CalculatorModule.init(banksForCalculator);
@@ -2385,6 +2463,11 @@
                 return;
             }
 
+            // Prepara o container para uma transição suave
+            track.classList.remove('loaded-fade-in');
+            void track.offsetWidth; // Force reflow
+            track.classList.add('loaded-fade-in');
+            
             // Duplica o conteúdo para o efeito de loop infinito
             track.innerHTML = linksHTML + linksHTML;
 
@@ -2407,62 +2490,8 @@
                     setTimeout(() => { window.location.href = destinationUrl; }, 300); // Redireciona após um pequeno atraso
                 });
             });
-
-            // Inicia o auto-scroll
-            startAffiliateAutoScroll();
-
-            // Lógica dos botões de navegação do carrossel
-            const prevBtn = document.getElementById('affiliate-prev-btn');
-            const nextBtn = document.getElementById('affiliate-next-btn');
-
-            nextBtn.addEventListener('click', () => {
-                pauseAffiliateAutoScroll();
-                container.scrollBy({ left: container.offsetWidth / 2, behavior: 'smooth' });
-            });
-
-            prevBtn.addEventListener('click', () => {
-                pauseAffiliateAutoScroll();
-                container.scrollBy({ left: -container.offsetWidth / 2, behavior: 'smooth' });
-            });
-
-            // Pausa o scroll quando o mouse está sobre o container
-            wrapper.addEventListener('mouseenter', () => clearInterval(affiliateAutoScrollInterval));
-
-            // Reinicia o scroll quando o mouse sai
-            wrapper.addEventListener('mouseleave', startAffiliateAutoScroll);
         }
 
-        function startAffiliateAutoScroll() {
-            // Limpa qualquer intervalo existente para evitar aceleração
-            if (affiliateAutoScrollInterval) clearInterval(affiliateAutoScrollInterval);
-
-            const container = document.getElementById('affiliate-links-container');
-            const track = document.getElementById('affiliate-track');
-
-            // Ponto médio onde o scroll deve ser reiniciado
-            const scrollWidth = track.scrollWidth / 2;
-
-            affiliateAutoScrollInterval = setInterval(() => {
-                // Se o scroll passou do ponto médio, reinicia silenciosamente
-                if (container.scrollLeft >= scrollWidth) {
-                    container.scrollLeft = 0;
-                }
-                // Move o scroll um pouco para a direita
-                container.scrollLeft += 1;
-            }, 25); // Ajuste este valor para mudar a velocidade (menor = mais rápido)
-        }
-
-        function pauseAffiliateAutoScroll() {
-            // Limpa o intervalo de auto-scroll
-            clearInterval(affiliateAutoScrollInterval);
-
-            // Define um temporizador para reiniciar o auto-scroll após um período de inatividade
-            let timeoutId;
-            clearTimeout(timeoutId); // Limpa qualquer temporizador anterior
-            timeoutId = setTimeout(() => {
-                startAffiliateAutoScroll();
-            }, 5000); // Reinicia após 5 segundos
-        }
 
         async function loadSupporters() {
             const carouselContainer = document.getElementById('supporters-carousel-container'); // Renamed for clarity
@@ -2503,6 +2532,11 @@
             let slideInterval;
 
             const slidesWrapper = document.getElementById('supporter-slides-wrapper');
+            if (slidesWrapper) {
+                slidesWrapper.classList.remove('loaded-fade-in');
+                void slidesWrapper.offsetWidth; // Force reflow
+                slidesWrapper.classList.add('loaded-fade-in');
+            }
 
             const bannersHTML = data.map((supporter, index) => `
                 <div class="supporter-slide flex-shrink-0 w-full h-full px-6" data-slide="${index}">
@@ -2775,6 +2809,44 @@
         }
 
 
+
+        async function loadProducts() {
+            const grid = document.getElementById('dynamic-products-grid');
+            if (!grid || grid.classList.contains('loaded')) return;
+
+            try {
+                const response = await fetch('products.json');
+                if (!response.ok) throw new Error('Falha ao carregar produtos.');
+                const products = await response.json();
+
+                grid.innerHTML = ''; // Limpa o loader
+                
+                Object.keys(products).forEach(id => {
+                    const product = products[id];
+                    const card = `
+                        <a href="product-detail.html?id=${id}" class="product-card fade-in">
+                            <div class="product-image-container">
+                                <span class="category-badge ${product.badgeClass}">${product.category}</span>
+                                <img src="${product.img}" alt="${product.name}" class="product-image">
+                            </div>
+                            <div class="product-info">
+                                <h5 class="font-bold text-slate-800 mb-1">${product.name}</h5>
+                                <p class="text-xs text-slate-500 mb-4">${product.description.substring(0, 60)}...</p>
+                                <div class="mt-auto flex items-center justify-between">
+                                    <span class="product-price">${product.price}</span>
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors duration-300">+</div>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    grid.innerHTML += card;
+                });
+                grid.classList.add('loaded');
+            } catch (error) {
+                console.error('Erro ao processar catálogo:', error);
+                grid.innerHTML = '<p class="col-span-full text-center text-red-500 py-10 text-xs font-bold">Erro ao carregar catálogo. Tente novamente.</p>';
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', initializeApp);
 

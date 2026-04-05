@@ -3,12 +3,13 @@ const path = require('path');
 const supabase = require('../config/supabase');
 
 /**
- * Get scraper health status
+ * Obter o estado de saúde (health status) do scraper
+ * Determina se o scraper está a correr corretamente através da última data e hora de atualização.
  */
 const getHealth = async (req, res) => {
     try {
-        // Get last update from exchange_rates table
-        // Note: Using updated_at as timestamp column
+        // Obter a última atualização da tabela exchange_rates
+        // Nota: A usar a coluna updated_at como timestamp de referência
         const { data, error } = await supabase
             .from('exchange_rates')
             .select('updated_at')
@@ -26,12 +27,12 @@ const getHealth = async (req, res) => {
             ? (now - lastUpdate) / (1000 * 60 * 60)
             : null;
 
-        // Get count of rates per bank for the latest run
-        // We filter by rates updated in the last 1 hour of the last run
+        // Conta quantas taxas por banco existem para a última execução
+        // Filtramos pelas taxas que foram atualizadas na janela temporal de +/- 5 minutos da última data
         let totalRates = 0;
         if (lastUpdate) {
-            const timeWindowStart = new Date(lastUpdate.getTime() - 5 * 60000).toISOString(); // 5 mins before
-            const timeWindowEnd = new Date(lastUpdate.getTime() + 5 * 60000).toISOString(); // 5 mins after
+            const timeWindowStart = new Date(lastUpdate.getTime() - 5 * 60000).toISOString(); // 5 min antes
+            const timeWindowEnd = new Date(lastUpdate.getTime() + 5 * 60000).toISOString(); // 5 min depois
 
             const { count, error: countError } = await supabase
                 .from('exchange_rates')
@@ -42,7 +43,7 @@ const getHealth = async (req, res) => {
             totalRates = count || 0;
         }
 
-        // Determine status
+        // Determinar o estado de saúde do sistema de scraping
         let status = 'unknown';
         if (!lastUpdate) {
             status = 'never_run';
@@ -73,7 +74,7 @@ const getHealth = async (req, res) => {
 };
 
 /**
- * Manually trigger scraper (admin only)
+ * Despoletar execução manual do scraper (Restrito a Admin)
  */
 const triggerScraper = async (req, res) => {
     try {
@@ -81,36 +82,36 @@ const triggerScraper = async (req, res) => {
         const projectRoot = path.resolve(__dirname, '../..');
         console.log('📂 Project root:', projectRoot);
 
-        // Create logs directory if it doesn't exist
+        // Criar a diretoria de logs caso não exista
         const logsDir = path.join(projectRoot, 'logs');
         if (!fs.existsSync(logsDir)) {
             fs.mkdirSync(logsDir, { recursive: true });
         }
 
-        // Create log files for stdout and stderr
+        // Definir e criar os ficheiros de texto para os logs (stdout e stderr)
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const stdoutLog = path.join(logsDir, `scraper-${timestamp}.log`);
         const stderrLog = path.join(logsDir, `scraper-${timestamp}.error.log`);
 
-        // Open file descriptors for logs
+        // Abrir descritores de base para que o filho possa herdar os logs
         const stdoutFd = fs.openSync(stdoutLog, 'a');
         const stderrFd = fs.openSync(stderrLog, 'a');
 
-        // Use spawn with detached mode so the process survives server restarts
+        // Usa o método spawn em "detached mode". Assim o processo de extração não morre se este servidor reiniciar ou for cancelado.
         const scriptPath = path.join(projectRoot, 'webscraper', 'run-all-scrapers.js');
-        console.log('🚀 Spawning scraper:', scriptPath);
-        console.log(`📝 Logs will be written to: ${stdoutLog}`);
+        console.log('🚀 A acionar processo secundário scraper:', scriptPath);
+        console.log(`📝 Logs vão ser registados em: ${stdoutLog}`);
 
         const child = spawn('node', [scriptPath], {
             cwd: projectRoot,
             detached: true,
-            stdio: ['ignore', stdoutFd, stderrFd]  // Use file descriptors
+            stdio: ['ignore', stdoutFd, stderrFd]  // Usa os ficheiros em vez da consola principal
         });
 
-        //  Unreference so parent can exit
+        // "Desanexa" o processo para suportar continuação independente
         child.unref();
 
-        // Close file descriptors in parent process
+        // Fechar os ficheiros no proceso originário
         fs.close(stdoutFd, () => { });
         fs.close(stderrFd, () => { });
 
@@ -164,7 +165,8 @@ const triggerInformalScraper = async (req, res) => {
 
 
 /**
- * Get last scraper results
+ * Obter os resultados do último scraper completo
+ * Fornece um resumo de estatísticas de moedas atualizadas.
  */
 const getLastResults = async (req, res) => {
     try {
@@ -188,7 +190,7 @@ const getLastResults = async (req, res) => {
             });
         }
 
-        // Get all rates from that timestamp (approximate window)
+        // Identificar todos os pares obtidos no mesmo intervalo da última extração detetada
         const timeWindowStart = new Date(new Date(latest.updated_at).getTime() - 5 * 60000).toISOString();
         const timeWindowEnd = new Date(new Date(latest.updated_at).getTime() + 5 * 60000).toISOString();
 
@@ -204,7 +206,7 @@ const getLastResults = async (req, res) => {
 
         if (ratesError) throw ratesError;
 
-        // Group by bank
+        // Agrupar contagem de taxas por cada banco/fornecedor
         const bankResults = {};
         rates.forEach(rate => {
             const bankCode = rate.rate_providers.code;
@@ -233,19 +235,19 @@ const getLastResults = async (req, res) => {
     }
 };
 
-// Helper function
+// Função auxiliar para traduzir o estado da saúde e calcular as mensagens de frontend
 function getStatusMessage(status, hours) {
     switch (status) {
         case 'healthy':
-            return `Scraper running normally. Last run ${hours.toFixed(1)} hours ago.`;
+            return `O sistema de extração corre habitualmente normal. Última corrida há ${hours.toFixed(1)} horas.`;
         case 'stale':
-            return `Scraper data is stale. Last run ${hours.toFixed(1)} hours ago.`;
+            return `Atenção: Os dados parecem desatualizados. Última corrida há ${hours.toFixed(1)} horas.`;
         case 'error':
-            return `Scraper hasn't run in over 24 hours. Check logs.`;
+            return `Alerta: Scraper não atualiza há mais de 24 horas. Reveja os relatórios de logs.`;
         case 'never_run':
-            return 'Scraper has never run successfully.';
+            return 'O integrador do scraper não reportou sucesso ao arrancar ainda.';
         default:
-            return 'Unknown status';
+            return 'Estado misterioso/desconhecido.';
     }
 }
 

@@ -3,13 +3,13 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// Schedule the scraper to run every 4 hours
-// Cron format: Minute Hour Day Month DayOfWeek
+// Agenda o verificador (scraper) para correr a cada 4 horas
+// Formato cron: Minuto Hora Dia Mês DiaDaSemana
 const SCHEDULE = '0 */4 * * *';
 
-console.log(`📅 Scheduler initialized. Scraper will run every 4 hours (${SCHEDULE})`);
+console.log(`📅 Agendador inicializado. O Scraper irá correr a cada 4 horas (${SCHEDULE})`);
 
-// Ensure logs directory exists
+// Garante que a pasta de logs existe
 const logDir = path.join(__dirname, '..', 'logs');
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -23,29 +23,29 @@ const logToFile = (message) => {
     try {
         fs.appendFileSync(logPath, logMessage);
     } catch (error) {
-        console.error('Failed to write to log file:', error);
+        console.error('Falha ao escrever no ficheiro de log:', error);
     }
 };
 
 const runScraper = () => {
     const startTime = new Date();
-    console.log('⏰ Starting scheduled scraper execution...');
-    logToFile('⏰ Starting scheduled scraper execution...');
+    console.log('⏰ A iniciar execução agendada do scraper...');
+    logToFile('⏰ A iniciar execução agendada do scraper...');
 
-    // Execute 'npm run scrape:all' command to run all scrapers
+    // Executar o comando 'npm run scrape:all' para iniciar todos os scrapers
     const projectRoot = path.resolve(__dirname, '..');
 
-    // Set a timeout of 10 minutes (600000ms) for the scraper
+    // Define um tempo limite de 10 minutos (600000ms) para a extração
     const scraperProcess = exec('npm run scrape:all', {
         cwd: projectRoot,
-        timeout: 600000, // 10 minutes
-        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+        timeout: 600000, // 10 minutos
+        maxBuffer: 1024 * 1024 * 10 // buffer de 10MB
     }, (error, stdout, stderr) => {
         const endTime = new Date();
         const duration = ((endTime - startTime) / 1000).toFixed(2);
 
         if (error) {
-            const errorMsg = `❌ Scraper execution failed after ${duration}s: ${error.message}`;
+            const errorMsg = `❌ Execução do Scraper falhou após ${duration}s: ${error.message}`;
             console.error(errorMsg);
             logToFile(errorMsg);
 
@@ -53,66 +53,65 @@ const runScraper = () => {
                 logToFile(`❌ Stderr: ${stderr}`);
             }
 
-            // Log stdout even on error for debugging
+            // Regista sempre o stdout (saída padrão) mesmo havendo erro para facilitar a depuração
             if (stdout) {
-                logToFile(`📋 Stdout (on error): ${stdout.substring(0, 500)}`);
+                logToFile(`📋 Stdout (no erro): ${stdout.substring(0, 500)}`);
             }
             return;
         }
 
         if (stderr) {
-            console.warn(`⚠️ Scraper warnings: ${stderr}`);
+            console.warn(`⚠️ Avisos do Scraper: ${stderr}`);
             logToFile(`⚠️ Stderr: ${stderr}`);
         }
 
-        const successMsg = `✅ Scraper execution completed successfully in ${duration}s`;
+        const successMsg = `✅ Execução do Scraper concluída com sucesso em ${duration}s`;
         console.log(successMsg);
         logToFile(successMsg);
 
-        // Log a summary of the output
+        // Regista um resumo da saída
         if (stdout) {
             const lines = stdout.split('\n');
-            const summary = lines.slice(-10).join('\n'); // Last 10 lines
-            logToFile(`📊 Summary: ${summary}`);
+            const summary = lines.slice(-10).join('\n'); // Últimas 10 linhas
+            logToFile(`📊 Resumo: ${summary}`);
         }
     });
 
-    // Log process start
-    logToFile(`🚀 Process started with PID: ${scraperProcess.pid}`);
+    // Regista o arranque do processo
+    logToFile(`🚀 Processo iniciado com PID: ${scraperProcess.pid}`);
 };
 
-// Initialize the cron job
+// Inicializar a tarefa (cron job)
 const job = cron.schedule(SCHEDULE, runScraper, {
-    scheduled: false, // Don't start immediately
+    scheduled: false, // Não avança automaticamente (arranque manual através do start)
     timezone: "UTC"
 });
 
-console.log('✅ Scheduler configured and ready');
-logToFile('✅ Scheduler configured and ready');
+console.log('✅ Agendador configurado e pronto a rodar');
+logToFile('✅ Agendador configurado e pronto a rodar');
 
-// Export for use in server.js
+// Exportar para utilizar no server.js
 module.exports = {
     start: () => {
         job.start();
-        const msg = `🚀 Scheduler started at ${new Date().toISOString()}`;
+        const msg = `🚀 Agendador iniciado às ${new Date().toISOString()}`;
         console.log(msg);
         logToFile(msg);
         return job;
     },
     stop: () => {
         job.stop();
-        const msg = `⏸️ Scheduler stopped at ${new Date().toISOString()}`;
+        const msg = `⏸️ Agendador pausado às ${new Date().toISOString()}`;
         console.log(msg);
         logToFile(msg);
     },
-    runNow: runScraper // Export for testing purposes
+    runNow: runScraper // Exportado caso se deseje forçar um teste manual
 };
 
-// Auto-start in production when this module is imported
-// This ensures the cron job runs even if start() is never explicitly called
+// Se estiver em ambiente de produção inicia automaticamente o processo
 if (process.env.NODE_ENV === 'production') {
     job.start();
-    const msg = `🚀 AUTO-START: Scheduler automatically started in production at ${new Date().toISOString()}`;
+    const msg = `🚀 AUTO-START: Agendador iniciado automaticamente em ambiente de produção às ${new Date().toISOString()}`;
     console.log(msg);
     logToFile(msg);
 }

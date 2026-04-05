@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7407113762962919"
-     crossorigin="anonymous"></script>
+    
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
     <title>Adquira o seu Cartão Visa Virtual - EcoKambio</title>
     <meta name="description" content="Adquira já o seu cartão Visa virtual para compras online e pagamentos de serviços internacionais. Rápido, seguro e com carregamento mínimo acessível.">
@@ -328,47 +327,49 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module">
         async function loadVisaPageData() {
-            let informalRates = { usd_rate: 0, eur_rate: 0 };
-            let visaSettings = {};
+            // Taxas de fallback caso a API falhe (valores aproximados)
+            let informalRates = { usd_rate: 950, eur_rate: 1050 };
+            let visaSettings = { visa_fee_percent: 0 };
 
             try {
                 const response = await fetch('/api/visa-settings');
-                if (!response.ok) throw new Error('Failed to load settings');
-                const settings = await response.json();
-
-                // Helper to format currency
-                const formatCurrency = (value, currency) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency }).format(value);
-
-                // Update dynamic elements
-                document.getElementById('visa-title').textContent = settings.visa_title || 'Cartão Visa Virtual';
-                document.getElementById('visa-image').src = settings.visa_image_url || '/assets/visa.png';
-                visaSettings = settings;
+                if (response.ok) {
+                    const settings = await response.json();
+                    visaSettings = settings;
+                }
                 
-                // Carregar taxas informais para o conversor
+                // Atualizar elementos dinâmicos
+                const visaTitle = document.getElementById('visa-title');
+                const visaImage = document.getElementById('visa-image');
+                if (visaTitle) visaTitle.textContent = visaSettings.visa_title || 'Cartão Visa Virtual';
+                if (visaImage && visaSettings.visa_image_url) visaImage.src = visaSettings.visa_image_url;
+
+                // Carregar taxas informais reais
                 try {
                     const ratesResponse = await fetch('/api/informal-rates');
                     if (ratesResponse.ok) {
-                        informalRates = await ratesResponse.json(); // eslint-disable-line
+                        const data = await ratesResponse.json();
+                        if (data.usd_rate > 0) informalRates = data;
                     }
                 } catch (rateError) {
-                    console.error('Could not load informal rates:', rateError);
+                    console.warn('Usando taxas de fallback:', rateError);
                 }
 
-                // Update WhatsApp links
-                const whatsappNumber = settings.visa_whatsapp_number;
+                // Configurar links de WhatsApp
+                const whatsappNumber = visaSettings.visa_whatsapp_number;
                 if (whatsappNumber) {
-                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Ol%C3%A1%2C%20gostaria%20de%20adquirir%20o%20Cart%C3%A3o%20Visa%20Virtual.`;
-                    document.getElementById('whatsapp-cta-btn-hero').href = whatsappUrl;
-                    document.getElementById('whatsapp-cta-btn-footer').href = whatsappUrl;
+                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá, gostaria de adquirir o Cartão Visa Virtual.`;
+                    const btnHero = document.getElementById('whatsapp-cta-btn-hero');
+                    const btnFooter = document.getElementById('whatsapp-cta-btn-footer');
+                    if (btnHero) btnHero.href = whatsappUrl;
+                    if (btnFooter) btnFooter.href = whatsappUrl;
                 }
 
-                // Inicia o conversor com as taxas carregadas
                 setupQuickConverter(informalRates, visaSettings);
 
             } catch (error) {
-                console.error('Error loading Visa page data:', error);
-                // The page will show default static values if the fetch fails.
-                setupQuickConverter(informalRates, visaSettings); // Inicia o conversor mesmo em caso de erro
+                console.error('Erro ao carregar dados da página Visa:', error);
+                setupQuickConverter(informalRates, visaSettings);
             }
         }
 
@@ -379,73 +380,92 @@
             const toSelect = document.getElementById('quick-converter-to');
             const resultDisplay = document.getElementById('quick-converter-result');
             const feeNotice = document.getElementById('converter-fee-notice');
+            
             const feePercent = parseFloat(settings.visa_fee_percent) || 0;
+
+            const formatNumber = (num, minDec = 2, maxDec = 2) => {
+                return new Intl.NumberFormat('pt-AO', { 
+                    minimumFractionDigits: minDec, 
+                    maximumFractionDigits: maxDec 
+                }).format(num);
+            };
 
             function updateToOptions() {
                 const fromValue = fromSelect.value;
-                const toValue = toSelect.value;
                 Array.from(toSelect.options).forEach(option => {
                     option.disabled = (option.value === fromValue);
                 });
-                if (fromValue === toValue) toSelect.value = Array.from(toSelect.options).find(opt => !opt.disabled).value;
+                if (fromSelect.value === toSelect.value) {
+                    toSelect.value = Array.from(toSelect.options).find(opt => !opt.disabled).value;
+                }
             }
 
             const calculate = () => {
-                const amountStr = amountInput.value.replace(/\./g, '').replace(',', '.');
-                const amount = parseFloat(amountStr);
-                if (isNaN(amount) || amount === 0) {
+                // Limpeza mais robusta do input: remove espaços e converte vírgula em ponto
+                const val = amountInput.value.trim().replace(/\s/g, '').replace(',', '.');
+                const amount = parseFloat(val);
+
+                if (isNaN(amount) || amount <= 0) {
                     feeNotice.textContent = '';
                     resultDisplay.textContent = '';
                     return;
                 }
 
-                const from = fromSelect.value, to = toSelect.value;
+                const from = fromSelect.value;
+                const to = toSelect.value;
                 let resultAmount = 0;
-                let rate = 0;
-                
-                // Limpa a nota da taxa por padrão
+                let currentRate = 0;
+
                 feeNotice.textContent = '';
 
                 if (from !== 'AOA' && to === 'AOA') {
-                    // Conversão de Estrangeiro para AOA: aplica a taxa
-                    rate = (from === 'USD') ? rates.usd_rate : rates.eur_rate;
-                    const convertedAmount = amount * rate;
-                    resultAmount = convertedAmount * (1 + (feePercent / 100));
-                   
-                    // Mostra a nota da taxa
-                    const formattedFee = new Intl.NumberFormat('pt-AO', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(feePercent);
-                    if (feePercent > 0) feeNotice.textContent = `Valor final a pagar usando mercado informal (inclui a nossa taxa de ${formattedFee}%).`;
+                    // Conversão Estrangeiro -> Kwanza (venda do ponto de vista do site)
+                    currentRate = (from === 'USD') ? (rates.usd_rate || 950) : (rates.eur_rate || 1050);
+                    const baseKz = amount * currentRate;
+                    // Aplica a taxa de serviço configurada
+                    resultAmount = baseKz * (1 + (feePercent / 100));
+                    
+                    if (feePercent > 0) {
+                        feeNotice.textContent = `Inclui taxa de serviço de ${formatNumber(feePercent, 0, 2)}%`;
+                    }
+                } else if (from === 'AOA') {
+                    // Conversão Kwanza -> Estrangeiro
+                    currentRate = (to === 'USD') ? (rates.usd_rate || 950) : (rates.eur_rate || 1050);
+                    resultAmount = amount / currentRate;
                 } else {
-                    // Outras conversões (AOA -> Estrangeiro, Estrangeiro -> Estrangeiro)
-                    if (from === 'AOA' && to === 'USD') rate = 1 / rates.usd_rate;
-                    else if (from === 'AOA' && to === 'EUR') rate = 1 / rates.eur_rate;
-                    else if (from === 'USD' && to === 'EUR') rate = rates.usd_rate / rates.eur_rate;
-                    else if (from === 'EUR' && to === 'USD') rate = rates.eur_rate / rates.usd_rate;
-                    else if (from === to) rate = 1;
-                    resultAmount = amount * rate;
+                    // Estrangeiro -> Estrangeiro (USD <-> EUR)
+                    const usdRate = rates.usd_rate || 950;
+                    const eurRate = rates.eur_rate || 1050;
+                    if (from === 'USD' && to === 'EUR') resultAmount = amount * (usdRate / eurRate);
+                    else if (from === 'EUR' && to === 'USD') resultAmount = amount * (eurRate / usdRate);
                 }
 
-                const formatNumber = (num) => new Intl.NumberFormat('pt-AO', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(num);
-
-                resultDisplay.textContent = (resultAmount && isFinite(resultAmount)) 
-                    ? `≈ ${formatNumber(resultAmount)} ${to}`
-                    : 'Taxa indisponível';
+                if (isFinite(resultAmount) && resultAmount > 0) {
+                    resultDisplay.textContent = `≈ ${formatNumber(resultAmount)} ${to}`;
+                } else {
+                    resultDisplay.textContent = 'Taxa indisponível';
+                }
             };
 
-            [amountInput, toSelect].forEach(el => el.addEventListener('input', calculate));
-            fromSelect.addEventListener('input', () => {
+            // Event Listeners
+            amountInput.addEventListener('input', calculate);
+            toSelect.addEventListener('change', calculate);
+            fromSelect.addEventListener('change', () => {
                 updateToOptions();
                 calculate();
             });
+            
             switchBtn.addEventListener('click', () => {
-                [fromSelect.value, toSelect.value] = [toSelect.value, fromSelect.value]; 
-                updateToOptions(); 
-                calculate(); 
+                const oldFrom = fromSelect.value;
+                fromSelect.value = toSelect.value;
+                toSelect.value = oldFrom;
+                updateToOptions();
+                calculate();
             });
 
-            // Chamada inicial
+            // Inicialização
             updateToOptions();
-            amountInput.value = '100,00'; // Valor padrão
+            if (!amountInput.value) amountInput.value = '100,00';
             calculate();
         }
 

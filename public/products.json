@@ -1,0 +1,56 @@
+{
+    "eco-book": {
+        "name": "Eco-Book Pro M2",
+        "category": "Computadores",
+        "badgeClass": "badge-computadores",
+        "price": "950.000,00 Kz",
+        "oldPrice": "1.200.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1000&auto=format&fit=crop",
+        "description": "O Eco-Book Pro M2 é o portátil definitivo para produtividade e criatividade em Angola. Equipado com o mais recente processador de alto desempenho, oferece autonomia de bateria para o dia inteiro e um ecrã Retina deslumbrante."
+    },
+    "kambio-phone": {
+        "name": "Kambio Phone 15 Pro",
+        "category": "Telemóveis",
+        "badgeClass": "badge-telemoveis",
+        "price": "450.000,00 Kz",
+        "oldPrice": "520.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1000&auto=format&fit=crop",
+        "description": "Experimenta a elegância e a potência do Kambio Phone 15 Pro. Com um sistema de câmaras triplo de nível profissional e o chip mais rápido num smartphone, estás pronto para o futuro."
+    },
+    "smart-tv": {
+        "name": "OLED Smart TV 65\"",
+        "category": "Televisores",
+        "badgeClass": "badge-televisores",
+        "price": "1.250.000,00 Kz",
+        "oldPrice": "1.500.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=1000&auto=format&fit=crop",
+        "description": "Leva o cinema para a tua sala. Esta Smart TV OLED de 65 polegadas oferece pretos puros, cores infinitas e a tecnologia de som Dolby Atmos para uma imersão total."
+    },
+    "headphones": {
+        "name": "Premium Wireless ANC",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "155.000,00 Kz",
+        "oldPrice": "190.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
+        "description": "Isola-te do ruído e foca-te na música. Os nossos Headphones Premium Wireless com Cancelamento Ativo de Ruído (ANC) oferecem até 40 horas de reprodução com som cristalino."
+    },
+    "fridge": {
+        "name": "Frigorífico Smart Inverter",
+        "category": "Eletromesticos",
+        "badgeClass": "badge-eletrodomesticos",
+        "price": "890.000,00 Kz",
+        "oldPrice": "1.100.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1630459065645-549fe5a56db4?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "description": "Mantenha os seus alimentos frescos por mais tempo com a tecnologia Smart Inverter. Este frigorífico inteligente permite controlar a temperatura via smartphone e economiza até 30% de energia."
+    },
+    "keyboard": {
+        "name": "Teclado Mecânico RGB",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "45.000,00 Kz",
+        "oldPrice": "65.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop",
+        "description": "Domina os teus jogos com o Teclado Mecânico RGB. Switches óticos ultra-rápidos, teclas macro programáveis e iluminação personalizável de 16.8 milhões de cores."
+    }
+}

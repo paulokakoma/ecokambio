@@ -64,15 +64,9 @@ app.use(helmet({
                 "'unsafe-eval'",
                 "https://cdn.jsdelivr.net",
                 "https://cdn.tailwindcss.com",
-                "https://pagead2.googlesyndication.com",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
-                "https://googleads.g.doubleclick.net",
-                "https://partner.googleadservices.com",
-                "https://tpc.googlesyndication.com",
-                "https://www.google.com",
-                "https://ep1.adtrafficquality.google",
-                "https://ep2.adtrafficquality.google"
+                "https://www.google.com"
             ],
             scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
             styleSrc: [
@@ -90,29 +84,19 @@ app.use(helmet({
                 "'self'",
                 "data:",
                 "https:",
-                "https://pagead2.googlesyndication.com",
                 "https://www.google-analytics.com",
-                "https://googleads.g.doubleclick.net",
                 "https://www.google.com"
             ],
             connectSrc: [
                 "'self'",
                 "https://drkjkkpzujwnkghtdokz.supabase.co",
-                "https://www.google-analytics.com",
-                "https://pagead2.googlesyndication.com",
-                "https://googleads.g.doubleclick.net",
-                "https://partner.googleadservices.com",
-                "https://ep1.adtrafficquality.google",
-                "https://ep2.adtrafficquality.google"
+                "https://www.google-analytics.com"
             ],
             frameSrc: [
                 "'self'",
-                "https://pagead2.googlesyndication.com",
-                "https://googleads.g.doubleclick.net",
-                "https://tpc.googlesyndication.com",
                 "https://www.google.com"
             ],
-            childSrc: ["'self'", "https://pagead2.googlesyndication.com"],
+            childSrc: ["'self'"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: config.isDevelopment ? null : []
         },
@@ -146,25 +130,25 @@ app.set('trust proxy', 1);
 // Apply subdomain middleware early to detect admin.localhost vs localhost
 app.use(subdomainMiddleware);
 
-// Session Configuration
+// Configuração de Sessão
 let sessionStore;
 
 if (config.isDevelopment && !process.env.REDIS_URL) {
-    // Local development without Redis env: Use FileStore
+    // Desenvolvimento local sem variável Redis: Utiliza sistema de ficheiros para guardar sessões (FileStore)
     const FileStore = require("session-file-store")(session);
     sessionStore = new FileStore({
         path: './sessions',
-        ttl: 30 * 24 * 60 * 60, // 30 days
+        ttl: 30 * 24 * 60 * 60, // Duração da sessão: 30 dias
         retries: 0
     });
-    logger.info('📁 Using FileStore for sessions');
+    logger.info('📁 A utilizar FileStore para gestão de sessões');
 } else {
-    // Redis Store (Prod or Dev with Redis)
+    // Produção ou Desenvolvimento com Redis: Utiliza Redis para escalar as sessões de forma robusta
     sessionStore = new RedisStore({
         client: redisClient,
-        prefix: 'ecokambio:sess:',
+        prefix: 'ecokambio:sess:', // Prefixo para identificar os dados da aplicação no Redis
     });
-    logger.info('✅ Using Redis session store');
+    logger.info('✅ A utilizar Redis para gestão de sessões');
 }
 
 
@@ -247,7 +231,8 @@ app.use('/netflix', express.static(path.join(__dirname, 'src/netflix/public'), {
 }));
 
 // ============================================================================
-// SECURITY: Disable caching for admin pages (prevent login data in cache)
+// SEGURANÇA: Desativar cache em páginas de administração
+// Isto evita que dispositivos/redes memorizem dados sensíveis de acesso.
 // ============================================================================
 const noCacheHeaders = (req, res, next) => {
     res.set({
@@ -259,7 +244,7 @@ const noCacheHeaders = (req, res, next) => {
     next();
 };
 
-// Apply no-cache to all admin-related routes
+// Aplicar não-cache a todos os caminhos que exigem login/visão de administrador
 app.use('/login', noCacheHeaders);
 app.use('/login.html', noCacheHeaders);
 app.use('/admin', noCacheHeaders);
@@ -307,25 +292,26 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// API Routes (Legacy)
+// Rotas da API (Legado)
 app.use("/api", authRoutes); // Contém /login, /logout, etc. Não deve ter `isAdmin` aqui.
 app.use("/api", publicRoutes); // Rotas públicas, sem `isAdmin`.
 
-// Scraper API Routes (Public)
+// Rotas de API para o Scraper (Público)
+// Usado para saber a saúde e o último sucesso do robô que busca os valores.
 app.get("/api/scraper/health", scraperController.getHealth);
 app.get("/api/scraper/last-results", scraperController.getLastResults);
 
-// Scraper API Routes (Protected)
-app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper); // Protegida
+// Rotas de API para o Scraper (Protegido - Apenas Admin)
+app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
 
-// EcoFlix Module API Routes (Public & Protected mixed - handles its own auth)
+// Módulo EcoFlix (Rotas API partilhadas de uso misto, o próprio módulo trata a segurança)
 app.use("/api/ecoflix", ecoflixRoutes);
 
-// Google Sheets Integration - Token-based auth (must be before isAdmin middleware)
+// Integração Google Sheets - Exportação (Requer Token específico antes das regras normais do Admin)
 const adminController = require('./src/controllers/adminController');
 app.get('/api/admin/export-sales-auto', adminController.exportSalesAuto);
 
-// Admin API Routes (Protected globally)
+// Rotas exclusivas de Admin (Globais e protegidas pelo Middleware `isAdmin`)
 app.use("/api", isAdmin, adminRoutes);
 
 
@@ -419,32 +405,35 @@ require('./src/netflix/services/sms_queue.service');
 // Scheduler
 const scheduler = require('./webscraper/scheduler');
 
-// Start Server only if run directly
+// Inicializador da Aplicação / Arranque do Servidor
+// Impede execução se este for importado apenas como módulo de teste
 if (require.main === module) {
     server.listen(config.port, '0.0.0.0', () => {
-        logger.info(`✅ Server running on port ${config.port}`);
-        logger.info(`   Environment: ${config.isDevelopment ? 'Development' : 'Production'}`);
+        logger.info(`✅ Servidor a correr na porta ${config.port}`);
+        logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
 
-        // Start scraper scheduler in production
+        // O Scraper Scheduler faz atualizações de taxas cambiais regularmente.
+        // Apenas correr num ambiente de Produção para não gerar spam local.
         if (!config.isDevelopment) {
             try {
                 const scraperScheduler = require('./webscraper/scheduler');
                 scraperScheduler.start();
-                logger.info('📅 Scraper scheduler started (runs every 4 hours)');
+                logger.info('📅 Agendamento de scraping ativado (corre a cada 4 horas)');
             } catch (error) {
-                logger.error('⚠️  Failed to start scraper scheduler:', { message: error.message });
+                logger.error('⚠️ Falha ao arrancar o agendador de scraping:', { message: error.message });
             }
         } else {
-            logger.info('ℹ️  Scraper scheduler disabled in development mode');
-            logger.info('   Use: npm run scrape to test manually');
-            logger.info(`Servidor a correr em desenvolvimento:`);
-            logger.info(`  📱 Página Principal: http://localhost:${config.port}`);
-            logger.info(`  🔐 Admin: http://admin.localhost:${config.port}`);
+            logger.info('ℹ️ Agendador de scraping desativado em desenvolvimento');
+            logger.info('   Use o comando: npm run scrape para testar de forma manual.');
+            logger.info(`Rotas Locais Ativas:`);
+            logger.info(`  📱 Plataforma EcoKambio: http://localhost:${config.port}`);
+            logger.info(`  🔐 Painel Administrativo: http://admin.localhost:${config.port}`);
         }
     }).on('error', (e) => {
+        // Deteta colisão de portos (Se o terminal já tiver outro processo ativado na mesma porta)
         if (e.code === 'EADDRINUSE') {
-            console.error(`\n❌ ERRO: A porta ${config.port} já está em uso.`);
-            console.error('   Verifique se outra instância do servidor já não está a correr e tente novamente.');
+            console.error(`\n❌ ERRO FATAL: A porta ${config.port} encontra-se ocupada!`);
+            console.error('   Verifique se outro processo da aplicação está já a utilizar esta porta do computador.');
             process.exit(1);
         }
     });

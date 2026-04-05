@@ -1,6 +1,6 @@
 /**
- * Payment Service
- * Handles core payment processing logic (Supabase RPC, SMS notifications, etc.)
+ * Serviço de Pagamentos (Payment Service)
+ * Lida com toda a lógica central de processamento de aquisições (Mecanismos atómicos via Supabase RPC, notificações SMS, etc.)
  */
 
 const supabase = require('../../config/supabase');
@@ -9,30 +9,30 @@ const { familyPlanQueue } = require('./queue.service');
 const smsService = require('./sms.service');
 
 /**
- * Handle Out of Stock Logic
- * @param {Object} order
+ * Lidar com cenários de rutura de stock (Esgotado)
+ * @param {Object} order Os dados do pedido (encomenda)
  */
 const handleOutOfStock = async (order) => {
-    // 1. Update order status
+    // 1. Atualizar o estado do pedido para indicar falta de stock
     await supabase.from('ecoflix_orders').update({ status: 'STOCK_OUT' }).eq('id', order.id);
 
-    // 2. Notify Admin
+    // 2. Notificar Administração
     // await smsService.sendAdminAlert(`STOCK ESGOTADO! Pedido ${order.id} pago mas sem stock.`);
 
     return {
-        success: true, // Return true so user sees "Paid" but with specific message
+        success: true, // Retornamos true para o utilizador ver a mensagem de "Pago", mas com um aviso especial
         message: 'Pagamento recebido, mas stock temporariamente esgotado. Sua conta será enviada em breve.',
         stockOut: true
     };
 };
 
 /**
- * Process a Payment (Atomic Allocation via RPC)
- * @param {Object} order
+ * Processar um pagamento (Alocação de conta atómica por RPC)
+ * @param {Object} order Os dados do pagamento processado
  */
 const processPayment = async (order) => {
     try {
-        // --- 0. RENEWAL LOGIC ---
+        // --- 0. LÓGICA DE RENOVAÇÃO (RENEWAL) ---
         if (order.subscription_action === 'RENEWAL' && order.target_subscription_id) {
             const { data: result, error } = await supabase
                 .rpc('extend_subscription', {
@@ -42,22 +42,22 @@ const processPayment = async (order) => {
 
             if (error) throw error;
 
-            // Notify
+            // Enviar SMS de notificação após sucesso de renovação
             if (result.success) {
                 await smsService.sendRenewalSms(order.phone, result.new_expires_at);
             }
             return result;
         }
 
-        // --- 1. FAMILY PLAN LOGIC (Via Queue) ---
+        // --- 1. LÓGICA DO PLANO FAMÍLIA (Processado via Fila/Queue) ---
         if (order.plan_type === 'FAMILIA') {
             // await familyPlanQueue.add('assign-family', { orderId: order.id }); 
-            // Commented out as queue might not be setup in this context yet
+            // Comentado localmente: a fila poderá não estar instanciada dependendo do contexto
             return { success: true, message: 'Processamento em fila (Família) - Contacte Suporte' };
         }
 
-        // --- 2. STANDARD PLAN LOGIC (RPC) ---
-        // Call the atomic SQL function 'purchase_slot'
+        // --- 2. LÓGICA DE PLANO NORMAL/PADRÃO (Via RPC Atómico) ---
+        // Chama uma função residente do SQL de nome 'purchase_slot' (para garantir segurança concorrencial)
         const { data: result, error } = await supabase
             .rpc('purchase_slot', {
                 p_user_id: order.user_id,
@@ -69,17 +69,17 @@ const processPayment = async (order) => {
 
         if (error) throw error;
 
-        // Verify Result
+        // Verificar Resposta do Backend
         if (!result.success) {
-            console.warn(`[ProcessPayment] Purchase failed: ${result.message}`);
-            // If Stock Out, handle it
+            console.warn(`[ProcessPayment] Falha na compra: ${result.message}`);
+            // Se o motivo for falta de stock, encaminhar para essa verificação apropriada
             if (result.message === 'STOCK_ESGOTADO') {
                 return handleOutOfStock(order);
             }
             return result;
         }
 
-        // 3. SUCCESS -> SEND SMS (VIA QUEUE)
+        // 3. SE SUCESSO -> ADICIONAR SMS À FILA (VIA QUEUE)
         if (result.credentials) {
             const creds = result.credentials;
             await smsQueue.add('enviar-credencial', {
@@ -89,23 +89,23 @@ const processPayment = async (order) => {
                 attempts: 3,
                 backoff: { type: 'exponential', delay: 5000 }
             });
-            console.log(`[ProcessPayment] Delivery SMS for ${order.phone} added to queue.`);
+            console.log(`[ProcessPayment] Envio de SMS da credencial para ${order.phone} adicionado à fila.`);
         }
 
-        // 4. ADD PARTNER COMMISSION (Influencer Tracking)
+        // 4. ATRIBUIR COMISSÃO A PARCEIRO/INFLUENCER (Se tiver código promocional)
         if (order.coupon_used) {
             try {
-                // Try RPC first (preferred - atomic operation)
+                // Primeira tentativa: Usar diretamente o RPC para aplicar comissão atomicamente
                 const { data: commission, error: rpcError } = await supabase.rpc('add_partner_commission', {
                     p_coupon_code: order.coupon_used,
                     p_plan_type: order.plan_type
                 });
 
                 if (rpcError) {
-                    // Fallback: Calculate and update manually
-                    console.warn(`[ProcessPayment] RPC failed, using fallback:`, rpcError.message);
+                    // Plano de fallback manual: Se a store procedure falhar, atualizar aqui o valor
+                    console.warn(`[ProcessPayment] Função RPC falhou para comissão. Utilizando o recuo manual:`, rpcError.message);
 
-                    // Get coupon commission rates
+                    // Obter as atuais taxas de comissão do cupão
                     const { data: coupon } = await supabase
                         .from('ecoflix_coupons')
                         .select('commission_mobile, commission_tv')
@@ -117,7 +117,7 @@ const processPayment = async (order) => {
                             ? (coupon.commission_mobile || 500)
                             : (coupon.commission_tv || 700);
 
-                        // Update coupon with new commission
+                        // Guardar a atualização com a nova contagem de comissão e referências
                         await supabase
                             .from('ecoflix_coupons')
                             .update({
@@ -126,13 +126,13 @@ const processPayment = async (order) => {
                             })
                             .eq('code', order.coupon_used);
 
-                        console.log(`[ProcessPayment] Partner commission added: ${commissionAmount} Kz`);
+                        console.log(`[ProcessPayment] Comissão de parceiro atribuída manualmente: ${commissionAmount} Kz`);
                     }
                 } else {
-                    console.log(`[ProcessPayment] Partner commission added via RPC: ${commission} Kz`);
+                    console.log(`[ProcessPayment] Comissão de parceiro atribuída via RPC: ${commission} Kz`);
                 }
             } catch (couponErr) {
-                console.warn(`[ProcessPayment] Failed to add partner commission:`, couponErr.message);
+                console.warn(`[ProcessPayment] Falha fatal silenciosa ao adicionar a comissão de parceiro:`, couponErr.message);
             }
         }
 

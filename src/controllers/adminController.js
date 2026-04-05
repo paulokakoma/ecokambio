@@ -440,11 +440,7 @@ const updateCell = async (req, res) => {
 
 
 const getDashboardStats = async (req, res) => {
-    const onlineUsers = 0; // TODO: Get from WebSocket if possible, or pass it in.
-    // Note: Accessing wss from here is tricky without dependency injection. 
-    // For now we will skip onlineUsers or implement a way to get it.
-    // We can export a getter from websocket.js
-
+    // Obter os utilizadores online diretamente pelo serviço WebSocket
     const { getOnlineUserCount } = require('../websocket');
     const currentOnlineUsers = getOnlineUserCount ? getOnlineUserCount() : 0;
 
