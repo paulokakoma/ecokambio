@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Produto - EcoKambio</title>
     
-    <!-- Tailwind CSS (via local output) -->
+    <!-- Tailwind CSS -->
     <link href="/css/output.css" rel="stylesheet">
     
     <!-- Google Fonts -->
@@ -14,168 +14,328 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .product-price { font-family: 'JetBrains Mono', monospace; color: #10b981; }
-        .badge-eletronicos { background: #3b82f6; color: white; }
-        .badge-computadores { background: #6366f1; color: white; }
-        .badge-televisores { background: #ec4899; color: white; }
-        .badge-eletrodomesticos { background: #10b981; color: white; }
-        .badge-telemoveis { background: #f59e0b; color: white; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; padding-bottom: 80px; }
+        @media (min-width: 768px) { body { padding-bottom: 0; } }
         
-        /* Garantia de Quadrado Perfeito */
-        .square-box {
-            aspect-ratio: 1 / 1;
-            width: 100%;
-            object-fit: cover;
+        .product-price { font-family: 'JetBrains Mono', monospace; color: #10b981; }
+        .badge-eletronicos { background: rgba(59, 130, 246, 0.9); color: white; }
+        .badge-computadores { background: rgba(99, 102, 241, 0.9); color: white; }
+        .badge-televisores { background: rgba(236, 72, 153, 0.9); color: white; }
+        .badge-eletrodomesticos { background: rgba(16, 185, 129, 0.9); color: white; }
+        .badge-telemoveis { background: rgba(245, 158, 11, 0.9); color: white; }
+        
+        .square-box { aspect-ratio: 1 / 1; width: 100%; object-fit: cover; }
+
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .fade-in { animation: fadeIn 0.8s ease-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Glassmorphism & Mesh Backgrounds */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-top-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .ambient-mesh {
+            background-color: #ffffff;
+            background-image: radial-gradient(at 0% 0%, hsla(152,80%,90%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 100%, hsla(210,100%,95%,1) 0, transparent 50%);
+        }
+
+        /* CTA Pulso */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .animate-pulse-ring { animation: pulse-ring 2s infinite; }
+
+        /* Skeleton Shimmer */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .skeleton {
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0));
+            animation: shimmer 1.5s infinite;
+        }
+        
+        /* Sticky Mobile Area */
+        .mobile-sticky-cta {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 50;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #f1f5f9;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+        }
+        @media (min-width: 768px) {
+            .mobile-sticky-cta { position: static; background: transparent; padding: 0; box-shadow: none; border: none; backdrop-filter: none; }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
-    <!-- Header (Consistente com index.html) -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-slate-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
             <a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity group">
                 <img src="/assets/main-logo.svg" alt="EcoKambio" class="h-10 w-auto group-hover:scale-105 transition-transform">
                 <span class="text-xl font-bold text-emerald-600">EcoKambio</span>
             </a>
             <nav class="ml-auto flex items-center space-x-6">
-                <a href="/" class="text-slate-600 hover:text-emerald-600 font-semibold text-sm transition-colors">Voltar ao Mercado</a>
+                <a href="/" class="text-slate-600 hover:text-emerald-600 font-semibold text-sm transition-colors">← Voltar ao Mercado</a>
             </nav>
         </div>
     </header>
 
-    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <!-- Breadcrumbs -->
-        <nav class="mb-6 flex text-sm text-slate-400">
-            <a href="/" class="hover:text-emerald-500 transition-colors">Produtos</a>
-            <span class="mx-2">/</span>
-            <span id="breadcrumb-category" class="text-slate-600 font-medium">Categoria</span>
-            <span class="mx-2">/</span>
-            <span id="breadcrumb-name" class="text-slate-900 font-bold">Produto</span>
-        </nav>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start fade-in">
-            <!-- Galeria de Imagem -->
-            <div class="space-y-4">
-                <div class="bg-white p-2 rounded-3xl shadow-lg border border-slate-100 overflow-hidden group">
-                    <img id="product-main-image" src="" alt="Produto" class="w-full h-auto max-h-[380px] object-contain rounded-2xl group-hover:scale-105 transition-transform duration-700 mx-auto">
+    <main class="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Skeleton UI (Visível Inicialmente) -->
+        <div id="product-skeleton" class="w-full">
+            <div class="mb-6 flex gap-2">
+                <div class="skeleton h-4 w-16"></div> <div class="skeleton h-4 w-4"></div> <div class="skeleton h-4 w-24"></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+                <div class="skeleton h-[400px] w-full rounded-[2rem]"></div>
+                <div class="space-y-6 pt-4">
+                    <div class="skeleton h-6 w-24 rounded-full mb-3"></div>
+                    <div class="skeleton h-10 w-3/4 mb-3"></div>
+                    <div class="skeleton h-8 w-1/3 mb-6"></div>
+                    <div class="skeleton h-32 w-full rounded-2xl mb-6"></div>
+                    <div class="flex gap-4"><div class="skeleton h-10 w-10 rounded-full"></div><div class="skeleton h-10 w-10 rounded-full"></div></div>
+                    <div class="skeleton h-14 w-2/3 rounded-full mt-6"></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Info do Produto -->
-            <div class="space-y-6">
-                <div>
-                    <span id="product-category-badge" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm"></span>
-                    <h1 id="product-name" class="text-2xl md:text-3xl font-extrabold text-slate-800 leading-tight mb-2">Nome do Produto</h1>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span id="product-price" class="text-xl font-bold product-price">0,00 Kz</span>
-                        <span class="text-sm text-slate-400 line-through decoration-red-400/50" id="product-old-price"></span>
+        <!-- Conteúdo do Produto (Oculto Inicialmente) -->
+        <div id="product-details-content" class="hidden fade-in">
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 flex text-xs font-semibold text-slate-400">
+                <a href="/" class="hover:text-emerald-500 transition-colors">Produtos</a>
+                <span class="mx-2">/</span>
+                <span id="breadcrumb-category" class="text-slate-500">Categoria</span>
+                <span class="mx-2">/</span>
+                <span id="breadcrumb-name" class="text-slate-900 border-b border-transparent">Produto</span>
+            </nav>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                
+                <!-- Galeria de Imagem Premium -->
+                <div class="space-y-4">
+                    <div class="ambient-mesh p-4 sm:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden group flex items-center justify-center min-h-[350px] relative">
+                        <!-- Imagem Principal -->
+                        <img id="product-main-image" src="" alt="Produto" class="w-full h-auto max-h-[400px] object-contain rounded-2xl group-hover:scale-105 transition-transform duration-700 mx-auto relative z-10 drop-shadow-2xl">
+                    </div>
+                    <!-- Miniaturas Simuladas -->
+                    <div class="flex justify-center gap-3 mt-4" id="thumbnail-gallery">
+                        <button class="w-16 h-16 rounded-2xl border-2 border-emerald-500 bg-white p-1 overflow-hidden transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                            <img id="thumb-1" src="" class="w-full h-full object-contain opacity-100" alt="Vista 1">
+                        </button>
+                        <button class="w-16 h-16 rounded-2xl border-2 border-transparent bg-white shadow-sm p-1 overflow-hidden transition-transform hover:scale-105 focus:outline-none hover:border-slate-300">
+                            <img id="thumb-2" src="" class="w-full h-full object-contain opacity-60" alt="Vista 2">
+                        </button>
                     </div>
                 </div>
 
-                <div class="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                    <h3 class="text-xs font-bold text-slate-800 mb-2 uppercase tracking-wider">Descrição</h3>
-                    <p id="product-description" class="text-slate-600 leading-relaxed text-xs">
-                        Carregando detalhes...
-                    </p>
-                </div>
+                <!-- Info do Produto e Variantes -->
+                <div class="space-y-6">
+                    <div>
+                        <span id="product-category-badge" class="px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm backdrop-blur-md"></span>
+                        <h1 id="product-name" class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-2"></h1>
+                        <div class="flex items-center gap-4 mt-3">
+                            <span id="product-price" class="text-2xl font-black product-price"></span>
+                            <span class="text-sm font-semibold text-slate-400 line-through decoration-red-400/50 decoration-2" id="product-old-price"></span>
+                        </div>
+                    </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Destaques</h3>
-                    <ul class="grid grid-cols-2 gap-2 text-[10px]">
-                        <li class="flex items-center gap-2 text-slate-600 bg-white p-2 rounded-lg border border-slate-50 shadow-sm"><span class="text-emerald-500">✓</span> Envio em 24h</li>
-                        <li class="flex items-center gap-2 text-slate-600 bg-white p-2 rounded-lg border border-slate-50 shadow-sm"><span class="text-emerald-500">✓</span> Garantia de 1 Ano</li>
-                        <li class="flex items-center gap-2 text-slate-600 bg-white p-2 rounded-lg border border-slate-50 shadow-sm"><span class="text-emerald-500">✓</span> Kwanza/IBAN</li>
-                        <li class="flex items-center gap-2 text-slate-600 bg-white p-2 rounded-lg border border-slate-50 shadow-sm"><span class="text-emerald-500">✓</span> Suporte Local</li>
-                    </ul>
-                </div>
+                    <!-- Variantes Visuais (Mock JS) -->
+                    <div class="py-4 border-y border-slate-100 space-y-5">
+                        <!-- Cores -->
+                        <div>
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Cor: <span id="color-label" class="text-slate-800">Preto Meia-Noite</span></h3>
+                            <div class="flex gap-3" id="color-selectors">
+                                <button data-color="Preto Meia-Noite" class="w-9 h-9 rounded-full border-2 border-slate-300 ring-2 ring-emerald-500 ring-offset-2 bg-slate-900 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
+                                <button data-color="Prata" class="w-9 h-9 rounded-full border-2 border-slate-200 bg-slate-200 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
+                                <button data-color="Verde Esmeralda" class="w-9 h-9 rounded-full border-2 border-slate-200 bg-emerald-500 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
+                            </div>
+                        </div>
 
-                <div class="pt-8 border-t border-slate-100 flex justify-start">
-                    <a id="whatsapp-order-link" href="#" target="_blank" class="inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-8 rounded-full text-lg shadow-lg shadow-emerald-600/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-                        <svg width="24" height="24" style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
-                        <span>Pedir via WhatsApp</span>
-                    </a>
+                        <!-- Capacidade (Oculto se não for telefone/computador) -->
+                        <div id="capacity-container" class="hidden">
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Capacidade</h3>
+                            <div class="flex flex-wrap gap-2" id="capacity-selectors">
+                                <button class="px-4 py-2.5 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-colors focus:outline-none shadow-sm">128 GB</button>
+                                <button class="px-4 py-2.5 text-xs font-bold rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-colors focus:outline-none shadow-sm">256 GB</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descrição rica -->
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Visão Geral</h3>
+                        <p id="product-description" class="text-slate-700 leading-relaxed text-sm font-medium"></p>
+                    </div>
+
+                    <!-- Benefícios (Destaques) -->
+                    <div>
+                        <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Vantagens EcoKambio</h3>
+                        <ul class="grid grid-cols-2 gap-3 text-xs font-semibold">
+                            <li class="flex items-center gap-2 text-slate-700"><span class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pronta Entrega</li>
+                            <li class="flex items-center gap-2 text-slate-700"><span class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Garantia 1 Ano</li>
+                            <li class="flex items-center gap-2 text-slate-700"><span class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pagamento Local</li>
+                            <li class="flex items-center gap-2 text-slate-700"><span class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Fatura Oficial</li>
+                        </ul>
+                    </div>
+
+                    <!-- Call To Action (Responsivo / Sticky Mobile) -->
+                    <div class="mobile-sticky-cta pt-6 lg:pt-8 md:border-t border-slate-100 mt-auto">
+                        <a id="whatsapp-order-link" href="#" target="_blank" class="flex md:inline-flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg shadow-emerald-600/30 transition-all duration-300 hover:scale-105 hover:shadow-emerald-600/40 animate-pulse-ring w-full md:w-auto">
+                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                        <span>Encomendar via WhatsApp</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Seção: Produtos Relacionados -->
-        <section class="mt-20">
-            <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <span class="w-6 h-1 bg-emerald-500 rounded-full"></span>
-                Também poderás gostar
+        <section class="mt-20 pt-10 border-t border-slate-200 hidden fade-in" id="related-section">
+            <h2 class="text-xl font-extrabold text-slate-800 mb-8 flex items-center gap-3">
+                <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+                Recomendado para si
             </h2>
-            <div id="related-products-grid" class="flex flex-wrap md:flex-nowrap gap-4">
+            <div id="related-products-grid" class="flex flex-wrap md:flex-nowrap gap-5">
                 <!-- Populado via JS -->
             </div>
         </section>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-8 mt-20">
+    <footer class="bg-white border-t border-slate-100 text-slate-500 py-8 mt-10 pb-28 md:pb-8">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="flex justify-center flex-wrap gap-x-6 gap-y-2 mb-6">
-                <a href="/" class="hover:text-white transition-colors">Home</a>
-                <a href="/sobre" class="hover:text-white transition-colors">Sobre Nós</a>
-                <a href="/faq.html" class="hover:text-white transition-colors">FAQ</a>
+            <div class="flex justify-center flex-wrap gap-x-6 gap-y-2 mb-4 font-medium text-sm">
+                <a href="/" class="hover:text-emerald-600 transition-colors">Home</a>
+                <a href="/sobre" class="hover:text-emerald-600 transition-colors">Sobre Nós</a>
+                <a href="/faq.html" class="hover:text-emerald-600 transition-colors">FAQ</a>
             </div>
-            <p class="text-xs">© 2024 EcoKambio · Todos os direitos reservados.</p>
-        </div>    <script>
+            <p class="text-xs font-bold">© 2024 EcoKambio · Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
         async function init() {
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('id') || 'eco-book';
+            const id = params.get('id') || 'eco-book'; // Fallback for direct opening without id
             
             let products = {};
             try {
+                // Simulate delay slightly to show skeleton beauty
                 const response = await fetch('products.json');
                 if (!response.ok) throw new Error('Falha ao carregar base de dados.');
                 products = await response.json();
+                
+                // Extra artificial delay to demonstrate the shimmer skeleton
+                await new Promise(r => setTimeout(r, 600)); 
             } catch (error) {
-                console.error('Erro ao carregar catálogo:', error);
-                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><p class="text-red-500 font-bold">Erro ao carregar detalhes do produto. Tente novamente mais tarde.</p></div>';
+                console.error('Erro:', error);
+                document.getElementById('product-skeleton').innerHTML = '<p class="text-red-500 font-bold p-10 text-center">Falta o catálogo. Tente novamente mais tarde.</p>';
                 return;
             }
 
-            const product = products[id] || products['eco-book'];
+            const product = products[id] || products['eco-book'] || Object.values(products)[0];
+            
+            // Hide Skeleton, Show Content
+            document.getElementById('product-skeleton').classList.add('hidden');
+            document.getElementById('product-details-content').classList.remove('hidden');
+            document.getElementById('related-section').classList.remove('hidden');
 
-            // Atualiza Metadados e UI
-            document.title = `${product.name} - EcoKambio`;
+            // Set Data
+            document.title = `${product.name} - Detalhes Premium`;
             document.getElementById('product-name').textContent = product.name;
             document.getElementById('breadcrumb-name').textContent = product.name;
             document.getElementById('breadcrumb-category').textContent = product.category;
             document.getElementById('product-price').textContent = product.price;
             document.getElementById('product-old-price').textContent = product.oldPrice || '';
             document.getElementById('product-description').textContent = product.description;
+            
             document.getElementById('product-main-image').src = product.img;
             document.getElementById('product-main-image').alt = product.name;
+            document.getElementById('thumb-1').src = product.img;
+            document.getElementById('thumb-2').src = product.img; // Using same image as placeholder view limit
 
             const badge = document.getElementById('product-category-badge');
             badge.textContent = product.category;
-            badge.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm ${product.badgeClass}`;
+            badge.className = `px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm backdrop-blur-md text-white border border-white/20 ${product.badgeClass}`;
 
-            // WhatsApp link
-            const whatsappText = encodeURIComponent(`Olá EcoKambio! Vi o produto "${product.name}" no site e gostaria de saber mais informações.`);
+            // Show capacity variants solely for electronics/mobiles
+            if (product.category === 'Telemóveis' || product.category === 'Computadores') {
+                document.getElementById('capacity-container').classList.remove('hidden');
+            }
+
+            // WhatsApp link builder
+            const whatsappText = encodeURIComponent(`Olá EcoKambio! Tenho interesse no "${product.name}" através da loja online. Podem enviar detalhes?`);
             document.getElementById('whatsapp-order-link').href = `https://wa.me/244938948994?text=${whatsappText}`;
 
-            // Renderiza Produtos Relacionados (Exatamente 4 em Flex)
+            // --- Interactivity: Selection Mocks ---
+            const colorBtns = document.querySelectorAll('#color-selectors button');
+            const colorLabel = document.getElementById('color-label');
+            colorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    colorBtns.forEach(b => {
+                        b.classList.remove('ring-2', 'ring-emerald-500', 'ring-offset-2');
+                        b.classList.add('border-slate-200');
+                    });
+                    btn.classList.add('ring-2', 'ring-emerald-500', 'ring-offset-2');
+                    btn.classList.remove('border-slate-200');
+                    colorLabel.textContent = btn.dataset.color;
+                    
+                    // Add subtle image flicker to simulate color change
+                    const img = document.getElementById('product-main-image');
+                    img.style.opacity = '0.7';
+                    setTimeout(() => img.style.opacity = '1', 200);
+                });
+            });
+
+            const capBtns = document.querySelectorAll('#capacity-selectors button');
+            capBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    capBtns.forEach(b => {
+                        b.className = 'px-4 py-2.5 text-xs font-bold rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-colors focus:outline-none shadow-sm';
+                    });
+                    btn.className = 'px-4 py-2.5 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-colors focus:outline-none shadow-sm';
+                });
+            });
+
+            // Recomended Products
             const relatedGrid = document.getElementById('related-products-grid');
             const otherIds = Object.keys(products).filter(key => key !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             
             otherIds.forEach(key => {
                 const item = products[key];
                 const card = `
-                    <a href="product-detail.html?id=${key}" class="flex-1 w-1/4 min-w-[120px] md:min-w-0 bg-white p-2 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group flex flex-col">
-                        <div class="square-box overflow-hidden rounded-lg mb-2 bg-slate-50 flex items-center justify-center p-1">
-                            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
+                    <a href="product-detail.html?id=${key}" class="flex-1 w-[45%] md:w-1/4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 hover:shadow-xl hover:border-emerald-200 transition-all duration-300 group flex flex-col">
+                        <div class="square-box overflow-hidden rounded-xl mb-3 bg-slate-50 flex items-center justify-center p-2">
+                            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 mix-blend-multiply">
                         </div>
-                        <h4 class="font-bold text-slate-800 text-[10px] truncate mb-1">${item.name}</h4>
-                        <p class="text-[10px] text-emerald-600 font-bold">${item.price}</p>
+                        <h4 class="font-extrabold text-slate-800 text-[11px] truncate mb-1">${item.name}</h4>
+                        <p class="text-[12px] text-emerald-600 font-bold mt-auto pt-1">${item.price}</p>
                     </a>
                 `;
                 relatedGrid.innerHTML += card;

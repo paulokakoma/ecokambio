@@ -1,56 +1,92 @@
 {
-    "eco-book": {
-        "name": "Eco-Book Pro M2",
-        "category": "Computadores",
-        "badgeClass": "badge-computadores",
-        "price": "950.000,00 Kz",
-        "oldPrice": "1.200.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1000&auto=format&fit=crop",
-        "description": "O Eco-Book Pro M2 é o portátil definitivo para produtividade e criatividade em Angola. Equipado com o mais recente processador de alto desempenho, oferece autonomia de bateria para o dia inteiro e um ecrã Retina deslumbrante."
-    },
-    "kambio-phone": {
-        "name": "Kambio Phone 15 Pro",
+    "iphone-15": {
+        "name": "iPhone 15 Pro Max 256GB",
         "category": "Telemóveis",
         "badgeClass": "badge-telemoveis",
-        "price": "450.000,00 Kz",
-        "oldPrice": "520.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1000&auto=format&fit=crop",
-        "description": "Experimenta a elegância e a potência do Kambio Phone 15 Pro. Com um sistema de câmaras triplo de nível profissional e o chip mais rápido num smartphone, estás pronto para o futuro."
+        "price": "1.250.000,00 Kz",
+        "oldPrice": "1.450.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1695048133142-1a20a5bf616f?q=80&w=1000&auto=format&fit=crop",
+        "description": "Forjado em titânio de grau aeroespacial, o iPhone 15 Pro Max apresenta o nosso ecrã Super Retina XDR avançado e um processador A17 Pro."
     },
-    "smart-tv": {
-        "name": "OLED Smart TV 65\"",
+    "galaxy-s24": {
+        "name": "Samsung Galaxy S24 Ultra",
+        "category": "Telemóveis",
+        "badgeClass": "badge-telemoveis",
+        "price": "1.150.000,00 Kz",
+        "oldPrice": "1.300.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=1000&auto=format&fit=crop",
+        "description": "Câmara impressionante com estabilização noturna superior, SPen integrada e um armamento pronto para os desafios de uso extremo na vida angolana."
+    },
+    "macbook-pro": {
+        "name": "MacBook Pro 14\" M3 Max",
+        "category": "Computadores",
+        "badgeClass": "badge-computadores",
+        "price": "2.850.000,00 Kz",
+        "oldPrice": "3.100.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000&auto=format&fit=crop",
+        "description": "O portátil definitivo para o mercado. O salto gigante na arquitetura M3 Max garante uma autonomia excecional garantindo a execução dos projetos 3D mais pesados."
+    },
+    "zephyrus-g14": {
+        "name": "ASUS ROG Zephyrus G14",
+        "category": "Computadores",
+        "badgeClass": "badge-computadores",
+        "price": "1.450.000,00 Kz",
+        "oldPrice": "1.600.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000&auto=format&fit=crop",
+        "description": "Portátil de alta performance que combina a leveza com a potência máxima de uma gráfica dedicada. A ferramenta derradeira para quem programa, joga e renderiza projetos em movimento."
+    },
+    "sony-xm5": {
+        "name": "Auscultadores Sony WH-1000XM5",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "345.000,00 Kz",
+        "oldPrice": "395.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=1000&auto=format&fit=crop",
+        "description": "Considerado o melhor cancelamento de ruído do mercado. Foca-te no teu trabalho bloqueando praticamente todos os barulhos à tua volta com este Headset levíssimo."
+    },
+    "airpods-max": {
+        "name": "Apple AirPods Max",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "495.000,00 Kz",
+        "oldPrice": "550.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?q=80&w=1000&auto=format&fit=crop",
+        "description": "Auscultadores Over-Ear de qualidade de estúdio produzidos pela Apple num invólucro total de alumínio super resistente ao pó, e com áudio espacial excecional."
+    },
+    "mech-keyboard": {
+        "name": "Teclado Mecânico Keychron Q1",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "210.000,00 Kz",
+        "oldPrice": "240.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=1000&auto=format&fit=crop",
+        "description": "Uma lenda dos teclados mecânicos para produtividade. Feito num bloco sólido de alumínio pesado, switches táteis fantásticos para a melhor sensação de digitação no seu espaço de trabalho."
+    },
+    "magic-keyboard": {
+        "name": "Apple Magic Keyboard Wireless",
+        "category": "Eletrónicos",
+        "badgeClass": "badge-eletronicos",
+        "price": "135.000,00 Kz",
+        "oldPrice": "150.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1587826694602-0c0b299e5a1b?q=80&w=1000&auto=format&fit=crop",
+        "description": "Este teclado traz uma estética imemorável a qualquer mesa de trabalho. Bateria integrada recarregável de longa duração com conexão universal a periféricos digitais."
+    },
+    "monitor-ultrawide": {
+        "name": "Tela Samsung Odyssey 34\" Ultrawide",
         "category": "Televisores",
         "badgeClass": "badge-televisores",
-        "price": "1.250.000,00 Kz",
-        "oldPrice": "1.500.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=1000&auto=format&fit=crop",
-        "description": "Leva o cinema para a tua sala. Esta Smart TV OLED de 65 polegadas oferece pretos puros, cores infinitas e a tecnologia de som Dolby Atmos para uma imersão total."
+        "price": "680.000,00 Kz",
+        "oldPrice": "750.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1527443195645-1133f7f28990?q=80&w=1000&auto=format&fit=crop",
+        "description": "Tela curvada imersiva (34 polegadas) com taxa de atualização acelerada. Dá aos designers, programadores ou gamers as proporções perfeitas para colocar várias janelas lado a lado sem interrupção."
     },
-    "headphones": {
-        "name": "Premium Wireless ANC",
-        "category": "Eletrónicos",
-        "badgeClass": "badge-eletronicos",
-        "price": "155.000,00 Kz",
-        "oldPrice": "190.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
-        "description": "Isola-te do ruído e foca-te na música. Os nossos Headphones Premium Wireless com Cancelamento Ativo de Ruído (ANC) oferecem até 40 horas de reprodução com som cristalino."
-    },
-    "fridge": {
-        "name": "Frigorífico Smart Inverter",
-        "category": "Eletromesticos",
-        "badgeClass": "badge-eletrodomesticos",
-        "price": "890.000,00 Kz",
-        "oldPrice": "1.100.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1630459065645-549fe5a56db4?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "description": "Mantenha os seus alimentos frescos por mais tempo com a tecnologia Smart Inverter. Este frigorífico inteligente permite controlar a temperatura via smartphone e economiza até 30% de energia."
-    },
-    "keyboard": {
-        "name": "Teclado Mecânico RGB",
-        "category": "Eletrónicos",
-        "badgeClass": "badge-eletronicos",
-        "price": "45.000,00 Kz",
-        "oldPrice": "65.000,00 Kz",
-        "img": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop",
-        "description": "Domina os teus jogos com o Teclado Mecânico RGB. Switches óticos ultra-rápidos, teclas macro programáveis e iluminação personalizável de 16.8 milhões de cores."
+    "pro-display": {
+        "name": "Tela LG UltraFine 4K HDR",
+        "category": "Televisores",
+        "badgeClass": "badge-televisores",
+        "price": "490.000,00 Kz",
+        "oldPrice": "530.000,00 Kz",
+        "img": "https://images.unsplash.com/photo-1616423640778-28d1b53229bd?q=80&w=1000&auto=format&fit=crop",
+        "description": "Uma Tela calibrada para o mundo do design. A melhor maneira de obter cores precisas perante qualquer incidência de luminosidade local na sua sala de estar ou base de trabalho."
     }
 }
