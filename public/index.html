@@ -236,25 +236,7 @@
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05)
         }
 
-        /* 🎡 Carrossel de Produtos Infinito */
-        #affiliate-links-container {
-            overflow: hidden !important;
-        }
-
-        #affiliate-track {
-            display: flex;
-            width: max-content;
-            animation: scroll-infinite 40s linear infinite;
-        }
-
-        #affiliate-track:hover {
-            animation-play-state: paused;
-        }
-
-        @keyframes scroll-infinite {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+        /* Carrossel de Produtos: gerido via .carousel-track no bloco de estilos mais abaixo */
     </style>
     <!-- 2. Carregue o resto do CSS de forma não-bloqueante -->
     <link rel="stylesheet" href="/css/output.css" media="print" onload="this.media='all'">
@@ -719,28 +701,39 @@
             animation: slide-out-right 0.2s ease-out forwards;
         }
 
-        /* --- Estilos para Cards de Produtos (Carrossel Infinito) --- */
-        @keyframes scroll-products-marquee {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .products-marquee-track {
+        /* =====================================================
+           CARROSSÉIS DE PRODUTOS & AFILIADOS - Versão Limpa 
+           ===================================================== */
+        
+        /* Contentor principal do carrossel - onde rola */
+        .carousel-track {
             display: flex;
-            width: max-content;
-            animation: scroll-products-marquee 30s linear infinite;
+            overflow-x: auto;
+            gap: 1rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 0.5rem 0 1.5rem 0;
+            /* Padding direita para o último card não colar na borda */
+            padding-right: 1rem;
         }
-        .products-marquee-track:hover {
-            animation-play-state: paused;
+        .carousel-track::-webkit-scrollbar { display: none; }
+        
+        /* Card dentro do carrossel */
+        .carousel-track > * {
+            flex-shrink: 0;
+            scroll-snap-align: start;
         }
+        
+        /* Máscara de gradiente nas bordas */
         .mask-horizontal-gradient {
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
         }
+        /* Cards de produto */
         .product-card {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.5);
             border-radius: 1.5rem;
             overflow: hidden;
@@ -749,10 +742,14 @@
             cursor: pointer;
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
         }
-        .product-card-enhanced {
-            width: 280px; 
-            flex-shrink: 0;
-            margin-right: 1.25rem;
+        .product-card-enhanced, .affiliate-card {
+            width: 240px;
+        }
+        @media (max-width: 640px) {
+            .product-card-enhanced, .affiliate-card {
+                /* Exactamente 2 cards cabem na tela: 50% do ecrã menos metade do gap */
+                width: calc(50vw - 1.25rem);
+            }
         }
         .product-card:hover {
             transform: translateY(-8px);
@@ -806,6 +803,115 @@
         .badge-televisores { background: rgba(236, 72, 153, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
         .badge-eletrodomesticos { background: rgba(16, 185, 129, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
         .badge-telemoveis { background: rgba(245, 158, 11, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+
+        /* === MODAL DE CATÁLOGO === */
+        #catalog-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+        #catalog-modal.open {
+            display: flex;
+            animation: catalog-fadein 0.25s ease-out;
+        }
+        @keyframes catalog-fadein {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        #catalog-modal-inner {
+            background: #fff;
+            border-radius: 2rem;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 30px 80px -10px rgba(0,0,0,0.25);
+            overflow: hidden;
+            min-height: 400px;
+        }
+        /* Barra de pesquisa */
+        .catalog-search-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 9999px;
+            padding: 0.75rem 1.25rem 0.75rem 3rem;
+            outline: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .catalog-search-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+        }
+        /* Chips de filtro de categoria */
+        .cat-chip {
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .cat-chip.active, .cat-chip:hover {
+            background: #0f172a;
+            border-color: #0f172a;
+            color: #fff;
+        }
+        /* Grelha dentro do modal: 2 col mobile, 3 col tablet, 4 col desktop */
+        #catalog-full-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            #catalog-full-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 900px) {
+            #catalog-full-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .cat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .cat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            border-color: #cbd5e1;
+            background: #fff;
+        }
+        .cat-card img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .cat-card:hover img { transform: scale(1.08); }
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -1001,11 +1107,11 @@
                 </div>
                 <!-- Section: Formal Market -->
                 <div id="formal-market-panel" role="tabpanel">
-                    <div class="market-container p-4 sm:p-6 md:p-8">
-                        <div class="mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800 flex items-center">🏛️ MERCADO FORMAL</h3>
-                            <p id="formal-market-timestamp" class="text-sm text-gray-500 mt-1 flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="market-container p-2 sm:p-4 md:p-8">
+                        <div class="mb-3 md:mb-6">
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏛️ MERCADO FORMAL</h3>
+                            <p id="formal-market-timestamp" class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
+                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -1015,16 +1121,16 @@
 
                         <!-- Novo Conversor de Moeda -->
                         <div id="quick-converter-container"
-                            class="mb-6 sm:mb-8 p-4 sm:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
-                            <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Rápido <span
+                            class="mb-4 md:mb-8 p-3 md:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
+                            <h4 class="text-base md:text-lg font-bold text-gray-700 mb-2 md:mb-4">Conversor Rápido <span
                                     id="quick-converter-bank-name" class="text-emerald-600"></span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-4 items-end">
                                 <!-- Campo de Valor -->
                                 <div class="md:col-span-2">
                                     <label for="quick-converter-amount"
-                                        class="block text-sm font-medium text-gray-600">Valor</label>
+                                        class="block text-xs md:text-sm font-medium text-gray-600">Valor</label>
                                     <input type="text" id="quick-converter-amount" inputmode="decimal"
-                                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono"
+                                        class="mt-1 w-full p-2 md:p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base md:text-lg font-mono"
                                         placeholder="100,00">
                                 </div>
 
@@ -1033,15 +1139,15 @@
                                     <div class="flex-1">
                                         <label for="quick-converter-from" class="sr-only">De</label>
                                         <select id="quick-converter-from"
-                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
+                                            class="custom-select mt-1 w-full p-2 md:p-3 bg-white border border-gray-300 rounded-lg font-semibold text-sm md:text-base">
                                             <option value="USD">🇺🇸 USD</option>
                                             <option value="EUR">🇪🇺 EUR</option>
                                             <option value="AOA">🇦🇴 AOA</option>
                                         </select>
                                     </div>
                                     <button id="quick-converter-switch"
-                                        class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
-                                            class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                        class="p-2 md:p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
+                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
@@ -1049,7 +1155,7 @@
                                     <div class="flex-1">
                                         <label for="quick-converter-to" class="sr-only">Para</label>
                                         <select id="quick-converter-to"
-                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold">
+                                            class="custom-select mt-1 w-full p-2 md:p-3 bg-white border border-gray-300 rounded-lg font-semibold text-sm md:text-base">
                                             <option value="AOA">🇦🇴 AOA</option>
                                             <option value="USD">🇺🇸 USD</option>
                                             <option value="EUR">🇪🇺 EUR</option>
@@ -1058,12 +1164,12 @@
                                 </div>
                             </div>
                             <div id="quick-converter-result"
-                                class="mt-4 text-center text-2xl font-bold text-gray-800 h-8">
+                                class="mt-2 text-center text-xl md:text-2xl font-bold text-gray-800 h-6 md:h-8">
                             </div>
                         </div>
 
                         <div id="formal-market-grid"
-                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[200px]">
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-5 min-h-[200px]">
                             <!-- SKELETON LOADING (Estático para feedback imediato) -->
                             <div class="p-4 rounded-xl border-l-4 border-gray-200 bg-gray-50 shadow-sm h-full">
                                 <div class="skeleton h-6 w-1/4 mb-2"></div>
@@ -1132,11 +1238,11 @@
                 </div>
                 <!-- Section: Informal Market -->
                 <div id="informal-market-panel" role="tabpanel" class="hidden">
-                    <div class="market-container p-4 sm:p-6 md:p-8">
-                        <div class="mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800 flex items-center">🏪 MERCADO INFORMAL</h3>
-                            <p id="informal-market-timestamp" class="text-sm text-gray-500 mt-1 flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="market-container p-2 sm:p-4 md:p-8">
+                        <div class="mb-3 md:mb-6">
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏪 MERCADO INFORMAL</h3>
+                            <p id="informal-market-timestamp" class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
+                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -1146,49 +1252,55 @@
 
                         <!-- Conversor de Moeda para Mercado Informal -->
                         <div id="informal-converter-container"
-                            class="mb-6 sm:mb-8 p-4 sm:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
-                            <h4 class="text-lg font-bold text-gray-700 mb-4">Conversor Informal <span
+                            class="mb-4 md:mb-8 p-3 md:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
+                            <h4 class="text-base md:text-lg font-bold text-gray-700 mb-2 md:mb-4">Conversor Informal <span
                                     id="informal-converter-province-name" class="text-emerald-600"></span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-4 items-end">
                                 <div class="md:col-span-2">
                                     <label for="informal-converter-amount"
-                                        class="block text-sm font-medium text-gray-600">Valor</label>
+                                        class="block text-xs md:text-sm font-medium text-gray-600">Valor</label>
                                     <input type="text" id="informal-converter-amount" inputmode="decimal"
-                                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono"
+                                        class="mt-1 w-full p-2 md:p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base md:text-lg font-mono"
                                         placeholder="100,00">
                                 </div>
                                 <div class="md:col-span-3 flex items-end gap-2">
                                     <div class="flex-1">
                                         <select id="informal-converter-from"
-                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold"
+                                            class="custom-select mt-1 w-full p-2 md:p-3 bg-white border border-gray-300 rounded-lg font-semibold text-sm md:text-base"
                                             aria-label="De">
                                             <option value="USD">🇺🇸 USD</option>
                                             <option value="EUR">🇪🇺 EUR</option>
                                             <option value="USDT">🪙 USDT</option>
+                                            <option value="ZAR">🇿🇦 ZAR</option>
+                                            <option value="BRL">🇧🇷 BRL</option>
+                                            <option value="GBP">🇬🇧 GBP</option>
                                             <option value="AOA">🇦🇴 AOA</option>
                                         </select>
                                     </div>
                                     <button id="informal-converter-switch"
-                                        class="p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
-                                            class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                        class="p-2 md:p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
+                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                         </svg></button>
                                     <div class="flex-1">
                                         <select id="informal-converter-to"
-                                            class="custom-select mt-1 w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold"
+                                            class="custom-select mt-1 w-full p-2 md:p-3 bg-white border border-gray-300 rounded-lg font-semibold text-sm md:text-base"
                                             aria-label="Para">
                                             <option value="AOA">🇦🇴 AOA</option>
                                             <option value="USD">🇺🇸 USD</option>
                                             <option value="EUR">🇪🇺 EUR</option>
                                             <option value="USDT">🪙 USDT</option>
+                                            <option value="ZAR">🇿🇦 ZAR</option>
+                                            <option value="BRL">🇧🇷 BRL</option>
+                                            <option value="GBP">🇬🇧 GBP</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div id="informal-converter-result"
-                                class="mt-4 text-center text-2xl font-bold text-gray-800 h-8"></div>
+                                class="mt-2 text-center text-xl md:text-2xl font-bold text-gray-800 h-6 md:h-8"></div>
                         </div>
 
 
@@ -1198,7 +1310,7 @@
                             <h4 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                                 <span class="mr-2">🏪</span> Mercado Informal
                             </h4>
-                            <div id="informal-rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div id="informal-rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                                 <!-- SKELETON LOADING -->
                                 <div class="bg-white/60 border border-orange-200 p-4 rounded-xl">
                                     <div class="skeleton h-5 w-3/4 mb-2"></div>
@@ -1245,50 +1357,62 @@
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
                                 <!-- Visa Virtual Card -->
-                                <a href="/visa" class="group bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-left relative overflow-hidden">
-                                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 flex items-center gap-5 mb-6">
-                                        <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-indigo-200">💳</div>
-                                        <div>
-                                            <h4 class="font-bold text-xl text-slate-800">Visa Virtual</h4>
-                                            <span class="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded">INSTANTÂNEO</span>
+                                <a href="/visa" class="group bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center md:flex-col md:items-start gap-4 md:gap-0">
+                                    <div class="hidden md:block absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
+                                    
+                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-indigo-600 flex items-center justify-center text-xl md:text-2xl shadow-md shadow-indigo-200 rounded-xl md:rounded-2xl md:mb-4">💳</div>
+                                    
+                                    <div class="relative z-10 flex flex-col flex-grow">
+                                        <div class="flex items-center flex-wrap gap-1.5 md:gap-2 mb-1 md:mb-2">
+                                            <h4 class="font-bold text-base md:text-lg text-slate-800 leading-none">Visa Virtual</h4>
+                                            <span class="text-[9px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase leading-none">Instantâneo</span>
                                         </div>
-                                    </div>
-                                    <p class="relative z-10 text-slate-600 text-sm mb-6 leading-relaxed">Obtém o teu cartão em minutos. Compra na Amazon, Shein e paga Netflix sem complicações.</p>
-                                    <div class="relative z-10 flex items-center justify-between">
-                                        <span class="text-indigo-600 font-bold text-sm flex items-center group-hover:gap-2 transition-all">Começar agora <span class="ml-2">→</span></span>
+                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight md:leading-snug mb-0 md:mb-4 line-clamp-2">Cartão instantâneo para compras globais e serviços online.</p>
+                                        
+                                        <div class="hidden md:flex items-center justify-between mt-auto">
+                                            <span class="text-indigo-600 font-bold text-xs flex items-center group-hover:gap-1.5 transition-all">Começar agora <span class="ml-1">→</span></span>
+                                        </div>
                                     </div>
                                 </a>
 
                                 <!-- EcoFlix Card -->
-                                <a href="/netflix" class="group bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 text-left relative overflow-hidden">
-                                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 flex items-center gap-5 mb-6">
-                                        <div class="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-red-200">🎬</div>
-                                        <div>
-                                            <h4 class="font-bold text-xl text-slate-800">EcoFlix</h4>
-                                            <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">PARTILHADO</span>
+                                <a href="/netflix" class="group bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center md:flex-col md:items-start gap-4 md:gap-0">
+                                    <div class="hidden md:block absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
+                                    
+                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-red-600 flex items-center justify-center text-xl md:text-2xl shadow-md shadow-red-200 rounded-xl md:rounded-2xl md:mb-4">🎬</div>
+                                    
+                                    <div class="relative z-10 flex flex-col flex-grow">
+                                        <div class="flex items-center flex-wrap gap-1.5 md:gap-2 mb-1 md:mb-2">
+                                            <h4 class="font-bold text-base md:text-lg text-slate-800 leading-none">EcoFlix</h4>
+                                            <span class="text-[9px] md:text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded uppercase leading-none">Partilhado</span>
                                         </div>
-                                    </div>
-                                    <p class="relative z-10 text-slate-600 text-sm mb-6 leading-relaxed">A melhor experiência de streaming em Angola. Contas seguras com pagamento local via IBAN.</p>
-                                    <div class="relative z-10 flex items-center justify-between">
-                                        <span class="text-red-600 font-bold text-sm flex items-center group-hover:gap-2 transition-all">Ver planos <span class="ml-2">→</span></span>
+                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight md:leading-snug mb-0 md:mb-4 line-clamp-2">Serviço de streaming premium em Angola. Pagamentos via IBAN.</p>
+                                        
+                                        <div class="hidden md:flex items-center justify-between mt-auto">
+                                            <span class="text-red-600 font-bold text-xs flex items-center group-hover:gap-1.5 transition-all">Ver planos <span class="ml-1">→</span></span>
+                                        </div>
                                     </div>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Produtos Físicos (Mock) -->
+                        <!-- Produtos Físicos: Carrossel + Ver Todos -->
                         <div>
-                            <h4 class="text-sm font-bold text-slate-400 uppercase letter-spacing-widest mb-6 flex items-center">
-                                <span class="mr-2">📦</span> Hardware & Eletrónicos
-                                <div class="flex-grow h-px bg-slate-100 ml-4"></div>
-                            </h4>
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center">
+                                    <span class="mr-2">📦</span> Hardware &amp; Eletrónicos
+                                    <div class="flex-grow h-px bg-slate-100 ml-4 w-8"></div>
+                                </h4>
+                                <button id="open-catalog-btn" class="flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-2 px-4 rounded-full transition-all duration-200 whitespace-nowrap ml-4">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                    Ver Todos
+                                </button>
+                            </div>
+                            <!-- Carrossel Marquee -->
                             <div class="relative w-full overflow-hidden mask-horizontal-gradient py-2">
                                 <div id="dynamic-products-grid" class="flex gap-5 w-full">
-                                    <!-- Os produtos serão carregados aqui dinamicamente via JS -->
+                                    <!-- Shimmer Skeletons -->
                                     <div class="flex gap-5 w-full">
-                                        <!-- Shimmer Skeleton 1 -->
                                         <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px]">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
@@ -1301,7 +1425,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Shimmer Skeleton 2 -->
                                         <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden sm:flex">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
@@ -1314,7 +1437,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Shimmer Skeleton 3 -->
                                         <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden md:flex">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
@@ -1334,6 +1456,46 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ====== MODAL: CATÁLOGO COMPLETO ====== -->
+             <div id="catalog-modal" role="dialog" aria-modal="true" aria-label="Catálogo de produtos">
+                 <div id="catalog-modal-inner">
+                     <!-- Cabeçalho do modal -->
+                     <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+                         <div>
+                             <h2 class="text-xl font-extrabold text-slate-900">🛍️ Catálogo Completo</h2>
+                             <p class="text-xs text-slate-400 font-medium mt-0.5">Hardware &amp; Eletrónicos EcoKambio</p>
+                         </div>
+                         <button id="close-catalog-btn" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors text-lg font-bold" aria-label="Fechar">
+                             ✕
+                         </button>
+                     </div>
+
+                     <!-- Barra de pesquisa + Filtros -->
+                     <div class="px-6 py-4 border-b border-slate-50 bg-slate-50">
+                         <div class="relative mb-3">
+                             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                             </svg>
+                             <input id="catalog-search" type="search" placeholder="Pesquisar produto..." class="catalog-search-input" autocomplete="off">
+                         </div>
+                         <!-- Chips de Categoria -->
+                         <div class="flex flex-wrap gap-2" id="catalog-filters">
+                             <button class="cat-chip active" data-filter="all">Todos</button>
+                             <button class="cat-chip" data-filter="Telemóveis">📱 Telemóveis</button>
+                             <button class="cat-chip" data-filter="Computadores">💻 Computadores</button>
+                             <button class="cat-chip" data-filter="Eletrónicos">🎧 Eletrónicos</button>
+                             <button class="cat-chip" data-filter="Televisores">🖥️ Telas</button>
+                         </div>
+                     </div>
+
+                     <!-- Grelha de produtos -->
+                     <div class="p-6">
+                         <div id="catalog-results-count" class="text-xs font-bold text-slate-400 mb-4"></div>
+                         <div id="catalog-full-grid"></div>
+                     </div>
+                 </div>
+             </div>
             <!-- START: Calculator Section (Import Costs) -->
             <div id="calculator-panel" class="hidden" role="tabpanel">
                 <div id="calculator-card-container" class="w-full max-w-xl mx-auto calculator-card min-h-[400px]">
@@ -1354,9 +1516,9 @@
     </main>
     <!-- Secção de Apoiadores com altura mínima para evitar CLS -->
     <!-- START: Partners/Supporters Carousel Section -->
-    <section id="supporters-section" class="w-full bg-slate-50 pt-8 md:pt-12 pb-12 md:pb-16 mt-4 md:mt-8">
+    <section id="supporters-section" class="w-full bg-slate-50 pt-3 md:pt-12 pb-6 md:pb-16 mt-2 md:mt-8">
         <div class="w-full max-w-7xl mx-auto">
-            <h2 class="text-4xl font-bold text-slate-800 text-center mb-12">Parceiros</h2>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 text-center mb-4 md:mb-12">Parceiros</h2>
         </div>
         <div id="supporters-container-wrapper" class="relative w-full group">
             <!-- Botões de navegação -->
@@ -1399,8 +1561,8 @@
     <div class="bg-slate-800 text-slate-300">
         <!-- Secção de Afiliados movida para dentro de um div -->
         <!-- START: Products/Affiliates Carousel Section -->
-        <div class="w-full max-w-7xl mx-auto px-6 pt-8 md:pt-12 pb-16">
-            <h2 class="text-3xl font-bold text-white text-center mb-12">Produtos</h2>
+        <div class="w-full max-w-7xl mx-auto px-6 pt-3 md:pt-12 pb-3 md:pb-16">
+            <h2 class="text-2xl md:text-3xl font-bold text-white text-center mb-3 md:mb-12">Produtos</h2>
             <div id="affiliate-links-wrapper" class="relative group">
                 <!-- Botão de Recuar -->
                 <button id="affiliate-prev-btn"
@@ -1408,12 +1570,9 @@
                     &#x2190;
                 </button>
 
-                <!-- Container com scroll -->
-                <div id="affiliate-links-container" class="flex overflow-x-auto no-scrollbar -mx-4 px-4">
-                    <!-- Conteúdo dinâmico com espaçamento -->
-                    <div id="affiliate-track" class="flex flex-shrink-0 gap-x-8 py-4">
-                        <!-- O conteúdo será preenchido por JavaScript -->
-                    </div>
+                <!-- O carrossel é um único elemento scrollable -->
+                <div id="affiliate-track" class="carousel-track">
+                    <!-- O conteúdo será preenchido por JavaScript -->
                 </div>
 
                 <!-- Botão de Avançar -->
@@ -1433,52 +1592,69 @@
     </main>
 
     <!-- START: Footer Section -->
-    <footer class="bg-slate-800 text-slate-400 mt-16 py-8">
+    <footer class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Footer Content -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-6 border-b border-slate-700">
+            <div class="flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-8 pb-3 border-b border-slate-700">
 
-                <!-- Brand Section -->
-                <div class="text-center md:text-left">
-                    <h3 class="text-white font-bold text-lg mb-3">EcoKambio</h3>
-                    <p class="text-slate-400 text-sm">Plataforma de Taxas de Câmbio em Angola</p>
-                    <div id="social-media-links"
-                        class="flex justify-center md:justify-start items-center space-x-4 mt-4">
+                <!-- Brand Section (Topo no mobile, Esquerda no desktop) -->
+                <div class="text-center md:text-left mb-0">
+                    <h3 class="text-white font-bold text-base md:text-lg mb-0.5 md:mb-3">EcoKambio</h3>
+                    <p class="text-slate-400 text-[11px] md:text-sm">Plataforma de Taxas de Câmbio em Angola</p>
+                    <div id="social-media-links" class="flex justify-center md:justify-start items-center space-x-3 mt-2 md:mt-4">
                         <!-- Os links sociais serão carregados aqui pelo main.js -->
                     </div>
                 </div>
 
-                <!-- Links Section -->
-                <div class="text-center">
-                    <h3 class="text-white font-semibold text-sm mb-3">Links Úteis</h3>
-                    <nav class="flex flex-col space-y-2 text-sm">
-                        <a href="/sobre" class="text-slate-400 hover:text-white transition-colors">Sobre Nós</a>
-                        <a href="/fundadores.html"
-                            class="text-slate-400 hover:text-white transition-colors">Fundadores</a>
-                        <a href="/faq.html"
-                            class="text-slate-400 hover:text-white transition-colors">FAQ</a>
-                    </nav>
-                </div>
+                <!-- Agrupador Central (Linhas no Mobile, Colunas no Desktop) -->
+                <div class="flex flex-col md:col-span-2 md:grid md:grid-cols-2 md:gap-8">
+                    
+                    <!-- Mobile: Linha 1 (FAQ, Termos, Privacidade) | Desktop: Links Section -->
+                    <div class="flex justify-center items-center gap-2 md:block md:text-center text-[11px] md:text-sm text-slate-400 mt-1 md:mt-0">
+                        <h3 class="hidden md:block text-white font-semibold mb-3">Links Úteis</h3>
+                        
+                        <!-- Desktop apenas -->
+                        <nav class="hidden md:flex flex-col space-y-2">
+                            <a href="/sobre" class="hover:text-white transition-colors">Sobre Nós</a>
+                            <a href="/fundadores.html" class="hover:text-white transition-colors">Fundadores</a>
+                            <a href="/faq.html" class="hover:text-white transition-colors">FAQ</a>
+                        </nav>
+                        
+                        <!-- Mobile apenas (Linha 1) -->
+                        <a href="/faq.html" class="md:hidden hover:text-white transition-colors">FAQ</a>
+                        <span class="md:hidden text-slate-600 px-1">•</span>
+                        <a href="/termos" class="md:hidden hover:text-white transition-colors">Termos</a>
+                        <span class="md:hidden text-slate-600 px-1">•</span>
+                        <a href="/privacidade" class="md:hidden hover:text-white transition-colors">Privacidade</a>
+                    </div>
 
-                <!-- Legal Section -->
-                <div class="text-center md:text-right">
-                    <h3 class="text-white font-semibold text-sm mb-3">Legal</h3>
-                    <nav class="flex flex-col space-y-2 text-sm">
-                        <a href="/termos" class="text-slate-400 hover:text-white transition-colors">Termos e
-                            Condições</a>
-                        <a href="/privacidade" class="text-slate-400 hover:text-white transition-colors">Política de
-                            Privacidade</a>
-                    </nav>
-                    <div id="footer-contact-info" class="mt-4 text-slate-400 text-xs">
-                        <!-- Informações de contato carregadas via JS -->
+                    <!-- Mobile: Linha 2 (Sobre Nós, Email) | Desktop: Legal Section -->
+                    <div class="flex justify-center items-center gap-2 md:block md:text-right text-[11px] md:text-sm text-slate-400 mt-1 md:mt-0">
+                        <h3 class="hidden md:block text-white font-semibold mb-3">Legal</h3>
+                        
+                        <!-- Desktop apenas -->
+                        <nav class="hidden md:flex flex-col space-y-2 items-end">
+                            <a href="/termos" class="hover:text-white transition-colors">Termos e Condições</a>
+                            <a href="/privacidade" class="hover:text-white transition-colors">Política de Privacidade</a>
+                        </nav>
+                        
+                        <!-- Mobile apenas (Linha 2) -->
+                        <a href="/sobre" class="md:hidden hover:text-white transition-colors">Sobre Nós</a>
+                        <span class="md:hidden text-slate-600 px-1">•</span>
+                        <a href="mailto:suporte@ecokambio.com" class="md:hidden hover:text-white transition-colors font-medium">suporte@ecokambio.com</a>
+
+                        <!-- JS Info Contactos (só Desktop, em mobile usamos o suporte inline acima) -->
+                        <div id="footer-contact-info" class="hidden md:block mt-3 text-xs">
+                            <!-- Informações de contato carregadas via JS -->
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Copyright -->
-            <div class="py-6 text-center">
-                <p class="text-slate-500 text-xs">
-                    © <span id="current-year">2025</span> EcoKambio · Moko Tech, Sociedade por Quotas (NIF: 5002764768)
+            <div class="py-2 text-center">
+                <p class="text-slate-500 text-[10px] md:text-xs">
+                    © <span id="current-year">2025</span> EcoKambio · Moko Tech, Reg. NIF: 5002764768
                 </p>
             </div>
 
@@ -1526,7 +1702,7 @@
             updateSelectedBank(bankData) { this.selectedBank = bankData; this._listeners.forEach(fn => fn(bankData)); }
         };
 
-        const currencyFlags = { USD: '🇺🇸', EUR: '🇪🇺', AOA: '🇦🇴', USDT: '🪙' };
+        const currencyFlags = { USD: '🇺🇸', EUR: '🇪🇺', AOA: '🇦🇴', USDT: '🪙', ZAR: '🇿🇦', BRL: '🇧🇷', GBP: '🇬🇧' };
 
         // Safe gtag wrapper to prevent errors when GA hasn't loaded
         function safeGtag(...args) {
@@ -1709,9 +1885,30 @@
                     const usd_equivalence = bank.usd_rate ? formatNumber(100 * bank.usd_rate) : 'N/A';
                     const eur_equivalence = bank.eur_rate ? formatNumber(100 * bank.eur_rate) : 'N/A';
                     return `
-                        <div class="p-4 rounded-xl border-l-4 border-theme-${themeCode} bg-theme-${themeCode}-faded shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full fade-in">
-                            <div>
-                                <p class="font-bold text-lg text-gray-800">${bank.code}</p><p class="text-xs text-gray-600">${bank.name}</p>
+                        <div class="p-3 md:p-4 rounded-xl border-l-4 border-theme-${themeCode} bg-theme-${themeCode}-faded shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 fade-in">
+                            <!-- VISÃO MOBILE (Horizontal & Ultra-compacta) -->
+                            <div class="md:hidden flex items-center justify-between">
+                                <div class="flex flex-col pr-2 w-1/3">
+                                    <span class="font-bold text-base text-gray-800">${bank.code}</span>
+                                    <span class="text-[10px] text-gray-500 leading-tight truncate" title="${bank.name}">${bank.name}</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-bold text-gray-400">USD</span>
+                                        <span class="text-sm font-bold text-theme-${themeCode} font-mono">${formatNumber(bank.usd_rate)}</span>
+                                    </div>
+                                    <div class="w-px h-6 bg-gray-200"></div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-bold text-gray-400">EUR</span>
+                                        <span class="text-sm font-bold text-theme-${themeCode} font-mono">${formatNumber(bank.eur_rate)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VISÃO DESKTOP (Layout Clássico) -->
+                            <div class="hidden md:flex flex-col justify-between h-full">
+                                <p class="font-bold text-lg text-gray-800">${bank.code}</p>
+                                <p class="text-xs text-gray-600">${bank.name}</p>
                                 <div class="space-y-4 mt-4">
                                     <div>
                                         <div class="flex justify-between items-baseline"><span class="text-sm font-semibold text-gray-600">${currencyFlags.USD} USD/AOA</span><span class="text-lg font-bold text-theme-${themeCode} font-mono">${formatNumber(bank.usd_rate)}</span></div>
@@ -1729,15 +1926,37 @@
                 // Add Binance card for informational display (not for calculator)
                 const binance = banks.find(b => b.code === 'BINANCE');
                 if (binance) {
-                    // Get USDT rates from exchange_rates
                     const usdtAoa = binance.exchange_rates?.find(r => r.currency_pair === 'USDT/AOA')?.sell_rate;
                     const usdtUsd = binance.exchange_rates?.find(r => r.currency_pair === 'USDT/USD')?.sell_rate;
                     const usdtEur = binance.exchange_rates?.find(r => r.currency_pair === 'USDT/EUR')?.sell_rate;
 
                     if (usdtAoa || usdtUsd || usdtEur) {
                         gridContainer.innerHTML += `
-                        <div class="p-4 rounded-xl border-l-4 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full fade-in">
-                            <div>
+                        <div class="p-3 md:p-4 rounded-xl border-l-4 border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 fade-in">
+                            <!-- VISÃO MOBILE BINANCE -->
+                            <div class="md:hidden flex items-center justify-between">
+                                <div class="flex flex-col w-1/3">
+                                    <span class="font-bold text-base text-gray-800">Binance</span>
+                                    <span class="text-[10px] text-gray-500 leading-tight">USDT</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    ${usdtAoa ? `
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-bold text-gray-400">USDT/AOA</span>
+                                        <span class="text-sm font-bold text-green-600 font-mono">${formatNumber(usdtAoa)}</span>
+                                    </div>` : ''}
+                                    ${usdtAoa && usdtUsd ? `<div class="w-px h-6 bg-gray-200"></div>` : ''}
+                                    ${usdtUsd ? `
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-bold text-gray-400">USDT/USD</span>
+                                        <span class="text-sm font-bold text-green-600 font-mono">${usdtUsd.toFixed(4)}</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+
+                            <!-- VISÃO DESKTOP BINANCE -->
+                            <div class="hidden md:block">
                                 <p class="font-bold text-lg text-gray-800">Binance</p>
                                 <p class="text-xs text-gray-600 mb-4">USDT</p>
                                 <div class="space-y-3">
@@ -1794,7 +2013,7 @@
                     }
                 }
 
-                const requiredPairs = ['USD/AOA', 'EUR/AOA', 'USDT/AOA'];
+                const requiredPairs = ['USD/AOA', 'EUR/AOA', 'USDT/AOA', 'ZAR/AOA', 'BRL/AOA', 'GBP/AOA'];
 
                 if (!allRates || allRates.length === 0) {
                     gridContainer.innerHTML = '<p class="col-span-full text-center text-slate-500 py-8">Nenhuma taxa disponível.</p>';
@@ -1811,22 +2030,52 @@
                         const sellRate = item.sell_rate || item.rate;
 
                         return `
-                            <div class="bg-white/80 border border-orange-200 p-4 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 fade-in">
-                                <p class="text-sm text-gray-600 font-bold mb-2">${fromFlag} ${from} / ${toFlag} ${to}</p>
-                                <div class="my-2">
-                                    <span class="text-2xl font-bold text-emerald-600 font-mono">${formatNumber(sellRate)}</span>
+                            <div class="bg-white/80 border border-orange-200 p-3 md:p-4 rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 fade-in">
+                                <!-- VISÃO MOBILE (Horizontal & Ultra-compacta) -->
+                                <div class="md:hidden flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg leading-none">${fromFlag}</span>
+                                        <span class="font-bold text-base text-gray-800">${from}</span>
+                                    </div>
+                                    <div class="flex flex-col text-right">
+                                        <span class="text-[9px] font-bold text-gray-400">/ ${to}</span>
+                                        <span class="text-sm font-bold text-emerald-600 font-mono">${formatNumber(sellRate)}</span>
+                                    </div>
                                 </div>
-                                <div class="mt-3 pt-3 border-t border-orange-200">
-                                    <p class="text-xs text-gray-600">100 ${from} ≈ ${formatNumber(100 * sellRate)} ${to}</p>
+
+                                <!-- VISÃO DESKTOP (Layout Clássico) -->
+                                <div class="hidden md:block">
+                                    <p class="text-sm text-gray-600 font-bold mb-2">${fromFlag} ${from} / ${toFlag} ${to}</p>
+                                    <div class="my-2">
+                                        <span class="text-2xl font-bold text-emerald-600 font-mono">${formatNumber(sellRate)}</span>
+                                    </div>
+                                    <div class="mt-3 pt-3 border-t border-orange-200">
+                                        <p class="text-xs text-gray-600">100 ${from} ≈ ${formatNumber(100 * sellRate)} ${to}</p>
+                                    </div>
                                 </div>
                             </div>`;
                     }
                     return `
-                        <div class="bg-white/40 border border-orange-200 p-4 rounded-xl opacity-60 fade-in">
-                            <p class="text-sm text-gray-600 font-bold mb-2">${fromFlag} ${from} / ${toFlag} ${to}</p>
-                            <p class="text-2xl font-bold text-gray-400 mt-1">N/A</p>
-                            <div class="mt-3 pt-3 border-t border-orange-200">
-                                <p class="text-xs text-gray-400">Dados indisponíveis</p>
+                        <div class="bg-white/40 border border-orange-200 p-3 md:p-4 rounded-xl opacity-60 fade-in">
+                            <!-- VISÃO MOBILE (Horizontal & Ultra-compacta) -->
+                            <div class="md:hidden flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg leading-none">${fromFlag}</span>
+                                    <span class="font-bold text-base text-gray-800">${from}</span>
+                                </div>
+                                <div class="flex flex-col text-right">
+                                    <span class="text-[9px] font-bold text-gray-400">/ ${to}</span>
+                                    <span class="text-sm font-bold text-gray-400 font-mono">N/A</span>
+                                </div>
+                            </div>
+
+                            <!-- VISÃO DESKTOP -->
+                            <div class="hidden md:block">
+                                <p class="text-sm text-gray-600 font-bold mb-2">${fromFlag} ${from} / ${toFlag} ${to}</p>
+                                <p class="text-2xl font-bold text-gray-400 mt-1">N/A</p>
+                                <div class="mt-3 pt-3 border-t border-orange-200">
+                                    <p class="text-xs text-gray-400">Dados indisponíveis</p>
+                                </div>
                             </div>
                         </div>`;
                 }).join('');
@@ -2383,6 +2632,71 @@
             loadFooterInfo();
 
 
+            // === Carrossel Infinito Suave (requestAnimationFrame) ===
+            function setupAutoScroll() {
+                const tracks = [
+                    ...document.querySelectorAll('.products-marquee-track'),
+                    document.getElementById('affiliate-track')
+                ].filter(Boolean);
+                
+                tracks.forEach(track => {
+                    // Duplicar os cards para criar ilusão de loop infinito
+                    const originals = [...track.children];
+                    if (originals.length < 2) return;
+                    originals.forEach(card => track.appendChild(card.cloneNode(true)));
+                    
+                    let isPaused = false;
+                    let rafId;
+                    const speed = 0.8; // px por frame de forma contínua
+                    
+                    // Desliga o `snap` nativo para permitir animação milimétrica sem bloqueios
+                    track.style.scrollSnapType = 'none';
+                    
+                    const animate = () => {
+                        if (!isPaused) {
+                            track.scrollLeft += speed;
+                            // Reset invisível quando chega à metade (início dos clones)
+                            if (track.scrollLeft >= track.scrollWidth / 2) {
+                                track.scrollLeft = 0;
+                            }
+                        }
+                        rafId = requestAnimationFrame(animate);
+                    };
+                    
+                    // Lógica de Retoma Inteligente
+                    const handleInteraction = () => { 
+                        isPaused = true; 
+                        track.style.scrollSnapType = 'x mandatory'; // Ativa o Snap para movimento humano
+                    };
+                    const handleRelease = () => {
+                        setTimeout(() => { 
+                            isPaused = false; 
+                            track.style.scrollSnapType = 'none'; // Liberta o Snap para modo automático
+                        }, 2000);
+                    };
+                    
+                    track.addEventListener('mouseenter', handleInteraction);
+                    track.addEventListener('mouseleave', handleRelease);
+                    track.addEventListener('touchstart', handleInteraction, { passive: true });
+                    track.addEventListener('touchend', handleRelease, { passive: true });
+                    // Adiciona scroll event para reagir quando se desliza num touchpad
+                    track.addEventListener('wheel', handleInteraction, { passive: true });
+                    
+                    let scrollTimeout;
+                    track.addEventListener('scroll', () => {
+                        if (isPaused) {
+                            clearTimeout(scrollTimeout);
+                            scrollTimeout = setTimeout(handleRelease, 2000);
+                        }
+                    });
+                    
+                    rafId = requestAnimationFrame(animate);
+                });
+            }
+            
+            // Iniciar o auto-slider assim que possível
+            setTimeout(setupAutoScroll, 1000);
+            
             logActivity('page_view');
         }
 
@@ -2444,7 +2758,6 @@
 
         async function loadAffiliateLinks() {
             const track = document.getElementById('affiliate-track');
-            const container = document.getElementById('affiliate-links-container'); // Container com scroll
             const { data, error } = await dbClient // A query é feita aqui
 
             track.innerHTML = Array(4).fill(0).map(() => `
@@ -2509,7 +2822,7 @@
                 }
 
                 return `<a href="details.html?id=${link.id}" 
-                       class="affiliate-link-item group block bg-slate-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 w-48 md:w-56 flex-shrink-0"
+                       class="affiliate-link-item affiliate-card group block bg-slate-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex-shrink-0"
                        data-affiliate-id="${link.id}" 
                        data-product-title="${link.title}">
                         <img src="${link.image_url || '/assets/error-state.svg'}" alt="Imagem de ${link.title}" class="w-full h-32 object-cover group-hover:opacity-80 transition-opacity bg-slate-600" loading="lazy" decoding="async" width="224" height="128" onerror="this.onerror=null; this.src='/assets/error-state.svg'; this.classList.add('p-4');">
@@ -2533,8 +2846,8 @@
             void track.offsetWidth; // Force reflow
             track.classList.add('loaded-fade-in');
             
-            // Duplica o conteúdo para o efeito de loop infinito
-            track.innerHTML = linksHTML + linksHTML;
+            // Injeta os cards no carrossel (sem duplicar)
+            track.innerHTML = linksHTML;
 
             // Adiciona event listeners para os links de afiliados
             track.querySelectorAll('.affiliate-link-item').forEach(link => {
@@ -2598,13 +2911,18 @@
 
             const slidesWrapper = document.getElementById('supporter-slides-wrapper');
             if (slidesWrapper) {
-                slidesWrapper.classList.remove('loaded-fade-in');
+                slidesWrapper.classList.remove('loaded-fade-in', 'transition-transform');
+                slidesWrapper.style.transition = 'none';
+                slidesWrapper.style.overflowX = 'auto';
+                slidesWrapper.style.scrollSnapType = 'x mandatory';
+                slidesWrapper.style.scrollBehavior = 'smooth';
+                slidesWrapper.style.scrollbarWidth = 'none';
                 void slidesWrapper.offsetWidth; // Force reflow
                 slidesWrapper.classList.add('loaded-fade-in');
             }
 
             const bannersHTML = data.map((supporter, index) => `
-                <div class="supporter-slide flex-shrink-0 w-full h-full px-6" data-slide="${index}">
+                <div class="supporter-slide flex-shrink-0 w-full h-full px-6" style="scroll-snap-align: center;" data-slide="${index}">
                     <a href="${supporter.referral_url || supporter.affiliate_link || supporter.website_url}" target="_blank" rel="noopener sponsored"
                        class="supporter-link block w-full h-full"
                        data-supporter-id="${supporter.id}" data-supporter-name="${supporter.name}">
@@ -2643,9 +2961,20 @@
                 if (index < 0) index = slides.length - 1;
 
                 currentSlide = index;
-                slidesWrapper.style.transform = `translateX(${-currentSlide * 100}%)`;
+                if (slidesWrapper) {
+                    slidesWrapper.scrollTo({ left: index * slidesWrapper.clientWidth, behavior: 'smooth' });
+                }
                 updateDots();
             }
+
+            slidesWrapper.addEventListener('scroll', () => {
+                // Ao rolar (manual ou auto), atualizar os dots baseando na posição
+                const newIndex = Math.round(slidesWrapper.scrollLeft / slidesWrapper.offsetWidth);
+                if (newIndex >= 0 && newIndex < slides.length && newIndex !== currentSlide) {
+                    currentSlide = newIndex;
+                    updateDots();
+                }
+            }, { passive: true });
 
             // Cria indicadores
             indicators.innerHTML = data.map((_, index) => `
@@ -2692,9 +3021,11 @@
                 });
             });
 
-            // Pausa no hover
+            // Pausa no hover e touch
             carouselContainer.addEventListener('mouseenter', stopSlideshow);
             carouselContainer.addEventListener('mouseleave', startSlideshow);
+            slidesWrapper.addEventListener('touchstart', stopSlideshow, { passive: true });
+            slidesWrapper.addEventListener('touchend', () => { setTimeout(startSlideshow, 2000); }, { passive: true });
 
             // Adiciona event listeners para os links
             slidesWrapper.querySelectorAll('.supporter-link').forEach(link => {
@@ -2882,10 +3213,10 @@
             try {
                 const response = await fetch('products.json');
                 if (!response.ok) throw new Error('Falha ao carregar produtos.');
-                const products = await response.json();
+                window._allProducts = await response.json();
+                const products = window._allProducts;
 
                 let cardsHtml = '';
-                
                 Object.keys(products).forEach(id => {
                     const product = products[id];
                     cardsHtml += `
@@ -2906,20 +3237,101 @@
                     `;
                 });
 
-                // Implementação do Carrossel Infinito
-                gridContainer.innerHTML = `
-                    <div class="products-marquee-track">
-                        ${cardsHtml}
-                        ${cardsHtml} <!-- Duplicado com precisão para rolagem perfeita -->
-                    </div>
-                `;
+                // Carrossel Infinito
+                gridContainer.innerHTML = `<div class="products-marquee-track">${cardsHtml}${cardsHtml}</div>`;
                 gridContainer.className = "w-full cursor-grab active:cursor-grabbing";
                 gridContainer.classList.add('loaded');
+
+                // Popular a grelha do modal com todos os produtos
+                renderCatalogGrid(products, '', 'all');
+
             } catch (error) {
                 console.error('Erro ao processar catálogo:', error);
-                gridContainer.innerHTML = '<p class="w-full text-center text-red-500 py-10 text-xs font-bold w-full">Erro ao carregar catálogo. Tente atualizar a página.</p>';
+                gridContainer.innerHTML = '<p class="w-full text-center text-red-500 py-10 text-xs font-bold">Erro ao carregar catálogo. Tente atualizar a página.</p>';
             }
         }
+
+        // === LÓGICA DO MODAL DE CATÁLOGO ===
+        function renderCatalogGrid(products, query, categoryFilter) {
+            const grid = document.getElementById('catalog-full-grid');
+            const countEl = document.getElementById('catalog-results-count');
+            if (!grid) return;
+
+            const lowerQuery = query.toLowerCase().trim();
+            const entries = Object.entries(products).filter(([id, p]) => {
+                const matchesSearch = !lowerQuery ||
+                    p.name.toLowerCase().includes(lowerQuery) ||
+                    p.description.toLowerCase().includes(lowerQuery) ||
+                    p.category.toLowerCase().includes(lowerQuery);
+                const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (countEl) {
+                countEl.textContent = `${entries.length} produto${entries.length !== 1 ? 's' : ''} encontrado${entries.length !== 1 ? 's' : ''}`;
+            }
+
+            if (entries.length === 0) {
+                grid.innerHTML = '<div class="no-results">😔 Nenhum produto encontrado.<br><span class="text-slate-400 text-xs">Tente outro termo ou categoria</span></div>';
+                return;
+            }
+
+            grid.innerHTML = entries.map(([id, p]) => `
+                <a href="product-detail.html?id=${id}" class="cat-card fade-in">
+                    <div class="overflow-hidden relative">
+                        <span class="absolute top-2 left-2 z-10 ${p.badgeClass} text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-white shadow">${p.category}</span>
+                        <img src="${p.img}" alt="${p.name}" loading="lazy">
+                    </div>
+                    <div class="p-3 flex flex-col flex-grow">
+                        <h5 class="font-extrabold text-slate-800 text-xs leading-snug mb-1">${p.name}</h5>
+                        <p class="text-[10px] text-slate-500 leading-relaxed flex-grow">${p.description.substring(0, 55)}...</p>
+                        <p class="text-sm font-black text-emerald-600 mt-2 font-mono">${p.price}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function initCatalogModal() {
+            const modal  = document.getElementById('catalog-modal');
+            const openBtn  = document.getElementById('open-catalog-btn');
+            const closeBtn = document.getElementById('close-catalog-btn');
+            const searchInput = document.getElementById('catalog-search');
+            const filterBtns = document.querySelectorAll('#catalog-filters .cat-chip');
+
+            let currentFilter = 'all';
+            let currentQuery  = '';
+
+            const open = () => { modal.classList.add('open'); document.body.style.overflow = 'hidden'; };
+            const close = () => { modal.classList.remove('open'); document.body.style.overflow = ''; };
+
+            openBtn.addEventListener('click', open);
+            closeBtn.addEventListener('click', close);
+            modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+            // Pesquisa em tempo real (debounced 150ms)
+            let debounceTimer;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    currentQuery = searchInput.value;
+                    if (window._allProducts) renderCatalogGrid(window._allProducts, currentQuery, currentFilter);
+                }, 150);
+            });
+
+            // Filtros de categoria
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    if (window._allProducts) renderCatalogGrid(window._allProducts, currentQuery, currentFilter);
+                });
+            });
+        }
+
+        // Inicializar modal quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => { initCatalogModal(); });
 
         document.addEventListener('DOMContentLoaded', initializeApp);
 

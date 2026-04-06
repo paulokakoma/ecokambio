@@ -87,15 +87,55 @@ const targets = [
             let rates = [];
             try {
                 if (label === 'BAI') {
-                    await page.waitForSelector('table.table-striped', { timeout: 15000 });
+                    // Try to wait for page load fully
+                    await page.waitForNetworkIdle({ timeout: 15000 }).catch(() => { });
+                    
+                    const selectors = ['table.table-striped', 'table', '.cambio', '.taxas', '[class*="rate"]', '[class*="cambio"]'];
+                    let foundSelector = null;
+
+                    for (const selector of selectors) {
+                        try {
+                            await page.waitForSelector(selector, { timeout: 5000 });
+                            foundSelector = selector;
+                            log.info(`BAI: Found selector: ${selector}`);
+                            break;
+                        } catch (e) {}
+                    }
+
                     rates = await page.evaluate(() => {
-                        const rows = document.querySelectorAll('table.table-striped tbody tr');
-                        return Array.from(rows, row => {
-                            const cols = row.querySelectorAll('td');
-                            const currency = cols[0]?.innerText.trim().split('\n')[0];
-                            return { bank: 'BAI', currency, sell: cols[3]?.innerText.trim() };
+                        const results = [];
+                        // Strategy 1: Find tables
+                        document.querySelectorAll('table').forEach(table => {
+                            const rows = table.querySelectorAll('tr');
+                            rows.forEach(row => {
+                                const cols = row.querySelectorAll('td, th');
+                                if (cols.length >= 2) {
+                                    const currency = cols[0]?.innerText.trim().replace(/\n/g, ' ').split(' ')[0];
+                                    let sell = null;
+                                    // BAI usually has: Moeda | Compra Notas | Venda Notas | Compra Transf | Venda Transf
+                                    if (cols.length >= 4) sell = cols[3]?.innerText.trim();
+                                    else if (cols.length >= 2) sell = cols[cols.length-1]?.innerText.trim();
+                                    
+                                    if (currency && ['USD', 'EUR', 'ZAR', 'GBP'].includes(currency) && sell) {
+                                        results.push({ bank: 'BAI', currency, sell });
+                                    }
+                                }
+                            });
                         });
+
+                        // Strategy 2: Text fallback (Regex) if tables didn't yield
+                        if (results.length === 0) {
+                            const allText = document.body.innerText;
+                            const usdMatch = allText.match(/USD[^\d]*?(\d{2,}[,.]\d{2,})/i);
+                            const eurMatch = allText.match(/EUR[^\d]*?(\d{2,}[,.]\d{2,})/i);
+                            
+                            if (usdMatch) results.push({ bank: 'BAI', currency: 'USD', sell: usdMatch[1] });
+                            if (eurMatch) results.push({ bank: 'BAI', currency: 'EUR', sell: eurMatch[1] });
+                        }
+                        
+                        return results;
                     });
+
                 } else if (label === 'BFA') {
                     try {
                         await page.waitForSelector('.exchangeTaxes-table table', { timeout: 30000 });

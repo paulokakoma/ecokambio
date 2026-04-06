@@ -8,25 +8,37 @@ const supabase = createClient(
 
 async function scrapeInformalUSDT() {
     console.log('🚀 Starting Informal Market USDT Scraper...');
-    console.log('💡 Strategy: USDT/AOA = (USDT/USD from Binance) × (USD/AOA informal)');
+    console.log('💡 Strategy: Calcular USDT, ZAR, BRL, GBP com base na taxa Informal USD/AOA e taxas de câmbio da Binance');
 
     try {
-        // 1. Fetch USDT/USD rate from Binance
-        console.log('📡 Fetching USDT/USD rate from Binance...');
-        const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTUSD');
+        // 1. Fetch cross rates from Binance
+        console.log('📡 Fetching cross rates from Binance...');
+        const symbols = '["USDTUSD","USDTZAR","USDTBRL","GBPUSDT"]';
+        const binanceResponse = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`);
 
         if (!binanceResponse.ok) {
             throw new Error(`Binance API error: ${binanceResponse.status}`);
         }
 
         const binanceData = await binanceResponse.json();
-        const usdtToUsd = parseFloat(binanceData.price);
+        
+        let usdtToUsd = 0, usdtToZar = 0, usdtToBrl = 0, gbpToUsdt = 0;
+        binanceData.forEach(ticker => {
+            if (ticker.symbol === 'USDTUSD') usdtToUsd = parseFloat(ticker.price);
+            if (ticker.symbol === 'USDTZAR') usdtToZar = parseFloat(ticker.price);
+            if (ticker.symbol === 'USDTBRL') usdtToBrl = parseFloat(ticker.price);
+            if (ticker.symbol === 'GBPUSDT') gbpToUsdt = parseFloat(ticker.price);
+        });
 
-        if (!usdtToUsd || isNaN(usdtToUsd)) {
-            throw new Error('Invalid USDT/USD rate from Binance');
+        if (!usdtToUsd || !usdtToZar || !usdtToBrl || !gbpToUsdt) {
+            throw new Error('Missing rates from Binance API');
         }
 
-        console.log(`✅ USDT/USD rate: ${usdtToUsd.toFixed(4)} (1 USDT = ${usdtToUsd} USD)`);
+        console.log(`✅ Binance Rates Loaded: 
+        1 USDT = ${usdtToUsd} USD
+        1 USDT = ${usdtToZar} ZAR
+        1 USDT = ${usdtToBrl} BRL
+        1 GBP  = ${gbpToUsdt} USDT`);
 
         // 2. Get INFORMAL providers
         console.log('📊 Fetching informal market providers...');
@@ -46,7 +58,7 @@ async function scrapeInformalUSDT() {
 
         console.log(`📋 Found ${providers.length} informal market providers`);
 
-        // 3. For each provider, get USD rate and calculate USDT
+        // 3. For each provider, get USD rate and calculate CROSS rates
         let successCount = 0;
         let errorCount = 0;
 
@@ -61,37 +73,52 @@ async function scrapeInformalUSDT() {
                     .single();
 
                 if (usdError || !usdRate) {
-                    console.warn(`⚠️  No USD rate found for ${provider.code}, skipping USDT`);
+                    console.warn(`⚠️  No USD rate found for ${provider.code}, skipping cross rates`);
                     errorCount++;
                     continue;
                 }
 
-                console.log(`📈 ${provider.code} USD rates - Buy: ${usdRate.buy_rate.toFixed(2)}, Sell: ${usdRate.sell_rate.toFixed(2)}`);
+                console.log(`\n📈 ${provider.code} USD base rates - Buy: ${usdRate.buy_rate.toFixed(2)}, Sell: ${usdRate.sell_rate.toFixed(2)}`);
 
-                // Calculate USDT rates: USDT/AOA = (USDT/USD) × (USD/AOA)
-                const usdtSellRate = usdtToUsd * usdRate.sell_rate;
-                const usdtBuyRate = usdtToUsd * usdRate.buy_rate;
+                // CALCULATION LOGIC:
+                // Base: USDT/AOA = (USDT/USD) * (USD/AOA)
+                const usdtAoaSell = usdtToUsd * usdRate.sell_rate;
+                const usdtAoaBuy = usdtToUsd * usdRate.buy_rate;
 
-                console.log(`💱 ${provider.code} USDT calc: ${usdtToUsd.toFixed(4)} × ${usdRate.sell_rate.toFixed(2)} = ${usdtSellRate.toFixed(2)}`);
+                // ZAR/AOA = (USDT/AOA) / (USDT/ZAR)
+                const zarAoaSell = usdtAoaSell / usdtToZar;
+                const zarAoaBuy = usdtAoaBuy / usdtToZar;
 
-                // Upsert USDT rate
+                // BRL/AOA = (USDT/AOA) / (USDT/BRL)
+                const brlAoaSell = usdtAoaSell / usdtToBrl;
+                const brlAoaBuy = usdtAoaBuy / usdtToBrl;
+
+                // GBP/AOA = (GBP/USDT) * (USDT/AOA)
+                const gbpAoaSell = gbpToUsdt * usdtAoaSell;
+                const gbpAoaBuy = gbpToUsdt * usdtAoaBuy;
+
+                const updatedAt = new Date().toISOString();
+                const newRates = [
+                    { provider_id: provider.id, currency_pair: 'USDT/AOA', sell_rate: usdtAoaSell, buy_rate: usdtAoaBuy, updated_at: updatedAt },
+                    { provider_id: provider.id, currency_pair: 'ZAR/AOA', sell_rate: zarAoaSell, buy_rate: zarAoaBuy, updated_at: updatedAt },
+                    { provider_id: provider.id, currency_pair: 'BRL/AOA', sell_rate: brlAoaSell, buy_rate: brlAoaBuy, updated_at: updatedAt },
+                    { provider_id: provider.id, currency_pair: 'GBP/AOA', sell_rate: gbpAoaSell, buy_rate: gbpAoaBuy, updated_at: updatedAt }
+                ];
+
+                // Upsert all cross rates
                 const { error: upsertError } = await supabase
                     .from('exchange_rates')
-                    .upsert({
-                        provider_id: provider.id,
-                        currency_pair: 'USDT/AOA',
-                        sell_rate: usdtSellRate,
-                        buy_rate: usdtBuyRate,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'provider_id,currency_pair'
-                    });
+                    .upsert(newRates, { onConflict: 'provider_id,currency_pair' });
 
                 if (upsertError) {
                     console.error(`❌ Error updating ${provider.code}:`, upsertError.message);
                     errorCount++;
                 } else {
-                    console.log(`✅ Updated ${provider.code} - Buy: ${usdtBuyRate.toFixed(2)}, Sell: ${usdtSellRate.toFixed(2)}`);
+                    console.log(`✅ Updated ${provider.code} Cross Rates:
+        - USDT: ${usdtAoaSell.toFixed(2)}
+        - ZAR: ${zarAoaSell.toFixed(2)}
+        - BRL: ${brlAoaSell.toFixed(2)}
+        - GBP: ${gbpAoaSell.toFixed(2)}`);
                     successCount++;
                 }
             } catch (err) {
@@ -101,13 +128,11 @@ async function scrapeInformalUSDT() {
         }
 
         console.log('\n📊 Summary:');
-        console.log(`   ✅ Successfully updated: ${successCount} providers`);
+        console.log(`   ✅ Successfully updated cross rates for: ${successCount} providers`);
         if (errorCount > 0) {
             console.log(`   ❌ Failed/Skipped: ${errorCount} providers`);
         }
-        console.log(`   💱 USDT/USD: ${usdtToUsd.toFixed(4)}`);
-        console.log(`   📊 Source: Binance USDT/USD × Informal USD/AOA`);
-        console.log('\n✨ Informal Market USDT Scraper completed successfully!');
+        console.log('\n✨ Informal Market Cross Rates Scraper completed successfully!');
 
     } catch (error) {
         console.error('\n❌ Fatal error in Informal Market USDT Scraper:');

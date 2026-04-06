@@ -108,10 +108,5 @@ module.exports = {
     runNow: runScraper // Exportado caso se deseje forçar um teste manual
 };
 
-// Se estiver em ambiente de produção inicia automaticamente o processo
-if (process.env.NODE_ENV === 'production') {
-    job.start();
-    const msg = `🚀 AUTO-START: Agendador iniciado automaticamente em ambiente de produção às ${new Date().toISOString()}`;
-    console.log(msg);
-    logToFile(msg);
-}
+// O auto-start em produção foi removido pois o server.js já o invoca na inicialização,
+// unificando o controlo do agendador.

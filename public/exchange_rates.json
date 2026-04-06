@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-05T10:42:15.426Z",
+  "lastUpdated": "2026-04-06T08:03:40.433Z",
   "rates": [
     {
       "bank": "BFA",
@@ -75,6 +75,21 @@
       "bank": "BIC",
       "currency": "SEK",
       "sell": "98,395"
+    },
+    {
+      "bank": "BNA",
+      "currency": "USD",
+      "sell": "912,131"
+    },
+    {
+      "bank": "BNA",
+      "currency": "EUR",
+      "sell": "1051,545"
+    },
+    {
+      "bank": "BNA",
+      "currency": "ZAR",
+      "sell": "53,635"
     }
   ]
 }

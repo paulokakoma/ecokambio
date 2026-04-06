@@ -413,21 +413,19 @@ if (require.main === module) {
         logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
 
         // O Scraper Scheduler faz atualizações de taxas cambiais regularmente.
-        // Apenas correr num ambiente de Produção para não gerar spam local.
-        if (!config.isDevelopment) {
-            try {
-                const scraperScheduler = require('./webscraper/scheduler');
-                scraperScheduler.start();
-                logger.info('📅 Agendamento de scraping ativado (corre a cada 4 horas)');
-            } catch (error) {
-                logger.error('⚠️ Falha ao arrancar o agendador de scraping:', { message: error.message });
-            }
-        } else {
-            logger.info('ℹ️ Agendador de scraping desativado em desenvolvimento');
-            logger.info('   Use o comando: npm run scrape para testar de forma manual.');
+        try {
+            const scraperScheduler = require('./webscraper/scheduler');
+            scraperScheduler.start();
+            logger.info('📅 Agendamento automático de scraping ativado (corre a cada 4 horas)');
+        } catch (error) {
+            logger.error('⚠️ Falha ao arrancar o agendador de scraping:', { message: error.message });
+        }
+
+        if (config.isDevelopment) {
             logger.info(`Rotas Locais Ativas:`);
             logger.info(`  📱 Plataforma EcoKambio: http://localhost:${config.port}`);
             logger.info(`  🔐 Painel Administrativo: http://admin.localhost:${config.port}`);
+            logger.info('   Use também o comando: npm run scrape para testar o scraping fora do horário.');
         }
     }).on('error', (e) => {
         // Deteta colisão de portos (Se o terminal já tiver outro processo ativado na mesma porta)
