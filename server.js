@@ -399,8 +399,6 @@ app.use(Sentry.Handlers.errorHandler());
 app.use(errorHandler);
 
 // EcoFlix Queues (Producers)
-require('./src/netflix/services/queue.service');
-require('./src/netflix/services/sms_queue.service');
 if (process.env.REDIS_URL) {
     require('./src/netflix/services/queue.service');
     require('./src/netflix/services/sms_queue.service');
@@ -418,9 +416,10 @@ if (require.main === module) {
         logger.info(`✅ Servidor a correr na porta ${config.port}`);
         logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
 
-        // Iniciar o agendador de scraping (node-cron)
-        scheduler.start();
-        logger.info('📅 Agendador de scraping iniciado (executa a cada 4 horas)');
+        // NOTA: O agendamento via node-cron foi desativado. 
+        // Em produção, o web scraping está a ser gerido exclusivamente pelo Supercronic (Docker)
+        // que lê o ficheiro 'crontab' na raiz do projeto.
+        logger.info('📅 Agendamento via node-cron desativado (Gerido pelo Supercronic)');
 
         if (config.isDevelopment) {
             logger.info(`Rotas Locais Ativas:`);
