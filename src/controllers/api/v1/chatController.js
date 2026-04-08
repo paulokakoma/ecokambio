@@ -53,8 +53,8 @@ const chatController = {
             const contextText = documents.map(doc => doc.content).join('\n---\n');
             const sources = documents.map(doc => doc.metadata?.source).filter((v, i, a) => a.indexOf(v) === i);
 
-        // 4. Generate Response using Groq AI (Llama 3.3 70B)
-        const systemPrompt = `Você é a Ana, assistente virtual inteligente da EcoKambio. Seu foco atual é ajudar utilizadores com o Cartão Visa Virtual.
+            // 4. Generate Response using Groq AI (Llama 3.3 70B)
+            const systemPrompt = `Você é a Ana, assistente virtual inteligente da EcoKambio. Seu foco atual é ajudar utilizadores com o Cartão Visa Virtual.
 
 CONHECIMENTO ESPECIALISTA (VISA VIRTUAL):
 - O QUE É: Cartão pré-pago internacional 100% digital. ACEITO EM: Netflix, Spotify, Shein, Alibaba, Amazon, Facebook Ads, Google Ads, OpenAI, etc.
