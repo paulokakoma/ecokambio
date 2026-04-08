@@ -11,17 +11,13 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
   NODE_ENV = 'production'
   PORT = '3000'
 
-# --- DEFINIÇÃO DOS PROCESSOS ---
-[processes]
-  web = "/usr/src/app/docker-entrypoint.sh"  # Inicia Supercronic + servidor Express
-  worker = "npm run worker"                   # O processador de filas BullMQ
+# Processos removidos: O Fly.io usará o CMD padrão do Dockerfile criando apenas 1 máquina
 
-# --- CONFIGURAÇÃO DE REDE (SÓ PARA O WEB) ---
+# --- CONFIGURAÇÃO DE REDE ---
 [http_service]
-  processes = ['web'] 
   internal_port = 3000
   force_https = true
-  auto_stop_machines = 'off'
+  auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1 # Reduzido para 1 se quiser poupar, ou mantém 2 para HA
 
@@ -44,8 +40,11 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
   destination = '/usr/src/app/sessions'
   initial_size = '1gb'
 
+# Máquina Única (Faz tudo: Web + Worker + Scraper)
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
 
+# Adicionar memória SWAP para evitar que picos do Playwright matem o processo (OOM)
+swap_size_mb = 1024

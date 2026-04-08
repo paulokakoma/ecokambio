@@ -38,7 +38,7 @@ const runScraper = () => {
     // Define um tempo limite de 10 minutos (600000ms) para a extração
     const scraperProcess = exec('npm run scrape:all', {
         cwd: projectRoot,
-        timeout: 600000, // 10 minutos
+        timeout: 1800000, // 30 minutos (1800000ms) para acomodar scrapers sequenciais
         maxBuffer: 1024 * 1024 * 10 // buffer de 10MB
     }, (error, stdout, stderr) => {
         const endTime = new Date();

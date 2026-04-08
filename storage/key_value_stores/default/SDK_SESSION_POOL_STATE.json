@@ -1,0 +1,87 @@
+{
+  "usableSessionsCount": 2,
+  "retiredSessionsCount": 0,
+  "sessions": [
+    {
+      "id": "session_1LNsSYpgD9",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.0",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-08T22:10:53.763Z",
+      "createdAt": "2026-04-08T21:20:53.763Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_xRrYDAnpUb",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.0",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "_gid",
+            "value": "GA1.2.1759437796.1775683258",
+            "expires": "2026-04-09T21:20:57.000Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-08T21:21:02.697Z",
+            "lastAccessed": "2026-04-08T21:21:02.697Z"
+          },
+          {
+            "key": "_gat_gtag_UA_49969076_1",
+            "value": "1",
+            "expires": "2026-04-08T21:22:00.000Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-08T21:21:02.698Z",
+            "lastAccessed": "2026-04-08T21:21:02.698Z"
+          },
+          {
+            "key": "_ga_GK7CBYM23R",
+            "value": "GS2.1.s1775683260$o1$g0$t1775683260$j60$l0$h0",
+            "expires": "2027-05-13T21:21:00.682Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-08T21:21:02.698Z",
+            "lastAccessed": "2026-04-08T21:21:02.698Z"
+          },
+          {
+            "key": "_ga",
+            "value": "GA1.1.1671334992.1775683258",
+            "expires": "2027-05-13T21:21:00.682Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-08T21:21:02.698Z",
+            "lastAccessed": "2026-04-08T21:21:02.698Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-08T22:10:53.768Z",
+      "createdAt": "2026-04-08T21:20:53.768Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    }
+  ]
+}

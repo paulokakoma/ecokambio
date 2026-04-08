@@ -133,8 +133,8 @@ app.use(subdomainMiddleware);
 // Configuração de Sessão
 let sessionStore;
 
-if (config.isDevelopment && !process.env.REDIS_URL) {
-    // Desenvolvimento local sem variável Redis: Utiliza sistema de ficheiros para guardar sessões (FileStore)
+if (!process.env.REDIS_URL) {
+    // Sem variável Redis (mesmo em Produção): Utiliza sistema de ficheiros para guardar sessões
     const FileStore = require("session-file-store")(session);
     sessionStore = new FileStore({
         path: './sessions',
@@ -401,6 +401,12 @@ app.use(errorHandler);
 // EcoFlix Queues (Producers)
 require('./src/netflix/services/queue.service');
 require('./src/netflix/services/sms_queue.service');
+if (process.env.REDIS_URL) {
+    require('./src/netflix/services/queue.service');
+    require('./src/netflix/services/sms_queue.service');
+} else {
+    logger.info('⚠️ REDIS_URL não definida: Sistema de filas EcoFlix (BullMQ) desativado no servidor web.');
+}
 
 // Scheduler
 const scheduler = require('./webscraper/scheduler');
@@ -412,14 +418,9 @@ if (require.main === module) {
         logger.info(`✅ Servidor a correr na porta ${config.port}`);
         logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
 
-        // O Scraper Scheduler faz atualizações de taxas cambiais regularmente.
-        try {
-            const scraperScheduler = require('./webscraper/scheduler');
-            scraperScheduler.start();
-            logger.info('📅 Agendamento automático de scraping ativado (corre a cada 4 horas)');
-        } catch (error) {
-            logger.error('⚠️ Falha ao arrancar o agendador de scraping:', { message: error.message });
-        }
+        // Iniciar o agendador de scraping (node-cron)
+        scheduler.start();
+        logger.info('📅 Agendador de scraping iniciado (executa a cada 4 horas)');
 
         if (config.isDevelopment) {
             logger.info(`Rotas Locais Ativas:`);

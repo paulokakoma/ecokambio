@@ -1,7 +1,6 @@
 # Crontab para Supercronic - EcoKambio
-# O scraping a cada 4 horas foi movido EXCLUSIVAMENTE para o node-cron (server.js/scheduler.js)
-# para evitar execuções simultâneas e falta de memória (OOM) em produção.
-# 0 */4 * * * cd /usr/src/app && npm run scrape:all >> /usr/src/app/logs/cron.log 2>&1
+# Executa todos os scrapers de 4 em 4 horas no minuto 0
+0 */4 * * * cd /usr/src/app && npm run scrape:all >> /usr/src/app/logs/cron.log 2>&1
 
 # Log diário dos cron jobs ativos (apenas para monitoramento)
 0 0 * * * echo "Cron jobs ativos: $(date)" >> /usr/src/app/logs/cron-status.log
