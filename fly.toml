@@ -23,7 +23,7 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
 
 
   [[http_service.checks]]
-    grace_period = '15s'  # Tempo após boot antes de iniciar health checks
+    grace_period = '30s'  # Tempo aumentado para permitir arranque lento em jnb
     interval = '20s'      # Verifica a cada 20 segundos 
     method = 'GET'
     timeout = '5s'        # Timeout de 5 segundos
@@ -33,7 +33,7 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
     type = 'tcp'
     interval = '15s'      # Check TCP a cada 15 segundos
     timeout = '3s'
-    grace_period = '10s'
+    grace_period = '20s'
 
 [mounts]
   source = 'ecokambio_sessions'

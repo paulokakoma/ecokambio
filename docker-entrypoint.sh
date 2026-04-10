@@ -30,5 +30,8 @@ else
 fi
 
 # Iniciar aplicação principal
-echo "🌐 Iniciando aplicação Node.js..."
+echo "🌐 Iniciando aplicação Node.js (Ambiente: $NODE_ENV, Porto: $PORT)..."
+
+# Usamos exec para que o Node seja o PID 1 e receba sinais corretamente
+# Mas antes, vamos garantir que o output seja enviado para stdout/stderr sem buffering excessivo
 exec npm start

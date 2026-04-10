@@ -22,7 +22,11 @@ const missingVars = requiredVars.filter(key => {
 });
 
 if (missingVars.length > 0) {
-    console.error(`Erro: Variáveis de ambiente em falta: ${missingVars.join(', ')}`);
+    console.error('================================================================');
+    console.error('❌ ERRO FATAL: Variáveis de ambiente obrigatórias em falta!');
+    console.error(`   Em falta: ${missingVars.join(', ')}`);
+    console.error('   Verifique os Secrets no Fly.io (fly secrets list)');
+    console.error('================================================================');
     process.exit(1);
 }
 

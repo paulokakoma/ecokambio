@@ -5,14 +5,15 @@ const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 const redisConfig = {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    family: process.env.NODE_ENV === 'production' ? 6 : undefined, // IPv6 for Fly.io internal network
+    family: undefined, // Let ioredis handle IPv4/IPv6 detection automatically
     retryStrategy(times) {
         const delay = Math.min(times * 50, 2000);
+        console.log(`[Redis] Reconnecting (#${times})...`);
         return delay;
     }
 };
 
-// Create a singleton connection for general caching
+console.log(`[Redis] Connecting to: ${redisUrl.includes('@') ? redisUrl.split('@')[1] : redisUrl}`);
 const redisClient = new Redis(redisUrl, redisConfig);
 
 redisClient.on('error', (err) => {

@@ -1,15 +1,38 @@
 
+console.log('🏁 [Server] Processo Node iniciado. A carregar módulos...');
+
+process.on('uncaughtException', (err) => {
+    console.error('💥 FATAL: Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 FATAL: Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
+console.log('📦 [Server] Carregando: express, http, path...');
 const express = require("express");
 const http = require("http");
-const https = require("https"); // Importar o módulo https
+const https = require("https"); 
 const path = require("path");
+
+console.log('📦 [Server] Carregando: session, compression, logger...');
 const session = require("express-session");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
+const config = require("./src/config/env");
+const logger = require("./src/config/logger");
+
+console.log('📦 [Server] Carregando: Sentry...');
+const { initSentry, Sentry } = require('./src/config/sentry');
+
+console.log('📦 [Server] Carregando: Redis Client...');
+const { redisClient } = require('./src/config/redis');
+
+console.log('📦 [Server] Carregando: Middleware e Rotas...');
 const app = express();
 const websocket = require("./src/websocket");
-const { initSentry, Sentry } = require('./src/config/sentry');
-const { redisClient } = require('./src/config/redis');
 const RedisStore = require('connect-redis').default;
 
 // Initialize Sentry
@@ -29,11 +52,6 @@ websocket.init(server);
 
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-
-// Config & Utils
-const config = require("./src/config/env");
-const logger = require("./src/config/logger");
-
 
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
