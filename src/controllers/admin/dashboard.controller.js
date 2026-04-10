@@ -3,7 +3,7 @@
  * Gerencia estatísticas e dashboard do administrador
  */
 const { dashboardService } = require('../../services');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const logger = require('../../config/logger');
 
 /**

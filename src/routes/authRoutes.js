@@ -4,7 +4,7 @@ const authController = require('../controllers/authController');
 const isAdmin = require('../middleware/auth');
 const { loginValidationRules } = require('../middleware/authValidation');
 const { handleValidationErrors } = require('../middleware/validator');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 
 router.post(
     '/login',

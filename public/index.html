@@ -27,7 +27,8 @@
         connect-src 'self' 
             https://drkjkkpzujwnkghtdokz.supabase.co 
             https://www.google-analytics.com
-            https://pagead2.googlesyndication.com; 
+            https://pagead2.googlesyndication.com
+            https://cdn.jsdelivr.net; 
         frame-src 'self' 
             https://www.googletagmanager.com
             https://googleads.g.doubleclick.net
@@ -709,13 +710,18 @@
         .carousel-track {
             display: flex;
             overflow-x: auto;
-            gap: 1rem;
+            gap: 0.75rem;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             padding: 0.5rem 0 1.5rem 0;
             /* Padding direita para o último card não colar na borda */
             padding-right: 1rem;
+        }
+        @media (min-width: 768px) {
+            .carousel-track {
+                gap: 1.25rem;
+            }
         }
         .carousel-track::-webkit-scrollbar { display: none; }
         
@@ -745,10 +751,11 @@
         .product-card-enhanced, .affiliate-card {
             width: 240px;
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .product-card-enhanced, .affiliate-card {
-                /* Exactamente 2 cards cabem na tela: 50% do ecrã menos metade do gap */
-                width: calc(50vw - 1.25rem);
+                /* Exatamente 2 cards na tela: 50% do container menos metade do gap (0.75rem = 12px -> 6px = 0.375rem) */
+                width: calc(50% - 0.375rem);
+                min-width: calc(50% - 0.375rem);
             }
         }
         .product-card:hover {
@@ -759,9 +766,14 @@
         }
         .product-image-container {
             position: relative;
-            height: 160px;
+            height: 120px;
             overflow: hidden;
             background-color: #f8fafc;
+        }
+        @media (min-width: 768px) {
+            .product-image-container {
+                height: 160px;
+            }
         }
         .product-image {
             width: 100%;
@@ -788,10 +800,15 @@
             -webkit-backdrop-filter: blur(4px);
         }
         .product-info {
-            padding: 1.25rem;
+            padding: 0.75rem;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+        }
+        @media (min-width: 768px) {
+            .product-info {
+                padding: 1.25rem;
+            }
         }
         .product-price {
             font-family: 'JetBrains Mono', monospace;
@@ -809,7 +826,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 1000;
+            z-index: 9999;
             background: rgba(15, 23, 42, 0.65);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
@@ -834,6 +851,9 @@
             box-shadow: 0 30px 80px -10px rgba(0,0,0,0.25);
             overflow: hidden;
             min-height: 400px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
         /* Barra de pesquisa */
         .catalog-search-input {
@@ -1341,7 +1361,7 @@
                 <div id="products-market-panel" role="tabpanel" class="hidden">
                     <div class="market-container p-4 sm:p-6 md:p-10">
                         <!-- Cabeçalho da Secção -->
-                        <div class="mb-12 text-center">
+                        <div class="mb-5 md:mb-12 text-center">
                             <h3 class="text-xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
                                 🛍️ <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">NOSSOS PRODUTOS</span>
                             </h3>
@@ -1386,10 +1406,10 @@
                                     <span class="mr-2">📦</span> Produtos
                                     <div class="flex-grow h-px bg-slate-100 ml-4 w-8"></div>
                                 </h4>
-                                <button id="open-catalog-btn" class="flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-2 px-4 rounded-full transition-all duration-200 whitespace-nowrap ml-4">
+                            <a href="/produtos.html" id="open-catalog-btn" class="flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-2 px-4 rounded-full transition-all duration-200 whitespace-nowrap ml-4">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                                     Ver Todos
-                                </button>
+                            </a>
                             </div>
                             <!-- Carrossel Marquee -->
                             <div class="relative w-full overflow-hidden mask-horizontal-gradient py-2">
@@ -1440,45 +1460,6 @@
                 </div>
             </div>
 
-            <!-- ====== MODAL: CATÁLOGO COMPLETO ====== -->
-             <div id="catalog-modal" role="dialog" aria-modal="true" aria-label="Catálogo de produtos">
-                 <div id="catalog-modal-inner">
-                     <!-- Cabeçalho do modal -->
-                     <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-                         <div>
-                             <h2 class="text-xl font-extrabold text-slate-900">🛍️ Catálogo Completo</h2>
-                             <p class="text-xs text-slate-400 font-medium mt-0.5">Hardware &amp; Eletrónicos EcoKambio</p>
-                         </div>
-                         <button id="close-catalog-btn" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors text-lg font-bold" aria-label="Fechar">
-                             ✕
-                         </button>
-                     </div>
-
-                     <!-- Barra de pesquisa + Filtros -->
-                     <div class="px-6 py-4 border-b border-slate-50 bg-slate-50">
-                         <div class="relative mb-3">
-                             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                             </svg>
-                             <input id="catalog-search" type="search" placeholder="Pesquisar produto..." class="catalog-search-input" autocomplete="off">
-                         </div>
-                         <!-- Chips de Categoria -->
-                         <div class="flex flex-wrap gap-2" id="catalog-filters">
-                             <button class="cat-chip active" data-filter="all">Todos</button>
-                             <button class="cat-chip" data-filter="Telemóveis">📱 Telemóveis</button>
-                             <button class="cat-chip" data-filter="Computadores">💻 Computadores</button>
-                             <button class="cat-chip" data-filter="Eletrónicos">🎧 Eletrónicos</button>
-                             <button class="cat-chip" data-filter="Televisores">🖥️ Telas</button>
-                         </div>
-                     </div>
-
-                     <!-- Grelha de produtos -->
-                     <div class="p-6">
-                         <div id="catalog-results-count" class="text-xs font-bold text-slate-400 mb-4"></div>
-                         <div id="catalog-full-grid"></div>
-                     </div>
-                 </div>
-             </div>
             <!-- START: Calculator Section (Import Costs) -->
             <div id="calculator-panel" class="hidden" role="tabpanel">
                 <div id="calculator-card-container" class="w-full max-w-xl mx-auto calculator-card min-h-[400px]">
@@ -2614,71 +2595,6 @@
             loadSupporters();
             loadFooterInfo();
 
-
-            // === Carrossel Infinito Suave (requestAnimationFrame) ===
-            function setupAutoScroll() {
-                const tracks = [
-                    ...document.querySelectorAll('.products-marquee-track'),
-                    document.getElementById('affiliate-track')
-                ].filter(Boolean);
-                
-                tracks.forEach(track => {
-                    // Duplicar os cards para criar ilusão de loop infinito
-                    const originals = [...track.children];
-                    if (originals.length < 2) return;
-                    originals.forEach(card => track.appendChild(card.cloneNode(true)));
-                    
-                    let isPaused = false;
-                    let rafId;
-                    const speed = 0.8; // px por frame de forma contínua
-                    
-                    // Desliga o `snap` nativo para permitir animação milimétrica sem bloqueios
-                    track.style.scrollSnapType = 'none';
-                    
-                    const animate = () => {
-                        if (!isPaused) {
-                            track.scrollLeft += speed;
-                            // Reset invisível quando chega à metade (início dos clones)
-                            if (track.scrollLeft >= track.scrollWidth / 2) {
-                                track.scrollLeft = 0;
-                            }
-                        }
-                        rafId = requestAnimationFrame(animate);
-                    };
-                    
-                    // Lógica de Retoma Inteligente
-                    const handleInteraction = () => { 
-                        isPaused = true; 
-                        track.style.scrollSnapType = 'x mandatory'; // Ativa o Snap para movimento humano
-                    };
-                    const handleRelease = () => {
-                        setTimeout(() => { 
-                            isPaused = false; 
-                            track.style.scrollSnapType = 'none'; // Liberta o Snap para modo automático
-                        }, 2000);
-                    };
-                    
-                    track.addEventListener('mouseenter', handleInteraction);
-                    track.addEventListener('mouseleave', handleRelease);
-                    track.addEventListener('touchstart', handleInteraction, { passive: true });
-                    track.addEventListener('touchend', handleRelease, { passive: true });
-                    // Adiciona scroll event para reagir quando se desliza num touchpad
-                    track.addEventListener('wheel', handleInteraction, { passive: true });
-                    
-                    let scrollTimeout;
-                    track.addEventListener('scroll', () => {
-                        if (isPaused) {
-                            clearTimeout(scrollTimeout);
-                            scrollTimeout = setTimeout(handleRelease, 2000);
-                        }
-                    });
-                    
-                    rafId = requestAnimationFrame(animate);
-                });
-            }
-            
-            // Iniciar o auto-slider assim que possível
-            setTimeout(setupAutoScroll, 1000);
             
             logActivity('page_view');
         }
@@ -2744,7 +2660,7 @@
             const { data, error } = await dbClient // A query é feita aqui
 
             track.innerHTML = Array(4).fill(0).map(() => `
-                <div class="block bg-slate-700 rounded-lg overflow-hidden shadow-lg w-48 md:w-56 flex-shrink-0">
+                <div class="affiliate-card block bg-slate-700 rounded-lg overflow-hidden shadow-lg flex-shrink-0">
                     <div class="skeleton-dark h-32 w-full"></div>
                     <div class="p-3">
                         <div class="skeleton-dark h-5 w-full mb-2"></div>
@@ -3203,7 +3119,7 @@
                 Object.keys(products).forEach(id => {
                     const product = products[id];
                     cardsHtml += `
-                        <a href="product-detail.html?id=${id}" class="product-card product-card-enhanced fade-in hover:z-20 relative">
+                        <a href="product-detail.html?id=${id}" class="product-card product-card-enhanced fade-in hover:z-20 relative flex-shrink-0">
                             <div class="product-image-container rounded-t-2xl">
                                 <span class="category-badge ${product.badgeClass} shadow-md">${product.category}</span>
                                 <img src="${product.img}" alt="${product.name}" class="product-image">
@@ -3221,100 +3137,15 @@
                 });
 
                 // Carrossel Infinito
-                gridContainer.innerHTML = `<div class="products-marquee-track">${cardsHtml}${cardsHtml}</div>`;
-                gridContainer.className = "w-full cursor-grab active:cursor-grabbing";
+                gridContainer.innerHTML = cardsHtml + cardsHtml;
+                gridContainer.className = "products-marquee-track carousel-track cursor-grab active:cursor-grabbing w-full";
                 gridContainer.classList.add('loaded');
-
-                // Popular a grelha do modal com todos os produtos
-                renderCatalogGrid(products, '', 'all');
 
             } catch (error) {
                 console.error('Erro ao processar catálogo:', error);
                 gridContainer.innerHTML = '<p class="w-full text-center text-red-500 py-10 text-xs font-bold">Erro ao carregar catálogo. Tente atualizar a página.</p>';
             }
         }
-
-        // === LÓGICA DO MODAL DE CATÁLOGO ===
-        function renderCatalogGrid(products, query, categoryFilter) {
-            const grid = document.getElementById('catalog-full-grid');
-            const countEl = document.getElementById('catalog-results-count');
-            if (!grid) return;
-
-            const lowerQuery = query.toLowerCase().trim();
-            const entries = Object.entries(products).filter(([id, p]) => {
-                const matchesSearch = !lowerQuery ||
-                    p.name.toLowerCase().includes(lowerQuery) ||
-                    p.description.toLowerCase().includes(lowerQuery) ||
-                    p.category.toLowerCase().includes(lowerQuery);
-                const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
-                return matchesSearch && matchesCategory;
-            });
-
-            if (countEl) {
-                countEl.textContent = `${entries.length} produto${entries.length !== 1 ? 's' : ''} encontrado${entries.length !== 1 ? 's' : ''}`;
-            }
-
-            if (entries.length === 0) {
-                grid.innerHTML = '<div class="no-results">😔 Nenhum produto encontrado.<br><span class="text-slate-400 text-xs">Tente outro termo ou categoria</span></div>';
-                return;
-            }
-
-            grid.innerHTML = entries.map(([id, p]) => `
-                <a href="product-detail.html?id=${id}" class="cat-card fade-in">
-                    <div class="overflow-hidden relative">
-                        <span class="absolute top-2 left-2 z-10 ${p.badgeClass} text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-white shadow">${p.category}</span>
-                        <img src="${p.img}" alt="${p.name}" loading="lazy">
-                    </div>
-                    <div class="p-3 flex flex-col flex-grow">
-                        <h5 class="font-extrabold text-slate-800 text-xs leading-snug mb-1">${p.name}</h5>
-                        <p class="text-[10px] text-slate-500 leading-relaxed flex-grow">${p.description.substring(0, 55)}...</p>
-                        <p class="text-sm font-black text-emerald-600 mt-2 font-mono">${p.price}</p>
-                    </div>
-                </a>
-            `).join('');
-        }
-
-        function initCatalogModal() {
-            const modal  = document.getElementById('catalog-modal');
-            const openBtn  = document.getElementById('open-catalog-btn');
-            const closeBtn = document.getElementById('close-catalog-btn');
-            const searchInput = document.getElementById('catalog-search');
-            const filterBtns = document.querySelectorAll('#catalog-filters .cat-chip');
-
-            let currentFilter = 'all';
-            let currentQuery  = '';
-
-            const open = () => { modal.classList.add('open'); document.body.style.overflow = 'hidden'; };
-            const close = () => { modal.classList.remove('open'); document.body.style.overflow = ''; };
-
-            openBtn.addEventListener('click', open);
-            closeBtn.addEventListener('click', close);
-            modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-
-            // Pesquisa em tempo real (debounced 150ms)
-            let debounceTimer;
-            searchInput.addEventListener('input', () => {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    currentQuery = searchInput.value;
-                    if (window._allProducts) renderCatalogGrid(window._allProducts, currentQuery, currentFilter);
-                }, 150);
-            });
-
-            // Filtros de categoria
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentFilter = btn.dataset.filter;
-                    if (window._allProducts) renderCatalogGrid(window._allProducts, currentQuery, currentFilter);
-                });
-            });
-        }
-
-        // Inicializar modal quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', () => { initCatalogModal(); });
 
         document.addEventListener('DOMContentLoaded', initializeApp);
 

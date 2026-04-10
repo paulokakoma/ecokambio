@@ -4,7 +4,7 @@
  */
 const { affiliateLinkService } = require('../../services');
 const { affiliateLinkRepository } = require('../../repositories');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const { AppError } = require('../../middleware/errorHandler');
 
 /**

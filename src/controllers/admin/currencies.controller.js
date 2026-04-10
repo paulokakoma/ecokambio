@@ -4,7 +4,7 @@
  */
 const { currencyService } = require('../../services');
 const { currencyRepository } = require('../../repositories');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const { AppError } = require('../../middleware/errorHandler');
 
 /**

@@ -3,7 +3,7 @@
  * Gerencia configurações do sistema
  */
 const { settingsService } = require('../../services');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const { AppError } = require('../../middleware/errorHandler');
 const sharp = require('sharp');
 const path = require('path');

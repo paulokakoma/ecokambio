@@ -4,7 +4,7 @@
  */
 const { rateProviderService } = require('../../services');
 const { rateProviderRepository } = require('../../repositories');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const { AppError } = require('../../middleware/errorHandler');
 const logger = require('../../config/logger');
 

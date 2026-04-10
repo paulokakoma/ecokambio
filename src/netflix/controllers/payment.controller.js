@@ -3,11 +3,22 @@
  * Handles HTTP requests for payments (AppyPay, Webhooks, Status Checks)
  */
 
+const crypto = require('crypto');
 const supabase = require('../../config/supabase');
 const axios = require('axios');
 const paymentService = require('../services/payment.service');
-const { verifySignature } = require('../../utils/crypto');
 const { redisClient } = require('../../config/redis');
+
+// Helper: Verify HMAC Signature (inline to avoid circular dependency)
+const verifySignature = (payload, signature, secret) => {
+    if (!signature || !secret) return false;
+    const hmac = crypto.createHmac('sha256', secret);
+    const digest = hmac.update(payload).digest('hex');
+    const signatureBuffer = Buffer.from(signature);
+    const digestBuffer = Buffer.from(digest);
+    if (signatureBuffer.length !== digestBuffer.length) return false;
+    return crypto.timingSafeEqual(signatureBuffer, digestBuffer);
+};
 
 const PaymentProviderFactory = require('../services/payment_factory.service');
 

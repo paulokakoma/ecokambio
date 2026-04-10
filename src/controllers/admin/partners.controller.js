@@ -3,7 +3,7 @@
  * Gerencia parceiros e clicks
  */
 const { partnerService } = require('../../services');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const logger = require('../../config/logger');
 
 /**

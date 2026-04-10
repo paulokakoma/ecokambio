@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const ecoflixController = require('./controller');
 const isAdmin = require('../middleware/auth');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 const { validateSignature } = require('../middleware/hmacSignature');
 
 // ============================================================================

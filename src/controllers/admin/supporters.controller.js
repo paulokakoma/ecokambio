@@ -4,7 +4,7 @@
  */
 const { supporterService } = require('../../services');
 const { supporterRepository } = require('../../repositories');
-const { catchAsync } = require('../../utils/catchAsync');
+const { catchAsync } = require('../../middleware/catchAsync');
 const { AppError } = require('../../middleware/errorHandler');
 const sharp = require('sharp');
 const path = require('path');

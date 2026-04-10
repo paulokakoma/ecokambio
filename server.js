@@ -38,7 +38,7 @@ const logger = require("./src/config/logger");
 // Middleware
 const subdomainMiddleware = require("./src/middleware/subdomain");
 const isAdmin = require("./src/middleware/auth");
-const { errorHandler } = require("./src/middleware/errorHandler");
+const { errorHandler, AppError } = require("./src/middleware/errorHandler");
 
 // Routes
 const authRoutes = require("./src/routes/authRoutes");
@@ -90,7 +90,8 @@ app.use(helmet({
             connectSrc: [
                 "'self'",
                 "https://drkjkkpzujwnkghtdokz.supabase.co",
-                "https://www.google-analytics.com"
+                "https://www.google-analytics.com",
+                "https://cdn.jsdelivr.net"
             ],
             frameSrc: [
                 "'self'",

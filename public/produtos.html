@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos | EcoKambio</title>
+    
+    <meta name="description" content="Explore o catálogo completo de produtos na EcoKambio. Encontre telemóveis, computadores, televisores e eletrodomésticos com os melhores preços calculados para si.">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .badge-eletronicos { background: rgba(59, 130, 246, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+        .badge-computadores { background: rgba(99, 102, 241, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+        .badge-televisores { background: rgba(236, 72, 153, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+        .badge-eletrodomesticos { background: rgba(16, 185, 129, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+        .badge-telemoveis { background: rgba(245, 158, 11, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+
+        /* Barra de pesquisa */
+        .catalog-search-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 9999px;
+            padding: 0.85rem 1.5rem 0.85rem 3.5rem;
+            outline: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            background-color: #fff;
+        }
+        .catalog-search-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+        }
+
+        /* Chips de filtro de categoria */
+        .cat-chip {
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .cat-chip.active, .cat-chip:hover {
+            background: #0f172a;
+            border-color: #0f172a;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Grelha de Produtos */
+        #catalog-full-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+        @media (min-width: 640px) { #catalog-full-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } }
+        @media (min-width: 1024px) { #catalog-full-grid { grid-template-columns: repeat(4, 1fr); gap: 2rem; } }
+
+        .cat-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .cat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+            border-color: #cbd5e1;
+        }
+        .cat-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            background-color: #f1f5f9;
+        }
+        .cat-card:hover img { transform: scale(1.08); }
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div data-include="/components/header.html" class="sticky top-0 z-50 w-full border-b border-gray-100"></div>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <!-- Cabeçalho -->
+        <div class="mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3">
+                🛍️ Catálogo Completo
+            </h1>
+            <p class="text-slate-500 mt-2 font-medium">Explore os nossos produtos com custos já estimados para si.</p>
+        </div>
+
+        <!-- Controlos: Pesquisa e Filtros -->
+        <div class="mb-10 space-y-5">
+            <div class="relative max-w-2xl">
+                <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input id="catalog-search" type="search" placeholder="O que procura hoje?" class="catalog-search-input" autocomplete="off">
+            </div>
+            
+            <div class="flex flex-wrap gap-2 md:gap-3" id="catalog-filters">
+                <button class="cat-chip active" data-filter="all">Todos</button>
+                <button class="cat-chip" data-filter="Telemóveis">📱 Telemóveis</button>
+                <button class="cat-chip" data-filter="Computadores">💻 Computadores</button>
+                <button class="cat-chip" data-filter="Eletrónicos">🎧 Eletrónicos</button>
+                <button class="cat-chip" data-filter="Televisores">🖥️ Telas</button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div>
+            <div id="catalog-results-count" class="text-sm font-bold text-slate-400 mb-6">A carregar produtos...</div>
+            <div id="catalog-full-grid"></div>
+            
+            <!-- Container de Paginação -->
+            <div id="pagination-controls" class="mt-12 flex justify-center items-center gap-2 md:gap-3"></div>
+        </div>
+
+    </main>
+
+    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8 w-full"></footer>
+
+    <script src="/js/components.js"></script>
+    <script>
+        let allProducts = {};
+        let currentFilter = 'all';
+        let currentQuery = '';
+        let currentPage = 1;
+        const itemsPerPage = 12; // Número ideal por ser divisível por 2, 3 e 4 colunas
+
+        async function init() {
+            try {
+                const response = await fetch('/products.json');
+                allProducts = await response.json();
+                renderGrid();
+                setupControls();
+            } catch (error) {
+                document.getElementById('catalog-full-grid').innerHTML = '<div class="no-results">Erro ao carregar os produtos. Tente recarregar a página.</div>';
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('catalog-full-grid');
+            const countEl = document.getElementById('catalog-results-count');
+            const paginationEl = document.getElementById('pagination-controls');
+            const lowerQuery = currentQuery.toLowerCase().trim();
+            
+            const entries = Object.entries(allProducts).filter(([id, p]) => {
+                const matchesSearch = !lowerQuery || p.name.toLowerCase().includes(lowerQuery) || p.description.toLowerCase().includes(lowerQuery) || p.category.toLowerCase().includes(lowerQuery);
+                const matchesCategory = currentFilter === 'all' || p.category === currentFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            countEl.textContent = `${entries.length} produto${entries.length !== 1 ? 's' : ''} encontrado${entries.length !== 1 ? 's' : ''}`;
+
+            if (entries.length === 0) {
+                grid.innerHTML = '<div class="no-results">😔 Nenhum produto encontrado.<br><span class="text-slate-400 text-sm mt-2 block">Tente ajustar a sua pesquisa ou os filtros.</span></div>';
+                paginationEl.innerHTML = '';
+                return;
+            }
+
+            // Lógica de Paginação
+            const totalPages = Math.ceil(entries.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const currentEntries = entries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+            grid.innerHTML = currentEntries.map(([id, p]) => `
+                <a href="/product-detail.html?id=${id}" class="cat-card fade-in">
+                    <div class="overflow-hidden relative">
+                        <span class="absolute top-3 left-3 z-10 ${p.badgeClass} text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full text-white shadow-md">${p.category}</span>
+                        <img src="${p.img}" alt="${p.name}" loading="lazy">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h5 class="font-extrabold text-slate-800 text-sm leading-snug mb-2">${p.name}</h5>
+                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">${p.description.substring(0, 60)}...</p>
+                        <p class="text-base font-black text-emerald-600 mt-3 font-mono" style="font-family: 'JetBrains Mono', monospace;">${p.price}</p>
+                    </div>
+                </a>
+            `).join('');
+            
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const paginationEl = document.getElementById('pagination-controls');
+            if (totalPages <= 1) {
+                paginationEl.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            // Botão Anterior
+            html += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-2 md:px-4 md:py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors shadow-sm" ${currentPage === 1 ? 'disabled' : ''}>Anterior</button>`;
+            
+            // Números das páginas (visíveis em ecrãs maiores)
+            html += `<div class="hidden sm:flex gap-1.5">`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    html += `<button class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-600 text-white font-bold text-sm shadow-md">${i}</button>`;
+                } else {
+                    html += `<button onclick="changePage(${i})" class="w-9 h-9 md:w-10 md:h-10 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm">${i}</button>`;
+                }
+            }
+            html += `</div>`;
+            
+            // Texto da página (visível apenas em mobile)
+            html += `<span class="sm:hidden text-sm font-medium text-slate-500 px-2">Pág ${currentPage} de ${totalPages}</span>`;
+
+            // Botão Próximo
+            html += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-2 md:px-4 md:py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors shadow-sm" ${currentPage === totalPages ? 'disabled' : ''}>Próxima</button>`;
+            paginationEl.innerHTML = html;
+        }
+
+        function setupControls() {
+            const searchInput = document.getElementById('catalog-search');
+            const filterBtns = document.querySelectorAll('#catalog-filters .cat-chip');
+            let debounceTimer;
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    currentQuery = searchInput.value;
+                    currentPage = 1; // Voltar à página 1 após pesquisar
+                    renderGrid();
+                }, 200);
+            });
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    currentPage = 1; // Voltar à página 1 após filtrar
+                    renderGrid();
+                });
+            });
+        }
+        
+        window.changePage = function(page) {
+            currentPage = page;
+            renderGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Sobe suavemente ao mudar de página
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
