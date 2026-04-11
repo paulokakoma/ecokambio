@@ -48,7 +48,7 @@
 
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-7407113762962919">
-    
+
 
 
 
@@ -499,13 +499,25 @@
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         @keyframes loadedFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .skeleton {
@@ -518,14 +530,15 @@
         .skeleton::after {
             content: "";
             position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
             transform: translateX(-100%);
-            background-image: linear-gradient(
-                90deg, 
-                rgba(255, 255, 255, 0) 0, 
-                rgba(255, 255, 255, 0.3) 50%, 
-                rgba(255, 255, 255, 0) 100%
-            );
+            background-image: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0) 0,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.5s infinite;
         }
 
@@ -539,14 +552,15 @@
         .skeleton-dark::after {
             content: "";
             position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
             transform: translateX(-100%);
-            background-image: linear-gradient(
-                90deg, 
-                rgba(255, 255, 255, 0) 0, 
-                rgba(255, 255, 255, 0.15) 50%, 
-                rgba(255, 255, 255, 0) 100%
-            );
+            background-image: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0) 0,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.5s infinite;
         }
 
@@ -705,7 +719,7 @@
         /* =====================================================
            CARROSSÉIS DE PRODUTOS & AFILIADOS - Versão Limpa 
            ===================================================== */
-        
+
         /* Contentor principal do carrossel - onde rola */
         .carousel-track {
             display: flex;
@@ -718,15 +732,19 @@
             /* Padding direita para o último card não colar na borda */
             padding-right: 1rem;
         }
+
         @media (min-width: 768px) {
             .carousel-track {
                 gap: 1.25rem;
             }
         }
-        .carousel-track::-webkit-scrollbar { display: none; }
-        
+
+        .carousel-track::-webkit-scrollbar {
+            display: none;
+        }
+
         /* Card dentro do carrossel */
-        .carousel-track > * {
+        .carousel-track>* {
             flex-shrink: 0;
             scroll-snap-align: start;
         }
@@ -737,7 +755,7 @@
             width: max-content !important;
             will-change: scroll-left;
         }
-        
+
         /* Ajuste para garantir que o contendor pai não corte a sombra do hover */
         .mask-horizontal-gradient {
             -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
@@ -750,6 +768,7 @@
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
+
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -768,42 +787,53 @@
             cursor: pointer;
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
         }
-        .product-card-enhanced, .affiliate-card {
+
+        .product-card-enhanced,
+        .affiliate-card {
             width: 240px;
         }
+
         @media (max-width: 768px) {
-            .product-card-enhanced, .affiliate-card {
+
+            .product-card-enhanced,
+            .affiliate-card {
                 /* Em carrossel marquee (max-content), largura percentual não funciona. Usamos largura fixa. */
                 width: 160px;
                 min-width: 160px;
             }
         }
+
         .product-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 25px 40px -12px rgba(15, 23, 42, 0.12);
             border-color: #cbd5e1;
             background: white;
         }
+
         .product-image-container {
             position: relative;
             height: 120px;
             overflow: hidden;
             background-color: #f8fafc;
         }
+
         @media (min-width: 768px) {
             .product-image-container {
                 height: 160px;
             }
         }
+
         .product-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .product-card:hover .product-image {
             transform: scale(1.1);
         }
+
         .category-badge {
             position: absolute;
             top: 0.75rem;
@@ -819,27 +849,55 @@
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         }
+
         .product-info {
             padding: 0.5rem 0.6rem;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
+
         @media (min-width: 768px) {
             .product-info {
                 padding: 1.25rem;
             }
         }
+
         .product-price {
             font-family: 'JetBrains Mono', monospace;
             color: #10b981;
             font-weight: 700;
         }
-        .badge-eletronicos { background: rgba(59, 130, 246, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
-        .badge-computadores { background: rgba(99, 102, 241, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
-        .badge-televisores { background: rgba(236, 72, 153, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
-        .badge-eletrodomesticos { background: rgba(16, 185, 129, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
-        .badge-telemoveis { background: rgba(245, 158, 11, 0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.2); color: white; }
+
+        .badge-eletronicos {
+            background: rgba(59, 130, 246, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .badge-computadores {
+            background: rgba(99, 102, 241, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .badge-televisores {
+            background: rgba(236, 72, 153, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .badge-eletrodomesticos {
+            background: rgba(16, 185, 129, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .badge-telemoveis {
+            background: rgba(245, 158, 11, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
 
         /* === MODAL DE CATÁLOGO === */
         #catalog-modal {
@@ -855,26 +913,37 @@
             padding: 2rem 1rem;
             overflow-y: auto;
         }
+
         #catalog-modal.open {
             display: flex;
             animation: catalog-fadein 0.25s ease-out;
         }
+
         @keyframes catalog-fadein {
-            from { opacity: 0; transform: scale(0.97); }
-            to   { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
+
         #catalog-modal-inner {
             background: #fff;
             border-radius: 2rem;
             width: 100%;
             max-width: 1100px;
-            box-shadow: 0 30px 80px -10px rgba(0,0,0,0.25);
+            box-shadow: 0 30px 80px -10px rgba(0, 0, 0, 0.25);
             overflow: hidden;
             min-height: 400px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
         }
+
         /* Barra de pesquisa */
         .catalog-search-input {
             border: 2px solid #e2e8f0;
@@ -886,10 +955,12 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             width: 100%;
         }
+
         .catalog-search-input:focus {
             border-color: #10b981;
             box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
         }
+
         /* Chips de filtro de categoria */
         .cat-chip {
             padding: 0.4rem 1rem;
@@ -905,46 +976,62 @@
             transition: all 0.15s;
             white-space: nowrap;
         }
-        .cat-chip.active, .cat-chip:hover {
+
+        .cat-chip.active,
+        .cat-chip:hover {
             background: #0f172a;
             border-color: #0f172a;
             color: #fff;
         }
+
         /* Grelha dentro do modal: 2 col mobile, 3 col tablet, 4 col desktop */
         #catalog-full-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
+
         @media (min-width: 640px) {
-            #catalog-full-grid { grid-template-columns: repeat(3, 1fr); }
+            #catalog-full-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
+
         @media (min-width: 900px) {
-            #catalog-full-grid { grid-template-columns: repeat(4, 1fr); }
+            #catalog-full-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
+
         .cat-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 1.25rem;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
             cursor: pointer;
         }
+
         .cat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
             border-color: #cbd5e1;
             background: #fff;
         }
+
         .cat-card img {
             width: 100%;
             height: 130px;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
-        .cat-card:hover img { transform: scale(1.08); }
+
+        .cat-card:hover img {
+            transform: scale(1.08);
+        }
+
         .no-results {
             grid-column: 1 / -1;
             text-align: center;
@@ -1140,8 +1227,7 @@
                         <button id="informal-market-tab-btn" role="tab"
                             aria-label="Ver taxas do mercado informal (kinguilas)"
                             class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base">Informal</button>
-                        <button id="products-market-tab-btn" role="tab"
-                            aria-label="Ver produtos disponíveis"
+                        <button id="products-market-tab-btn" role="tab" aria-label="Ver produtos disponíveis"
                             class="py-2 px-5 sm:px-8 rounded-full font-semibold transition-all duration-300 text-sm sm:text-base text-gray-600">Produtos</button>
                     </div>
                 </div>
@@ -1149,9 +1235,12 @@
                 <div id="formal-market-panel" role="tabpanel">
                     <div class="market-container p-2 sm:p-4 md:p-8">
                         <div class="mb-3 md:mb-6">
-                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏛️ MERCADO FORMAL</h3>
-                            <p id="formal-market-timestamp" class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
-                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏛️ MERCADO FORMAL
+                            </h3>
+                            <p id="formal-market-timestamp"
+                                class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
+                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -1187,8 +1276,8 @@
                                     </div>
                                     <button id="quick-converter-switch"
                                         class="p-2 md:p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
-                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                         </svg></button>
@@ -1280,9 +1369,12 @@
                 <div id="informal-market-panel" role="tabpanel" class="hidden">
                     <div class="market-container p-2 sm:p-4 md:p-8">
                         <div class="mb-3 md:mb-6">
-                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏪 MERCADO INFORMAL</h3>
-                            <p id="informal-market-timestamp" class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
-                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center">🏪 MERCADO
+                                INFORMAL</h3>
+                            <p id="informal-market-timestamp"
+                                class="text-xs md:text-sm text-gray-500 mt-1 flex items-center">
+                                <svg class="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -1293,8 +1385,8 @@
                         <!-- Conversor de Moeda para Mercado Informal -->
                         <div id="informal-converter-container"
                             class="mb-4 md:mb-8 p-3 md:p-6 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200">
-                            <h4 class="text-base md:text-lg font-bold text-gray-700 mb-2 md:mb-4">Conversor Informal <span
-                                    id="informal-converter-province-name" class="text-emerald-600"></span></h4>
+                            <h4 class="text-base md:text-lg font-bold text-gray-700 mb-2 md:mb-4">Conversor Informal
+                                <span id="informal-converter-province-name" class="text-emerald-600"></span></h4>
                             <div class="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-4 items-end">
                                 <div class="md:col-span-2">
                                     <label for="informal-converter-amount"
@@ -1319,8 +1411,8 @@
                                     </div>
                                     <button id="informal-converter-switch"
                                         class="p-2 md:p-3 mb-0.5 bg-gray-200 hover:bg-gray-300 rounded-full transition-transform duration-300 focus:outline-none"><svg
-                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                            class="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                         </svg></button>
@@ -1340,7 +1432,8 @@
                                 </div>
                             </div>
                             <div id="informal-converter-result"
-                                class="mt-2 text-center text-lg sm:text-xl md:text-2xl font-bold text-gray-800 min-h-[1.75rem] break-all"></div>
+                                class="mt-2 text-center text-lg sm:text-xl md:text-2xl font-bold text-gray-800 min-h-[1.75rem] break-all">
+                            </div>
                         </div>
 
 
@@ -1350,7 +1443,8 @@
                             <h4 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                                 <span class="mr-2">🏪</span> Mercado Informal
                             </h4>
-                            <div id="informal-rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
+                            <div id="informal-rates-grid"
+                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                                 <!-- SKELETON LOADING -->
                                 <div class="bg-white/60 border border-orange-200 p-4 rounded-xl">
                                     <div class="skeleton h-5 w-3/4 mb-2"></div>
@@ -1382,8 +1476,11 @@
                     <div class="market-container p-2 sm:p-4 md:p-8">
                         <!-- Cabeçalho da Secção -->
                         <div class="mb-4 text-center">
-                            <h3 class="text-sm md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
-                                🛍️ <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500 uppercase">NOSSOS PRODUTOS</span>
+                            <h3
+                                class="text-sm md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
+                                🛍️ <span
+                                    class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500 uppercase">NOSSOS
+                                    PRODUTOS</span>
                             </h3>
                         </div>
 
@@ -1391,28 +1488,44 @@
                         <div class="mb-6">
                             <div class="grid grid-cols-2 gap-3 md:gap-8 max-w-2xl mx-auto">
                                 <!-- Visa Virtual Card -->
-                                <a href="/visa" class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
-                                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-indigo-600 flex-shrink-0 flex items-center justify-center text-xl shadow-md shadow-indigo-200 rounded-xl md:rounded-2xl">💳</div>
+                                <a href="/visa"
+                                    class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
+                                    <div
+                                        class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700">
+                                    </div>
+                                    <div
+                                        class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-indigo-600 flex-shrink-0 flex items-center justify-center text-xl shadow-md shadow-indigo-200 rounded-xl md:rounded-2xl">
+                                        💳</div>
                                     <div class="relative z-10 flex flex-col w-full">
-                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">Visa Virtual</h4>
+                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">Visa
+                                            Virtual</h4>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[9px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">Instantâneo</span>
+                                            <span
+                                                class="text-[9px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">Instantâneo</span>
                                         </div>
-                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight line-clamp-2">Cartão para compras globais.</p>
+                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight line-clamp-2">
+                                            Cartão para compras globais.</p>
                                     </div>
                                 </a>
 
                                 <!-- EcoFlix Card -->
-                                <a href="/netflix" class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
-                                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-red-600 flex-shrink-0 flex items-center justify-center text-xl shadow-md shadow-red-200 rounded-xl md:rounded-2xl">🎬</div>
+                                <a href="/netflix"
+                                    class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
+                                    <div
+                                        class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700">
+                                    </div>
+                                    <div
+                                        class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-red-600 flex-shrink-0 flex items-center justify-center text-xl shadow-md shadow-red-200 rounded-xl md:rounded-2xl">
+                                        🎬</div>
                                     <div class="relative z-10 flex flex-col w-full">
-                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">EcoFlix</h4>
+                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">
+                                            EcoFlix</h4>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-[9px] md:text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded uppercase">Partilhado</span>
+                                            <span
+                                                class="text-[9px] md:text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded uppercase">Partilhado</span>
                                         </div>
-                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight line-clamp-2">Séries e filmes para partilhar.</p>
+                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight line-clamp-2">
+                                            Séries e filmes para partilhar.</p>
                                     </div>
                                 </a>
                             </div>
@@ -1421,21 +1534,28 @@
                         <!-- Produtos Físicos: Carrossel + Ver Todos -->
                         <div>
                             <div class="flex items-center justify-between mb-6">
-                                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center">
+                                <h4
+                                    class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center">
                                     <span class="mr-2">📦</span> Produtos
                                     <div class="flex-grow h-px bg-slate-100 ml-4 w-8"></div>
                                 </h4>
-                            <a href="/produtos.html" id="open-catalog-btn" class="flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-2 px-4 rounded-full transition-all duration-200 whitespace-nowrap ml-4">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                <a href="/produtos.html" id="open-catalog-btn"
+                                    class="flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-2 px-4 rounded-full transition-all duration-200 whitespace-nowrap ml-4">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
                                     Ver Todos
-                            </a>
+                                </a>
                             </div>
                             <!-- Carrossel Marquee -->
-                            <div class="relative w-full mask-horizontal-gradient py-2 overflow-x-auto scrollbar-hide" id="products-scroll-container">
+                            <div class="relative w-full mask-horizontal-gradient py-2 overflow-x-auto scrollbar-hide"
+                                id="products-scroll-container">
                                 <div id="dynamic-products-grid" class="flex gap-5 w-max">
                                     <!-- Shimmer Skeletons -->
                                     <div class="flex gap-5 w-full">
-                                        <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px]">
+                                        <div
+                                            class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px]">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
                                                 <div class="skeleton h-5 w-3/4 mb-3"></div>
@@ -1447,7 +1567,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden sm:flex">
+                                        <div
+                                            class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden sm:flex">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
                                                 <div class="skeleton h-5 w-3/4 mb-3"></div>
@@ -1459,7 +1580,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden md:flex">
+                                        <div
+                                            class="w-[280px] min-w-[280px] bg-white border border-slate-100 rounded-[1.5rem] p-0 shadow-sm flex-shrink-0 overflow-hidden flex flex-col h-[320px] hidden md:flex">
                                             <div class="skeleton h-[160px] w-full mb-4"></div>
                                             <div class="px-5 pb-5 flex-grow flex flex-col">
                                                 <div class="skeleton h-5 w-3/4 mb-3"></div>
@@ -1574,7 +1696,8 @@
 
     </main>
 
-    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8"></footer>
+    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8">
+    </footer>
 
     <!-- Banner de Termos e Cookies -->
     <div id="terms-banner"
@@ -1711,11 +1834,11 @@
             const formalTabBtn = document.getElementById('formal-market-tab-btn');
             const informalTabBtn = document.getElementById('informal-market-tab-btn');
             const productsTabBtn = document.getElementById('products-market-tab-btn');
-            
+
             const formalPanel = document.getElementById('formal-market-panel');
             const informalPanel = document.getElementById('informal-market-panel');
             const productsPanel = document.getElementById('products-market-panel');
-            
+
             const activeClasses = ['bg-white', 'text-[var(--theme-color)]', 'shadow-md'], inactiveClasses = ['text-gray-600'];
 
             // Painéis
@@ -1931,7 +2054,7 @@
 
                 // Combinar todas as taxas de todos os provedores (priorizando o primeiro encontrado)
                 let allRates = [];
-                 for (const provider in data) {
+                for (const provider in data) {
                     if (data[provider] && Array.isArray(data[provider])) {
                         allRates = data[provider];
                         window.informalConverterName = provider;
@@ -2134,7 +2257,7 @@
                 const calculate = () => {
                     // Fonte de dados: taxas calculadas no MarketModule
                     const informalRates = window.informalConverterRates || [];
-                    
+
                     // Limpeza e conversão do valor de entrada (AOA ou moeda estrangeira)
                     const rawValue = amountInput.value.replace(/\D/g, '');
                     const amount = parseFloat(rawValue) / 100;
@@ -2149,17 +2272,17 @@
                     let rate = 0;
                     if (from === to) {
                         rate = 1;
-                    } else if (to === 'AOA') { 
+                    } else if (to === 'AOA') {
                         // Conversão direta para Kwanza: Multiplica pelo valor de venda
                         const pair = `${from}/AOA`;
                         const rateData = provinceRates.find(r => r.pair === pair);
                         rate = rateData ? rateData.rate : 0;
-                    } else if (from === 'AOA') { 
+                    } else if (from === 'AOA') {
                         // Conversão de Kwanza para Estrangeira: Divide pelo valor de venda (1/rate)
                         const pair = `${to}/AOA`;
                         const rateData = provinceRates.find(r => r.pair === pair);
                         rate = rateData ? 1 / rateData.rate : 0;
-                    } else { 
+                    } else {
                         // Conversão cruzada (ex: USD para EUR) através do Kwanza
                         const fromToAoaPair = `${from}/AOA`;
                         const toToAoaPair = `${to}/AOA`;
@@ -2572,7 +2695,7 @@
             loadSupporters();
             loadFooterInfo();
 
-            
+
             logActivity('page_view');
         }
 
@@ -2729,7 +2852,7 @@
             track.classList.remove('loaded-fade-in');
             void track.offsetWidth; // Force reflow
             track.classList.add('loaded-fade-in');
-            
+
             // Injeta os cards no carrossel (DUPLICADO PARA LOOP INFINITO)
             track.innerHTML = linksHTML + linksHTML;
 
@@ -3096,14 +3219,14 @@
 
         function initHybridCarousel(scrollContainer, track, speed = 0.5) {
             if (!scrollContainer || !track) return;
-            
+
             let isPaused = false;
             let resumeTimer;
 
             function step() {
                 if (!isPaused) {
                     scrollContainer.scrollLeft += speed;
-                    
+
                     // Loop infinito (ajustado para conteúdo duplicado)
                     if (scrollContainer.scrollLeft >= track.scrollWidth / 2) {
                         scrollContainer.scrollLeft = 0;
@@ -3119,15 +3242,15 @@
             const pauseEvents = ['mousedown', 'touchstart', 'pointerdown'];
             const resumeEvents = ['mouseup', 'mouseleave', 'touchend', 'pointerup', 'pointercancel'];
 
-            pauseEvents.forEach(e => scrollContainer.addEventListener(e, () => { 
-                isPaused = true; 
+            pauseEvents.forEach(e => scrollContainer.addEventListener(e, () => {
+                isPaused = true;
             }, { passive: true }));
 
             resumeEvents.forEach(e => scrollContainer.addEventListener(e, () => {
                 // Esperar 2.5 segundos de inatividade para retomar o scroll automático
                 clearTimeout(resumeTimer);
-                resumeTimer = setTimeout(() => { 
-                    isPaused = false; 
+                resumeTimer = setTimeout(() => {
+                    isPaused = false;
                 }, 2500);
             }, { passive: true }));
 
@@ -3143,11 +3266,11 @@
                 scrollContainer.style.cursor = 'grabbing';
             });
 
-            window.addEventListener('mouseup', () => { 
-                isDragging = false; 
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
                 if (scrollContainer) scrollContainer.style.cursor = 'grab';
             });
-            
+
             scrollContainer.addEventListener('mouseleave', () => { isDragging = false; });
 
             scrollContainer.addEventListener('mousemove', (e) => {
@@ -3198,7 +3321,6 @@
                 initHybridCarousel(scrollContainer, gridContainer, 0.5);
 
             } catch (error) {
-            } catch (error) {
                 console.error('Erro ao processar catálogo:', error);
                 gridContainer.innerHTML = '<p class="w-full text-center text-red-500 py-10 text-xs font-bold">Erro ao carregar catálogo. Tente atualizar a página.</p>';
             }
@@ -3209,7 +3331,7 @@
     </script>
     <!-- Card rotation removed - only Netflix promo now -->
     <script src="/js/cookie-consent.js"></script>
-   
+
 
 </body>
 
