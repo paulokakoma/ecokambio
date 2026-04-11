@@ -2730,8 +2730,12 @@
             void track.offsetWidth; // Force reflow
             track.classList.add('loaded-fade-in');
             
-            // Injeta os cards no carrossel (sem duplicar)
-            track.innerHTML = linksHTML;
+            // Injeta os cards no carrossel (DUPLICADO PARA LOOP INFINITO)
+            track.innerHTML = linksHTML + linksHTML;
+
+            // Inicializar o carrossel híbrido para afiliados
+            const scrollContainer = document.getElementById('affiliate-links-wrapper');
+            initHybridCarousel(scrollContainer, track, 0.4); // Velocidade ligeiramente menor para leitura de títulos
 
             // Adiciona event listeners para os links de afiliados
             track.querySelectorAll('.affiliate-link-item').forEach(link => {
@@ -3090,6 +3094,71 @@
 
 
 
+        function initHybridCarousel(scrollContainer, track, speed = 0.5) {
+            if (!scrollContainer || !track) return;
+            
+            let isPaused = false;
+            let resumeTimer;
+
+            function step() {
+                if (!isPaused) {
+                    scrollContainer.scrollLeft += speed;
+                    
+                    // Loop infinito (ajustado para conteúdo duplicado)
+                    if (scrollContainer.scrollLeft >= track.scrollWidth / 2) {
+                        scrollContainer.scrollLeft = 0;
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+
+            // Iniciar auto-scroll
+            requestAnimationFrame(step);
+
+            // Pausar em interação (Mouse e Toque)
+            const pauseEvents = ['mousedown', 'touchstart', 'pointerdown'];
+            const resumeEvents = ['mouseup', 'mouseleave', 'touchend', 'pointerup', 'pointercancel'];
+
+            pauseEvents.forEach(e => scrollContainer.addEventListener(e, () => { 
+                isPaused = true; 
+            }, { passive: true }));
+
+            resumeEvents.forEach(e => scrollContainer.addEventListener(e, () => {
+                // Esperar 2.5 segundos de inatividade para retomar o scroll automático
+                clearTimeout(resumeTimer);
+                resumeTimer = setTimeout(() => { 
+                    isPaused = false; 
+                }, 2500);
+            }, { passive: true }));
+
+            // Suporte a drag com o mouse
+            let isDragging = false;
+            let startX;
+            let initialScrollLeft;
+
+            scrollContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.pageX - scrollContainer.offsetLeft;
+                initialScrollLeft = scrollContainer.scrollLeft;
+                scrollContainer.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mouseup', () => { 
+                isDragging = false; 
+                if (scrollContainer) scrollContainer.style.cursor = 'grab';
+            });
+            
+            scrollContainer.addEventListener('mouseleave', () => { isDragging = false; });
+
+            scrollContainer.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - scrollContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                scrollContainer.scrollLeft = initialScrollLeft - walk;
+            });
+        }
+
         async function loadProducts() {
             const gridContainer = document.getElementById('dynamic-products-grid');
             if (!gridContainer || gridContainer.classList.contains('loaded')) return;
@@ -3125,62 +3194,10 @@
                 gridContainer.innerHTML = cardsHtml + cardsHtml;
                 gridContainer.classList.add('loaded');
 
-                let isPaused = false;
-                let scrollSpeed = 0.5; // Velocidade do scroll (pixels por frame)
+                // Inicializar com a nova função global
+                initHybridCarousel(scrollContainer, gridContainer, 0.5);
 
-                function step() {
-                    if (!isPaused) {
-                        scrollContainer.scrollLeft += scrollSpeed;
-                        
-                        // Loop infinito: se chegarmos ao meio (o conteúdo original), voltamos ao zero
-                        if (scrollContainer.scrollLeft >= gridContainer.scrollWidth / 2) {
-                            scrollContainer.scrollLeft = 0;
-                        }
-                    }
-                    requestAnimationFrame(step);
-                }
-
-                // Iniciar auto-scroll
-                requestAnimationFrame(step);
-
-                // Pausar em interação (Mouse e Toque)
-                const pauseEvents = ['mousedown', 'touchstart', 'pointerdown'];
-                const resumeEvents = ['mouseup', 'mouseleave', 'touchend', 'pointerup', 'pointercancel'];
-
-                pauseEvents.forEach(e => scrollContainer.addEventListener(e, () => { 
-                    isPaused = true; 
-                }, { passive: true }));
-
-                resumeEvents.forEach(e => scrollContainer.addEventListener(e, () => {
-                    // Esperar 2.5 segundos de inatividade para retomar o scroll automático
-                    clearTimeout(scrollContainer.resumeTimer);
-                    scrollContainer.resumeTimer = setTimeout(() => { 
-                        isPaused = false; 
-                    }, 2500);
-                }, { passive: true }));
-
-                // Adicionar suporte a drag com o mouse (opcional, mas bom para UX)
-                let isDragging = false;
-                let startX;
-                let scrollLeft;
-
-                scrollContainer.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    startX = e.pageX - scrollContainer.offsetLeft;
-                    scrollLeft = scrollContainer.scrollLeft;
-                });
-
-                scrollContainer.addEventListener('mouseleave', () => { isDragging = false; });
-                scrollContainer.addEventListener('mouseup', () => { isDragging = false; });
-
-                scrollContainer.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    e.preventDefault();
-                    const x = e.pageX - scrollContainer.offsetLeft;
-                    const walk = (x - startX) * 2;
-                    scrollContainer.scrollLeft = scrollLeft - walk;
-                });
-
+            } catch (error) {
             } catch (error) {
                 console.error('Erro ao processar catálogo:', error);
                 gridContainer.innerHTML = '<p class="w-full text-center text-red-500 py-10 text-xs font-bold">Erro ao carregar catálogo. Tente atualizar a página.</p>';
