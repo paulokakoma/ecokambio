@@ -725,7 +725,6 @@
             display: flex;
             overflow-x: auto;
             gap: 0.75rem;
-            scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             padding: 0.5rem 0 1.5rem 0;
@@ -746,7 +745,6 @@
         /* Card dentro do carrossel */
         .carousel-track>* {
             flex-shrink: 0;
-            scroll-snap-align: start;
         }
 
         /* --- PROPRIEDADES DO TRACK (CONTEÚDO) --- */
@@ -2857,8 +2855,13 @@
             track.innerHTML = linksHTML + linksHTML;
 
             // Inicializar o carrossel híbrido para afiliados
-            const scrollContainer = document.getElementById('affiliate-links-wrapper');
-            initHybridCarousel(scrollContainer, track, 0.4); // Velocidade ligeiramente menor para leitura de títulos
+            initHybridCarousel(track, track, 0.4); // O container de scroll é o próprio track
+
+            // Configurar botões de avançar/recuar
+            const prevBtn = document.getElementById('affiliate-prev-btn');
+            const nextBtn = document.getElementById('affiliate-next-btn');
+            if (prevBtn) prevBtn.addEventListener('click', () => { track.scrollBy({ left: -240, behavior: 'smooth' }); });
+            if (nextBtn) nextBtn.addEventListener('click', () => { track.scrollBy({ left: 240, behavior: 'smooth' }); });
 
             // Adiciona event listeners para os links de afiliados
             track.querySelectorAll('.affiliate-link-item').forEach(link => {
