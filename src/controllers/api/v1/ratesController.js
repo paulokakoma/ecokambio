@@ -1,5 +1,5 @@
 const supabase = require('../../../config/supabase');
-const { handleSupabaseError } = require('../../../utils/errorHandler');
+const { handleSupabaseError } = require('../../../middleware/errorHandler');
 
 /**
  * Get all current exchange rates

@@ -53,7 +53,7 @@ router.delete('/:resource/:id', async (req, res) => {
     if (!tableName) return res.status(404).json({ message: "Recurso não encontrado." });
 
     const supabase = require('../config/supabase');
-    const { handleSupabaseError } = require('../utils/errorHandler');
+    const { handleSupabaseError } = require('../middleware/errorHandler');
 
     const { error } = await supabase.from(tableName).delete().eq('id', id);
     if (error) return handleSupabaseError(error, res);

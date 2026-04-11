@@ -7,6 +7,49 @@ const logger = require('../config/logger');
  * Use esta classe para erros como "item não encontrado", "input inválido", etc.
  * @extends Error
  */
+
+/**
+ * Trata erros específicos do Supabase/PostgREST.
+ * Mapeia códigos de erro comuns para status HTTP adequados.
+ */
+const handleSupabaseError = (error, res) => {
+    logger.error('Supabase Error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+    });
+
+    // Mapeamento de códigos comuns do PostgREST
+    // https://postgrest.org/en/stable/errors.html
+    let statusCode = 400;
+    let message = error.message || 'Erro na operação de base de dados';
+
+    if (error.code === 'PGRST116') {
+        statusCode = 404;
+        message = 'Recurso não encontrado.';
+    } else if (error.code === '23505') {
+        statusCode = 409;
+        message = 'Este registo já existe (conflito de unicidade).';
+    } else if (error.code === '42501') {
+        statusCode = 403;
+        message = 'Permissão negada para esta operação.';
+    }
+
+    return res.status(statusCode).json({
+        success: false,
+        error: {
+            code: error.code || 'DATABASE_ERROR',
+            message: message,
+            details: error.details || error.hint || undefined
+        },
+        meta: {
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+        }
+    });
+};
+
 class AppError extends Error {
     constructor(message, statusCode, errors = undefined) {
         super(message);
@@ -85,4 +128,4 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 
-module.exports = { errorHandler, AppError };
+module.exports = { errorHandler, AppError, handleSupabaseError };

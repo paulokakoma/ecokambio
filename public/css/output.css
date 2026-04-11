@@ -1127,6 +1127,10 @@ video {
   min-height: 100vh;
 }
 
+.min-h-\[1\.75rem\] {
+  min-height: 1.75rem;
+}
+
 .\!w-auto {
   width: auto !important;
 }
@@ -1648,6 +1652,10 @@ video {
 
 .text-nowrap {
   text-wrap: nowrap;
+}
+
+.break-all {
+  word-break: break-all;
 }
 
 .\!rounded-lg {
@@ -3567,6 +3575,11 @@ video {
   .sm\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+
+  .sm\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 

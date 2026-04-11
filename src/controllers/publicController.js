@@ -1,6 +1,6 @@
 const supabase = require("../config/supabase");
 const config = require("../config/env");
-const { handleSupabaseError } = require("../utils/errorHandler");
+const { handleSupabaseError } = require("../middleware/errorHandler");
 
 const getConfig = (req, res) => {
     res.json({
