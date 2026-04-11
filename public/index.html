@@ -800,7 +800,7 @@
             -webkit-backdrop-filter: blur(4px);
         }
         .product-info {
-            padding: 0.75rem;
+            padding: 0.5rem 0.6rem;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
@@ -1359,41 +1359,36 @@
                 </div>
                 <!-- Section: EcoKambio Products (Visa, Netflix) -->
                 <div id="products-market-panel" role="tabpanel" class="hidden">
-                    <div class="market-container p-4 sm:p-6 md:p-10">
+                    <div class="market-container p-2 sm:p-4 md:p-8">
                         <!-- Cabeçalho da Secção -->
-                        <div class="mb-5 md:mb-12 text-center">
-                            <h3 class="text-xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
-                                🛍️ <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">NOSSOS PRODUTOS</span>
+                        <div class="mb-4 text-center">
+                            <h3 class="text-sm md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-3">
+                                🛍️ <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500 uppercase">NOSSOS PRODUTOS</span>
                             </h3>
-                            <p class="text-slate-500 mt-2 max-w-sm mx-auto text-sm">O melhor catálogo à sua disposição.</p>
                         </div>
 
                         <!-- Serviços Digitais (Visa & Netflix) -->
-                        <div class="mb-16">
-                            <h4 class="text-sm font-bold text-slate-400 uppercase letter-spacing-widest mb-6 flex items-center">
-                                <span class="mr-2">⚡</span> Serviços Digitais
-                                <div class="flex-grow h-px bg-slate-100 ml-4"></div>
-                            </h4>
-                            <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-2xl mx-auto">
+                        <div class="mb-6">
+                            <div class="grid grid-cols-2 gap-3 md:gap-8 max-w-2xl mx-auto">
                                 <!-- Visa Virtual Card -->
-                                <a href="/visa" class="group bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-center text-center gap-3 aspect-square md:aspect-auto">
+                                <a href="/visa" class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 md:gap-3 md:aspect-auto">
                                     <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-indigo-600 flex items-center justify-center text-xl shadow-md shadow-indigo-200 rounded-2xl">💳</div>
+                                    <div class="relative z-10 w-10 h-10 md:w-14 md:h-14 bg-indigo-600 flex items-center justify-center text-lg md:text-xl shadow-md shadow-indigo-200 rounded-xl md:rounded-2xl">💳</div>
                                     <div class="relative z-10 flex flex-col items-center w-full">
-                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">Visa Virtual</h4>
-                                        <span class="text-[9px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase mb-2">Instantâneo</span>
-                                        <p class="text-slate-500 text-[10px] md:text-xs leading-tight line-clamp-2">Cartão para compras globais.</p>
+                                        <h4 class="font-bold text-xs md:text-lg text-slate-800 leading-none mb-1">Visa Virtual</h4>
+                                        <span class="text-[8px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase mb-1 md:mb-2">Instantâneo</span>
+                                        <p class="text-slate-500 text-[9px] md:text-xs leading-tight line-clamp-2">Cartão para compras globais.</p>
                                     </div>
                                 </a>
 
                                 <!-- EcoFlix Card -->
-                                <a href="/netflix" class="group bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-center text-center gap-3 aspect-square md:aspect-auto">
+                                <a href="/netflix" class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 md:gap-3 md:aspect-auto">
                                     <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700"></div>
-                                    <div class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-red-600 flex items-center justify-center text-xl shadow-md shadow-red-200 rounded-2xl">🎬</div>
+                                    <div class="relative z-10 w-10 h-10 md:w-14 md:h-14 bg-red-600 flex items-center justify-center text-lg md:text-xl shadow-md shadow-red-200 rounded-xl md:rounded-2xl">🎬</div>
                                     <div class="relative z-10 flex flex-col items-center w-full">
-                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">EcoFlix</h4>
-                                        <span class="text-[9px] md:text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded uppercase mb-2">Partilhado</span>
-                                        <p class="text-slate-500 text-[10px] md:text-xs leading-tight line-clamp-2">Séries e filmes para partilhar.</p>
+                                        <h4 class="font-bold text-xs md:text-lg text-slate-800 leading-none mb-1">EcoFlix</h4>
+                                        <span class="text-[8px] md:text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded uppercase mb-1 md:mb-2">Partilhado</span>
+                                        <p class="text-slate-500 text-[9px] md:text-xs leading-tight line-clamp-2">Séries e filmes para partilhar.</p>
                                     </div>
                                 </a>
                             </div>
@@ -3160,11 +3155,10 @@
                                 <img src="${product.img}" alt="${product.name}" class="product-image">
                             </div>
                             <div class="product-info relative z-10 bg-white">
-                                <h5 class="font-bold text-slate-800 mb-1">${product.name}</h5>
-                                <p class="text-[11px] leading-relaxed text-slate-500 mb-4">${product.description.substring(0, 70)}...</p>
+                                <h5 class="font-bold text-slate-800 mb-2 text-xs md:text-sm line-clamp-1">${product.name}</h5>
                                 <div class="mt-auto flex items-center justify-between">
-                                    <span class="product-price text-sm">${product.price}</span>
-                                    <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm font-bold text-lg">+</div>
+                                    <span class="product-price text-[11px] md:text-sm">${product.price}</span>
+                                    <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm font-bold text-sm md:text-lg">+</div>
                                 </div>
                             </div>
                         </a>

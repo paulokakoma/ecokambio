@@ -392,12 +392,12 @@
     <!-- NAVBAR -->
     <nav class="glass-nav fixed w-full z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
+            <div class="flex justify-between h-14 md:h-20 items-center">
                 <div class="flex items-center gap-3">
                     <!-- LOGO ESTILO NETFLIX -->
                     <div class="cursor-pointer" onclick="goHome()" title="Voltar ao Início">
-                        <h1 class="text-4xl font-black"
-                            style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 3px 3px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
+                        <h1 class="text-2xl md:text-4xl font-black"
+                            style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 2px 2px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
                             <span style="color: #E50914;">ECOFLIX</span>
                         </h1>
                     </div>
@@ -416,33 +416,33 @@
         </div>
     </nav>
 
-    <div class="h-20"></div> <!-- Espaçador para o navbar fixo -->
+    <div class="h-12 md:h-20"></div> <!-- Espaçador reduzido para o navbar fixo -->
 
-    <!-- Hero Section -->
-    <section class="container mx-auto px-4 pt-4 pb-8">
+    <!-- Hero Section - Oculta em Mobile para economizar espaço -->
+    <section class="container mx-auto px-4 pt-2 md:pt-4 pb-2 hidden md:block">
         <div class="text-center animate-fade-in">
             <h2
-                class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-brand-color via-red-500 to-red-800 bg-clip-text text-transparent inline-block">
+                class="text-2xl md:text-5xl font-bold mb-1 md:mb-4 bg-gradient-to-r from-brand-color via-red-500 to-red-800 bg-clip-text text-transparent inline-block">
                 Paga com Visa, Assiste Netflix
             </h2>
         </div>
     </section>
 
     <!-- ÁREA PRINCIPAL -->
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl relative z-10" id="app">
+    <main class="flex-grow container mx-auto px-4 py-0 md:py-8 max-w-7xl relative z-10" id="app">
 
         <!-- TELA 1: CATÁLOGO DE PLANOS -->
         <div id="step-catalog" class="block animate-fade-in">
-            <div class="text-center mb-12 mt-4">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">Planos para todos os ecrãs.</h1>
-                <p class="text-xl text-muted">Escolha a melhor opção para si. Cancele quando quiser.</p>
+            <div class="text-center mb-6 md:mb-12 mt-[10px]">
+                <h1 class="text-2xl md:text-5xl font-bold mb-2">Planos para todos os ecrãs.</h1>
+                <p class="text-base md:text-xl text-muted">Escolha a melhor opção. Cancele quando quiser.</p>
             </div>
 
             <!-- GRID DE 3 COLUNAS -->
             <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
 
                 <!-- 1. PLANO ECONÓMICO -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6">
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6">
                     <div
                         class="absolute top-0 right-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         ECONÓMICO</div>
@@ -456,19 +456,11 @@
                     </div>
                     <div class="border-t border-gray-700/20 my-4 pt-4">
                         <p class="text-muted text-xs font-bold mb-2 uppercase">Dispositivos Permitidos:</p>
-                        <div class="flex flex-col gap-2 mb-4 text-muted">
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-mobile-alt text-lg w-6 text-center text-brand"></i><span
-                                    class="text-sm">Telemóvel</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-tablet-alt text-lg w-6 text-center text-brand"></i><span
-                                    class="text-sm">Tablet</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-laptop text-lg w-6 text-center text-brand"></i><span
-                                    class="text-sm">Computador</span></div>
-                            <div class="flex items-center gap-3 opacity-40"><i
-                                    class="fas fa-tv text-lg w-6 text-center"></i><span
-                                    class="text-sm line-through">Smart TV</span></div>
+                        <div class="grid grid-cols-2 gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-2"><i class="fas fa-mobile-alt text-sm w-5 text-center text-brand"></i><span class="text-[11px]">Telemóvel</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-tablet-alt text-sm w-5 text-center text-brand"></i><span class="text-[11px]">Tablet</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-laptop text-sm w-5 text-center text-brand"></i><span class="text-[11px]">Computador</span></div>
+                            <div class="flex items-center gap-2 opacity-40"><i class="fas fa-tv text-sm w-5 text-center"></i><span class="text-[11px] line-through">Smart TV</span></div>
                         </div>
                     </div>
                     <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
@@ -486,7 +478,7 @@
                 </div>
 
                 <!-- 2. PLANO RECOMENDADO (ULTRA) -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6 transform md:-translate-y-2 border-t-4 border-t-current shadow-2xl"
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-current shadow-2xl"
                     style="border-top-color: var(--brand-color)">
                     <div class="absolute top-0 right-0 bg-brand-color text-white text-[10px] font-bold px-3 py-1 rounded-bl"
                         style="background-color: var(--brand-color)">RECOMENDADO</div>
@@ -500,16 +492,10 @@
                     </div>
                     <div class="border-t border-gray-700/20 my-4 pt-4">
                         <p class="text-xs font-bold mb-2 uppercase opacity-80">Todos os Dispositivos:</p>
-                        <div class="flex flex-col gap-2 mb-4 text-muted">
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-tv text-lg w-6 text-center text-brand"></i><span
-                                    class="text-sm font-bold" style="color: var(--text-color)">Smart TV 4K</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-laptop text-lg w-6 text-center"></i><span
-                                    class="text-sm">Computador</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-mobile-alt text-lg w-6 text-center"></i><span
-                                    class="text-sm">Telemóvel / Tablet</span></div>
+                        <div class="grid grid-cols-2 gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-2"><i class="fas fa-tv text-sm w-5 text-center text-brand"></i><span class="text-[11px] font-bold" style="color: var(--text-color)">Smart TV 4K</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-laptop text-sm w-5 text-center"></i><span class="text-[11px]">Computador</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-mobile-alt text-sm w-5 text-center"></i><span class="text-[11px]">Telemóvel / Tablet</span></div>
                         </div>
                     </div>
                     <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
@@ -527,7 +513,7 @@
                 </div>
 
                 <!-- 3. PLANO FAMÍLIA (PREMIUM) -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-6">
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6">
                     <div
                         class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         FAMÍLIA</div>
@@ -541,17 +527,10 @@
                     </div>
                     <div class="border-t border-gray-700/20 my-4 pt-4">
                         <p class="text-muted text-xs font-bold mb-2 uppercase">Exclusividades:</p>
-                        <div class="flex flex-col gap-2 mb-4 text-muted">
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-user-circle text-lg w-6 text-center"></i><span
-                                    class="text-sm font-bold" style="color: var(--text-color)">5 Perfis
-                                    Diferentes</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-users text-lg w-6 text-center"></i><span class="text-sm">4 Ecrãs
-                                    Simultâneos</span></div>
-                            <div class="flex items-center gap-3"><i
-                                    class="fas fa-home text-lg w-6 text-center"></i><span
-                                    class="text-sm">Multi-Residência</span></div>
+                        <div class="grid grid-cols-2 gap-2 mb-4 text-muted">
+                            <div class="flex items-center gap-2"><i class="fas fa-user-circle text-sm w-5 text-center"></i><span class="text-[11px] font-bold" style="color: var(--text-color)">5 Perfis</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-users text-sm w-5 text-center"></i><span class="text-[11px]">4 Ecrãs</span></div>
+                            <div class="flex items-center gap-2"><i class="fas fa-home text-sm w-5 text-center"></i><span class="text-[11px]">Multi-Casa</span></div>
                         </div>
                     </div>
                     <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
