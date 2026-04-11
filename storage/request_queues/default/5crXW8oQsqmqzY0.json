@@ -1,6 +1,6 @@
 {
 	"id": "5crXW8oQsqmqzY0",
-	"json": "{\"id\":\"5crXW8oQsqmqzY0\",\"url\":\"https://www.bfa.ao/pt/particulares/\",\"loadedUrl\":\"https://www.bfa.ao/pt/particulares/\",\"uniqueKey\":\"https://www.bfa.ao/pt/particulares\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BFA\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-10T07:31:15.274Z\"}",
+	"json": "{\"id\":\"5crXW8oQsqmqzY0\",\"url\":\"https://www.bfa.ao/pt/particulares/\",\"loadedUrl\":\"https://www.bfa.ao/pt/particulares/\",\"uniqueKey\":\"https://www.bfa.ao/pt/particulares\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BFA\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-11T14:12:22.021Z\"}",
 	"method": "GET",
 	"orderNo": null,
 	"retryCount": 0,

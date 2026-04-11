@@ -1,6 +1,6 @@
 {
 	"id": "N9jTB5mErYTvgGC",
-	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"loadedUrl\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-10T07:31:31.032Z\"}",
+	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"loadedUrl\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-11T14:13:10.405Z\"}",
 	"method": "GET",
 	"orderNo": null,
 	"retryCount": 0,

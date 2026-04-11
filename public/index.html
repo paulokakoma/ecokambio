@@ -1574,76 +1574,7 @@
 
     </main>
 
-    <!-- START: Footer Section -->
-    <footer class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Main Footer Content -->
-            <div class="flex flex-col md:grid md:grid-cols-3 gap-3 md:gap-8 pb-3 border-b border-slate-700">
-
-                <!-- Brand Section (Topo no mobile, Esquerda no desktop) -->
-                <div class="text-center md:text-left mb-0">
-                    <h3 class="text-white font-bold text-base md:text-lg mb-0.5 md:mb-3">EcoKambio</h3>
-                    <p class="text-slate-400 text-[11px] md:text-sm">Plataforma de Taxas de Câmbio em Angola</p>
-                    <div id="social-media-links" class="flex justify-center md:justify-start items-center space-x-3 mt-2 md:mt-4">
-                        <!-- Os links sociais serão carregados aqui pelo main.js -->
-                    </div>
-                </div>
-
-                <!-- Agrupador Central (Linhas no Mobile, Colunas no Desktop) -->
-                <div class="flex flex-col md:col-span-2 md:grid md:grid-cols-2 md:gap-8">
-                    
-                    <!-- Mobile: Linha 1 (FAQ, Termos, Privacidade) | Desktop: Links Section -->
-                    <div class="flex justify-center items-center gap-2 md:block md:text-center text-[11px] md:text-sm text-slate-400 mt-1 md:mt-0">
-                        <h3 class="hidden md:block text-white font-semibold mb-3">Links Úteis</h3>
-                        
-                        <!-- Desktop apenas -->
-                        <nav class="hidden md:flex flex-col space-y-2">
-                            <a href="/sobre" class="hover:text-white transition-colors">Sobre Nós</a>
-                            <a href="/fundadores.html" class="hover:text-white transition-colors">Fundadores</a>
-                            <a href="/faq.html" class="hover:text-white transition-colors">FAQ</a>
-                        </nav>
-                        
-                        <!-- Mobile apenas (Linha 1) -->
-                        <a href="/faq.html" class="md:hidden hover:text-white transition-colors">FAQ</a>
-                        <span class="md:hidden text-slate-600 px-1">•</span>
-                        <a href="/termos" class="md:hidden hover:text-white transition-colors">Termos</a>
-                        <span class="md:hidden text-slate-600 px-1">•</span>
-                        <a href="/privacidade" class="md:hidden hover:text-white transition-colors">Privacidade</a>
-                    </div>
-
-                    <!-- Mobile: Linha 2 (Sobre Nós, Email) | Desktop: Legal Section -->
-                    <div class="flex justify-center items-center gap-2 md:block md:text-right text-[11px] md:text-sm text-slate-400 mt-1 md:mt-0">
-                        <h3 class="hidden md:block text-white font-semibold mb-3">Legal</h3>
-                        
-                        <!-- Desktop apenas -->
-                        <nav class="hidden md:flex flex-col space-y-2 items-end">
-                            <a href="/termos" class="hover:text-white transition-colors">Termos e Condições</a>
-                            <a href="/privacidade" class="hover:text-white transition-colors">Política de Privacidade</a>
-                        </nav>
-                        
-                        <!-- Mobile apenas (Linha 2) -->
-                        <a href="/sobre" class="md:hidden hover:text-white transition-colors">Sobre Nós</a>
-                        <span class="md:hidden text-slate-600 px-1">•</span>
-                        <a href="mailto:suporte@ecokambio.com" class="md:hidden hover:text-white transition-colors font-medium">suporte@ecokambio.com</a>
-
-                        <!-- JS Info Contactos (só Desktop, em mobile usamos o suporte inline acima) -->
-                        <div id="footer-contact-info" class="hidden md:block mt-3 text-xs">
-                            <!-- Informações de contato carregadas via JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Copyright -->
-            <div class="py-2 text-center">
-                <p class="text-slate-500 text-[10px] md:text-xs">
-                    © <span id="current-year">2025</span> EcoKambio · Moko Tech, Reg. NIF: 5002764768
-                </p>
-            </div>
-
-            <script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>
-        </div>
-    </footer>
+    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8"></footer>
 
     <!-- Banner de Termos e Cookies -->
     <div id="terms-banner"

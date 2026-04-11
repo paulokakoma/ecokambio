@@ -48,9 +48,9 @@
 
         /* Chips de filtro de categoria */
         .cat-chip {
-            padding: 0.5rem 1.25rem;
+            padding: 0.4rem 1rem;
             border-radius: 9999px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -60,6 +60,7 @@
             color: #64748b;
             transition: all 0.2s ease;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .cat-chip.active, .cat-chip:hover {
             background: #0f172a;
@@ -96,13 +97,14 @@
         }
         .cat-card img {
             width: 100%;
-            height: 180px;
+            height: 140px;
             object-fit: cover;
             transition: transform 0.5s ease;
             background-color: #f1f5f9;
         }
-        .cat-card:hover img { transform: scale(1.08); }
-        .no-results {
+        @media (min-width: 640px) {
+            .cat-card img { height: 180px; }
+        }
             grid-column: 1 / -1;
             text-align: center;
             padding: 4rem 1rem;
@@ -120,11 +122,11 @@
     <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         
         <!-- Cabeçalho -->
-        <div class="mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3">
+        <div class="mb-6 md:mb-12">
+            <h1 class="text-xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-2 md:gap-3">
                 🛍️ Catálogo Completo
             </h1>
-            <p class="text-slate-500 mt-2 font-medium">Explore os nossos produtos com custos já estimados para si.</p>
+            <p class="text-xs md:text-base text-slate-500 mt-1 font-medium">Explore os nossos produtos com custos já estimados.</p>
         </div>
 
         <!-- Controlos: Pesquisa e Filtros -->
@@ -136,12 +138,13 @@
                 <input id="catalog-search" type="search" placeholder="O que procura hoje?" class="catalog-search-input" autocomplete="off">
             </div>
             
-            <div class="flex flex-wrap gap-2 md:gap-3" id="catalog-filters">
+            <div class="flex items-center overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide gap-2 md:gap-3" id="catalog-filters">
                 <button class="cat-chip active" data-filter="all">Todos</button>
                 <button class="cat-chip" data-filter="Telemóveis">📱 Telemóveis</button>
                 <button class="cat-chip" data-filter="Computadores">💻 Computadores</button>
                 <button class="cat-chip" data-filter="Eletrónicos">🎧 Eletrónicos</button>
                 <button class="cat-chip" data-filter="Televisores">🖥️ Telas</button>
+                <button class="cat-chip" data-filter="Eletrodomesticos">🏠 Casa</button>
             </div>
         </div>
 
@@ -156,15 +159,15 @@
 
     </main>
 
-    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-16 py-8 w-full"></footer>
+    <footer data-include="/components/_footer.html" class="bg-slate-800 text-slate-400 mt-2 md:mt-16 pt-4 pb-2 md:py-8 w-full"></footer>
 
     <script src="/js/components.js"></script>
     <script>
         let allProducts = {};
         let currentFilter = 'all';
         let currentQuery = '';
-        let currentPage = 1;
-        const itemsPerPage = 12; // Número ideal por ser divisível por 2, 3 e 4 colunas
+        let visibleCount = 6; // Começa com 6 produtos (3 linhas no mobile de 2 colunas)
+        const increment = 6; // Carrega mais 3 linhas de cada vez
 
         async function init() {
             try {
@@ -197,88 +200,105 @@
                 return;
             }
 
-            // Lógica de Paginação
-            const totalPages = Math.ceil(entries.length / itemsPerPage);
-            if (currentPage > totalPages) currentPage = totalPages;
-            
-            const currentEntries = entries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            const currentEntries = entries.slice(0, visibleCount);
 
             grid.innerHTML = currentEntries.map(([id, p]) => `
                 <a href="/product-detail.html?id=${id}" class="cat-card fade-in">
                     <div class="overflow-hidden relative">
-                        <span class="absolute top-3 left-3 z-10 ${p.badgeClass} text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full text-white shadow-md">${p.category}</span>
+                        <span class="absolute top-2 left-2 z-10 ${p.badgeClass} text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-white shadow-md">${p.category}</span>
                         <img src="${p.img}" alt="${p.name}" loading="lazy">
                     </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h5 class="font-extrabold text-slate-800 text-sm leading-snug mb-2">${p.name}</h5>
-                        <p class="text-xs text-slate-500 leading-relaxed flex-grow">${p.description.substring(0, 60)}...</p>
-                        <p class="text-base font-black text-emerald-600 mt-3 font-mono" style="font-family: 'JetBrains Mono', monospace;">${p.price}</p>
+                    <div class="p-3 flex flex-col flex-grow">
+                        <h5 class="font-bold text-slate-800 text-[11px] md:text-sm leading-snug mb-1 line-clamp-2">${p.name}</h5>
+                        <p class="text-sm md:text-base font-black text-emerald-600 mt-auto font-mono" style="font-family: 'JetBrains Mono', monospace;">${p.price}</p>
                     </div>
                 </a>
             `).join('');
             
-            renderPagination(totalPages);
+            renderPagination(0, entries.length);
         }
 
-        function renderPagination(totalPages) {
+        function renderPagination(totalPages, totalEntries) {
             const paginationEl = document.getElementById('pagination-controls');
-            if (totalPages <= 1) {
+            
+            if (visibleCount >= totalEntries) {
                 paginationEl.innerHTML = '';
                 return;
             }
 
-            let html = '';
-            // Botão Anterior
-            html += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-2 md:px-4 md:py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors shadow-sm" ${currentPage === 1 ? 'disabled' : ''}>Anterior</button>`;
-            
-            // Números das páginas (visíveis em ecrãs maiores)
-            html += `<div class="hidden sm:flex gap-1.5">`;
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    html += `<button class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-600 text-white font-bold text-sm shadow-md">${i}</button>`;
-                } else {
-                    html += `<button onclick="changePage(${i})" class="w-9 h-9 md:w-10 md:h-10 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm">${i}</button>`;
-                }
-            }
-            html += `</div>`;
-            
-            // Texto da página (visível apenas em mobile)
-            html += `<span class="sm:hidden text-sm font-medium text-slate-500 px-2">Pág ${currentPage} de ${totalPages}</span>`;
-
-            // Botão Próximo
-            html += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-2 md:px-4 md:py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm transition-colors shadow-sm" ${currentPage === totalPages ? 'disabled' : ''}>Próxima</button>`;
-            paginationEl.innerHTML = html;
+            paginationEl.innerHTML = `
+                <button onclick="loadMore()" class="flex items-center gap-2 px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-base hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                    Ver Mais Produtos
+                </button>
+            `;
         }
 
         function setupControls() {
             const searchInput = document.getElementById('catalog-search');
+            const filterContainer = document.getElementById('catalog-filters');
             const filterBtns = document.querySelectorAll('#catalog-filters .cat-chip');
             let debounceTimer;
+
+            // --- Lógica de Scroll Híbrido (Auto + Manual) para Categorias ---
+            // Duplicar conteúdo para loop infinito
+            const originalContent = filterContainer.innerHTML;
+            filterContainer.innerHTML = originalContent + originalContent;
+
+            let isPaused = false;
+            let scrollSpeed = 0.3; // Velocidade mais lenta para categorias (leitura fácil)
+
+            function step() {
+                if (!isPaused) {
+                    filterContainer.scrollLeft += scrollSpeed;
+                    if (filterContainer.scrollLeft >= filterContainer.scrollWidth / 2) {
+                        filterContainer.scrollLeft = 0;
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+
+            // Pausar em interação
+            const pauseEvents = ['mousedown', 'touchstart', 'pointerdown'];
+            const resumeEvents = ['mouseup', 'mouseleave', 'touchend', 'pointerup', 'pointercancel'];
+
+            pauseEvents.forEach(e => filterContainer.addEventListener(e, () => { isPaused = true; }, { passive: true }));
+            resumeEvents.forEach(e => filterContainer.addEventListener(e, () => {
+                clearTimeout(filterContainer.resumeTimer);
+                filterContainer.resumeTimer = setTimeout(() => { isPaused = false; }, 3000);
+            }, { passive: true }));
+            
+            // Suporte a clique nos botões (usar delegação para suportar os duplicados)
+            filterContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.cat-chip');
+                if (!btn) return;
+                
+                // Limpar todos
+                filterContainer.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+                
+                // Marcar como ativo todos os clones da categoria selecionada
+                const filterValue = btn.dataset.filter;
+                filterContainer.querySelectorAll(`.cat-chip[data-filter="${filterValue}"]`).forEach(b => b.classList.add('active'));
+                
+                currentFilter = filterValue;
+                visibleCount = 6; // Reset ao trocar categoria
+                renderGrid();
+            });
 
             searchInput.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
                     currentQuery = searchInput.value;
-                    currentPage = 1; // Voltar à página 1 após pesquisar
+                    visibleCount = 6; // Reset ao pesquisar
                     renderGrid();
                 }, 200);
             });
-
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentFilter = btn.dataset.filter;
-                    currentPage = 1; // Voltar à página 1 após filtrar
-                    renderGrid();
-                });
-            });
         }
         
-        window.changePage = function(page) {
-            currentPage = page;
+        window.loadMore = function() {
+            visibleCount += increment;
             renderGrid();
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // Sobe suavemente ao mudar de página
         };
 
         document.addEventListener('DOMContentLoaded', init);

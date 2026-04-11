@@ -1,6 +1,6 @@
 {
 	"id": "fUnYOPekLQJqXfg",
-	"json": "{\"id\":\"fUnYOPekLQJqXfg\",\"url\":\"https://www.bci.ao/\",\"loadedUrl\":\"https://www.bci.ao/\",\"uniqueKey\":\"https://www.bci.ao\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BCI\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-10T07:31:56.734Z\"}",
+	"json": "{\"id\":\"fUnYOPekLQJqXfg\",\"url\":\"https://www.bci.ao/\",\"loadedUrl\":\"https://www.bci.ao/\",\"uniqueKey\":\"https://www.bci.ao\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BCI\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-11T14:13:10.189Z\"}",
 	"method": "GET",
 	"orderNo": null,
 	"retryCount": 0,
