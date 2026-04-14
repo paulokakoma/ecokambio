@@ -1,0 +1,36 @@
+
+🚀 Iniciando execução de todos os scrapers...
+
+
+============================================================
+🏦 Executando: Mercado Formal (Bancos)
+============================================================
+
+🚀 Starting Cron Scraper...
+[32mINFO[39m [33m PuppeteerCrawler:[39m Starting the crawler.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BFA – https://www.bfa.ao/pt/particulares/
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 4 rates from BFA
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BAI – https://bancobai.ao/pt/cambios-e-valores
+[32mINFO[39m [33m PuppeteerCrawler:[39m BAI: Found selector: table.table-striped
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 4 rates from BAI
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BCI – https://www.bci.ao/
+[32mINFO[39m [33m PuppeteerCrawler:[39m BCI: Waiting for page to fully load...
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BNA – https://www.bna.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 3 rates from BNA
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":23944,"requestsFinishedPerMinute":3,"requestsFailedPerMinute":0,"requestTotalDurationMillis":71833,"requestsTotal":3,"crawlerRuntimeMillis":60223,"retryHistogram":[3]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":3,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing YETU – https://www.bancoyetu.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 0 rates from YETU
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BIC – https://www.bancobic.ao/inicio/particulares/index
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 11 rates from BIC
+[32mINFO[39m [33m PuppeteerCrawler:[39m All requests from the queue have been processed, the crawler will shut down.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Final request statistics:[90m {"requestsFinished":6,"requestsFailed":0,"retryHistogram":[6],"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":43344,"requestsFinishedPerMinute":4,"requestsFailedPerMinute":0,"requestTotalDurationMillis":260066,"requestsTotal":6,"crawlerRuntimeMillis":94458}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Finished! Total 6 requests: 6 succeeded, 0 failed.[90m {"terminal":true}[39m
+✅ Puppeteer scraping completed
+💾 Data saved to /Users/av/Documents/Projetos/ecokambio-main/public/exchange_rates.json
+📡 Sending data to Supabase...
+📊 Transformed 22 records for upsert
+🔍 Deduplicated: 22 → 22 records
+✅ Data successfully saved to Supabase!
+   - Total rates: 22
+   - Banks: BFA, BAI, BNA, BIC

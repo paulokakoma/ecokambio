@@ -13,6 +13,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Component Loader -->
+    <script src="/js/components.js" defer></script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; padding-bottom: 80px; }
         @media (min-width: 768px) { body { padding-bottom: 0; } }
@@ -141,21 +147,7 @@
 <body class="min-h-screen flex flex-col antialiased">
 
     <!-- Header -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <!-- BOTÃO VOLTAR PARA HOME DO SITE -->
-                <a href="/" class="flex items-center gap-2 text-slate-400 hover:text-emerald-600 transition-colors mr-2 group">
-                    <i class="fas fa-arrow-left text-xs md:text-sm group-hover:-translate-x-1 transition-transform"></i>
-                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider hidden xs:block">Início</span>
-                </a>
-                <a href="/" class="flex items-center space-x-2 group">
-                    <img src="/assets/main-logo.svg" alt="EcoKambio" class="h-8 md:h-10 w-auto">
-                    <span class="text-lg md:text-xl font-bold text-emerald-600 hidden sm:block">EcoKambio</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    <header data-include="/components/header.html" class="sticky top-0 z-50 w-full"></header>
 
     <main class="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         <!-- Skeleton UI (Visível Inicialmente) -->
@@ -294,7 +286,7 @@
             </div>
             <style>
                 #related-products-grid::-webkit-scrollbar { display: none; }
-                #related-products-grid > a { scroll-snap-align: center; flex: 0 0 75%; }
+                #related-products-grid > a { scroll-snap-align: center; flex: 0 0 45%; }
                 @media (min-width: 768px) { #related-products-grid > a { flex: 1 1 0; } }
             </style>
         </section>
@@ -305,12 +297,12 @@
     <script>
         async function init() {
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('id') || 'eco-book'; // Fallback for direct opening without id
+            const id = decodeURIComponent(params.get('id') || '');
             
             let products = {};
             try {
                 // Simulate delay slightly to show skeleton beauty
-                const response = await fetch('products.json');
+                const response = await fetch('/products.json?v=' + Date.now());
                 if (!response.ok) throw new Error('Falha ao carregar base de dados.');
                 products = await response.json();
                 
@@ -322,7 +314,12 @@
                 return;
             }
 
-            const product = products[id] || products['eco-book'] || Object.values(products)[0];
+            const product = products[id];
+            if (!product) {
+                console.error(`Produto não encontrado para id="${id}". Chaves disponíveis:`, Object.keys(products));
+                document.getElementById('product-skeleton').innerHTML = '<p class="text-red-500 font-bold p-10 text-center">Produto não encontrado. <a href="/" class="underline">Voltar à loja</a></p>';
+                return;
+            }
             
             // Hide Skeleton, Show Content
             document.getElementById('product-skeleton').classList.add('hidden');
@@ -330,7 +327,7 @@
             document.getElementById('related-section').classList.remove('hidden');
 
             // Set Data
-            document.title = `${product.name} - Detalhes Premium`;
+            document.title = `${product.name} - EcoKambio`;
             document.getElementById('product-name').textContent = product.name;
             document.getElementById('breadcrumb-name').textContent = product.name;
             document.getElementById('breadcrumb-category').textContent = product.category;
@@ -338,10 +335,44 @@
             document.getElementById('product-old-price').textContent = product.oldPrice || '';
             document.getElementById('product-description').textContent = product.description;
             
-            document.getElementById('product-main-image').src = product.img;
-            document.getElementById('product-main-image').alt = product.name;
-            document.getElementById('thumb-1').src = product.img;
-            document.getElementById('thumb-2').src = product.img; // Using same image as placeholder view limit
+            // Images: use the images array if available, otherwise use the single img
+            const allImages = (product.images && product.images.length > 0) ? product.images : (product.img ? [product.img] : []);
+            
+            const mainImg = document.getElementById('product-main-image');
+            mainImg.src = allImages[0] || '';
+            mainImg.alt = product.name;
+
+            // Build thumbnail gallery dynamically from real images
+            const thumbGallery = document.getElementById('thumbnail-gallery');
+            if (allImages.length <= 1) {
+                // Hide the whole gallery if there's only one (or no) image
+                thumbGallery.classList.add('hidden');
+            } else {
+                thumbGallery.innerHTML = allImages.map((url, i) => `
+                    <button data-img="${url}" class="thumb-btn w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-2 ${i === 0 ? 'border-emerald-500' : 'border-transparent'} bg-white shadow-sm p-1 overflow-hidden transition-transform hover:scale-105 focus:outline-none hover:border-slate-300">
+                        <img src="${url}" class="w-full h-full object-contain ${i === 0 ? 'opacity-100' : 'opacity-60'}" alt="Vista ${i+1}">
+                    </button>
+                `).join('');
+
+                // Thumbnail click handler — swap main image
+                thumbGallery.querySelectorAll('.thumb-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        mainImg.style.opacity = '0.5';
+                        setTimeout(() => {
+                            mainImg.src = btn.dataset.img;
+                            mainImg.style.opacity = '1';
+                        }, 150);
+                        thumbGallery.querySelectorAll('.thumb-btn').forEach(b => {
+                            b.classList.remove('border-emerald-500');
+                            b.classList.add('border-transparent');
+                            b.querySelector('img').classList.replace('opacity-100', 'opacity-60');
+                        });
+                        btn.classList.add('border-emerald-500');
+                        btn.classList.remove('border-transparent');
+                        btn.querySelector('img').classList.replace('opacity-60', 'opacity-100');
+                    });
+                });
+            }
 
             const badge = document.getElementById('product-category-badge');
             badge.textContent = product.category;

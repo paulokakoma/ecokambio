@@ -1,0 +1,158 @@
+{
+  "version": 2,
+  "skills": {
+    "accessibility": {
+      "name": "accessibility",
+      "source": "local",
+      "contentHash": "706129400c8c91a9264582940b36007116faffcaf27bb0780bdab87337b4f881",
+      "installedAt": "2026-04-14T21:43:11.790Z",
+      "updatedAt": "2026-04-14T21:43:11.807Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "component-common-domain-detection": {
+      "name": "component-common-domain-detection",
+      "source": "local",
+      "contentHash": "58c72d63eaf387cf11ae36b223ff80478ba861f53265e42a3c4fbcb3bc739208",
+      "installedAt": "2026-04-14T21:43:33.214Z",
+      "updatedAt": "2026-04-14T21:43:33.230Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "frontend-blueprint": {
+      "name": "frontend-blueprint",
+      "source": "local",
+      "contentHash": "c79c5acbf69e88e1b0c848e64afb671f33091e32b6dcb1b2e6f9c78213a10ec3",
+      "installedAt": "2026-04-14T21:44:39.174Z",
+      "updatedAt": "2026-04-14T21:44:39.194Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "react-composition-patterns": {
+      "name": "react-composition-patterns",
+      "source": "local",
+      "contentHash": "171c6a35a0a74a6b37facf2a6e3883a02f53e3f2d429e6aa5834412c65d38dc7",
+      "installedAt": "2026-04-14T21:45:21.519Z",
+      "updatedAt": "2026-04-14T21:45:21.548Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "create-adr": {
+      "name": "create-adr",
+      "source": "local",
+      "contentHash": "47ec663c849e8c1620c6f33a7be0055acdcf838c27ab7c16f44260244b80195a",
+      "installedAt": "2026-04-14T21:45:49.307Z",
+      "updatedAt": "2026-04-14T21:45:49.323Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "technical-design-doc-creator": {
+      "name": "technical-design-doc-creator",
+      "source": "local",
+      "contentHash": "d05974df076f695f96b4e4c263ad19f2aaffe8ee6248c1b07a634dd9ed0ea51e",
+      "installedAt": "2026-04-14T21:46:39.476Z",
+      "updatedAt": "2026-04-14T21:46:39.492Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "skill-architect": {
+      "name": "skill-architect",
+      "source": "local",
+      "contentHash": "349b256153447631c3ed356996c3a62fec52493d07ba75e37b12c458f9fbf6bb",
+      "installedAt": "2026-04-14T21:47:00.876Z",
+      "updatedAt": "2026-04-14T21:47:00.897Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "the-fool": {
+      "name": "the-fool",
+      "source": "local",
+      "contentHash": "b761f983e21e00173ac42760f478095a3e8c733862c20d9f711d10d962f407cc",
+      "installedAt": "2026-04-14T21:48:00.209Z",
+      "updatedAt": "2026-04-14T21:48:00.234Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "ai-pricing": {
+      "name": "ai-pricing",
+      "source": "local",
+      "contentHash": "642a42cf94b8061aad642d84363bb4f60712af858c093bed6f2ec6135a3e7937",
+      "installedAt": "2026-04-14T21:48:50.764Z",
+      "updatedAt": "2026-04-14T21:49:04.717Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "gtm-engineering": {
+      "name": "gtm-engineering",
+      "source": "local",
+      "contentHash": "b2cfbea2da9f2a52527f6c41f128df2dba76c33df90692357a5533c06b78223f",
+      "installedAt": "2026-04-14T21:49:19.637Z",
+      "updatedAt": "2026-04-14T21:49:19.654Z",
+      "agents": [
+        "cursor",
+        "claude-code",
+        "windsurf"
+      ],
+      "method": "copy",
+      "global": false
+    },
+    "playwright-skill": {
+      "name": "playwright-skill",
+      "source": "local",
+      "contentHash": "9c45020d33af9ac2d44c89721f154c94bd73b9d8590117597b9a26920ff9cecc",
+      "installedAt": "2026-04-14T21:49:54.669Z",
+      "updatedAt": "2026-04-14T21:49:54.679Z",
+      "agents": [
+        "cursor",
+        "claude-code"
+      ],
+      "method": "copy",
+      "global": false
+    }
+  }
+}

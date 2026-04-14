@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Painel de Administração - EcoKambio</title>
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" sizes="any">
     <link rel="apple-touch-icon" href="/assets/favicon.svg">
@@ -452,6 +455,13 @@
                 </svg>
                 <span>Moedas</span>
             </a>
+            
+            <a href="#produtos" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                <span>Produtos</span>
+            </a>
             <a href="#cartao_visa" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
@@ -753,6 +763,10 @@
                             </svg>
                             <span>Atualizar Todas as Taxas</span>
                         </button>
+                        <div id="scraper-status-panel" class="text-xs text-slate-500 hidden sm:flex flex-col justify-center">
+                            <span id="scraper-health-status" class="font-semibold text-gray-500">Verificando...</span>
+                            <span id="scraper-last-run" class="text-slate-400">--</span>
+                        </div>
                         <input type="search" id="bank-search-input" placeholder="Procurar por nome ou código..."
                             class="w-full md:w-64 px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition">
                         <button id="add-bank-btn" class="btn-primary flex-shrink-0">Adicionar Banco</button>
@@ -989,6 +1003,41 @@
             </section>
 
             <!-- Configurações Section -->
+            
+            <!-- Produtos Section -->
+            <section id="produtos" class="admin-section hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">Gerir Produtos</h2>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+                        <input type="search" id="product-search-input" placeholder="Procurar por nome ou slug..."
+                            class="w-full md:w-64 px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                        <button id="add-product-btn" class="btn-primary flex-shrink-0">Adicionar Produto</button>
+                    </div>
+                </div>
+                <div class="admin-table">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[800px]">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="text-left">PRODUTO</th>
+                                    <th scope="col" class="text-left">CATEGORIA</th>
+                                    <th scope="col" class="text-left">PREÇO</th>
+                                    <th scope="col" class="text-left">PREÇO ANTIGO</th>
+                                    <th scope="col">STATUS</th>
+                                    <th scope="col" class="text-center">AÇÕES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-table-body">
+                                <tr class="h-48">
+                                    <td colspan="6" class="text-center">
+                                        <div class="loader mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
             <section id="configuracoes" class="admin-section hidden">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">Configurações Gerais</h2>
                 <div class="card p-6 md:p-8 max-w-3xl mx-auto">
@@ -1342,6 +1391,112 @@
 
 
         <!-- Modal: Confirmação de Exclusão -->
+        
+        <!-- Product Modal -->
+        <div id="product-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div class="modal-content relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-lg font-bold text-slate-900" id="product-modal-title">Novo Produto</h3>
+                            <button type="button" class="close-product-modal text-slate-400 hover:text-slate-600 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <form id="product-form" class="px-6 py-6 pb-8">
+                            <input type="hidden" id="product_id" name="id">
+                            <div class="space-y-5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="product_name" class="block text-sm font-semibold text-slate-700 mb-1">Nome do Produto</label>
+                                        <input type="text" id="product_name" name="name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label for="product_category" class="block text-sm font-semibold text-slate-700 mb-1">Categoria</label>
+                                        <select id="product_category" name="category" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                            <option value="Telemóveis">Telemóveis</option>
+                                            <option value="Computadores">Computadores</option>
+                                            <option value="Eletrónicos">Eletrónicos</option>
+                                            <option value="Televisores">Televisores</option>
+                                            <option value="Eletrodomesticos">Eletrodomésticos</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="product_price" class="block text-sm font-semibold text-slate-700 mb-1">Preço Atual (String formatada)</label>
+                                        <input type="text" id="product_price" name="price" placeholder="Ex: 1.150.000,00 Kz" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label for="product_old_price" class="block text-sm font-semibold text-slate-700 mb-1">Preço Antigo (String formatada)</label>
+                                        <input type="text" id="product_old_price" name="old_price" placeholder="Ex: 1.300.000,00 Kz" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <label for="product_slug" class="block text-sm font-semibold text-slate-700 mb-1">ID Mnemónica (Slug)</label>
+                                        <input type="text" id="product_slug" name="slug" placeholder="galaxy-s24" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                                        <p class="text-xs text-slate-500 mt-1">Deixe em branco para gerar auto.</p>
+                                    </div>
+                                    <div>
+                                        <label for="product_badge_class" class="block text-sm font-semibold text-slate-700 mb-1">Classe do Selo (Badge)</label>
+                                        <select id="product_badge_class" name="badge_class" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                                            <option value="">Automático por Categoria</option>
+                                            <option value="badge-telemoveis">Telemóveis (Rosa)</option>
+                                            <option value="badge-computadores">Computadores (Azul)</option>
+                                            <option value="badge-eletronicos">Eletrónicos (Laranja)</option>
+                                            <option value="badge-televisores">Televisores (Roxo)</option>
+                                            <option value="badge-eletrodomesticos">Eletrodomésticos (Verde)</option>
+                                            <option value="bg-red-500 text-white">Promoção (Vermelho)</option>
+                                            <option value="bg-slate-600 text-white">Neutro (Cinza)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="product_description" class="block text-sm font-semibold text-slate-700 mb-1">Descrição</label>
+                                    <textarea id="product_description" name="description" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
+                                </div>
+
+                                <!-- Gestor de Imagens Múltiplas -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Imagens do Produto</label>
+                                    
+                                    <!-- Grelha de imagens já carregadas -->
+                                    <div id="product-images-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3 empty:hidden"></div>
+
+                                    <!-- Zona de upload (drag & drop + click) -->
+                                    <div id="product-image-dropzone"
+                                         class="flex flex-col items-center justify-center px-6 py-5 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors bg-slate-50 cursor-pointer"
+                                         onclick="document.getElementById('product_image_new').click()">
+                                        <svg class="h-9 w-9 text-slate-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <p class="text-sm font-semibold text-indigo-600">Clique para adicionar imagem</p>
+                                        <p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP — Máx. 5MB por ficheiro</p>
+                                        <input id="product_image_new" type="file" class="sr-only" accept="image/*" multiple>
+                                    </div>
+                                    <p id="product-images-upload-status" class="text-xs text-emerald-600 mt-2 hidden"></p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="product_is_active" name="is_active" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="text-sm font-medium text-slate-700">Produto Ativo (Visível no site)</span>
+                                </div>
+                            </div>
+                            <div class="mt-8 flex justify-end space-x-3">
+                                <button type="button" class="close-product-modal px-4 py-2 border border-slate-300 rounded-lg text-slate-700 bg-white hover:bg-slate-50 font-medium transition-colors">Cancelar</button>
+                                <button type="submit" id="save-product-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm flex items-center space-x-2">
+                                    <span>Guardar Produto</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="delete-confirm-modal"
             class="modal-overlay fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center hidden z-40 p-4">
             <div
@@ -1391,18 +1546,19 @@
     <script type="module">
         // --- CONFIG & INIT ---
         const API_BASE_URL = ''; // As chamadas serão relativas ao domínio atual
+        const CACHE_BUSTER = Date.now(); // Força reload do JS
 
         // Constrói a URL do WebSocket para apontar sempre para o subdomínio 'admin'.
         function getWebSocketURL() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.host;
             const parts = host.split('.');
-            // Se já estiver no subdomínio admin (ou localhost), usa o host atual.
-            if (parts[0] === 'admin' || host.startsWith('localhost')) {
+            // Se já estiver no subdomínio admin, usa o host atual.
+            if (parts[0] === 'admin') {
                 return `${protocol}//${host}`;
             }
-            // Caso contrário, adiciona 'admin.' ao host.
-            return `${protocol}//admin.${host}`;
+            // Em localhost ou qualquer outro host, usa o host atual (mesmo servidor)
+            return `${protocol}//${host}`;
         }
         const WEBSOCKET_URL = getWebSocketURL();
 
@@ -1478,13 +1634,15 @@
             await Promise.all([
                 loadDashboardData(),
                 loadRecentActivity(),
+                loadProducts(),
                 loadBanks(),
                 loadCurrencies(),
                 loadInformalRates(),
                 loadAffiliateLinks(),
                 loadSupporters(),
                 loadSettings(),
-                loadVisaSettings()
+                loadVisaSettings(),
+                updateScraperHealthUI()
             ]);
             // Renderiza os gráficos e preenche seletores APÓS os dados principais serem carregados
             await Promise.all([
@@ -2086,6 +2244,7 @@
         // --- WEBSOCKET & REALTIME ---
         function connectAdminWebSocket() {
             console.log('🔌 A tentar conectar ao WebSocket do admin...');
+            console.log('🔗 WebSocket URL:', WEBSOCKET_URL);
             // Adicionado para evitar erro se o elemento não existir
             const onlineUsersEl = document.getElementById('online-users-stat');
             if (!onlineUsersEl) return;
@@ -2096,7 +2255,7 @@
                 console.log('✅ WebSocket do admin conectado.');
             };
 
-            ws.onmessage = (event) => {
+            ws.onmessage = async (event) => {
                 try {
                     const data = JSON.parse(event.data);
 
@@ -2124,6 +2283,17 @@
                         sessionActivities.push(activity);
                         // Renderiza (ou redesenha) o grupo da sessão no topo do feed
                         renderSessionGroup(sessionId, sessionActivities, true);
+                    }
+
+                    // Atualiza quando scraper termina
+                    if (data.type === 'scraper_completed') {
+                        const { success, duration } = data.payload;
+                        if (success) {
+                            showToast(`✅ Scraper concluído em ${duration}s. A atualizar dados...`, 'success');
+                            await refreshRatesAfterScraper();
+                        } else {
+                            showToast('❌ Scraper falhou. Verifique os logs.', 'error');
+                        }
                     }
                 } catch (error) {
                     console.error('Erro ao processar mensagem WebSocket:', error);
@@ -3268,6 +3438,51 @@
             }
         }
 
+        // Atualiza os dados de taxas após scraper completar
+        async function refreshRatesAfterScraper() {
+            console.log('🔄 Atualizando dados após scraper...');
+            try {
+                // Recarregar dados de taxas formais e informais
+                await loadBanks();
+                await loadInformalRates();
+                // Atualizar status do scraper na UI
+                await updateScraperHealthUI();
+                showToast('✅ Dados de taxas atualizados com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao atualizar dados:', error);
+                showToast('Erro ao atualizar dados. Recarregue a página.', 'error');
+            }
+        }
+
+        // Atualiza a UI do status do scraper
+        async function updateScraperHealthUI() {
+            try {
+                const response = await fetch('/api/scraper/health');
+                const data = await response.json();
+
+                const statusEl = document.getElementById('scraper-health-status');
+                const lastRunEl = document.getElementById('scraper-last-run');
+
+                if (statusEl) {
+                    const statusColors = {
+                        'healthy': 'text-green-600',
+                        'stale': 'text-yellow-600',
+                        'error': 'text-red-600',
+                        'never_run': 'text-gray-500'
+                    };
+                    statusEl.className = `font-semibold ${statusColors[data.status] || 'text-gray-600'}`;
+                    statusEl.textContent = data.message || data.status;
+                }
+
+                if (lastRunEl && data.lastRun) {
+                    const lastRun = new Date(data.lastRun);
+                    lastRunEl.textContent = `Última execução: ${lastRun.toLocaleString('pt-PT')}`;
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status do scraper:', error);
+            }
+        }
+
         function showDeleteConfirmation(message, onConfirm) {
             const modal = document.getElementById('delete-confirm-modal');
             const inputContainer = document.getElementById('delete-confirm-input-container');
@@ -3309,6 +3524,367 @@
             }
         });
 
-    </script>
+    
+        // ==========================================
+        // PRODUTOS SCRIPTS
+        // ==========================================
+        let productsData = [];
+        let currentProductImages = []; // Imagens já guardadas (para produto em edição)
 
+        // Pesquisa de produtos
+        document.getElementById('product-search-input')?.addEventListener('keyup', renderProductsTable);
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                if (!response.ok) throw new Error('Falha ao carregar produtos');
+                productsData = await response.json();
+                renderProductsTable();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('products-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-500">Erro ao carregar produtos.</td></tr>`;
+            }
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-table-body');
+            const searchTerm = document.getElementById('product-search-input')?.value.toLowerCase() || '';
+            
+            const filteredProducts = productsData.filter(p => 
+                p.name.toLowerCase().includes(searchTerm) || 
+                (p.slug && p.slug.toLowerCase().includes(searchTerm)) ||
+                (p.category && p.category.toLowerCase().includes(searchTerm))
+            );
+
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500">${searchTerm ? 'Nenhum produto encontrado para esta pesquisa.' : 'Nenhum produto cadastrado.'}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredProducts.map(p => {
+                // Imagem: preferência à lista de product_images, senão img_url
+                const images = p.product_images || [];
+                const primaryImg = images.find(i => i.is_primary)?.url || images[0]?.url || p.img_url;
+                const imgCount = images.length;
+
+                return `
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <img src="${primaryImg || '/assets/main-logo.png'}" class="w-10 h-10 rounded object-contain bg-slate-100" alt="Imagem">
+                                ${imgCount > 1 ? `<span class="absolute -top-1 -right-1 bg-indigo-600 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">${imgCount}</span>` : ''}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-800">${p.name}</div>
+                                <div class="text-xs text-slate-500">${p.slug}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${p.category}</td>
+                    <td class="font-mono text-emerald-600 font-bold">${p.price}</td>
+                    <td class="text-xs text-slate-400 line-through">${p.old_price || '-'}</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="updateProductStatus('${p.id}', this.checked)" ${p.is_active ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="text-center space-x-2">
+                        <button onclick="editProduct('${p.id}')" class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar">
+                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button onclick="confirmDeleteProduct('${p.id}')" class="text-red-500 hover:text-red-700 transition-colors" title="Eliminar">
+                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // Renderizar grelha de imagens no modal
+        function renderProductImagesGrid(images) {
+            const grid = document.getElementById('product-images-grid');
+            if (!grid) return;
+
+            if (!images || images.length === 0) {
+                grid.innerHTML = '';
+                return;
+            }
+
+            grid.innerHTML = images.map(img => `
+                <div class="relative group rounded-lg overflow-hidden border-2 ${img.is_primary ? 'border-indigo-500' : 'border-slate-200'} aspect-square bg-slate-100">
+                    <img src="${img.url}" class="w-full h-full object-contain" alt="Imagem">
+                    ${img.is_primary ? '<span class="absolute top-1 left-1 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Principal</span>' : ''}
+                    <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        ${!img.is_primary ? `<button type="button" onclick="setImagePrimary('${img.id}')" title="Definir como principal" class="bg-white text-indigo-600 rounded-full p-1.5 hover:bg-indigo-600 hover:text-white transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </button>` : ''}
+                        <button type="button" onclick="deleteProductImage('${img.id}')" title="Remover imagem" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Apagar imagem individual
+        async function deleteProductImage(imageId) {
+            if (!confirm('Remover esta imagem?')) return;
+            try {
+                const res = await fetch(`/api/product-images/${imageId}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Erro ao remover imagem');
+                currentProductImages = currentProductImages.filter(i => i.id !== imageId);
+                renderProductImagesGrid(currentProductImages);
+                typeof showToast === 'function' && showToast('Imagem removida.', 'success');
+            } catch (err) {
+                typeof showToast === 'function' ? showToast(err.message, 'error') : alert(err.message);
+            }
+        }
+
+        // Definir imagem principal
+        async function setImagePrimary(imageId) {
+            try {
+                const res = await fetch(`/api/product-images/${imageId}/set-primary`, { method: 'POST' });
+                if (!res.ok) throw new Error('Erro ao definir imagem principal');
+                currentProductImages = currentProductImages.map(i => ({ ...i, is_primary: i.id === imageId }));
+                renderProductImagesGrid(currentProductImages);
+                typeof showToast === 'function' && showToast('Imagem principal definida.', 'success');
+            } catch (err) {
+                typeof showToast === 'function' ? showToast(err.message, 'error') : alert(err.message);
+            }
+        }
+
+        // Upload de nova(s) imagem(ns) para produto existente
+        async function uploadImages(productId, files) {
+            const status = document.getElementById('product-images-upload-status');
+            status.textContent = '';
+            status.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                status.textContent = `A enviar imagem ${i + 1} de ${files.length}...`;
+
+                const fd = new FormData();
+                fd.append('image', file);
+
+                try {
+                    const res = await fetch(`/api/products/${productId}/images`, { method: 'POST', body: fd });
+                    const result = await res.json();
+                    if (!res.ok) throw new Error(result.message || 'Erro no upload');
+                    currentProductImages.push(result.data);
+                    renderProductImagesGrid(currentProductImages);
+                } catch (err) {
+                    status.classList.add('!text-red-500');
+                    status.textContent = `Erro ao enviar "${file.name}": ${err.message}`;
+                    return;
+                }
+            }
+
+            status.textContent = `✓ ${files.length} imagem(ns) adicionada(s).`;
+            setTimeout(() => status.classList.add('hidden'), 3000);
+        }
+
+        // Listener: Input de nova imagem
+        document.getElementById('product_image_new')?.addEventListener('change', async (e) => {
+            const productId = document.getElementById('product_id').value;
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            if (!productId) {
+                // Produto ainda não foi guardado — guardar primeiro
+                typeof showToast === 'function'
+                    ? showToast('Por favor, guarde o produto primeiro antes de adicionar imagens.', 'error')
+                    : alert('Guarde o produto primeiro.');
+                e.target.value = '';
+                return;
+            }
+
+            await uploadImages(productId, files);
+            e.target.value = ''; // reset input
+        });
+
+        // Drag & drop na dropzone
+        const dropzone = document.getElementById('product-image-dropzone');
+        if (dropzone) {
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-indigo-500', 'bg-indigo-50'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-indigo-500', 'bg-indigo-50'));
+            dropzone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
+                const productId = document.getElementById('product_id').value;
+                if (!productId) {
+                    typeof showToast === 'function'
+                        ? showToast('Guarde o produto primeiro antes de adicionar imagens.', 'error')
+                        : alert('Guarde o produto primeiro.');
+                    return;
+                }
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                if (files.length > 0) await uploadImages(productId, files);
+            });
+        }
+
+        // Abrir modal de novo produto
+        document.getElementById('add-product-btn')?.addEventListener('click', () => {
+            document.getElementById('product-form').reset();
+            document.getElementById('product_id').value = '';
+            document.getElementById('product-modal-title').textContent = 'Novo Produto';
+            currentProductImages = [];
+            renderProductImagesGrid([]);
+            document.getElementById('product-images-upload-status').classList.add('hidden');
+            document.getElementById('product-modal').classList.remove('hidden');
+            setTimeout(() => {
+                document.querySelector('#product-modal .modal-overlay').classList.add('opacity-100');
+                document.querySelector('#product-modal .modal-content').classList.remove('opacity-0', 'translate-y-4', 'sm:scale-95');
+            }, 10);
+        });
+
+        // Fechar modal de produto
+        document.querySelectorAll('.close-product-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelector('#product-modal .modal-overlay').classList.remove('opacity-100');
+                document.querySelector('#product-modal .modal-content').classList.add('opacity-0', 'translate-y-4', 'sm:scale-95');
+                setTimeout(() => document.getElementById('product-modal').classList.add('hidden'), 300);
+            });
+        });
+
+        // Guardar Produto
+        document.getElementById('product-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-product-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loader !w-5 !h-5 !border-[2px]"></div> Guardando...';
+            btn.disabled = true;
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const id = formData.get('id');
+            const url = id ? `/api/products/${id}` : '/api/products';
+            const method = id ? 'PUT' : 'POST';
+
+            // Checkbox
+            formData.set('is_active', form.querySelector('#product_is_active').checked ? 'true' : 'false');
+            // Remove image field — imagens são geridas separadamente agora
+            formData.delete('product_image_new');
+
+            // Garantir que o slug nunca está vazio - gerar do nome se necessário
+            const slugValue = formData.get('slug');
+            if (!slugValue || slugValue.trim() === '') {
+                const nameValue = formData.get('name') || '';
+                const generatedSlug = generateSlug(nameValue);
+                if (generatedSlug) {
+                    formData.set('slug', generatedSlug);
+                }
+            }
+
+            try {
+                const response = await fetch(url, { method, body: formData });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Erro ao guardar produto');
+
+                typeof showToast === 'function' ? showToast('Produto guardado com sucesso.', 'success') : alert('Produto guardado com sucesso.');
+
+                // Se é criação, atualizar o ID oculto para permitir adicionar imagens sem fechar
+                if (!id && result.data?.id) {
+                    document.getElementById('product_id').value = result.data.id;
+                    document.getElementById('product-modal-title').textContent = 'Editar Produto';
+                    document.getElementById('product-images-upload-status').textContent = '✓ Produto criado! Agora pode adicionar imagens.';
+                    document.getElementById('product-images-upload-status').classList.remove('hidden');
+                } else {
+                    document.querySelector('.close-product-modal').click();
+                }
+
+                loadProducts();
+            } catch (error) {
+                console.error(error);
+                typeof showToast === 'function' ? showToast(error.message, 'error') : alert('Erro: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        function generateSlug(name) {
+            if (!name) return '';
+            return name.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        }
+
+        function editProduct(id) {
+            const p = productsData.find(prod => String(prod.id) === String(id));
+            if (!p) return;
+
+            document.getElementById('product_id').value = p.id;
+            document.getElementById('product_name').value = p.name;
+            document.getElementById('product_category').value = p.category;
+            document.getElementById('product_price').value = p.price;
+            document.getElementById('product_old_price').value = p.old_price || '';
+            document.getElementById('product_slug').value = p.slug || generateSlug(p.name);
+            document.getElementById('product_badge_class').value = p.badge_class || '';
+            document.getElementById('product_description').value = p.description || '';
+            document.getElementById('product_is_active').checked = p.is_active;
+            document.getElementById('product-images-upload-status').classList.add('hidden');
+
+            // Carregar imagens existentes
+            currentProductImages = (p.product_images || []).sort((a, b) => a.sort_order - b.sort_order);
+            renderProductImagesGrid(currentProductImages);
+
+            document.getElementById('product-modal-title').textContent = 'Editar Produto';
+            document.getElementById('product-modal').classList.remove('hidden');
+            setTimeout(() => {
+                document.querySelector('#product-modal .modal-overlay').classList.add('opacity-100');
+                document.querySelector('#product-modal .modal-content').classList.remove('opacity-0', 'translate-y-4', 'sm:scale-95');
+            }, 10);
+        }
+
+        async function updateProductStatus(id, isActive) {
+            try {
+                const formData = new FormData();
+                formData.append('is_active', isActive);
+                const response = await fetch(`/api/products/${id}`, { method: 'PUT', body: formData });
+                if (!response.ok) throw new Error('Erro ao atualizar status');
+                typeof showToast === 'function' && showToast('Status do produto atualizado.');
+            } catch (error) {
+                console.error(error);
+                typeof showToast === 'function' ? showToast(error.message, 'error') : alert('Erro: ' + error.message);
+                loadProducts();
+            }
+        }
+
+        let productToDelete = null;
+        function confirmDeleteProduct(id) {
+            productToDelete = id;
+            if (typeof showDeleteConfirmation === 'function') {
+                showDeleteConfirmation('Deseja realmente apagar este produto?', () => { deleteProduct(productToDelete); });
+            } else {
+                if (confirm('Deseja realmente apagar este produto?')) deleteProduct(id);
+            }
+        }
+
+        async function deleteProduct(id) {
+            try {
+                const response = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Erro ao apagar');
+                typeof showToast === 'function' ? showToast('Produto apagado com sucesso.', 'success') : alert('Produto apagado com sucesso.');
+                loadProducts();
+            } catch (error) {
+                console.error(error);
+                typeof showToast === 'function' ? showToast(error.message, 'error') : alert('Erro: ' + error.message);
+            }
+        }
+
+        // Expose product functions to global scope (required because this is a module script)
+        window.editProduct = editProduct;
+        window.confirmDeleteProduct = confirmDeleteProduct;
+        window.updateProductStatus = updateProductStatus;
+        window.deleteProductImage = deleteProductImage;
+        window.setImagePrimary = setImagePrimary;
+
+    </script>
 </html>

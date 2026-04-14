@@ -105,6 +105,7 @@
         @media (min-width: 640px) {
             .cat-card img { height: 180px; }
         }
+        .no-results {
             grid-column: 1 / -1;
             text-align: center;
             padding: 4rem 1rem;
@@ -143,8 +144,8 @@
                 <button class="cat-chip" data-filter="Telemóveis">📱 Telemóveis</button>
                 <button class="cat-chip" data-filter="Computadores">💻 Computadores</button>
                 <button class="cat-chip" data-filter="Eletrónicos">🎧 Eletrónicos</button>
-                <button class="cat-chip" data-filter="Televisores">🖥️ Telas</button>
-                <button class="cat-chip" data-filter="Eletrodomesticos">🏠 Casa</button>
+                <button class="cat-chip" data-filter="Televisores">🖥️ Televisores</button>
+                <button class="cat-chip" data-filter="Eletrodomésticos">🏠 Eletrodomésticos</button>
             </div>
         </div>
 
@@ -171,7 +172,7 @@
 
         async function init() {
             try {
-                const response = await fetch('/products.json');
+                const response = await fetch('/products.json?v=' + Date.now());
                 allProducts = await response.json();
                 renderGrid();
                 setupControls();
@@ -240,36 +241,7 @@
             const filterBtns = document.querySelectorAll('#catalog-filters .cat-chip');
             let debounceTimer;
 
-            // --- Lógica de Scroll Híbrido (Auto + Manual) para Categorias ---
-            // Duplicar conteúdo para loop infinito
-            const originalContent = filterContainer.innerHTML;
-            filterContainer.innerHTML = originalContent + originalContent;
-
-            let isPaused = false;
-            let scrollSpeed = 0.3; // Velocidade mais lenta para categorias (leitura fácil)
-
-            function step() {
-                if (!isPaused) {
-                    filterContainer.scrollLeft += scrollSpeed;
-                    if (filterContainer.scrollLeft >= filterContainer.scrollWidth / 2) {
-                        filterContainer.scrollLeft = 0;
-                    }
-                }
-                requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-
-            // Pausar em interação
-            const pauseEvents = ['mousedown', 'touchstart', 'pointerdown'];
-            const resumeEvents = ['mouseup', 'mouseleave', 'touchend', 'pointerup', 'pointercancel'];
-
-            pauseEvents.forEach(e => filterContainer.addEventListener(e, () => { isPaused = true; }, { passive: true }));
-            resumeEvents.forEach(e => filterContainer.addEventListener(e, () => {
-                clearTimeout(filterContainer.resumeTimer);
-                filterContainer.resumeTimer = setTimeout(() => { isPaused = false; }, 3000);
-            }, { passive: true }));
-            
-            // Suporte a clique nos botões (usar delegação para suportar os duplicados)
+            // Suporte a clique nos botões de filtro de categoria
             filterContainer.addEventListener('click', (e) => {
                 const btn = e.target.closest('.cat-chip');
                 if (!btn) return;
@@ -277,11 +249,10 @@
                 // Limpar todos
                 filterContainer.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
                 
-                // Marcar como ativo todos os clones da categoria selecionada
-                const filterValue = btn.dataset.filter;
-                filterContainer.querySelectorAll(`.cat-chip[data-filter="${filterValue}"]`).forEach(b => b.classList.add('active'));
+                // Ativar o botão clicado
+                btn.classList.add('active');
                 
-                currentFilter = filterValue;
+                currentFilter = btn.dataset.filter;
                 visibleCount = 6; // Reset ao trocar categoria
                 renderGrid();
             });

@@ -3290,7 +3290,7 @@
             if (!gridContainer || gridContainer.classList.contains('loaded')) return;
 
             try {
-                const response = await fetch('products.json');
+                const response = await fetch('/products.json?v=' + Date.now());
                 if (!response.ok) throw new Error('Falha ao carregar produtos.');
                 window._allProducts = await response.json();
                 const products = window._allProducts;

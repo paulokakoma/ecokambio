@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const productController = require('../controllers/productController');
 const isAdmin = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -21,6 +22,18 @@ router.post('/notify-update', adminController.notifyUpdate);
 router.post('/add-province', adminController.addProvince);
 router.post('/update-status', adminController.updateStatus);
 router.post('/update-cell', adminController.updateCell);
+
+// Products
+router.get('/products', productController.getAdminProducts);
+router.post('/products', upload.single('product_image'), productController.createProduct);
+router.put('/products/:id', upload.single('product_image'), productController.updateProduct);
+router.delete('/products/:id', productController.deleteProduct);
+
+// Product Images (multiple, incremental)
+router.post('/products/:id/images', upload.single('image'), productController.uploadProductImage);
+router.delete('/product-images/:imageId', productController.deleteProductImage);
+router.post('/product-images/:imageId/set-primary', productController.setPrimaryImage);
+
 
 // Dashboard & Stats
 router.get('/dashboard-stats', adminController.getDashboardStats);

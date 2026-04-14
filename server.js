@@ -67,6 +67,7 @@ const ecoflixRoutes = require("./src/netflix/routes");
 
 // Scraper
 const scraperController = require("./src/controllers/scraperController");
+const productController = require("./src/controllers/productController");
 
 
 
@@ -232,6 +233,9 @@ app.get('/exchange_rates.json', (req, res, next) => {
     });
     next();
 });
+
+// Intercept products.json to serve from DB dynamically
+app.get('/products.json', productController.getPublicProductsJson);
 
 // Serve other static files with default caching
 const defaultStaticOptions = {

@@ -1,7 +1,11 @@
 {
   "watch": ["."],
   "ignore": [
-    "sessions/*"
+    "sessions",
+    "public/exchange_rates.json",
+    "public/products.json",
+    "*.log",
+    "nohup.out"
   ],
   "ext": "js,json,html,css"
 }

@@ -1,35 +1,15 @@
 {
-  "lastUpdated": "2026-04-11T14:13:17.136Z",
+  "lastUpdated": "2026-04-14T22:29:36.694Z",
   "rates": [
     {
-      "bank": "BFA",
-      "currency": "USD",
-      "sell": "964,578"
-    },
-    {
-      "bank": "BFA",
-      "currency": "EUR",
-      "sell": "1149,292"
-    },
-    {
-      "bank": "BFA",
-      "currency": "NAD",
-      "sell": "59,925"
-    },
-    {
-      "bank": "BFA",
-      "currency": "GBP",
-      "sell": "1319,272"
-    },
-    {
       "bank": "BAI",
       "currency": "EUR",
-      "sell": "1144,4959"
+      "sell": "1152,1118"
     },
     {
       "bank": "BAI",
       "currency": "GBP",
-      "sell": "1314,198"
+      "sell": "1326,3361"
     },
     {
       "bank": "BAI",
@@ -39,77 +19,42 @@
     {
       "bank": "BAI",
       "currency": "ZAR",
-      "sell": "59,5527"
+      "sell": "59,7408"
     },
     {
-      "bank": "BNA",
+      "bank": "BFA",
       "currency": "USD",
-      "sell": "912,131"
+      "sell": "964,583"
     },
     {
-      "bank": "BNA",
+      "bank": "BFA",
       "currency": "EUR",
-      "sell": "1069,109"
+      "sell": "1145,645"
     },
     {
-      "bank": "BNA",
-      "currency": "ZAR",
-      "sell": "55,63"
-    },
-    {
-      "bank": "BIC",
-      "currency": "CAD",
-      "sell": "676,508"
-    },
-    {
-      "bank": "BIC",
-      "currency": "USD",
-      "sell": "944,056"
-    },
-    {
-      "bank": "BIC",
-      "currency": "ZAR",
-      "sell": "57,021"
-    },
-    {
-      "bank": "BIC",
-      "currency": "CHF",
-      "sell": "1186,465"
-    },
-    {
-      "bank": "BIC",
-      "currency": "DKK",
-      "sell": "146,652"
-    },
-    {
-      "bank": "BIC",
-      "currency": "EUR",
-      "sell": "1138,601"
-    },
-    {
-      "bank": "BIC",
-      "currency": "GBP",
-      "sell": "1258,324"
-    },
-    {
-      "bank": "BIC",
-      "currency": "JPY",
-      "sell": "5,878"
-    },
-    {
-      "bank": "BIC",
+      "bank": "BFA",
       "currency": "NAD",
-      "sell": "57,067"
+      "sell": "59,38"
     },
     {
-      "bank": "BIC",
-      "currency": "NOK",
-      "sell": "98,622"
+      "bank": "BFA",
+      "currency": "GBP",
+      "sell": "1317,835"
     },
     {
-      "bank": "BIC",
-      "currency": "SEK",
-      "sell": "101,243"
+      "bank": "BNA",
+      "currency": "USD",
+      "sell": "912,135"
+    },
+    {
+      "bank": "BNA",
+      "currency": "EUR",
+      "sell": "1076,228"
+    },
+    {
+      "bank": "BNA",
+      "currency": "ZAR",
+      "sell": "55,806"
     }
   ]
 }

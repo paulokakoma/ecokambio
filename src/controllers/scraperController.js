@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const supabase = require('../config/supabase');
+const { broadcast } = require('../websocket');
 
 /**
  * Obter o estado de saúde (health status) do scraper
@@ -73,6 +74,9 @@ const getHealth = async (req, res) => {
     }
 };
 
+// Mapa para rastrear processos de scraper em execução
+const activeScrapers = new Map();
+
 /**
  * Despoletar execução manual do scraper (Restrito a Admin)
  */
@@ -97,26 +101,64 @@ const triggerScraper = async (req, res) => {
         const stdoutFd = fs.openSync(stdoutLog, 'a');
         const stderrFd = fs.openSync(stderrLog, 'a');
 
-        // Usa o método spawn em "detached mode". Assim o processo de extração não morre se este servidor reiniciar ou for cancelado.
         const scriptPath = path.join(projectRoot, 'webscraper', 'run-all-scrapers.js');
         console.log('🚀 A acionar processo secundário scraper:', scriptPath);
         console.log(`📝 Logs vão ser registados em: ${stdoutLog}`);
 
-        const child = spawn('node', [scriptPath], {
+        const child = spawn(process.execPath, [scriptPath], {
             cwd: projectRoot,
             detached: true,
             stdio: ['ignore', stdoutFd, stderrFd]  // Usa os ficheiros em vez da consola principal
         });
 
-        // "Desanexa" o processo para suportar continuação independente
-        child.unref();
-
-        // Fechar os ficheiros no proceso originário
-        fs.close(stdoutFd, () => { });
-        fs.close(stderrFd, () => { });
-
         console.log(`✅ Scraper process started with PID: ${child.pid}`);
         console.log(`📁 Check logs at: ${stdoutLog}`);
+
+        // Rastrear o processo e notificar quando terminar
+        activeScrapers.set(child.pid, {
+            startTime: Date.now(),
+            status: 'running'
+        });
+
+        // Monitorar quando o processo terminar
+        child.on('exit', (code) => {
+            const scraperInfo = activeScrapers.get(child.pid);
+            const duration = scraperInfo ? ((Date.now() - scraperInfo.startTime) / 1000).toFixed(2) : 'unknown';
+
+            activeScrapers.delete(child.pid);
+
+            if (code === 0) {
+                console.log(`✅ Scraper ${child.pid} concluído com sucesso em ${duration}s`);
+                // Notificar todos os admins via WebSocket
+                broadcast({
+                    type: 'scraper_completed',
+                    payload: {
+                        success: true,
+                        pid: child.pid,
+                        duration: duration,
+                        timestamp: new Date().toISOString()
+                    }
+                }, 'admin');
+            } else {
+                console.error(`❌ Scraper ${child.pid} falhou com código ${code}`);
+                broadcast({
+                    type: 'scraper_completed',
+                    payload: {
+                        success: false,
+                        pid: child.pid,
+                        exitCode: code,
+                        timestamp: new Date().toISOString()
+                    }
+                }, 'admin');
+            }
+
+            // Fechar os ficheiros
+            fs.close(stdoutFd, () => { });
+            fs.close(stderrFd, () => { });
+        });
+
+        // "Desanexa" o processo para suportar continuação independente
+        child.unref();
 
         // Send immediate response
         res.json({
@@ -136,10 +178,11 @@ const triggerScraper = async (req, res) => {
  */
 const triggerInformalScraper = async (req, res) => {
     try {
+        const { exec } = require('child_process');
         const projectRoot = path.resolve(__dirname, '../..');
 
         // Run angocambio scraper in background
-        exec('node webscraper/angocambio-scraper.js', { cwd: projectRoot }, (error, stdout, stderr) => {
+        exec(`"${process.execPath}" webscraper/angocambio-scraper.js`, { cwd: projectRoot }, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Informal scraper execution error: ${error.message}`);
                 return;

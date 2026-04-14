@@ -1,0 +1,51 @@
+
+🚀 Iniciando execução de todos os scrapers...
+
+
+============================================================
+🏦 Executando: Mercado Formal (Bancos)
+============================================================
+
+🚀 Starting Cron Scraper...
+[32mINFO[39m [33m PuppeteerCrawler:[39m Starting the crawler.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BAI – https://bancobai.ao/pt/cambios-e-valores
+[32mINFO[39m [33m PuppeteerCrawler:[39m BAI: Found selector: table.table-striped
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 4 rates from BAI
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BFA – https://www.bfa.ao/pt/particulares/
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 4 rates from BFA
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BCI – https://www.bci.ao/
+[32mINFO[39m [33m PuppeteerCrawler:[39m BCI: Waiting for page to fully load...
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":4,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0.235},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":23124,"requestsFinishedPerMinute":2,"requestsFailedPerMinute":0,"requestTotalDurationMillis":46247,"requestsTotal":2,"crawlerRuntimeMillis":65520,"retryHistogram":[2]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing BNA – https://www.bna.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 3 rates from BNA
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":2,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":45577,"requestsFinishedPerMinute":2,"requestsFailedPerMinute":0,"requestTotalDurationMillis":182307,"requestsTotal":4,"crawlerRuntimeMillis":125522,"retryHistogram":[4]}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":45577,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":182307,"requestsTotal":4,"crawlerRuntimeMillis":185519,"retryHistogram":[4]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":2,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":45577,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":182307,"requestsTotal":4,"crawlerRuntimeMillis":245521,"retryHistogram":[4]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":2,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":45577,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":182307,"requestsTotal":4,"crawlerRuntimeMillis":305524,"retryHistogram":[4]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":2,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":45577,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":182307,"requestsTotal":4,"crawlerRuntimeMillis":365526,"retryHistogram":[4]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":2,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Processing YETU – https://www.bancoyetu.ao
+[32mINFO[39m [33m PuppeteerCrawler:[39m ✅ Extracted 0 rates from YETU
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":39500,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":197502,"requestsTotal":5,"crawlerRuntimeMillis":425534,"retryHistogram":[4,null,null,null,1]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":1,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":39500,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":197502,"requestsTotal":5,"crawlerRuntimeMillis":485536,"retryHistogram":[4,null,null,null,1]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":1,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m Statistics:[39m PuppeteerCrawler request statistics:[90m {"requestAvgFailedDurationMillis":null,"requestAvgFinishedDurationMillis":39500,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":197502,"requestsTotal":5,"crawlerRuntimeMillis":545541,"retryHistogram":[4,null,null,null,1]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:AutoscaledPool:[39m state[90m {"currentConcurrency":1,"desiredConcurrency":6,"systemStatus":{"isSystemIdle":true,"memInfo":{"isOverloaded":false,"limitRatio":0.2,"actualRatio":0},"eventLoopInfo":{"isOverloaded":false,"limitRatio":0.6,"actualRatio":0.275},"cpuInfo":{"isOverloaded":false,"limitRatio":0.4,"actualRatio":0},"clientInfo":{"isOverloaded":false,"limitRatio":0.3,"actualRatio":0}}}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m All requests from the queue have been processed, the crawler will shut down.
+[32mINFO[39m [33m PuppeteerCrawler:[39m Final request statistics:[90m {"requestsFinished":5,"requestsFailed":1,"retryHistogram":[4,null,null,null,1,1],"requestAvgFailedDurationMillis":94666,"requestAvgFinishedDurationMillis":39500,"requestsFinishedPerMinute":1,"requestsFailedPerMinute":0,"requestTotalDurationMillis":292168,"requestsTotal":6,"crawlerRuntimeMillis":568723}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Error analysis:[90m {"totalErrors":1,"uniqueErrors":1,"mostCommonErrors":["1x: Navigation timed out after 90 seconds. (/Users/av/Documents/Projetos/ecokambio-main/node_modules/@crawlee/core/crawlers/crawler_utils.js:13:11)"]}[39m
+[32mINFO[39m [33m PuppeteerCrawler:[39m Finished! Total 6 requests: 5 succeeded, 1 failed.[90m {"terminal":true}[39m
+✅ Puppeteer scraping completed
+💾 Data saved to /Users/av/Documents/Projetos/ecokambio-main/public/exchange_rates.json
+📡 Sending data to Supabase...
+📊 Transformed 11 records for upsert
+🔍 Deduplicated: 11 → 11 records
+✅ Data successfully saved to Supabase!
+   - Total rates: 11
+   - Banks: BAI, BFA, BNA

@@ -32,11 +32,7 @@ router.post('/subscription/report', validateSignature, catchAsync(ecoflixControl
 // Testing
 router.post('/test/simulate-webhook', catchAsync(ecoflixController.simulateWebhook));
 
-// Development Mocks
-if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-    const mockAppyPay = require('./mock_appypay');
-    router.use('/mock/appypay', mockAppyPay);
-}
+// Development Mocks Removed
 
 // ============================================================================
 // ADMIN ROUTES (Protected)

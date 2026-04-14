@@ -1,8 +1,8 @@
 {
 	"id": "N9jTB5mErYTvgGC",
-	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"loadedUrl\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\",\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-04-11T14:13:10.405Z\"}",
+	"json": "{\"id\":\"N9jTB5mErYTvgGC\",\"url\":\"https://www.bancobic.ao/inicio/particulares/index\",\"uniqueKey\":\"https://www.bancobic.ao/inicio/particulares/index\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"BIC\"}}",
 	"method": "GET",
-	"orderNo": null,
+	"orderNo": 1776209969697,
 	"retryCount": 0,
 	"uniqueKey": "https://www.bancobic.ao/inicio/particulares/index",
 	"url": "https://www.bancobic.ao/inicio/particulares/index"
