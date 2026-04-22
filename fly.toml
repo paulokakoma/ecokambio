@@ -19,7 +19,7 @@ primary_region = 'jnb' # Johannesburg - mais próximo de Angola (latência ~50ms
   force_https = true
   auto_stop_machines = false
   auto_start_machines = true
-  min_machines_running = 1 # Reduzido para 1 se quiser poupar, ou mantém 2 para HA
+  min_machines_running = 2 # Reduzido para 1 se quiser poupar, ou mantém 2 para HA
 
 
   [[http_service.checks]]
