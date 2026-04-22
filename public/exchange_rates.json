@@ -1,60 +1,115 @@
 {
-  "lastUpdated": "2026-04-14T22:29:36.694Z",
+  "lastUpdated": "2026-04-22T18:19:11.442Z",
   "rates": [
     {
-      "bank": "BAI",
-      "currency": "EUR",
-      "sell": "1152,1118"
-    },
-    {
-      "bank": "BAI",
-      "currency": "GBP",
-      "sell": "1326,3361"
-    },
-    {
-      "bank": "BAI",
-      "currency": "USD",
-      "sell": "976,4488"
-    },
-    {
-      "bank": "BAI",
-      "currency": "ZAR",
-      "sell": "59,7408"
-    },
-    {
       "bank": "BFA",
       "currency": "USD",
-      "sell": "964,583"
+      "sell": "965,62"
     },
     {
       "bank": "BFA",
       "currency": "EUR",
-      "sell": "1145,645"
+      "sell": "1132,918"
     },
     {
       "bank": "BFA",
       "currency": "NAD",
-      "sell": "59,38"
+      "sell": "58,681"
     },
     {
       "bank": "BFA",
       "currency": "GBP",
-      "sell": "1317,835"
+      "sell": "1304,442"
+    },
+    {
+      "bank": "BAI",
+      "currency": "EUR",
+      "sell": "1148,8418"
+    },
+    {
+      "bank": "BAI",
+      "currency": "GBP",
+      "sell": "1322,0718"
+    },
+    {
+      "bank": "BAI",
+      "currency": "USD",
+      "sell": "979,6555"
+    },
+    {
+      "bank": "BAI",
+      "currency": "ZAR",
+      "sell": "59,3855"
     },
     {
       "bank": "BNA",
       "currency": "USD",
-      "sell": "912,135"
+      "sell": "913,116"
     },
     {
       "bank": "BNA",
       "currency": "EUR",
-      "sell": "1076,228"
+      "sell": "1070,811"
     },
     {
       "bank": "BNA",
       "currency": "ZAR",
-      "sell": "55,806"
+      "sell": "55,352"
+    },
+    {
+      "bank": "BIC",
+      "currency": "CAD",
+      "sell": "684,82"
+    },
+    {
+      "bank": "BIC",
+      "currency": "USD",
+      "sell": "945,075"
+    },
+    {
+      "bank": "BIC",
+      "currency": "ZAR",
+      "sell": "56,736"
+    },
+    {
+      "bank": "BIC",
+      "currency": "CHF",
+      "sell": "1196,248"
+    },
+    {
+      "bank": "BIC",
+      "currency": "DKK",
+      "sell": "146,865"
+    },
+    {
+      "bank": "BIC",
+      "currency": "EUR",
+      "sell": "1140,414"
+    },
+    {
+      "bank": "BIC",
+      "currency": "GBP",
+      "sell": "1263,082"
+    },
+    {
+      "bank": "BIC",
+      "currency": "JPY",
+      "sell": "5,875"
+    },
+    {
+      "bank": "BIC",
+      "currency": "NAD",
+      "sell": "56,741"
+    },
+    {
+      "bank": "BIC",
+      "currency": "NOK",
+      "sell": "100,636"
+    },
+    {
+      "bank": "BIC",
+      "currency": "SEK",
+      "sell": "101,831"
     }
   ]
 }
