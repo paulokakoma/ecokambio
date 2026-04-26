@@ -1,0 +1,23 @@
+# fly.toml app configuration file for ecopay
+app = 'ecopay-api'
+primary_region = 'jnb'
+
+[build]
+dockerfile = 'Dockerfile'
+
+[env]
+NODE_ENV = 'production'
+PORT = '3001'
+SUPABASE_URL = 'https://drkjkkpzujwnkghtdokz.supabase.co'
+BYBIT_API_KEY = 'RXGlwkKWhH1T61VgXb'
+BYBIT_BASE_URL = 'https://api.bybit.com'
+
+[http_service]
+internal_port = 3001
+force_https = true
+auto_stop_machines = false
+
+[[secrets]]
+key = "SUPABASE_SERVICE_ROLE_KEY"
+[[secrets]]
+key = "BYBIT_API_SECRET"

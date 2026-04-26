@@ -2,6 +2,7 @@
 <html lang="pt" class="scroll-smooth">
 
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="233853" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -3530,6 +3531,7 @@
         // ==========================================
         let productsData = [];
         let currentProductImages = []; // Imagens já guardadas (para produto em edição)
+        let pendingProductImages = []; // Imagens temporárias até ser clicado em Guardar
 
         // Pesquisa de produtos
         document.getElementById('product-search-input')?.addEventListener('keyup', renderProductsTable);
@@ -3608,26 +3610,49 @@
             const grid = document.getElementById('product-images-grid');
             if (!grid) return;
 
-            if (!images || images.length === 0) {
-                grid.innerHTML = '';
-                return;
+            let html = '';
+
+            if (images && images.length > 0) {
+                html += images.map(img => `
+                    <div class="relative group rounded-lg overflow-hidden border-2 ${img.is_primary ? 'border-indigo-500' : 'border-slate-200'} aspect-square bg-slate-100">
+                        <img src="${img.url}" class="w-full h-full object-contain" alt="Imagem">
+                        ${img.is_primary ? '<span class="absolute top-1 left-1 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Principal</span>' : ''}
+                        <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            ${!img.is_primary ? `<button type="button" onclick="setImagePrimary('${img.id}')" title="Definir como principal" class="bg-white text-indigo-600 rounded-full p-1.5 hover:bg-indigo-600 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </button>` : ''}
+                            <button type="button" onclick="deleteProductImage('${img.id}')" title="Remover imagem" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
             }
 
-            grid.innerHTML = images.map(img => `
-                <div class="relative group rounded-lg overflow-hidden border-2 ${img.is_primary ? 'border-indigo-500' : 'border-slate-200'} aspect-square bg-slate-100">
-                    <img src="${img.url}" class="w-full h-full object-contain" alt="Imagem">
-                    ${img.is_primary ? '<span class="absolute top-1 left-1 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Principal</span>' : ''}
-                    <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        ${!img.is_primary ? `<button type="button" onclick="setImagePrimary('${img.id}')" title="Definir como principal" class="bg-white text-indigo-600 rounded-full p-1.5 hover:bg-indigo-600 hover:text-white transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </button>` : ''}
-                        <button type="button" onclick="deleteProductImage('${img.id}')" title="Remover imagem" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+            if (pendingProductImages && pendingProductImages.length > 0) {
+                pendingProductImages.forEach((file, index) => {
+                    const localUrl = URL.createObjectURL(file);
+                    html += `
+                    <div class="relative group rounded-lg overflow-hidden border-2 border-slate-200 aspect-square bg-slate-100">
+                        <img src="${localUrl}" class="w-full h-full object-contain opacity-70">
+                        <span class="absolute top-1 left-1 bg-yellow-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Pendente</span>
+                        <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <button type="button" onclick="window.removePendingImage(${index})" title="Remover imagem pendente" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                    `;
+                });
+            }
+
+            grid.innerHTML = html || '';
         }
+
+        window.removePendingImage = (index) => {
+            pendingProductImages.splice(index, 1);
+            renderProductImagesGrid(currentProductImages);
+        };
 
         // Apagar imagem individual
         async function deleteProductImage(imageId) {
@@ -3688,20 +3713,11 @@
 
         // Listener: Input de nova imagem
         document.getElementById('product_image_new')?.addEventListener('change', async (e) => {
-            const productId = document.getElementById('product_id').value;
-            const files = Array.from(e.target.files);
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
             if (!files.length) return;
 
-            if (!productId) {
-                // Produto ainda não foi guardado — guardar primeiro
-                typeof showToast === 'function'
-                    ? showToast('Por favor, guarde o produto primeiro antes de adicionar imagens.', 'error')
-                    : alert('Guarde o produto primeiro.');
-                e.target.value = '';
-                return;
-            }
-
-            await uploadImages(productId, files);
+            pendingProductImages.push(...files);
+            renderProductImagesGrid(currentProductImages);
             e.target.value = ''; // reset input
         });
 
@@ -3713,15 +3729,12 @@
             dropzone.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 dropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
-                const productId = document.getElementById('product_id').value;
-                if (!productId) {
-                    typeof showToast === 'function'
-                        ? showToast('Guarde o produto primeiro antes de adicionar imagens.', 'error')
-                        : alert('Guarde o produto primeiro.');
-                    return;
-                }
+                
                 const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-                if (files.length > 0) await uploadImages(productId, files);
+                if (files.length > 0) {
+                    pendingProductImages.push(...files);
+                    renderProductImagesGrid(currentProductImages);
+                }
             });
         }
 
@@ -3731,6 +3744,7 @@
             document.getElementById('product_id').value = '';
             document.getElementById('product-modal-title').textContent = 'Novo Produto';
             currentProductImages = [];
+            pendingProductImages = [];
             renderProductImagesGrid([]);
             document.getElementById('product-images-upload-status').classList.add('hidden');
             document.getElementById('product-modal').classList.remove('hidden');
@@ -3783,13 +3797,22 @@
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || 'Erro ao guardar produto');
 
-                typeof showToast === 'function' ? showToast('Produto guardado com sucesso.', 'success') : alert('Produto guardado com sucesso.');
+                typeof showToast === 'function' ? showToast('Dados do produto guardados.', 'success') : alert('Produto guardado!');
 
-                // Se é criação, atualizar o ID oculto para permitir adicionar imagens sem fechar
+                // Obter o ID final (seja da edição ou da nova criação)
+                const finalProductId = id || result.data?.id;
+
+                // Processar as imagens que estavam pendentes se houver
+                if (finalProductId && pendingProductImages.length > 0) {
+                    btn.innerHTML = '<div class="loader !w-5 !h-5 !border-[2px]"></div> Enviando Imagens...';
+                    await uploadImages(finalProductId, pendingProductImages);
+                    pendingProductImages = []; // Limpa a fila
+                }
+
                 if (!id && result.data?.id) {
                     document.getElementById('product_id').value = result.data.id;
                     document.getElementById('product-modal-title').textContent = 'Editar Produto';
-                    document.getElementById('product-images-upload-status').textContent = '✓ Produto criado! Agora pode adicionar imagens.';
+                    document.getElementById('product-images-upload-status').textContent = '✓ Produto e imagens criados com sucesso!';
                     document.getElementById('product-images-upload-status').classList.remove('hidden');
                 } else {
                     document.querySelector('.close-product-modal').click();
@@ -3832,6 +3855,7 @@
 
             // Carregar imagens existentes
             currentProductImages = (p.product_images || []).sort((a, b) => a.sort_order - b.sort_order);
+            pendingProductImages = []; // Limpa pendentes abertos anteriores
             renderProductImagesGrid(currentProductImages);
 
             document.getElementById('product-modal-title').textContent = 'Editar Produto';

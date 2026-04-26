@@ -125,4 +125,21 @@ router.post('/webhook/paypay', async (req, res) => {
   }
 });
 
+// Get transaction history for profile
+router.get('/history/:profileId', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('ecopay_transactions')
+      .select('*')
+      .eq('profile_id', req.params.profileId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    res.json({ success: true, transactions: data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

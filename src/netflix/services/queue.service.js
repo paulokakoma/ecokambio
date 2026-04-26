@@ -1,14 +1,18 @@
 const { Queue, Worker } = require('bullmq');
-const { redisConfig } = require('../../config/redis');
+const { redisConfig, redisUrl } = require('../../config/redis');
+const Redis = require('ioredis');
 const supabase = require('../../config/supabase');
 const smsService = require('./sms.service');
 
 // Define Queue Name
 const FAMILY_PLAN_QUEUE = 'family-plan-assignment';
 
+// Connection instance for BullMQ
+const queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+
 // Create Queue
 const familyPlanQueue = new Queue(FAMILY_PLAN_QUEUE, {
-    connection: redisConfig
+    connection: queueConnection
 });
 
 // Worker Factory
@@ -104,7 +108,7 @@ const startFamilyPlanWorker = () => {
         }
 
     }, {
-        connection: redisConfig,
+        connection: queueConnection,
         concurrency: 1,
         limiter: {
             max: 1,

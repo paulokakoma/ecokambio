@@ -3,11 +3,11 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// Agenda o verificador (scraper) para correr a cada 4 horas
+// Agenda o verificador (scraper) para correr a cada 6 horas
 // Formato cron: Minuto Hora Dia Mês DiaDaSemana
-const SCHEDULE = '0 */4 * * *';
+const SCHEDULE = '0 */6 * * *';
 
-console.log(`📅 Agendador inicializado. O Scraper irá correr a cada 4 horas (${SCHEDULE})`);
+console.log(`📅 Agendador inicializado. O Scraper irá correr a cada 6 horas (${SCHEDULE})`);
 
 // Garante que a pasta de logs existe
 const logDir = path.join(__dirname, '..', 'logs');
@@ -83,7 +83,7 @@ const runScraper = () => {
 
 // Inicializar a tarefa (cron job)
 const job = cron.schedule(SCHEDULE, runScraper, {
-    scheduled: false, // Não avança automaticamente (arranque manual através do start)
+    scheduled: true, // Inicia automaticamente
     timezone: "UTC"
 });
 

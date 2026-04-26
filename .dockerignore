@@ -10,3 +10,11 @@ node_modules
 
 # Logs e ficheiros de depuração
 npm-debug.log
+
+# Ficheiros Extra GIGANTES que travam o deploy
+ecopay
+.venv
+.cursor
+.claude
+.agent
+.agents

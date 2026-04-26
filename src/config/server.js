@@ -84,7 +84,8 @@ function getHelmetConfig() {
                     "https://cdn.tailwindcss.com",
                     "https://www.googletagmanager.com",
                     "https://www.google-analytics.com",
-                    "https://www.google.com"
+                    "https://www.google.com",
+                    "https://quge5.com"
                 ],
                 scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
                 styleSrc: [
@@ -262,7 +263,7 @@ function startServer(server, port) {
 
             logger.info(`✅ Servidor a correr na porta ${port}`);
             logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
-            logger.info('📅 Agendamento via node-cron desativado (Gerido pelo Supercronic)');
+            logger.info('📅 Agendamento via node-cron ativado');
 
             if (config.isDevelopment) {
                 logger.info('📱 Plataforma EcoKambio: http://localhost:' + port);

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="233853" async data-cfasync="false"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoPay - Comprar USDT em Angola</title>
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .neon-glow { box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        input:focus { outline: none; border-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col">
+        <header class="p-6 text-center">
+            <h1 class="text-3xl font-extrabold text-emerald-400">EcoPay</h1>
+            <p class="text-slate-400 text-sm mt-1">Compre USDT com Kwanza</p>
+        </header>
+
+        <main class="flex-grow p-6 space-y-6">
+            <div class="tabs flex gap-2 mb-6">
+                <button onclick="showTab('login')" id="tab-login" class="flex-1 py-3 rounded-xl font-semibold bg-emerald-600 text-white">Login</button>
+                <button onclick="showTab('register')" id="tab-register" class="flex-1 py-3 rounded-xl font-semibold bg-slate-800 text-slate-400">Registar</button>
+            </div>
+
+            <div id="login-section">
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Email</label>
+                        <input type="email" id="login-email" class="w-full p-4 rounded-xl text-white" placeholder="seu@email.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Senha</label>
+                        <input type="password" id="login-password" class="w-full p-4 rounded-xl text-white" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold text-lg neon-glow">Entrar</button>
+                </form>
+                <p class="text-center mt-4 text-slate-400">Esqueceu a senha? <a href="#" class="text-emerald-400">Recuperar</a></p>
+            </div>
+
+            <div id="register-section" class="hidden space-y-4">
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Nome Completo</label>
+                        <input type="text" id="reg-name" class="w-full p-4 rounded-xl text-white" placeholder="João Silva" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Email</label>
+                        <input type="email" id="reg-email" class="w-full p-4 rounded-xl text-white" placeholder="seu@email.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Telefone</label>
+                        <input type="tel" id="reg-phone" class="w-full p-4 rounded-xl text-white" placeholder="+244900000000" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Senha</label>
+                        <input type="password" id="reg-password" class="w-full p-4 rounded-xl text-white" placeholder="••••••••" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Confirmar Senha</label>
+                        <input type="password" id="reg-confirm" class="w-full p-4 rounded-xl text-white" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold text-lg">Criar Conta</button>
+                </form>
+            </div>
+
+            <div class="mt-8 p-4 glass rounded-xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-400">USDT/AOA</span>
+                    <span class="text-emerald-400 font-mono font-bold" id="rate-display">---</span>
+                </div>
+                <p class="text-xs text-slate-500">Taxa em tempo real via Binance</p>
+            </div>
+        </main>
+
+        <footer class="p-6 text-center text-slate-500 text-sm">
+            <p>EcoPay &copy; 2026</p>
+            <div class="flex justify-center gap-4 mt-2">
+                <a href="#" class="text-slate-400 hover:text-white">Termos</a>
+                <a href="#" class="text-slate-400 hover:text-white">Privacidade</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'https://ecopay-api.fly.dev';
+        
+        function showTab(tab) {
+            document.getElementById('login-section').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('register-section').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('tab-login').className = `flex-1 py-3 rounded-xl font-semibold ${tab === 'login' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`;
+            document.getElementById('tab-register').className = `flex-1 py-3 rounded-xl font-semibold ${tab === 'register' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('ecopay_token', data.token);
+                    window.location.href = '/ecopay/dashboard.html';
+                } else {
+                    alert(data.error || 'Login falhou');
+                }
+            } catch (err) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const phone = document.getElementById('reg-phone').value;
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+            
+            if (password !== confirm) {
+                alert('As senhas não coincidem');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/api/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Conta criada! Faça login.');
+                    showTab('login');
+                } else {
+                    alert(data.error || 'Registo falhou');
+                }
+            } catch (err) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function fetchRate() {
+            try {
+                const res = await fetch('https://api.ecokambio.com/api/rates/usdt');
+                const data = await res.json();
+                document.getElementById('rate-display').textContent = data.rate ? `${data.rate.toFixed(2)} AOA` : '---';
+            } catch (err) {
+                document.getElementById('rate-display').textContent = '---';
+            }
+        }
+
+        fetchRate();
+    </script>
+</body>
+</html>

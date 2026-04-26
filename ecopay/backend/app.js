@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -11,9 +12,15 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Serve static frontend
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Basic Health Check
 app.get('/', (req, res) => {
   res.json({ message: 'EcoPay Backend is running', timestamp: new Date() });
+});
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
 });
 
 // Routes

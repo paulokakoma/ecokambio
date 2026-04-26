@@ -85,7 +85,8 @@ app.use(helmet({
                 "https://cdn.tailwindcss.com",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
-                "https://www.google.com"
+                "https://www.google.com",
+                "https://quge5.com"
             ],
             scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
             styleSrc: [
@@ -110,7 +111,10 @@ app.use(helmet({
                 "'self'",
                 "https://drkjkkpzujwnkghtdokz.supabase.co",
                 "https://www.google-analytics.com",
-                "https://cdn.jsdelivr.net"
+                "https://cdn.jsdelivr.net",
+                "https://6opo.com",
+                "https://quge5.com",
+                "https://*.quge5.com"
             ],
             frameSrc: [
                 "'self'",
@@ -439,10 +443,9 @@ if (require.main === module) {
         logger.info(`✅ Servidor a correr na porta ${config.port}`);
         logger.info(`   Ambiente: ${config.isDevelopment ? 'Desenvolvimento' : 'Produção'}`);
 
-        // NOTA: O agendamento via node-cron foi desativado. 
-        // Em produção, o web scraping está a ser gerido exclusivamente pelo Supercronic (Docker)
-        // que lê o ficheiro 'crontab' na raiz do projeto.
-        logger.info('📅 Agendamento via node-cron desativado (Gerido pelo Supercronic)');
+        // Inicia o job interno de scraping (node-cron)
+        scheduler.start();
+        logger.info('📅 Agendamento via node-cron ativado');
 
         if (config.isDevelopment) {
             logger.info(`Rotas Locais Ativas:`);

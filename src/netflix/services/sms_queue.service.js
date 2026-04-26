@@ -1,13 +1,17 @@
 const { Queue, Worker } = require('bullmq');
-const { redisConfig } = require('../../config/redis');
+const { redisConfig, redisUrl } = require('../../config/redis');
+const Redis = require('ioredis');
 const smsService = require('./sms.service');
 
 // Define Queue Name
 const SMS_QUEUE = 'sms-delivery';
 
+// Connection instance for BullMQ
+const queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+
 // Create Queue
 const smsQueue = new Queue(SMS_QUEUE, {
-    connection: redisConfig
+    connection: queueConnection
 });
 
 // Worker Factory (to be called by worker.js)
@@ -24,7 +28,7 @@ const startSmsWorker = () => {
             throw error; // Retries according to configuration
         }
     }, {
-        connection: redisConfig,
+        connection: queueConnection,
         concurrency: 5, // Process multiple SMS in parallel
         limiter: {
             max: 5,

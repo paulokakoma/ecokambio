@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="233853" async data-cfasync="false"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoPay - Dashboard</title>
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        input:focus { outline: none; border-color: #10b981; }
+        .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <header class="p-4 flex justify-between items-center border-b border-slate-800">
+        <h1 class="text-xl font-bold text-emerald-400">EcoPay</h1>
+        <button onclick="logout()" class="text-slate-400 hover:text-white">Sair</button>
+    </header>
+
+    <main class="p-4 space-y-4">
+        <div class="glass p-4 rounded-xl">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-slate-400 text-sm">Saldo USDT</p>
+                    <p class="text-2xl font-mono text-emerald-400" id="balance">0.00</p>
+                </div>
+                <span class="status-badge bg-emerald-500/20 text-emerald-400" id="status-badge">---</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="showSection('buy')" class="glass p-4 rounded-xl text-center hover:border-emerald-500">
+                <p class="text-2xl mb-1">💵</p>
+                <p class="font-semibold">Comprar</p>
+            </button>
+            <button onclick="showSection('history')" class="glass p-4 rounded-xl text-center hover:border-emerald-500">
+                <p class="text-2xl mb-1">📋</p>
+                <p class="font-semibold">Histórico</p>
+            </button>
+        </div>
+
+        <div id="buy-section" class="space-y-4">
+            <div class="glass p-4 rounded-xl">
+                <h3 class="font-semibold mb-4">Comprar USDT</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Quantidade (AOA)</label>
+                        <input type="number" id="amount-aoa" class="w-full p-3 rounded-lg text-white" placeholder="50000" oninput="calcUsdt()">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Recebe USDT</label>
+                        <input type="text" id="amount-usdt" class="w-full p-3 rounded-lg text-emerald-400 font-mono" readonly>
+                    </div>
+                    <p class="text-xs text-slate-500">Taxa: <span id="rate">---</span> AOA/USDT</p>
+                    <button onclick="createOrder()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-bold">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="history-section" class="hidden space-y-3">
+            <h3 class="font-semibold">Transações</h3>
+            <div id="transactions-list" class="space-y-2"></div>
+        </div>
+
+        <div id="wallet-section" class="hidden glass p-4 rounded-xl">
+            <h3 class="font-semibold mb-3">Minha Carteira</h3>
+            <div class="space-y-2 text-sm">
+                <p class="text-slate-400">Endereço:</p>
+                <p class="font-mono text-xs break-all" id="wallet-address">---</p>
+                <p class="text-slate-400">Rede:</p>
+                <p id="wallet-chain">---</p>
+            </div>
+            <button onclick="showUpdateWallet()" class="mt-3 text-emerald-400 text-sm">Atualizar Carteira</button>
+        </div>
+    </main>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4">
+        <div class="glass p-6 rounded-xl max-w-sm w-full">
+            <h3 class="font-bold text-lg mb-4" id="modal-title">Pagamento</h3>
+            <div id="modal-content"></div>
+            <button onclick="closeModal()" class="mt-4 w-full py-2 bg-slate-700 rounded-lg">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://ecopay-api.fly.dev';
+        let token = localStorage.getItem('ecopay_token');
+        let profile = null;
+        let rate = 0;
+
+        async function init() {
+            if (!token) { window.location.href = '/ecopay/'; return; }
+            
+            try {
+                const res = await fetch(`${API_URL}/api/users/profile/${token}`);
+                const data = await res.json();
+                if (!data.success) { logout(); return; }
+                profile = data.profile;
+                renderProfile();
+            } catch (err) { console.error(err); }
+        }
+
+        function renderProfile() {
+            document.getElementById('status-badge').textContent = getStatus(profile.status);
+            document.getElementById('wallet-address').textContent = profile.wallet_address || 'Não configurado';
+            document.getElementById('wallet-chain').textContent = profile.wallet_chain || '---';
+        }
+
+        function getStatus(status) {
+            const map = { pending_kyc: 'KYC Pendente', pending_approval: 'Em Análise', approved: 'Aprovado', rejected: 'Rejeitado' };
+            return map[status] || status;
+        }
+
+        async function calcUsdt() {
+            const aoa = parseFloat(document.getElementById('amount-aoa').value) || 0;
+            if (rate > 0) {
+                const usdt = (aoa / rate).toFixed(2);
+                document.getElementById('amount-usdt').value = usdt;
+            }
+        }
+
+        async function createOrder() {
+            if (profile.status !== 'approved') {
+                alert('Conta não aprovada');
+                return;
+            }
+            const aoa = parseFloat(document.getElementById('amount-aoa').value);
+            if (!aoa || aoa < 5000) { alert('Mínimo: 5.000 AOA'); return; }
+
+            try {
+                const res = await fetch(`${API_URL}/api/payments/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profileId: profile.id, amountUsdt: aoa / rate })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showModal('Pagamento', \`
+                        <p class="text-sm text-slate-400 mb-2">Entity:</p>
+                        <p class="text-xl font-bold text-white mb-2">\${data.paymentData.entity}</p>
+                        <p class="text-sm text-slate-400 mb-2">Referência:</p>
+                        <p class="text-xl font-mono text-white mb-2">\${data.paymentData.reference}</p>
+                        <p class="text-sm text-slate-400 mb-2">Valor:</p>
+                        <p class="text-xl font-bold text-emerald-400">\${data.paymentData.amount.toFixed(2)} AOA</p>
+                        <p class="text-xs text-slate-500 mt-4">Pagamento pormultibanco ou IBAN</p>
+                    `);
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) { alert('Erro'); }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API_URL}/api/payments/history/${profile.id}`);
+                const data = await res.json();
+                const list = document.getElementById('transactions-list');
+                list.innerHTML = data.transactions?.map(t => \`
+                    <div class="glass p-3 rounded-lg">
+                        <div class="flex justify-between text-sm">
+                            <span>\${t.amount_usdt} USDT</span>
+                            <span class="\${t.payment_status === 'liquidated' ? 'text-emerald-400' : 'text-slate-400'}">\${t.payment_status}</span>
+                        </div>
+                        <p class="text-xs text-slate-500">\${new Date(t.created_at).toLocaleDateString()}</p>
+                    </div>
+                `).join('') || '<p class="text-slate-500">Sem transações</p>';
+            } catch (err) {}
+        }
+
+        function showSection(s) {
+            document.getElementById('buy-section').classList.toggle('hidden', s !== 'buy');
+            document.getElementById('history-section').classList.toggle('hidden', s !== 'history');
+            if (s === 'history') loadHistory();
+        }
+
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        function logout() { localStorage.removeItem('ecopay_token'); window.location.href = '/ecopay/'; }
+
+        init();
+    </script>
+</body>
+</html>

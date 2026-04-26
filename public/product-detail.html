@@ -144,7 +144,7 @@
             .mobile-gallery { min-height: 180px !important; padding: 1rem !important; }
         }
     </style>
-    <script src="https://quge5.com/88/tag.min.js" data-zone="232624" async data-cfasync="false"></script>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="233853" async data-cfasync="false"></script>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
@@ -185,9 +185,11 @@
                 
                 <!-- Galeria de Imagem Premium -->
                 <div class="space-y-3 md:space-y-4">
-                    <div class="ambient-mesh mobile-gallery p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-lg border border-slate-100 overflow-hidden group flex items-center justify-center min-h-[180px] md:min-h-[350px] relative">
+                    <div id="image-gallery-container" class="ambient-mesh mobile-gallery p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-lg border border-slate-100 overflow-hidden group flex items-center justify-center min-h-[180px] md:min-h-[350px] relative touch-none">
                         <!-- Imagem Principal -->
-                        <img id="product-main-image" src="" alt="Produto" class="w-full h-auto max-h-[220px] md:max-h-[400px] object-contain rounded-xl group-hover:scale-105 transition-transform duration-700 mx-auto relative z-10 drop-shadow-xl">
+                        <img id="product-main-image" src="" alt="Produto" class="w-full h-auto max-h-[220px] md:max-h-[400px] object-contain rounded-xl group-hover:scale-105 transition-transform duration-700 mx-auto relative z-10 drop-shadow-xl select-none">
+                        <!-- Indicador de slide (dots) -->
+                        <div id="slide-indicator" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 z-20"></div>
                     </div>
                     <!-- Miniaturas Simuladas -->
                     <div class="flex justify-center gap-2 md:gap-3 mt-3 md:mt-4" id="thumbnail-gallery">
@@ -341,37 +343,119 @@
             const allImages = (product.images && product.images.length > 0) ? product.images : (product.img ? [product.img] : []);
             
             const mainImg = document.getElementById('product-main-image');
+            let currentImageIndex = 0;
+
+            // Build slide indicator (dots) - only show on mobile
+            const slideIndicator = document.getElementById('slide-indicator');
+            if (allImages.length > 1) {
+                slideIndicator.innerHTML = allImages.map((_, i) => `
+                    <span class="dot w-2 h-2 rounded-full bg-white/60 ${i === 0 ? 'bg-white w-3' : ''} transition-all duration-300"></span>
+                `).join('');
+            }
+
+            // Function to switch image with slide effect
+            const switchImage = (index, direction = 'fade') => {
+                if (index === currentImageIndex) return; // evitar transições sem mudança
+                if (index < 0) index = allImages.length - 1;
+                if (index >= allImages.length) index = 0;
+                currentImageIndex = index;
+                
+                if (direction === 'fade') {
+                    mainImg.style.transition = 'opacity 250ms ease-in-out';
+                    mainImg.style.opacity = '0';
+                    setTimeout(() => {
+                        mainImg.src = allImages[index];
+                        mainImg.style.opacity = '1';
+                    }, 250);
+                } else {
+                    // Smooth slide para touch swipe
+                    const slideOut = direction === 'next' ? '-30px' : '30px';
+                    const slideIn = direction === 'next' ? '30px' : '-30px';
+                    
+                    mainImg.style.transition = 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease-in-out';
+                    mainImg.style.transform = `translateX(${slideOut})`;
+                    mainImg.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        mainImg.src = allImages[index];
+                        
+                        // Reseta posição instantaneamente invisível
+                        mainImg.style.transition = 'none';
+                        mainImg.style.transform = `translateX(${slideIn})`;
+                        // Força o reflow do browser
+                        void mainImg.offsetWidth;
+                        
+                        // Anima para o centro
+                        mainImg.style.transition = 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease-in-out';
+                        mainImg.style.transform = 'translateX(0)';
+                        mainImg.style.opacity = '1';
+                    }, 200);
+                }
+                
+                // Update indicators
+                slideIndicator.querySelectorAll('.dot').forEach((dot, i) => {
+                    dot.className = `dot w-2 h-2 rounded-full bg-white/60 ${i === index ? 'bg-white w-3' : ''} transition-all duration-300`;
+                });
+                // Update thumbnail selection
+                thumbGallery?.querySelectorAll('.thumb-btn').forEach((b, i) => {
+                    if (i === index) {
+                        b.classList.add('border-emerald-500');
+                        b.classList.remove('border-transparent');
+                        b.querySelector('img').classList.replace('opacity-60', 'opacity-100');
+                    } else {
+                        b.classList.remove('border-emerald-500');
+                        b.classList.add('border-transparent');
+                        b.querySelector('img')?.classList.replace('opacity-100', 'opacity-60');
+                    }
+                });
+            };
+
             mainImg.src = allImages[0] || '';
             mainImg.alt = product.name;
 
+            // Touch/Swipe support for main image
+            const galleryContainer = document.getElementById('image-gallery-container');
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const SWIPE_THRESHOLD = 50;
+
+            if (allImages.length > 1) {
+                galleryContainer.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                galleryContainer.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    const diff = touchStartX - touchEndX;
+                    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+                        if (diff > 0) {
+                            switchImage(currentImageIndex + 1, 'next'); // Swipe left - next
+                        } else {
+                            switchImage(currentImageIndex - 1, 'prev'); // Swipe right - previous
+                        }
+                    }
+                }, { passive: true });
+            }
+
             // Build thumbnail gallery dynamically from real images
             const thumbGallery = document.getElementById('thumbnail-gallery');
+            slideIndicator.classList.toggle('md:hidden', allImages.length <= 1); // Hide dots on desktop if single image
             if (allImages.length <= 1) {
                 // Hide the whole gallery if there's only one (or no) image
                 thumbGallery.classList.add('hidden');
+                slideIndicator.classList.add('hidden');
             } else {
                 thumbGallery.innerHTML = allImages.map((url, i) => `
-                    <button data-img="${url}" class="thumb-btn w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-2 ${i === 0 ? 'border-emerald-500' : 'border-transparent'} bg-white shadow-sm p-1 overflow-hidden transition-transform hover:scale-105 focus:outline-none hover:border-slate-300">
+                    <button data-index="${i}" class="thumb-btn w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-2 ${i === 0 ? 'border-emerald-500' : 'border-transparent'} bg-white shadow-sm p-1 overflow-hidden transition-transform hover:scale-105 focus:outline-none hover:border-slate-300">
                         <img src="${url}" class="w-full h-full object-contain ${i === 0 ? 'opacity-100' : 'opacity-60'}" alt="Vista ${i+1}">
                     </button>
                 `).join('');
 
-                // Thumbnail click handler — swap main image
+                // Thumbnail click handler — use switchImage function
                 thumbGallery.querySelectorAll('.thumb-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        mainImg.style.opacity = '0.5';
-                        setTimeout(() => {
-                            mainImg.src = btn.dataset.img;
-                            mainImg.style.opacity = '1';
-                        }, 150);
-                        thumbGallery.querySelectorAll('.thumb-btn').forEach(b => {
-                            b.classList.remove('border-emerald-500');
-                            b.classList.add('border-transparent');
-                            b.querySelector('img').classList.replace('opacity-100', 'opacity-60');
-                        });
-                        btn.classList.add('border-emerald-500');
-                        btn.classList.remove('border-transparent');
-                        btn.querySelector('img').classList.replace('opacity-60', 'opacity-100');
+                        const index = parseInt(btn.dataset.index);
+                        switchImage(index);
                     });
                 });
             }
