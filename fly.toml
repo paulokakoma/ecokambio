@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for ecokambio on 2026-04-22T21:55:10Z
+# fly.toml app configuration file generated for ecokambio-icf4uw on 2026-04-26T19:29:26Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'ecokambio'
-primary_region = 'jnb'
+app = 'ecokambio-icf4uw'
+primary_region = 'ams'
 
 [build]
   dockerfile = 'Dockerfile'
