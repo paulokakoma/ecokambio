@@ -15,7 +15,9 @@ BYBIT_BASE_URL = 'https://api.bybit.com'
 [http_service]
 internal_port = 3001
 force_https = true
-auto_stop_machines = false
+auto_stop_machines = 'stop'
+auto_start_machines = true
+min_machines_running = 1
 
 [[secrets]]
 key = "SUPABASE_SERVICE_ROLE_KEY"
