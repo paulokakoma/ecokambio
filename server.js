@@ -369,6 +369,11 @@ app.get('/health', async (req, res) => {
 // View Routes - handles subdomain routing
 // A lógica de servir os ficheiros principais (index.html vs admin.html)
 // é movida diretamente para cá para ser mais explícita e segura.
+// Serve sw.js from root for Monetag script
+app.get('/sw.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'sw.js'));
+});
+
 app.get('*', (req, res, next) => {
     // Se for uma rota de API, ignora e passa para o próximo handler (404)
     if (req.path.startsWith('/api/')) {
