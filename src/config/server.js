@@ -85,7 +85,9 @@ function getHelmetConfig() {
                     "https://www.googletagmanager.com",
                     "https://www.google-analytics.com",
                     "https://www.google.com",
-                    "https://quge5.com"
+                    "https://quge5.com",
+                    "https://3nbf4.com",
+                    "https://5gvci.com"
                 ],
                 scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"],
                 styleSrc: [
@@ -110,7 +112,16 @@ function getHelmetConfig() {
                     "'self'",
                     "https://drkjkkpzujwnkghtdokz.supabase.co",
                     "https://www.google-analytics.com",
-                    "https://cdn.jsdelivr.net"
+                    "https://cdn.jsdelivr.net",
+                    "https://5gvci.com",
+                    "https://quge5.com",
+                    "https://3nbf4.com"
+                ],
+                workerSrc: [
+                    "'self'",
+                    "https://5gvci.com",
+                    "https://quge5.com",
+                    "https://3nbf4.com"
                 ],
                 frameSrc: ["'self'", "https://www.google.com"],
                 childSrc: ["'self'"],
