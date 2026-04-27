@@ -1,7 +1,7 @@
         let dbClient;
         function formatCurrency(value, currency = 'AOA') {
             if (typeof value !== 'number') return 'N/A';
-            return new Intl.NumberFormat('pt-AO', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 20 }).format(value);
+            return new Intl.NumberFormat('pt-AO', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
         }
 
         function renderProductDetails(data) {
