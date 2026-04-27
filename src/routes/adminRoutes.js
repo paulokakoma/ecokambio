@@ -33,6 +33,7 @@ router.delete('/products/:id', productController.deleteProduct);
 router.post('/products/:id/images', upload.single('image'), productController.uploadProductImage);
 router.delete('/product-images/:imageId', productController.deleteProductImage);
 router.post('/product-images/:imageId/set-primary', productController.setPrimaryImage);
+router.put('/product-images/:imageId/color', productController.updateImageColor);
 
 
 // Dashboard & Stats

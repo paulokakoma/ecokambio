@@ -103,6 +103,7 @@ app.use(helmet({
             imgSrc: [
                 "'self'",
                 "data:",
+                "blob:",
                 "https:",
                 "https://www.google-analytics.com",
                 "https://www.google.com"

@@ -455,10 +455,11 @@
                 </svg>
                 <span>Moedas</span>
             </a>
-            
+
             <a href="#produtos" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                 </svg>
                 <span>Produtos</span>
             </a>
@@ -763,7 +764,8 @@
                             </svg>
                             <span>Atualizar Todas as Taxas</span>
                         </button>
-                        <div id="scraper-status-panel" class="text-xs text-slate-500 hidden sm:flex flex-col justify-center">
+                        <div id="scraper-status-panel"
+                            class="text-xs text-slate-500 hidden sm:flex flex-col justify-center">
                             <span id="scraper-health-status" class="font-semibold text-gray-500">Verificando...</span>
                             <span id="scraper-last-run" class="text-slate-400">--</span>
                         </div>
@@ -1003,7 +1005,7 @@
             </section>
 
             <!-- Configurações Section -->
-            
+
             <!-- Produtos Section -->
             <section id="produtos" class="admin-section hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -1391,17 +1393,24 @@
 
 
         <!-- Modal: Confirmação de Exclusão -->
-        
+
         <!-- Product Modal -->
-        <div id="product-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity"></div>
+        <div id="product-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
+            aria-modal="true">
+            <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity">
+            </div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="modal-content relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                    <div
+                        class="modal-content relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                         <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 class="text-lg font-bold text-slate-900" id="product-modal-title">Novo Produto</h3>
-                            <button type="button" class="close-product-modal text-slate-400 hover:text-slate-600 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <button type="button"
+                                class="close-product-modal text-slate-400 hover:text-slate-600 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
                             </button>
                         </div>
                         <form id="product-form" class="px-6 py-6 pb-8">
@@ -1409,12 +1418,17 @@
                             <div class="space-y-5">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label for="product_name" class="block text-sm font-semibold text-slate-700 mb-1">Nome do Produto</label>
-                                        <input type="text" id="product_name" name="name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                        <label for="product_name"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">Nome do
+                                            Produto</label>
+                                        <input type="text" id="product_name" name="name" required
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                     </div>
                                     <div>
-                                        <label for="product_category" class="block text-sm font-semibold text-slate-700 mb-1">Categoria</label>
-                                        <select id="product_category" name="category" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                        <label for="product_category"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">Categoria</label>
+                                        <select id="product_category" name="category" required
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                             <option value="Telemóveis">Telemóveis</option>
                                             <option value="Computadores">Computadores</option>
                                             <option value="Eletrónicos">Eletrónicos</option>
@@ -1423,24 +1437,50 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label for="product_price" class="block text-sm font-semibold text-slate-700 mb-1">Preço Atual (String formatada)</label>
-                                        <input type="text" id="product_price" name="price" placeholder="Ex: 1.150.000,00 Kz" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                        <label for="product_price"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">Preço Atual (String
+                                            formatada)</label>
+                                        <input type="text" id="product_price" name="price"
+                                            placeholder="Ex: 1.150.000,00 Kz" required
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                     </div>
                                     <div>
-                                        <label for="product_old_price" class="block text-sm font-semibold text-slate-700 mb-1">Preço Antigo (String formatada)</label>
-                                        <input type="text" id="product_old_price" name="old_price" placeholder="Ex: 1.300.000,00 Kz" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                                        <label for="product_old_price"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">Preço Antigo (String
+                                            formatada)</label>
+                                        <input type="text" id="product_old_price" name="old_price"
+                                            placeholder="Ex: 1.300.000,00 Kz"
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                     </div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label for="product_slug" class="block text-sm font-semibold text-slate-700 mb-1">ID Mnemónica (Slug)</label>
-                                        <input type="text" id="product_slug" name="slug" placeholder="galaxy-s24" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
-                                        <p class="text-xs text-slate-500 mt-1">Deixe em branco para gerar auto.</p>
+                                        <label for="product_whatsapp"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">WhatsApp de Compra
+                                            (Obrigatório)</label>
+                                        <input type="text" id="product_whatsapp" name="whatsapp_number"
+                                            placeholder="Ex: +244 9..." required
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                                     </div>
                                     <div>
-                                        <label for="product_badge_class" class="block text-sm font-semibold text-slate-700 mb-1">Classe do Selo (Badge)</label>
-                                        <select id="product_badge_class" name="badge_class" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                                        <label for="product_slug"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">ID Mnemónica
+                                            (Slug)</label>
+                                        <input type="text" id="product_slug" name="slug" placeholder="galaxy-s24"
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
+                                        <p class="text-xs text-slate-500 mt-1">Deixe em branco para gerar auto.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                                    <div>
+                                        <label for="product_badge_class"
+                                            class="block text-sm font-semibold text-slate-700 mb-1">Classe do Selo
+                                            (Badge)</label>
+                                        <select id="product_badge_class" name="badge_class"
+                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm">
                                             <option value="">Automático por Categoria</option>
                                             <option value="badge-telemoveis">Telemóveis (Rosa)</option>
                                             <option value="badge-computadores">Computadores (Azul)</option>
@@ -1454,41 +1494,55 @@
                                 </div>
 
                                 <div>
-                                    <label for="product_description" class="block text-sm font-semibold text-slate-700 mb-1">Descrição</label>
-                                    <textarea id="product_description" name="description" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
+                                    <label for="product_description"
+                                        class="block text-sm font-semibold text-slate-700 mb-1">Descrição</label>
+                                    <textarea id="product_description" name="description" rows="3"
+                                        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
                                 </div>
 
                                 <!-- Gestor de Imagens Múltiplas -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Imagens do Produto</label>
-                                    
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">Imagens do
+                                        Produto</label>
+
                                     <!-- Grelha de imagens já carregadas -->
-                                    <div id="product-images-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3 empty:hidden"></div>
+                                    <div id="product-images-grid"
+                                        class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3 empty:hidden"></div>
 
                                     <!-- Zona de upload (drag & drop + click) -->
                                     <div id="product-image-dropzone"
-                                         class="flex flex-col items-center justify-center px-6 py-5 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors bg-slate-50 cursor-pointer"
-                                         onclick="document.getElementById('product_image_new').click()">
-                                        <svg class="h-9 w-9 text-slate-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        class="flex flex-col items-center justify-center px-6 py-5 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-400 transition-colors bg-slate-50 cursor-pointer"
+                                        onclick="document.getElementById('product_image_new').click()">
+                                        <svg class="h-9 w-9 text-slate-400 mb-2" stroke="currentColor" fill="none"
+                                            viewBox="0 0 48 48">
+                                            <path
+                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
-                                        <p class="text-sm font-semibold text-indigo-600">Clique para adicionar imagem</p>
-                                        <p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP — Máx. 5MB por ficheiro</p>
-                                        <input id="product_image_new" type="file" class="sr-only" accept="image/*" multiple>
+                                        <p class="text-sm font-semibold text-indigo-600">Clique para adicionar imagem
+                                        </p>
+                                        <p class="text-xs text-slate-500 mt-1">PNG, JPG, WebP — Máx. 5MB por ficheiro
+                                        </p>
+                                        <input id="product_image_new" type="file" class="sr-only" accept="image/*"
+                                            multiple>
                                     </div>
-                                    <p id="product-images-upload-status" class="text-xs text-emerald-600 mt-2 hidden"></p>
+                                    <p id="product-images-upload-status" class="text-xs text-emerald-600 mt-2 hidden">
+                                    </p>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="product_is_active" name="is_active" checked>
                                         <span class="toggle-slider"></span>
                                     </label>
-                                    <span class="text-sm font-medium text-slate-700">Produto Ativo (Visível no site)</span>
+                                    <span class="text-sm font-medium text-slate-700">Produto Ativo (Visível no
+                                        site)</span>
                                 </div>
                             </div>
                             <div class="mt-8 flex justify-end space-x-3">
-                                <button type="button" class="close-product-modal px-4 py-2 border border-slate-300 rounded-lg text-slate-700 bg-white hover:bg-slate-50 font-medium transition-colors">Cancelar</button>
-                                <button type="submit" id="save-product-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm flex items-center space-x-2">
+                                <button type="button"
+                                    class="close-product-modal px-4 py-2 border border-slate-300 rounded-lg text-slate-700 bg-white hover:bg-slate-50 font-medium transition-colors">Cancelar</button>
+                                <button type="submit" id="save-product-btn"
+                                    class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm flex items-center space-x-2">
                                     <span>Guardar Produto</span>
                                 </button>
                             </div>
@@ -3524,7 +3578,7 @@
             }
         });
 
-    
+
         // ==========================================
         // PRODUTOS SCRIPTS
         // ==========================================
@@ -3550,9 +3604,9 @@
         function renderProductsTable() {
             const tbody = document.getElementById('products-table-body');
             const searchTerm = document.getElementById('product-search-input')?.value.toLowerCase() || '';
-            
-            const filteredProducts = productsData.filter(p => 
-                p.name.toLowerCase().includes(searchTerm) || 
+
+            const filteredProducts = productsData.filter(p =>
+                p.name.toLowerCase().includes(searchTerm) ||
                 (p.slug && p.slug.toLowerCase().includes(searchTerm)) ||
                 (p.category && p.category.toLowerCase().includes(searchTerm))
             );
@@ -3613,17 +3667,20 @@
 
             if (images && images.length > 0) {
                 html += images.map(img => `
-                    <div class="relative group rounded-lg overflow-hidden border-2 ${img.is_primary ? 'border-indigo-500' : 'border-slate-200'} aspect-square bg-slate-100">
-                        <img src="${img.url}" class="w-full h-full object-contain" alt="Imagem">
-                        ${img.is_primary ? '<span class="absolute top-1 left-1 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Principal</span>' : ''}
-                        <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            ${!img.is_primary ? `<button type="button" onclick="setImagePrimary('${img.id}')" title="Definir como principal" class="bg-white text-indigo-600 rounded-full p-1.5 hover:bg-indigo-600 hover:text-white transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </button>` : ''}
-                            <button type="button" onclick="deleteProductImage('${img.id}')" title="Remover imagem" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
+                    <div class="relative group rounded-lg overflow-hidden border-2 ${img.is_primary ? 'border-indigo-500' : 'border-slate-200'} bg-slate-100 flex flex-col">
+                        <div class="relative aspect-square">
+                            <img src="${img.url}" class="w-full h-full object-contain" alt="Imagem">
+                            ${img.is_primary ? '<span class="absolute top-1 left-1 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide leading-none">Principal</span>' : ''}
+                            <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                ${!img.is_primary ? `<button type="button" onclick="setImagePrimary('${img.id}')" title="Definir como principal" class="bg-white text-indigo-600 rounded-full p-1.5 hover:bg-indigo-600 hover:text-white transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </button>` : ''}
+                                <button type="button" onclick="deleteProductImage('${img.id}')" title="Remover imagem" class="bg-white text-red-500 rounded-full p-1.5 hover:bg-red-500 hover:text-white transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
                         </div>
+                        <input type="text" onblur="updateImageColor('${img.id}', this.value)" value="${img.color_name || ''}" placeholder="Cor (ex: Azul)" class="w-full text-xs p-1.5 border-t border-slate-200 focus:outline-none text-center bg-white" title="Cor (se aplicável)">
                     </div>
                 `).join('');
             }
@@ -3666,6 +3723,22 @@
                 typeof showToast === 'function' ? showToast(err.message, 'error') : alert(err.message);
             }
         }
+
+        // Atualizar cor da imagem
+        window.updateImageColor = async function (imageId, colorName) {
+            try {
+                const res = await fetch(`/api/product-images/${imageId}/color`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ color_name: colorName })
+                });
+                if (!res.ok) throw new Error('Erro ao atualizar cor');
+                const result = await res.json();
+                currentProductImages = currentProductImages.map(i => i.id === imageId ? { ...i, color_name: result.data.color_name } : i);
+            } catch (err) {
+                typeof showToast === 'function' ? showToast(err.message, 'error') : alert(err.message);
+            }
+        };
 
         // Definir imagem principal
         async function setImagePrimary(imageId) {
@@ -3728,7 +3801,7 @@
             dropzone.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 dropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
-                
+
                 const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
                 if (files.length > 0) {
                     pendingProductImages.push(...files);
@@ -3809,8 +3882,12 @@
                 }
 
                 if (!id && result.data?.id) {
-                    document.getElementById('product_id').value = result.data.id;
-                    document.getElementById('product-modal-title').textContent = 'Editar Produto';
+                    document.getElementById('product_id').value = '';
+                    document.getElementById('product-form').reset();
+                    currentProductImages = [];
+                    pendingProductImages = [];
+                    renderProductImagesGrid([]);
+                    document.getElementById('product-modal-title').textContent = 'Novo Produto';
                     document.getElementById('product-images-upload-status').textContent = '✓ Produto e imagens criados com sucesso!';
                     document.getElementById('product-images-upload-status').classList.remove('hidden');
                 } else {
@@ -3847,6 +3924,7 @@
             document.getElementById('product_price').value = p.price;
             document.getElementById('product_old_price').value = p.old_price || '';
             document.getElementById('product_slug').value = p.slug || generateSlug(p.name);
+            document.getElementById('product_whatsapp').value = p.whatsapp_number || '';
             document.getElementById('product_badge_class').value = p.badge_class || '';
             document.getElementById('product_description').value = p.description || '';
             document.getElementById('product_is_active').checked = p.is_active;
@@ -3910,4 +3988,5 @@
         window.setImagePrimary = setImagePrimary;
 
     </script>
+
 </html>

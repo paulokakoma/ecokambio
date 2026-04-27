@@ -145,7 +145,9 @@
             .mobile-gallery { min-height: 180px !important; padding: 1rem !important; }
         }
     </style>
-    <script>(function(s){s.dataset.zone='10912843',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <!-- Monetag Tag 2 -->
+<script>(function(s){s.dataset.zone='10934013',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script>(function(s){s.dataset.zone='10912843',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
@@ -224,13 +226,10 @@
 
                     <!-- Variantes Visuais (Mock JS) -->
                     <div class="py-3 md:py-4 border-y border-slate-100 space-y-4 md:space-y-5">
-                        <!-- Cores -->
-                        <div>
-                            <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 md:mb-3">Cor: <span id="color-label" class="text-slate-800">Preto Meia-Noite</span></h3>
-                            <div class="flex gap-2 md:gap-3" id="color-selectors">
-                                <button data-color="Preto Meia-Noite" class="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-slate-300 ring-2 ring-emerald-500 ring-offset-2 bg-slate-900 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
-                                <button data-color="Prata" class="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-slate-200 bg-slate-200 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
-                                <button data-color="Verde Esmeralda" class="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-slate-200 bg-emerald-500 shadow-sm transition-transform hover:scale-110 focus:outline-none"></button>
+                        <!-- Cores (Populadas via JS se aplicável) -->
+                        <div id="dynamic-color-container" class="hidden">
+                            <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 md:mb-3">Cor: <span id="color-label" class="text-slate-800"></span></h3>
+                            <div class="flex flex-wrap gap-2 md:gap-3" id="color-selectors">
                             </div>
                         </div>
 
@@ -414,6 +413,29 @@
                         b.querySelector('img')?.classList.replace('opacity-100', 'opacity-60');
                     }
                 });
+                
+                // Update color selection if applicable
+                const imagesDataArray = product.imagesData || [];
+                const currentImgObj = imagesDataArray[index];
+                if (currentImgObj && currentImgObj.color) {
+                    const colorBtns = document.querySelectorAll('#color-selectors button');
+                    document.getElementById('color-label').textContent = currentImgObj.color;
+                    colorBtns.forEach(b => {
+                        if (b.dataset.color === currentImgObj.color) {
+                            b.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+                            b.classList.remove('border-slate-200', 'text-slate-600', 'bg-white');
+                        } else {
+                            b.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+                            b.classList.add('border-slate-200', 'text-slate-600', 'bg-white');
+                        }
+                    });
+                } else if (imagesDataArray.length > 0) {
+                     document.getElementById('color-label').textContent = 'Padrão';
+                     document.querySelectorAll('#color-selectors button').forEach(b => {
+                        b.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+                        b.classList.add('border-slate-200', 'text-slate-600', 'bg-white');
+                     });
+                }
             };
 
             mainImg.src = allImages[0] || '';
@@ -476,28 +498,54 @@
             }
 
             // WhatsApp link builder
+            const targetPhone = product.whatsappNumber || "244938948994";
+            const cleanPhone = targetPhone.replace(/[^0-9+]/g, '');
             const whatsappText = encodeURIComponent(`Olá EcoKambio! Tenho interesse no "${product.name}" através da loja online. Podem enviar detalhes?`);
-            document.getElementById('whatsapp-order-link').href = `https://wa.me/244938948994?text=${whatsappText}`;
+            document.getElementById('whatsapp-order-link').href = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone}?text=${whatsappText}`;
 
-            // --- Interactivity: Selection Mocks ---
-            const colorBtns = document.querySelectorAll('#color-selectors button');
-            const colorLabel = document.getElementById('color-label');
-            colorBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    colorBtns.forEach(b => {
-                        b.classList.remove('ring-2', 'ring-emerald-500', 'ring-offset-2');
-                        b.classList.add('border-slate-200');
-                    });
-                    btn.classList.add('ring-2', 'ring-emerald-500', 'ring-offset-2');
-                    btn.classList.remove('border-slate-200');
-                    colorLabel.textContent = btn.dataset.color;
-                    
-                    // Add subtle image flicker to simulate color change
-                    const img = document.getElementById('product-main-image');
-                    img.style.opacity = '0.7';
-                    setTimeout(() => img.style.opacity = '1', 200);
+            // --- Interactivity: Colors ---
+            const colorContainer = document.getElementById('dynamic-color-container');
+            const colorSelectors = document.getElementById('color-selectors');
+            const imagesDataArray = product.imagesData || [];
+            const imagesWithColors = imagesDataArray.filter(img => img.color);
+            
+            if (imagesWithColors.length > 0) {
+                colorContainer.classList.remove('hidden');
+                
+                // Get unique colors but keep first image index of that color
+                const colorMap = new Map();
+                imagesDataArray.forEach((img, idx) => {
+                    if (img.color && !colorMap.has(img.color)) {
+                        colorMap.set(img.color, idx);
+                    }
                 });
-            });
+
+                colorSelectors.innerHTML = Array.from(colorMap.entries()).map(([color, index]) => `
+                    <button data-color="${color}" data-index="${index}" class="px-3 py-1.5 md:px-4 md:py-2 text-xs font-bold rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all focus:outline-none shadow-sm hover:border-slate-300">
+                        ${color}
+                    </button>
+                `).join('');
+
+                const colorBtns = document.querySelectorAll('#color-selectors button');
+                colorBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetIndex = parseInt(btn.dataset.index);
+                        switchImage(targetIndex);
+                    });
+                });
+                
+                // Init first color
+                if (imagesDataArray[0]?.color) {
+                    document.getElementById('color-label').textContent = imagesDataArray[0].color;
+                    const firstBtn = colorSelectors.querySelector(`button[data-color="${imagesDataArray[0].color}"]`);
+                    if (firstBtn) {
+                        firstBtn.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50');
+                        firstBtn.classList.remove('border-slate-200', 'text-slate-600', 'bg-white');
+                    }
+                } else {
+                     document.getElementById('color-label').textContent = 'Padrão';
+                }
+            }
 
             const capBtns = document.querySelectorAll('#capacity-selectors button');
             capBtns.forEach(btn => {
@@ -544,5 +592,7 @@
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
+<!-- Monetag Interstitial/Vinheta -->
+<script>(function(s){s.dataset.zone='10933902',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </body>
 </html>

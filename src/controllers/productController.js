@@ -44,7 +44,9 @@ const getPublicProductsJson = async (req, res) => {
                 oldPrice: product.old_price,
                 img: primaryImg,
                 images: images.map(i => i.url),
-                description: product.description
+                imagesData: images.map(i => ({ url: i.url, color: i.color_name || null })),
+                description: product.description,
+                whatsappNumber: product.whatsapp_number
             };
         });
 
@@ -156,11 +158,11 @@ const deleteProduct = async (req, res) => {
     try {
         // Obter as imagens primeiro para garantir
         const { data: images } = await supabase.from('product_images').select('id, url').eq('product_id', id);
-        
+
         // 1. Apagar registos de imagens associadas (prevenir erro de Foreign Key Violation)
         if (images && images.length > 0) {
             await supabase.from('product_images').delete().eq('product_id', id);
-            
+
             // Opcional: Remover os ficheiros do bucket 'site-assets'
             // const urls = images.map(img => img.url.split('/').pop()).filter(Boolean);
             // if (urls.length > 0) {
@@ -174,7 +176,7 @@ const deleteProduct = async (req, res) => {
             console.error("Erro do Supabase ao apagar produto:", error);
             throw error;
         }
-            
+
         res.status(200).json({ success: true, message: "Produto apagado com sucesso." });
     } catch (error) {
         console.error("Erro na API de apagar produto:", error);
@@ -286,10 +288,29 @@ const setPrimaryImage = async (req, res) => {
     }
 };
 
+// ADMIN API: Update Image Color
+const updateImageColor = async (req, res) => {
+    const { imageId } = req.params;
+    const { color_name } = req.body;
+    try {
+        const { data, error } = await supabase
+            .from('product_images')
+            .update({ color_name: color_name || null })
+            .eq('id', imageId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        handleSupabaseError(error, res);
+    }
+};
+
 // Helper: Extract valid data from body
 const extractProductData = (body) => {
-    let { slug, name, category, badge_class, price, old_price, description, is_active } = body;
-    
+    let { slug, name, category, badge_class, price, old_price, description, is_active, whatsapp_number } = body;
+
     const data = {};
 
     if (name !== undefined) data.name = String(name).trim();
@@ -299,6 +320,7 @@ const extractProductData = (body) => {
     if (badge_class !== undefined) data.badge_class = badge_class || null;
     if (old_price !== undefined) data.old_price = old_price;
     if (is_active !== undefined) data.is_active = (is_active === 'true' || is_active === true);
+    if (whatsapp_number !== undefined) data.whatsapp_number = whatsapp_number || null;
 
     // Auto-gerar o slug se enviarmos o nome ou o slug explicitamente
     if (slug !== undefined || name !== undefined) {
@@ -321,7 +343,7 @@ const extractProductData = (body) => {
         }
     }
 
-    
+
     return data;
 };
 
@@ -374,5 +396,6 @@ module.exports = {
     deleteProduct,
     uploadProductImage,
     deleteProductImage,
-    setPrimaryImage
+    setPrimaryImage,
+    updateImageColor
 };
