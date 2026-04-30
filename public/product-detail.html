@@ -7,6 +7,20 @@
     <meta name="monetag" content="d04e5a466b3b5772cafd953f59196620">
     <title>Detalhes do Produto - EcoKambio</title>
     
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="product">
+    <meta property="og:title" id="og-title" content="Detalhes do Produto - EcoKambio">
+    <meta property="og:description" id="og-description" content="Consulta o preço e características deste produto na EcoKambio.">
+    <meta property="og:image" id="og-image" content="">
+    <meta property="og:url" id="og-url" content="">
+    <meta property="og:site_name" content="EcoKambio">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitter-title" content="Detalhes do Produto - EcoKambio">
+    <meta name="twitter:description" id="twitter-description" content="Consulta o preço e características deste produto na EcoKambio.">
+    <meta name="twitter:image" id="twitter-image" content="">
+    
     <!-- Tailwind CSS -->
     <link href="/css/output.css" rel="stylesheet">
     
@@ -31,6 +45,7 @@
         .badge-televisores { background: rgba(236, 72, 153, 0.9); color: white; }
         .badge-eletrodomesticos { background: rgba(16, 185, 129, 0.9); color: white; }
         .badge-telemoveis { background: rgba(245, 158, 11, 0.9); color: white; }
+        .badge-gaming { background: rgba(168, 85, 247, 0.9); color: white; }
         
         .square-box { aspect-ratio: 1 / 1; width: 100%; object-fit: cover; }
 
@@ -222,6 +237,19 @@
                             <span id="product-price" class="text-2xl md:text-3xl font-black product-price"></span>
                             <span class="text-xs md:text-sm font-semibold text-slate-400 line-through decoration-red-400/50 decoration-2 mb-1" id="product-old-price"></span>
                         </div>
+                        <div id="product-location" class="hidden flex items-center gap-2 text-base text-slate-500 mt-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span class="font-medium"></span>
+                        </div>
+                        <div id="product-warranty" class="hidden flex items-center gap-2 text-base text-slate-500 mt-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            <span class="font-medium"></span>
+                        </div>
                     </div>
 
                     <!-- Variantes Visuais (Mock JS) -->
@@ -243,41 +271,61 @@
                         </div>
                     </div>
 
-                    <!-- Descrição + Vantagens colapsável -->
-                    <div>
+<!-- Descrição + Vantagens (Expandir/Colapsar apenas no Mobile) -->
+                    <div class="md:hidden">
                         <button id="see-more-btn" class="see-more-btn" aria-expanded="false">
                             <span id="see-more-label">Visão Geral &amp; Vantagens</span>
                             <svg class="chevron w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
-
                         <div id="see-more-body" class="see-more-body">
-                            <!-- Descrição rica -->
                             <div class="glass-panel p-4 md:p-5 rounded-2xl mt-3">
                                 <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Visão Geral</h3>
                                 <p id="product-description" class="text-slate-700 leading-relaxed text-xs md:text-sm font-medium"></p>
                             </div>
-
-                            <!-- Benefícios (Destaques) -->
                             <div class="mt-3 p-3 md:p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                 <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 md:mb-3">Vantagens EcoKambio</h3>
                                 <ul class="grid grid-cols-2 gap-2 md:gap-3 text-xs font-semibold">
                                     <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pronta Entrega</li>
                                     <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Garantia 1 Ano</li>
-                                    <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pagamento Local</li>
-                                    <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Fatura Oficial</li>
+                                    <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pagamento Seguro</li>
+                                    <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Suporte 24/7</li>
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+                    <!-- Desktop: Always visible -->
+                    <div class="hidden md:block">
+                        <div class="glass-panel p-4 md:p-5 rounded-2xl mt-3">
+                            <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Visão Geral</h3>
+                            <p id="product-description-desktop" class="text-slate-700 leading-relaxed text-xs md:text-sm font-medium"></p>
+                        </div>
+                        <div class="mt-3 p-3 md:p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <h3 class="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 md:mb-3">Vantagens EcoKambio</h3>
+                            <ul class="grid grid-cols-2 gap-2 md:gap-3 text-xs font-semibold">
+                                <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pronta Entrega</li>
+                                <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Garantia 1 Ano</li>
+                                <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Pagamento Seguro</li>
+                                <li class="flex items-center gap-1.5 md:gap-2 text-slate-700"><span class="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-emerald-100 text-emerald-600">✓</span> Suporte 24/7</li>
+                            </ul>
                         </div>
                     </div>
 
                     <!-- Call To Action (Responsivo / Sticky Mobile) -->
                     <div class="mobile-sticky-cta md:pt-6 lg:pt-8 md:border-t border-slate-100 mt-auto">
-                        <a id="whatsapp-order-link" href="#" target="_blank" class="flex md:inline-flex items-center justify-center gap-2 md:gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 md:py-4 px-6 md:px-8 rounded-2xl md:rounded-full text-base md:text-lg shadow-lg shadow-emerald-600/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 w-full md:w-auto">
+                        <!-- WhatsApp Button (Primeiro) -->
+                        <a id="whatsapp-order-link" href="#" target="_blank" class="flex md:inline-flex items-center justify-center gap-2 md:gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 md:py-4 px-6 md:px-8 rounded-2xl md:rounded-full text-base md:text-lg shadow-lg shadow-emerald-600/20 transition-all duration-300 hover:scale-[1.02] active:scale-95 w-full md:w-auto mb-3">
                             <i class="fab fa-whatsapp text-xl md:text-2xl"></i>
                             <span>Pedir via WhatsApp</span>
                         </a>
+                        <!-- Share Button (Segundo) -->
+                        <button id="share-btn" class="flex items-center justify-center gap-2 md:gap-3 border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3.5 md:py-4 px-6 md:px-8 rounded-2xl md:rounded-full text-base md:text-lg transition-all duration-300 w-full md:w-auto">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                            </svg>
+                            <span>Partilhar produto</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -295,8 +343,8 @@
             </div>
             <style>
                 #related-products-grid::-webkit-scrollbar { display: none; }
-                #related-products-grid > a { scroll-snap-align: center; flex: 0 0 45%; }
-                @media (min-width: 768px) { #related-products-grid > a { flex: 1 1 0; } }
+                #related-products-grid > a { scroll-snap-align: center; }
+                @media (min-width: 768px) { #related-products-grid { gap: 3; } }
             </style>
         </section>
     </main>
@@ -343,6 +391,32 @@
             document.getElementById('product-price').textContent = product.price;
             document.getElementById('product-old-price').textContent = product.oldPrice || '';
             document.getElementById('product-description').textContent = product.description;
+            document.getElementById('product-description-desktop').textContent = product.description;
+            
+            // Display location if available
+            const locationEl = document.getElementById('product-location');
+            if (product.location) {
+                locationEl.classList.remove('hidden');
+                locationEl.querySelector('span').textContent = product.location;
+            }
+            
+            // Display warranty if available
+            const warrantyEl = document.getElementById('product-warranty');
+            if (product.warranty) {
+                warrantyEl.classList.remove('hidden');
+                warrantyEl.querySelector('span').textContent = product.warranty;
+            }
+            
+            // Update Open Graph meta tags for social sharing
+            const currentUrl = window.location.href;
+            const productImage = product.img || product.images?.[0] || '';
+            document.getElementById('og-title').setAttribute('content', product.name);
+            document.getElementById('og-description').setAttribute('content', `Compra o ${product.name} por ${product.price} na EcoKambio`);
+            document.getElementById('og-image').setAttribute('content', productImage);
+            document.getElementById('og-url').setAttribute('content', currentUrl);
+            document.getElementById('twitter-title').setAttribute('content', product.name);
+            document.getElementById('twitter-description').setAttribute('content', `Compra o ${product.name} por ${product.price} na EcoKambio`);
+            document.getElementById('twitter-image').setAttribute('content', productImage);
             
             // Images: use the images array if available, otherwise use the single img
             const allImages = (product.images && product.images.length > 0) ? product.images : (product.img ? [product.img] : []);
@@ -445,10 +519,32 @@
             const galleryContainer = document.getElementById('image-gallery-container');
             let touchStartX = 0;
             let touchEndX = 0;
+            let autoRotateInterval = null;
             const SWIPE_THRESHOLD = 50;
 
             if (allImages.length > 1) {
+                // Auto-rotation
+                const startAutoRotate = () => {
+                    if (autoRotateInterval) clearInterval(autoRotateInterval);
+                    autoRotateInterval = setInterval(() => {
+                        switchImage(currentImageIndex + 1, 'next');
+                    }, 3500);
+                };
+                const stopAutoRotate = () => {
+                    if (autoRotateInterval) {
+                        clearInterval(autoRotateInterval);
+                        autoRotateInterval = null;
+                    }
+                };
+                
+                // Start auto-rotate on load
+                startAutoRotate();
+                
+                // Stop on hover/touch
+                galleryContainer.addEventListener('mouseenter', stopAutoRotate);
+                galleryContainer.addEventListener('mouseleave', startAutoRotate);
                 galleryContainer.addEventListener('touchstart', (e) => {
+                    stopAutoRotate();
                     touchStartX = e.changedTouches[0].screenX;
                 }, { passive: true });
 
@@ -457,12 +553,27 @@
                     const diff = touchStartX - touchEndX;
                     if (Math.abs(diff) > SWIPE_THRESHOLD) {
                         if (diff > 0) {
-                            switchImage(currentImageIndex + 1, 'next'); // Swipe left - next
+                            // Swipe left - next image
+                            switchImage(currentImageIndex + 1, 'next');
                         } else {
-                            switchImage(currentImageIndex - 1, 'prev'); // Swipe right - previous
+                            // Swipe right - previous image
+                            switchImage(currentImageIndex - 1, 'prev');
                         }
                     }
+                    // Resume auto-rotate after swipe
+                    setTimeout(startAutoRotate, 2000);
                 }, { passive: true });
+                
+                // Pause indicators clickable
+                const dots = slideIndicator.querySelectorAll('.-dot');
+                dots.forEach(dot => {
+                    dot.addEventListener('click', () => {
+                        stopAutoRotate();
+                        const idx = parseInt(dot.dataset.index);
+                        switchImage(idx);
+                        setTimeout(startAutoRotate, 2000);
+                    });
+                });
             }
 
             // Build thumbnail gallery dynamically from real images
@@ -493,15 +604,113 @@
             badge.className = `px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm backdrop-blur-md text-white border border-white/20 ${product.badgeClass}`;
 
             // Show capacity variants solely for electronics/mobiles
-            if (product.category === 'Telemóveis' || product.category === 'Computadores') {
+            if ((product.category === 'Telemóveis' || product.category === 'Computadores') && product.capacity) {
                 document.getElementById('capacity-container').classList.remove('hidden');
+                
+                // Build capacity buttons from product data
+                const capContainer = document.getElementById('capacity-selectors');
+                const capacities = product.capacity.split(',').map(c => c.trim());
+                capContainer.innerHTML = capacities.map((cap, idx) => `
+                    <button class="px-3 py-1.5 md:px-4 md:py-2.5 text-xs font-bold rounded-xl border-2 ${idx === 0 ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'} transition-colors focus:outline-none shadow-sm" data-capacity="${cap}">${cap}</button>
+                `).join('');
+                
+                // Add click handlers
+                let selectedCapacity = capacities[0];
+                capContainer.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        capContainer.querySelectorAll('button').forEach(b => {
+                            b.className = 'px-3 py-1.5 md:px-4 md:py-2.5 text-xs font-bold rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-colors focus:outline-none shadow-sm';
+                        });
+                        btn.className = 'px-3 py-1.5 md:px-4 md:py-2.5 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-colors focus:outline-none shadow-sm';
+                        selectedCapacity = btn.dataset.capacity;
+                    });
+                });
+                
+                // Update WhatsApp link with capacity
+                const updateWhatsApp = () => {
+                    const baseText = selectedCapacity 
+                        ? `Olá, vim pela EcoKambio! Tenho interesse no "${product.name}" (${selectedCapacity}). Podem enviar detalhes?`
+                        : `Olá, vim pela EcoKambio! Tenho interesse no "${product.name}". Podem enviar detalhes?`;
+                    document.getElementById('whatsapp-order-link').href = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone}?text=${encodeURIComponent(baseText)}`;
+                };
+                capContainer.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', updateWhatsApp);
+                });
             }
 
             // WhatsApp link builder
             const targetPhone = product.whatsappNumber || "244938948994";
             const cleanPhone = targetPhone.replace(/[^0-9+]/g, '');
-            const whatsappText = encodeURIComponent(`Olá EcoKambio! Tenho interesse no "${product.name}" através da loja online. Podem enviar detalhes?`);
+            const whatsappText = encodeURIComponent(`Olá, vim pela EcoKambio! Tenho interesse no "${product.name}". Podem enviar detalhes?`);
             document.getElementById('whatsapp-order-link').href = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone}?text=${whatsappText}`;
+            
+            // Track WhatsApp click
+            document.getElementById('whatsapp-order-link').addEventListener('click', async () => {
+                try {
+                    await supabase.from('user_activity').insert({
+                        event_type: 'whatsapp_click',
+                        product_id: id,
+                        product_name: product.name
+                    });
+                } catch (e) { console.log('Track error:', e); }
+            });
+
+            // Share Button functionality
+            const shareBtn = document.getElementById('share-btn');
+            
+            const productLink = window.location.href;
+            let shareDetails = `🏷️ ${product.name}\n`;
+            shareDetails += `💰 ${product.price} KZ\n`;
+            if (product.capacity) shareDetails += `💾 Capacidade: ${product.capacity}\n`;
+            if (product.location) shareDetails += `📍 Localização: ${product.location}\n`;
+            if (product.description) {
+                const shortDesc = product.description.length > 100 ? product.description.substring(0, 100) + '...' : product.description;
+                shareDetails += `📝 ${shortDesc}`;
+            }
+            const fullText = `${shareDetails}\n\n🔗 ${productLink}`;
+            
+            if (shareBtn && navigator.share) {
+                shareBtn.addEventListener('click', async () => {
+                    const shareData = {
+                        title: product.name,
+                        text: fullText,
+                        url: window.location.href
+                    };
+                    try {
+                        await navigator.share(shareData);
+                        // Track share
+                        await supabase.from('user_activity').insert({
+                            event_type: 'product_share',
+                            product_id: id,
+                            product_name: product.name
+                        });
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            await navigator.clipboard.writeText(fullText);
+                            alert('Link copiado para a área de transferência!');
+                            await supabase.from('user_activity').insert({
+                                event_type: 'product_share',
+                                product_id: id,
+                                product_name: product.name
+                            });
+                        }
+                    }
+                });
+            } else if (shareBtn) {
+                shareBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(fullText);
+                        alert('Link copiado para a área de transferência!');
+                        await supabase.from('user_activity').insert({
+                            event_type: 'product_share',
+                            product_id: id,
+                            product_name: product.name
+                        });
+                    } catch (err) {
+                        alert(fullText);
+                    }
+                });
+            }
 
             // --- Interactivity: Colors ---
             const colorContainer = document.getElementById('dynamic-color-container');
@@ -547,16 +756,6 @@
                 }
             }
 
-            const capBtns = document.querySelectorAll('#capacity-selectors button');
-            capBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    capBtns.forEach(b => {
-                        b.className = 'px-3 py-1.5 md:px-4 md:py-2.5 text-xs font-bold rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-colors focus:outline-none shadow-sm';
-                    });
-                    btn.className = 'px-3 py-1.5 md:px-4 md:py-2.5 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-colors focus:outline-none shadow-sm';
-                });
-            });
-
             // Recomended Products
             const relatedGrid = document.getElementById('related-products-grid');
             const otherIds = Object.keys(products).filter(key => key !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
@@ -564,12 +763,13 @@
             otherIds.forEach(key => {
                 const item = products[key];
                 const card = `
-                    <a href="product-detail.html?id=${key}" class="flex-1 w-[45%] md:w-1/4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 hover:shadow-xl hover:border-emerald-200 transition-all duration-300 group flex flex-col">
-                        <div class="square-box overflow-hidden rounded-xl mb-3 bg-slate-50 flex items-center justify-center p-2">
+                    <a href="product-detail.html?id=${key}" class="flex-0-0-auto w-[140px] md:w-[180px] bg-white p-2 md:p-3 rounded-xl border border-slate-100 shadow-sm hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 transition-all duration-300 group flex flex-col">
+                        <div class="square-box overflow-hidden rounded-lg mb-2 bg-slate-50 flex items-center justify-center p-1.5">
                             <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 mix-blend-multiply">
                         </div>
-                        <h4 class="font-extrabold text-slate-800 text-[11px] truncate mb-1">${item.name}</h4>
-                        <p class="text-[12px] text-emerald-600 font-bold mt-auto pt-1">${item.price}</p>
+                        <h4 class="font-bold text-slate-700 text-[10px] md:text-[11px] truncate mb-1 leading-tight">${item.name}</h4>
+                        ${item.capacity ? `<p class="text-[9px] md:text-[10px] text-slate-500 font-medium mb-1">${item.capacity}</p>` : ''}
+                        <p class="text-[11px] md:text-xs text-emerald-600 font-extrabold mt-auto pt-1">${item.price}</p>
                     </a>
                 `;
                 relatedGrid.innerHTML += card;
@@ -592,6 +792,7 @@
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="235032" async data-cfasync="false"></script>
 <!-- Monetag Interstitial/Vinheta -->
 <script>(function(s){s.dataset.zone='10933902',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </body>

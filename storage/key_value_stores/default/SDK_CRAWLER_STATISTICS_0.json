@@ -1,55 +1,29 @@
 {
-  "requestsFinished": 5,
-  "requestsFailed": 1,
-  "requestsRetries": 1,
+  "requestsFinished": 1,
+  "requestsFailed": 0,
+  "requestsRetries": 0,
   "requestsFailedPerMinute": 0,
-  "requestsFinishedPerMinute": 4,
-  "requestMinDurationMillis": 9008,
-  "requestMaxDurationMillis": 55470,
-  "requestTotalFailedDurationMillis": 10454,
-  "requestTotalFinishedDurationMillis": 159075,
-  "crawlerStartedAt": "2026-04-27T17:32:30.086Z",
-  "crawlerFinishedAt": "2026-04-27T17:33:50.053Z",
-  "statsPersistedAt": "2026-04-27T17:33:50.053Z",
-  "crawlerRuntimeMillis": 80174,
-  "crawlerLastStartTimestamp": 1777311149879,
+  "requestsFinishedPerMinute": 3,
+  "requestMinDurationMillis": 18634,
+  "requestMaxDurationMillis": 18634,
+  "requestTotalFailedDurationMillis": 0,
+  "requestTotalFinishedDurationMillis": 18634,
+  "crawlerStartedAt": "2026-04-30T17:02:41.926Z",
+  "crawlerFinishedAt": "2026-04-30T17:03:00.916Z",
+  "statsPersistedAt": "2026-04-30T17:03:00.916Z",
+  "crawlerRuntimeMillis": 19314,
+  "crawlerLastStartTimestamp": 1777568561602,
   "requestRetryHistogram": [
-    5,
-    null,
-    null,
-    null,
-    null,
     1
   ],
   "statsId": 0,
-  "requestAvgFailedDurationMillis": 10454,
-  "requestAvgFinishedDurationMillis": 31815,
-  "requestTotalDurationMillis": 169529,
-  "requestsTotal": 6,
+  "requestAvgFailedDurationMillis": null,
+  "requestAvgFinishedDurationMillis": 18634,
+  "requestTotalDurationMillis": 18634,
+  "requestsTotal": 1,
   "requestsWithStatusCode": {
-    "200": 4,
-    "304": 1
+    "200": 1
   },
-  "errors": {
-    "/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27": {
-      "missing error code": {
-        "Error": {
-          "net::ERR_CONNECTION_RESET at https://www.bci.ao/": {
-            "count": 1
-          }
-        }
-      }
-    }
-  },
-  "retryErrors": {
-    "/Users/av/Documents/Projetos/ecokambio-main/node_modules/puppeteer-core/lib/cjs/puppeteer/cdp/Frame.js:184:27": {
-      "missing error code": {
-        "Error": {
-          "net::ERR_CONNECTION_RESET at https://www.bci.ao/": {
-            "count": 5
-          }
-        }
-      }
-    }
-  }
+  "errors": {},
+  "retryErrors": {}
 }

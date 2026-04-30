@@ -70,10 +70,10 @@
             <form id="login-form" class="mt-8 space-y-6">
                 <div class="rounded-md shadow-sm space-y-4">
                     <div>
-                        <label for="username" class="sr-only">Usuário</label>
-                        <input id="username" name="username" type="text" required
+                        <label for="username" class="sr-only">Email</label>
+                        <input id="username" name="username" type="email" required
                             class="appearance-none rounded-md relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Usuário" autocomplete="off">
+                            placeholder="email@exemplo.com" autocomplete="off">
                     </div>
                     <div>
                         <label for="password" class="sr-only">Senha</label>
@@ -83,7 +83,7 @@
                     </div>
                 </div>
 
-                <div id="error-message" class="text-sm text-red-600 text-center h-4"></div>
+                <div id="error-message" class="text-sm text-red-600 text-center h-4">Use o email autorizado e senha para aceder ao painel</div>
 
                 <div>
                     <button type="submit"

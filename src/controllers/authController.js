@@ -8,6 +8,13 @@ const login = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Pedido inválido.' });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!username || !emailRegex.test(username)) {
+        console.log('Login attempt rejected: invalid email format');
+        return res.status(401).json({ success: false, message: 'Email inválido.' });
+    }
+
     console.log('Login attempt:', { username, passwordProvided: !!password, hashConfigured: !!config.admin.passwordHash });
     console.log('Hash from config:', config.admin.passwordHash);
 
@@ -21,10 +28,10 @@ const login = async (req, res) => {
         let userType = 'admin'; // Default
 
         // Check if user is adminflix
-        if (usernameLower === 'adminflix') {
+        if (usernameLower === 'adminflix@ecokambio.com') {
             redirectPath = '/netflix/adminflix.html';
             userType = 'adminflix';
-        } else if (usernameLower === 'admin' || usernameLower === 'lando pedro') {
+        } else if (usernameLower === 'admin@ecokambio.com' || usernameLower === 'lando@ecokambio.com') {
             redirectPath = '/private/admin.html';
             userType = 'admin';
         }

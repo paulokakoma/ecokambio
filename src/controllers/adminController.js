@@ -475,14 +475,16 @@ const getDashboardStats = async (req, res) => {
         weekStartDate.setUTCHours(0, 0, 0, 0);
         const weekStart = weekStartDate.toISOString();
 
-        const [activeBanksRes, todayViewsRes, weeklyViewsRes, monthlyViewsRes, newVisitorsRes, monthlyAffiliateClicksRes, monthlyVisaClicksRes] = await Promise.all([
+        const [activeBanksRes, todayViewsRes, weeklyViewsRes, monthlyViewsRes, newVisitorsRes, monthlyAffiliateClicksRes, monthlyVisaClicksRes, monthlyWhatsappClicksRes, monthlyProductSharesRes] = await Promise.all([
             supabase.from('rate_providers').select('id', { count: 'exact', head: true }).eq('type', 'FORMAL').eq('is_active', true),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: todayStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: weekStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: monthStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'first_visit', start_time: todayStart, end_time: todayEnd }),
             supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'affiliate_click').gte('created_at', monthStart),
-            supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'visa_cta_click').gte('created_at', monthStart)
+            supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'visa_cta_click').gte('created_at', monthStart),
+            supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_click').gte('created_at', monthStart),
+            supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'product_share').gte('created_at', monthStart)
         ]);
 
         res.status(200).json({
@@ -493,6 +495,8 @@ const getDashboardStats = async (req, res) => {
             newVisitorsToday: newVisitorsRes.data || 0,
             monthlyAffiliateClicks: monthlyAffiliateClicksRes.count || 0,
             monthlyVisaClicks: monthlyVisaClicksRes.count || 0,
+            monthlyWhatsappClicks: monthlyWhatsappClicksRes.count || 0,
+            monthlyProductShares: monthlyProductSharesRes.count || 0,
             onlineUsers: currentOnlineUsers
         });
     } catch (error) {

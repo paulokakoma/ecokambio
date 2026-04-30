@@ -1,9 +1,9 @@
 {
-  "usableSessionsCount": 13,
-  "retiredSessionsCount": 1,
+  "usableSessionsCount": 2,
+  "retiredSessionsCount": 0,
   "sessions": [
     {
-      "id": "session_RBdvAmceaa",
+      "id": "session_I7CivBE5gE",
       "cookieJar": {
         "version": "tough-cookie@4.1.4",
         "storeType": "MemoryCookieStore",
@@ -16,14 +16,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:30.189Z",
-      "createdAt": "2026-04-27T17:32:30.189Z",
+      "expiresAt": "2026-04-30T17:52:42.105Z",
+      "createdAt": "2026-04-30T17:02:42.105Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_87JzRfsYiF",
+      "id": "session_u1GSbGraRe",
       "cookieJar": {
         "version": "tough-cookie@4.1.4",
         "storeType": "MemoryCookieStore",
@@ -33,465 +33,53 @@
         "prefixSecurity": "silent",
         "cookies": [
           {
-            "key": "_gat_UA-43709848-1",
-            "value": "1",
-            "expires": "2026-04-27T17:33:39.000Z",
-            "domain": "bfa.ao",
+            "key": "_gid",
+            "value": "GA1.2.1684016286.1777568567",
+            "expires": "2026-05-01T17:02:46.000Z",
+            "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-04-27T17:32:39.110Z",
-            "lastAccessed": "2026-04-27T17:32:39.110Z"
+            "creation": "2026-04-30T17:02:48.766Z",
+            "lastAccessed": "2026-04-30T17:02:48.766Z"
+          },
+          {
+            "key": "_gat_gtag_UA_49969076_1",
+            "value": "1",
+            "expires": "2026-04-30T17:03:47.000Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-30T17:02:48.767Z",
+            "lastAccessed": "2026-04-30T17:02:48.767Z"
+          },
+          {
+            "key": "_ga_GK7CBYM23R",
+            "value": "GS2.1.s1777568567$o1$g0$t1777568567$j60$l0$h0",
+            "expires": "2027-06-04T17:02:47.733Z",
+            "domain": "angocambio.ao",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-30T17:02:48.768Z",
+            "lastAccessed": "2026-04-30T17:02:48.768Z"
           },
           {
             "key": "_ga",
-            "value": "GA1.2.549529038.1777311159",
-            "expires": "2027-06-01T17:32:39.088Z",
-            "domain": "bfa.ao",
+            "value": "GA1.1.2078720790.1777568567",
+            "expires": "2027-06-04T17:02:47.733Z",
+            "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-04-27T17:32:39.117Z",
-            "lastAccessed": "2026-04-27T17:32:39.117Z"
-          },
-          {
-            "key": "_ga_6KPKBJJNL1",
-            "value": "GS2.1.s1777311158$o1$g0$t1777311158$j60$l0$h0",
-            "expires": "2027-06-01T17:32:38.802Z",
-            "domain": "bfa.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:39.118Z",
-            "lastAccessed": "2026-04-27T17:32:39.118Z"
-          },
-          {
-            "key": "_gid",
-            "value": "GA1.2.129873172.1777311159",
-            "expires": "2026-04-28T17:32:39.000Z",
-            "domain": "bfa.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:39.118Z",
-            "lastAccessed": "2026-04-27T17:32:39.118Z"
-          },
-          {
-            "key": "bycookie",
-            "value": "{%22default%22:%22all_active%22%2C%22recomended%22:%22all_active%22%2C%22status%22:0%2C%22cookies%22:[%22byCookie%22%2C%22analytics%22%2C%22marketing%22]%2C%22listCookiesAccept%22:[%22bycookie%22%2C%22_ga%22%2C%22_gid%22%2C%22_gat%22%2C%22__utma%22%2C%22__utmt%22%2C%22__utmb%22%2C%22__utmc%22%2C%22__utmz%22%2C%22__utmv%22%2C%22_hjIncludedInSample%22%2C%22%22]%2C%22expires%22:365%2C%22version%22:%221.0.1%22}",
-            "expires": "2027-04-27T17:32:35.000Z",
-            "domain": "bfa.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:39.118Z",
-            "lastAccessed": "2026-04-27T17:32:39.118Z"
+            "creation": "2026-04-30T17:02:48.768Z",
+            "lastAccessed": "2026-04-30T17:02:48.768Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:30.192Z",
-      "createdAt": "2026-04-27T17:32:30.192Z",
+      "expiresAt": "2026-04-30T17:52:42.109Z",
+      "createdAt": "2026-04-30T17:02:42.109Z",
       "usageCount": 2,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_3Ifbw03xce",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:30.197Z",
-      "createdAt": "2026-04-27T17:32:30.197Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_fgUfrgOo9y",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": [
-          {
-            "key": "_fbp",
-            "value": "fb.1.1777311162432.930862735465258087",
-            "expires": "2026-07-26T17:32:42.000Z",
-            "domain": "bancobai.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:43.180Z",
-            "lastAccessed": "2026-04-27T17:32:43.180Z"
-          },
-          {
-            "key": "_gat_UA-186548147-1",
-            "value": "1",
-            "expires": "2026-04-27T17:33:40.000Z",
-            "domain": "bancobai.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:43.180Z",
-            "lastAccessed": "2026-04-27T17:32:43.180Z"
-          },
-          {
-            "key": "_gid",
-            "value": "GA1.2.1239350996.1777311160",
-            "expires": "2026-04-28T17:32:40.000Z",
-            "domain": "bancobai.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:43.180Z",
-            "lastAccessed": "2026-04-27T17:32:43.180Z"
-          },
-          {
-            "key": "_ga",
-            "value": "GA1.2.32132225.1777311160",
-            "expires": "2027-06-01T17:32:40.439Z",
-            "domain": "bancobai.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:43.180Z",
-            "lastAccessed": "2026-04-27T17:32:43.180Z"
-          },
-          {
-            "key": "__cf_bm",
-            "value": "y673iLKUb1DZgGG_rcn2hKWKRR9cYUgsMujIeyDW9gM-1777311154.0158641-1.0.1.1-zmMW_dEN_dniY9ikCfzZxqL0uQZNi6y5Mo3H1dWIiYvsdwvMZD9qRHKhoAIIyTwGokFXClp.US5Qf.9VuadW9gv3Z9NvQM0dR6MxKpotVd1aRJLQMAk6CExY_tx9peog",
-            "expires": "2026-04-27T18:02:35.313Z",
-            "domain": "bancobai.ao",
-            "path": "/",
-            "secure": true,
-            "httpOnly": true,
-            "hostOnly": false,
-            "creation": "2026-04-27T17:32:43.181Z",
-            "lastAccessed": "2026-04-27T17:32:43.181Z"
-          },
-          {
-            "key": "_ga_S7ZS1VH9VJ",
-            "value": "GS2.1.s1777311169$o1$g1$t1777311183$j46$l0$h0",
-            "expires": "2027-06-01T17:33:03.768Z",
-            "domain": "bna.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:33:16.078Z",
-            "lastAccessed": "2026-04-27T17:33:16.078Z"
-          },
-          {
-            "key": "_ga",
-            "value": "GA1.1.986759711.1777311183",
-            "expires": "2027-06-01T17:33:03.769Z",
-            "domain": "bna.ao",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-04-27T17:33:16.078Z",
-            "lastAccessed": "2026-04-27T17:33:16.078Z"
-          },
-          {
-            "key": "dmid",
-            "value": "15183306-e04a-45b6-a074-bf429cc8547c",
-            "expires": "2027-06-01T17:32:40.847Z",
-            "domain": "www.bancobic.ao",
-            "path": "/",
-            "secure": true,
-            "httpOnly": true,
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:34.671Z",
-            "lastAccessed": "2026-04-27T17:33:34.671Z"
-          },
-          {
-            "key": "sitevisitscookie",
-            "value": "1",
-            "expires": "2027-06-01T17:32:40.847Z",
-            "domain": "www.bancobic.ao",
-            "path": "/",
-            "secure": true,
-            "httpOnly": true,
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:34.672Z",
-            "lastAccessed": "2026-04-27T17:33:34.672Z"
-          },
-          {
-            "key": "opvc",
-            "value": "c2dd984a-fa4b-4f2b-af27-bd0d056d276b",
-            "expires": "2026-04-27T18:23:34.671Z",
-            "domain": "www.bancobic.ao",
-            "path": "/",
-            "secure": true,
-            "httpOnly": true,
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:34.672Z",
-            "lastAccessed": "2026-04-27T17:33:34.672Z"
-          },
-          {
-            "key": "JSESSIONID",
-            "value": "46F39214C7A4A388E5154ADCE6786E34",
-            "expires": "2026-04-27T18:23:34.671Z",
-            "domain": "www.bancobic.ao",
-            "path": "/",
-            "secure": true,
-            "httpOnly": true,
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:34.672Z",
-            "lastAccessed": "2026-04-27T17:33:34.672Z"
-          },
-          {
-            "key": "dmid",
-            "value": "0ed87df9-4aee-46f9-830a-1c96e16cbe9b",
-            "expires": "2027-06-01T17:32:51.515Z",
-            "domain": "www.bancoyetu.ao",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:39.090Z",
-            "lastAccessed": "2026-04-27T17:33:39.090Z"
-          },
-          {
-            "key": "opvc",
-            "value": "6dabc5cc-d5cf-474a-bc8f-a76738ed35d8",
-            "expires": "2026-04-27T18:23:39.089Z",
-            "domain": "www.bancoyetu.ao",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:39.090Z",
-            "lastAccessed": "2026-04-27T17:33:39.090Z"
-          },
-          {
-            "key": "sitevisitscookie",
-            "value": "1",
-            "expires": "2027-06-01T17:32:51.515Z",
-            "domain": "www.bancoyetu.ao",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:39.090Z",
-            "lastAccessed": "2026-04-27T17:33:39.090Z"
-          },
-          {
-            "key": "CMSJSESSIONID",
-            "value": "542E18123F0AA77F77FCDC438ACF2945",
-            "expires": "2026-04-27T18:23:39.089Z",
-            "domain": "www.bancoyetu.ao",
-            "path": "/",
-            "httpOnly": true,
-            "hostOnly": true,
-            "creation": "2026-04-27T17:33:39.090Z",
-            "lastAccessed": "2026-04-27T17:33:39.090Z"
-          }
-        ]
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:32.147Z",
-      "createdAt": "2026-04-27T17:32:32.147Z",
-      "usageCount": 17,
-      "maxUsageCount": 50,
-      "errorScore": 16
-    },
-    {
-      "id": "session_TmjObU4jfb",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:39.242Z",
-      "createdAt": "2026-04-27T17:32:39.242Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_ZNV4OBYkl0",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:44.901Z",
-      "createdAt": "2026-04-27T17:32:44.901Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_OEXotlNZfV",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:44.912Z",
-      "createdAt": "2026-04-27T17:32:44.912Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_8BIKEAtUCi",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:50.446Z",
-      "createdAt": "2026-04-27T17:32:50.446Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_Dseif5bRjS",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:22:55.730Z",
-      "createdAt": "2026-04-27T17:32:55.730Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_gM1i2h9pzI",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:23:06.377Z",
-      "createdAt": "2026-04-27T17:33:06.377Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_mddOiQLDA6",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:23:16.761Z",
-      "createdAt": "2026-04-27T17:33:16.761Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_C5ZvXvL7Qv",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:23:27.258Z",
-      "createdAt": "2026-04-27T17:33:27.258Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_OzJ6qIGwvJ",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:23:27.260Z",
-      "createdAt": "2026-04-27T17:33:27.260Z",
-      "usageCount": 2,
-      "maxUsageCount": 50,
-      "errorScore": 2
-    },
-    {
-      "id": "session_clf0IkaNhj",
-      "cookieJar": {
-        "version": "tough-cookie@4.1.4",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-04-27T18:23:39.437Z",
-      "createdAt": "2026-04-27T17:33:39.437Z",
-      "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     }

@@ -46,7 +46,10 @@ const getPublicProductsJson = async (req, res) => {
                 images: images.map(i => i.url),
                 imagesData: images.map(i => ({ url: i.url, color: i.color_name || null })),
                 description: product.description,
-                whatsappNumber: product.whatsapp_number
+                whatsappNumber: product.whatsapp_number,
+                capacity: product.capacity || null,
+                location: product.location || null,
+                warranty: product.warranty || null
             };
         });
 
@@ -309,18 +312,57 @@ const updateImageColor = async (req, res) => {
 
 // Helper: Extract valid data from body
 const extractProductData = (body) => {
-    let { slug, name, category, badge_class, price, old_price, description, is_active, whatsapp_number } = body;
+    let { slug, name, category, badge_class, price, old_price, description, is_active, whatsapp_number, location, capacity, warranty } = body;
 
     const data = {};
 
-    if (name !== undefined) data.name = String(name).trim();
-    if (category !== undefined) data.category = category;
-    if (price !== undefined) data.price = price;
-    if (description !== undefined) data.description = description;
-    if (badge_class !== undefined) data.badge_class = badge_class || null;
-    if (old_price !== undefined) data.old_price = old_price;
+    // Sanitize and validate inputs - prevent XSS, SQL injection, etc.
+    const sanitizeString = (value, maxLen = 500) => {
+        if (value === undefined || value === null) return null;
+        const str = String(value).trim();
+        if (str.length === 0) return null;
+        // Remove potentially dangerous characters and truncate
+        return str.slice(0, maxLen).replace(/[\x00-\x1F\x7F<>"'&]/g, '');
+    };
+
+    const sanitizeSlug = (value) => {
+        if (value === undefined || value === null) return '';
+        return String(value).trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .slice(0, 100);
+    };
+
+    const sanitizePrice = (value) => {
+        if (value === undefined || value === null) return null;
+        const num = parseFloat(value);
+        if (isNaN(num)) return null;
+        if (num < 0 || num > 999999999) return null;
+        return num;
+    };
+
+    // Validate category against allowed values
+    const allowedCategories = ['Smartphones', 'Tablets', 'Portáteis', 'Acessórios', 'Gaming', 'Smartwatches', 'Áudio', 'TVs', 'Outros'];
+    const allowedBadges = ['new', 'hot', 'sale', 'best', 'default'];
+
+    if (name !== undefined) data.name = sanitizeString(name, 200);
+    if (category !== undefined) {
+        const cat = sanitizeString(category, 50);
+        data.category = allowedCategories.includes(cat) ? cat : 'Outros';
+    }
+    if (price !== undefined) data.price = sanitizePrice(price);
+    if (description !== undefined) data.description = sanitizeString(description, 2000);
+    if (badge_class !== undefined) {
+        const badge = sanitizeString(badge_class, 30);
+        data.badge_class = allowedBadges.includes(badge) ? badge : 'default';
+    }
+    if (old_price !== undefined) data.old_price = sanitizePrice(old_price);
     if (is_active !== undefined) data.is_active = (is_active === 'true' || is_active === true);
-    if (whatsapp_number !== undefined) data.whatsapp_number = whatsapp_number || null;
+    if (whatsapp_number !== undefined) data.whatsapp_number = sanitizeString(whatsapp_number, 20);
+    if (location !== undefined) data.location = sanitizeString(location, 100);
+    if (capacity !== undefined) data.capacity = sanitizeString(capacity, 50);
+    if (warranty !== undefined) data.warranty = sanitizeString(warranty, 50);
 
     // Auto-gerar o slug se enviarmos o nome ou o slug explicitamente
     if (slug !== undefined || name !== undefined) {
@@ -354,7 +396,9 @@ const getDefaultBadge = (category) => {
         "Computadores": "badge-computadores",
         "Televisores": "badge-televisores",
         "Eletrodomésticos": "badge-eletrodomesticos",
-        "Telemóveis": "badge-telemoveis"
+        "Telemóveis": "badge-telemoveis",
+        "Gaming": "badge-gaming",
+        "Acessórios": "badge-eletronicos"
     };
     return defaultBadges[category] || "bg-slate-600 text-white";
 };
