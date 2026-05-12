@@ -1,28 +1,35 @@
-const Redis = require('ioredis');
+const redisUrl = process.env.REDIS_URL;
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+let redisClient = null;
+let redisConfig = {};
 
-const redisConfig = {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false,
-    family: undefined, // Let ioredis handle IPv4/IPv6 detection automatically
-    retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000);
-        console.log(`[Redis] Reconnecting (#${times})...`);
-        return delay;
-    }
-};
+if (redisUrl) {
+    const Redis = require('ioredis');
 
-console.log(`[Redis] Connecting to: ${redisUrl.includes('@') ? redisUrl.split('@')[1] : redisUrl}`);
-const redisClient = new Redis(redisUrl, redisConfig);
+    redisConfig = {
+        maxRetriesPerRequest: null,
+        enableReadyCheck: false,
+        family: undefined,
+        retryStrategy(times) {
+            const delay = Math.min(times * 50, 2000);
+            console.log(`[Redis] Reconnecting (#${times})...`);
+            return delay;
+        }
+    };
 
-redisClient.on('error', (err) => {
-    console.error('Redis Client Error:', err);
-});
+    console.log(`[Redis] Connecting to: ${redisUrl.includes('@') ? redisUrl.split('@')[1] : redisUrl}`);
+    redisClient = new Redis(redisUrl, redisConfig);
 
-redisClient.on('connect', () => {
-    console.log('Redis Client Connected');
-});
+    redisClient.on('error', (err) => {
+        console.error('Redis Client Error:', err);
+    });
+
+    redisClient.on('connect', () => {
+        console.log('Redis Client Connected');
+    });
+} else {
+    console.log('[Redis] REDIS_URL not set. Redis disabled.');
+}
 
 module.exports = {
     redisClient,

@@ -1,23 +1,26 @@
-const { Queue, Worker } = require('bullmq');
-const { redisConfig, redisUrl } = require('../../config/redis');
-const Redis = require('ioredis');
 const supabase = require('../../config/supabase');
 const smsService = require('./sms.service');
 
-// Define Queue Name
-const FAMILY_PLAN_QUEUE = 'family-plan-assignment';
+const { redisConfig, redisUrl } = require('../../config/redis');
 
-// Connection instance for BullMQ
-const queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+let familyPlanQueue = null;
+let queueConnection = null;
+let startFamilyPlanWorker = null;
 
-// Create Queue
-const familyPlanQueue = new Queue(FAMILY_PLAN_QUEUE, {
-    connection: queueConnection
-});
+if (redisUrl) {
+    const { Queue, Worker } = require('bullmq');
+    const Redis = require('ioredis');
 
-// Worker Factory
-const startFamilyPlanWorker = () => {
-    return new Worker(FAMILY_PLAN_QUEUE, async (job) => {
+    const FAMILY_PLAN_QUEUE = 'family-plan-assignment';
+
+    queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+
+    familyPlanQueue = new Queue(FAMILY_PLAN_QUEUE, {
+        connection: queueConnection
+    });
+
+    startFamilyPlanWorker = () => {
+        return new Worker(FAMILY_PLAN_QUEUE, async (job) => {
         const { orderId } = job.data;
         console.log(`[Queue] Processing Family Plan Order: ${orderId}`);
 
@@ -116,6 +119,9 @@ const startFamilyPlanWorker = () => {
         }
     });
 };
+} else {
+    console.log('[Queue] Redis not configured. Family Plan queue disabled.');
+}
 
 const handleOutOfStock = async (order) => {
     await smsService.sendSms(order.phone, 'EcoFlix: Pagamento recebido. Conta Família em preparação. Enviaremos em breve.');

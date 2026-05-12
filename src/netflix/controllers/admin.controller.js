@@ -412,13 +412,15 @@ const exportSalesAuto = async (req, res) => {
 
     try {
         // 2. CHECK REDIS CACHE
-        const cacheKey = 'ecoflix:relatorio_csv_cache';
-        const cachedContent = await redisClient.get(cacheKey);
+        if (redisClient) {
+            const cacheKey = 'ecoflix:relatorio_csv_cache';
+            const cachedContent = await redisClient.get(cacheKey);
 
-        if (cachedContent) {
-            console.log('⚡ Sales Report served via Redis Cache');
-            res.setHeader('Content-Type', 'text/csv');
-            return res.status(200).send(cachedContent);
+            if (cachedContent) {
+                console.log('⚡ Sales Report served via Redis Cache');
+                res.setHeader('Content-Type', 'text/csv');
+                return res.status(200).send(cachedContent);
+            }
         }
 
         // 3. FETCH FROM VIEW
@@ -430,8 +432,10 @@ const exportSalesAuto = async (req, res) => {
         if (error) throw error;
 
         // 4. CACHE IN REDIS (1 HOUR)
-        await redisClient.set(cacheKey, data, 'EX', 3600);
-        console.log('🐢 Sales Report served via Database (New Cache Created)');
+        if (redisClient) {
+            await redisClient.set(cacheKey, data, 'EX', 3600);
+            console.log('🐢 Sales Report served via Database (New Cache Created)');
+        }
 
         // 5. SEND PLAIN CSV
         res.setHeader('Content-Type', 'text/csv');

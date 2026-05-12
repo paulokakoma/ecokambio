@@ -314,7 +314,7 @@ const appyPayWebhook = async (req, res) => {
             const txId = transaction_id || cleanRef;
 
             // --- REDIS IDEMPOTENCY ---
-            if (txId) {
+            if (txId && redisClient) {
                 const idempotencyKey = `ecoflix:processed_tx:${txId}`;
                 const alreadyProcessed = await redisClient.get(idempotencyKey);
                 if (alreadyProcessed) {

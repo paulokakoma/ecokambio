@@ -82,14 +82,19 @@ const processPayment = async (order) => {
         // 3. SE SUCESSO -> ADICIONAR SMS À FILA (VIA QUEUE)
         if (result.credentials) {
             const creds = result.credentials;
-            await smsQueue.add('enviar-credencial', {
-                phone: order.phone,
-                credentials: creds
-            }, {
-                attempts: 3,
-                backoff: { type: 'exponential', delay: 5000 }
-            });
-            console.log(`[ProcessPayment] Envio de SMS da credencial para ${order.phone} adicionado à fila.`);
+            if (smsQueue) {
+                await smsQueue.add('enviar-credencial', {
+                    phone: order.phone,
+                    credentials: creds
+                }, {
+                    attempts: 3,
+                    backoff: { type: 'exponential', delay: 5000 }
+                });
+                console.log(`[ProcessPayment] Envio de SMS da credencial para ${order.phone} adicionado à fila.`);
+            } else {
+                await smsService.sendDeliverySms(order.phone, creds);
+                console.log(`[ProcessPayment] SMS enviado diretamente para ${order.phone} (sem Redis).`);
+            }
         }
 
         // 4. ATRIBUIR COMISSÃO A PARCEIRO/INFLUENCER (Se tiver código promocional)

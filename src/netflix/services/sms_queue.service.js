@@ -1,22 +1,25 @@
-const { Queue, Worker } = require('bullmq');
-const { redisConfig, redisUrl } = require('../../config/redis');
-const Redis = require('ioredis');
 const smsService = require('./sms.service');
 
-// Define Queue Name
-const SMS_QUEUE = 'sms-delivery';
+const { redisConfig, redisUrl } = require('../../config/redis');
 
-// Connection instance for BullMQ
-const queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+let smsQueue = null;
+let queueConnection = null;
+let startSmsWorker = null;
 
-// Create Queue
-const smsQueue = new Queue(SMS_QUEUE, {
-    connection: queueConnection
-});
+if (redisUrl) {
+    const { Queue, Worker } = require('bullmq');
+    const Redis = require('ioredis');
 
-// Worker Factory (to be called by worker.js)
-const startSmsWorker = () => {
-    return new Worker(SMS_QUEUE, async (job) => {
+    const SMS_QUEUE = 'sms-delivery';
+
+    queueConnection = new Redis(redisUrl, { ...redisConfig, maxRetriesPerRequest: null });
+
+    smsQueue = new Queue(SMS_QUEUE, {
+        connection: queueConnection
+    });
+
+    startSmsWorker = () => {
+        return new Worker(SMS_QUEUE, async (job) => {
         const { phone, credentials } = job.data;
         console.log(`[Queue] Processing SMS Delivery for: ${phone}`);
 
@@ -36,6 +39,9 @@ const startSmsWorker = () => {
         }
     });
 };
+} else {
+    console.log('[SMS Queue] Redis not configured. SMS queue disabled.');
+}
 
 module.exports = {
     smsQueue,
