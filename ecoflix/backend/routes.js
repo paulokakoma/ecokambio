@@ -86,6 +86,10 @@ router.get('/admin/sms-logs', isAdmin, catchAsync(adminController.getSmsLogs));
 router.post('/admin/orders/:id/confirm', isAdmin, catchAsync(paymentController.confirmPayment));
 router.post('/admin/orders/:id/cancel', isAdmin, catchAsync(paymentController.cancelOrder));
 
+// Clients & Issues
+router.get('/admin/clients', isAdmin, catchAsync(adminController.getClients));
+router.get('/admin/issues', isAdmin, catchAsync(adminController.getIssues));
+router.post('/admin/issues/:id/resolve', isAdmin, catchAsync(adminController.resolveIssue));
 // Security & Recovery (Admin)
 router.get('/admin/accounts/:id/recovery', isAdmin, catchAsync(adminController.getRecoveryData));
 

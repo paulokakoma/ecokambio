@@ -70,7 +70,7 @@ class PayGoProvider extends BasePaymentProvider {
             const headers = { 'x-api-key': this.apiKey };
             const response = await axios.get(`${PAYGO_BASE_URL}/payment-status/${paymentId}`, { headers });
 
-            const status = response.data?.status || 'unknown';
+            const status = response.data?.payment?.status || response.data?.status || 'unknown';
             const normalizedStatus = status.toLowerCase();
 
             return {

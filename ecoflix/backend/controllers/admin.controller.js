@@ -456,6 +456,79 @@ const getOrders = async (req, res) => {
 };
 
 // ============================================================================
+// ADMIN: Clients (Base de Clientes)
+// ============================================================================
+const getClients = async (req, res) => {
+    try {
+        const { data: subs, error } = await supabase
+            .from('ecoflix_subscriptions')
+            .select(`
+                *,
+                user:ecoflix_users(phone, name),
+                profile:ecoflix_profiles!fk_subscriptions_profile(
+                    name, pin, type,
+                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email)
+                ),
+                account:ecoflix_master_accounts(email),
+                order:ecoflix_orders(plan_type)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({ success: true, data: subs || [] });
+    } catch (error) {
+        console.error('Get clients error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============================================================================
+// ADMIN: Issues (Reporte de Problemas)
+// ============================================================================
+const getIssues = async (req, res) => {
+    try {
+        const { data: issues, error } = await supabase
+            .from('ecoflix_issues')
+            .select(`
+                *,
+                subscription:ecoflix_subscriptions(
+                    plan_type, expires_at,
+                    user:ecoflix_users(phone)
+                )
+            `)
+            .order('status', { ascending: false }) // OPEN first
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({ success: true, data: issues || [] });
+    } catch (error) {
+        console.error('Get issues error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const resolveIssue = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { data, error } = await supabase
+            .from('ecoflix_issues')
+            .update({ status: 'RESOLVED', resolved_at: new Date() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error('Resolve issue error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============================================================================
 // ADMIN: Inventory Status
 // ============================================================================
 const getInventoryStatus = async (req, res) => {
@@ -906,6 +979,9 @@ module.exports = {
     getOrders,
     getInventoryStatus,
     getExportCSV,
+    getClients,
+    getIssues,
+    resolveIssue,
     exportSalesAuto,
     getInfluencerStats,
     getRecoveryData,

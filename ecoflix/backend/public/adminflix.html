@@ -142,8 +142,12 @@
                 <i class="fas fa-shopping-cart w-5 text-center"></i> Vendas
             </div>
             <div id="nav-customers" onclick="switchTab('customers')"
-                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer">
                 <i class="fas fa-users w-5 text-center"></i> Clientes
+            </div>
+            <div id="nav-issues" onclick="switchTab('issues')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer">
+                <i class="fas fa-headset w-5 text-center"></i> Suporte
             </div>
         </nav>
 
@@ -171,6 +175,8 @@
             <div onclick="switchTab('dashboard')" class="p-3 font-bold border-b">Visão Geral</div>
             <div onclick="switchTab('stock')" class="p-3 font-bold border-b">Inventário</div>
             <div onclick="switchTab('sales')" class="p-3 font-bold border-b">Vendas</div>
+            <div onclick="switchTab('customers')" class="p-3 font-bold border-b">Clientes</div>
+            <div onclick="switchTab('issues')" class="p-3 font-bold border-b text-blue-600">Suporte</div>
             <div onclick="logout()" class="p-3 text-red-600 font-bold mt-4">Sair</div>
         </div>
     </div>
@@ -213,7 +219,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-xs font-medium text-red-600 uppercase font-bold">A Expirar (48h)</p>
-                                <h3 class="text-3xl font-bold text-red-600 mt-2">3</h3>
+                                <h3 class="text-3xl font-bold text-red-600 mt-2" id="dash-expiring">0</h3>
                             </div>
                             <div class="p-2 bg-red-100 rounded-lg text-red-600"><i class="fas fa-clock"></i></div>
                         </div>
@@ -223,11 +229,11 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-xs font-medium text-gray-500 uppercase">Receita Hoje</p>
-                                <h3 class="text-3xl font-bold text-gray-800 mt-2">22.500 Kz</h3>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="dash-revenue">0 Kz</h3>
                             </div>
                             <div class="p-2 bg-purple-100 rounded-lg text-purple-600"><i class="fas fa-coins"></i></div>
                         </div>
-                        <div class="mt-4 flex items-center text-xs text-gray-500">5 vendas</div>
+                        <div class="mt-4 flex items-center text-xs text-gray-500" id="dash-sales-count">0 vendas</div>
                     </div>
                 </div>
                 <!-- Gráfico e Atividade -->
@@ -341,15 +347,35 @@
                     <table class="w-full text-sm text-left">
                         <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
                             <tr>
-                                <th class="px-6 py-3">Nome / Telefone</th>
-                                <th class="px-6 py-3">Total Gasto (LTV)</th>
-                                <th class="px-6 py-3">Compras</th>
-                                <th class="px-6 py-3">Última Compra</th>
-                                <th class="px-6 py-3">Status Atual</th>
+                                <th class="px-6 py-3">Cliente (Nome / Tel)</th>
+                                <th class="px-6 py-3">Plano</th>
+                                <th class="px-6 py-3">Conta Alocada (Email/Perfil)</th>
+                                <th class="px-6 py-3">Dias Restantes</th>
+                                <th class="px-6 py-3">Status</th>
                                 <th class="px-6 py-3 text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100" id="customers-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. SUPORTE / PROBLEMAS -->
+            <div id="panel-issues" class="panel hidden">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Reporte de Problemas & Suporte</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-6 py-3">Cliente</th>
+                                <th class="px-6 py-3">Conta / Perfil</th>
+                                <th class="px-6 py-3">Problema Reportado</th>
+                                <th class="px-6 py-3">Data</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="issues-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -612,6 +638,9 @@
                 const { data } = await apiCall('/admin/dashboard');
                 document.getElementById('dash-free').innerText = data.freeProfiles || 0;
                 document.getElementById('dash-sold').innerText = data.soldProfiles || 0;
+                document.getElementById('dash-expiring').innerText = data.expiringAccounts || 0;
+                document.getElementById('dash-revenue').innerText = new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(data.todayRevenue || 0);
+                document.getElementById('dash-sales-count').innerText = `${data.todaySales || 0} vendas`;
             } catch (e) {
                 console.error('Dashboard load error:', e);
             }
@@ -934,48 +963,89 @@
         // ============================================================================
         // CUSTOMERS (from orders data)
         // ============================================================================
+        let customersData = [];
+        async function loadCustomers() {
+            try {
+                const { data } = await apiCall('/admin/clients');
+                customersData = data || [];
+                renderCustomers();
+            } catch (e) {
+                console.error('Customers load error:', e);
+            }
+        }
+
         function renderCustomers() {
-            // Aggregate customers from orders
-            const customerMap = new Map();
-            ordersData.forEach(o => {
-                const phone = o.phone || o.user?.phone;
-                if (!phone) return;
+            document.getElementById('customers-table-body').innerHTML = customersData.map(c => {
+                const name = c.user?.name || 'Cliente';
+                const phone = c.user?.phone || 'S/N';
+                const planType = c.order?.plan_type || c.profile?.type || 'N/A';
+                const email = c.profile?.master_account?.email || 'Sem conta';
+                const pin = c.profile?.pin ? `(PIN: ${c.profile.pin})` : '';
+                
+                let statusClass = 'badge-pendente';
+                let statusText = c.status;
+                if (c.status === 'ACTIVE') statusClass = 'badge-sucesso';
+                if (c.status === 'SUSPENDED') statusClass = 'bg-red-100 text-red-800';
+                if (c.status === 'EXPIRED') statusClass = 'bg-gray-200 text-gray-800';
 
-                if (!customerMap.has(phone)) {
-                    customerMap.set(phone, {
-                        name: o.user?.name || 'Cliente',
-                        phone,
-                        ltv: 0,
-                        orders: 0,
-                        last: o.created_at,
-                        hasPaid: false
-                    });
+                // Calculate remaining days
+                let daysLeft = '-';
+                if (c.end_date) {
+                    const diff = new Date(c.end_date) - new Date();
+                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    if (days > 0) {
+                        daysLeft = `${days} dias`;
+                    } else {
+                        daysLeft = 'Expirado';
+                    }
                 }
-                const c = customerMap.get(phone);
-                if (o.status === 'PAID') {
-                    c.ltv += Number(o.amount);
-                    c.hasPaid = true;
-                }
-                c.orders++;
-                if (new Date(o.created_at) > new Date(c.last)) c.last = o.created_at;
-            });
-
-            const customers = Array.from(customerMap.values());
-
-            document.getElementById('customers-table-body').innerHTML = customers.map(c => {
-                const statusClass = c.hasPaid ? 'badge-sucesso' : 'badge-pendente';
-                const status = c.hasPaid ? 'Ativo' : 'Pendente';
-                const last = new Date(c.last).toLocaleDateString('pt-PT');
 
                 return `<tr class="bg-white hover:bg-gray-50 border-b border-gray-100">
-                    <td class="px-6 py-4 font-medium"><div>${c.name}</div><div class="text-xs text-gray-400">${c.phone}</div></td>
-                    <td class="px-6 py-4 font-bold text-green-600">${c.ltv.toLocaleString()} Kz</td>
-                    <td class="px-6 py-4 text-xs">${c.orders} pedidos</td>
-                    <td class="px-6 py-4 text-xs text-gray-500">${last}</td>
-                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${status}</span></td>
-                    <td class="px-6 py-4 text-right"><button class="text-blue-600 hover:text-blue-800 text-xs font-bold">Ver Perfil</button></td>
+                    <td class="px-6 py-4 font-medium"><div>${name}</div><div class="text-xs text-gray-400">${phone}</div></td>
+                    <td class="px-6 py-4 font-bold">${planType}</td>
+                    <td class="px-6 py-4 text-xs">${email} ${pin}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-gray-600">${daysLeft}</td>
+                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusText}</span></td>
+                    <td class="px-6 py-4 text-right">
+                        ${c.status === 'ACTIVE' ? `<button onclick="suspendClient('${c.profile_id}')" class="text-red-600 hover:text-red-800 text-xs font-bold">Suspender</button>` : ''}
+                        ${c.status === 'SUSPENDED' ? `<button onclick="restoreClient('${c.profile_id}')" class="text-green-600 hover:text-green-800 text-xs font-bold ml-2">Restaurar</button>` : ''}
+                    </td>
                 </tr>`;
             }).join('');
+        }
+
+        async function suspendClient(profileId) {
+            if (!confirm('Deseja realmente suspender este cliente? O acesso será cortado imediatamente.')) return;
+            try {
+                const res = await apiCall(`/admin/profiles/${profileId}/suspend`, 'POST');
+                if (res.success) {
+                    showToast('Cliente suspenso com sucesso', 'success');
+                    await loadCustomers();
+                    await loadDashboard();
+                    await loadStock();
+                } else {
+                    showToast(res.message, 'error');
+                }
+            } catch (e) {
+                showToast('Erro ao suspender cliente', 'error');
+            }
+        }
+
+        async function restoreClient(profileId) {
+            if (!confirm('Deseja restaurar o acesso deste cliente?')) return;
+            try {
+                const res = await apiCall(`/admin/profiles/${profileId}/restore`, 'POST');
+                if (res.success) {
+                    showToast('Acesso restaurado com sucesso', 'success');
+                    await loadCustomers();
+                    await loadDashboard();
+                    await loadStock();
+                } else {
+                    showToast(res.message, 'error');
+                }
+            } catch (e) {
+                showToast('Erro ao restaurar acesso', 'error');
+            }
         }
 
         // ============================================================================
@@ -1036,6 +1106,10 @@
                     else if (data.type === 'stock_update') {
                         await loadStock();
                         await loadDashboard();
+                    }
+                    else if (data.type === 'new_issue') {
+                        showToast(`Novo problema reportado: ${data.issue.issue_type}`, 'warning');
+                        await loadIssues();
                     }
                     else if (data.type === 'new_user_activity') {
                         // Trata atividade de utilizadores
@@ -1104,6 +1178,8 @@
             loadDashboard();
             loadOrders();
             loadStock();
+            loadCustomers();
+            loadIssues();
             loadPlansPricing();
             await loadInventoryStats();
 
@@ -1119,6 +1195,58 @@
             });
         };
 
+        // ============================================================================
+        // ISSUES / SUPORTE
+        // ============================================================================
+        let issuesData = [];
+        async function loadIssues() {
+            try {
+                const { data } = await apiCall('/admin/issues');
+                issuesData = data || [];
+                renderIssues();
+            } catch (e) {
+                console.error('Issues load error:', e);
+            }
+        }
+
+        function renderIssues() {
+            document.getElementById('issues-table-body').innerHTML = issuesData.map(i => {
+                const name = i.user?.name || 'Cliente';
+                const phone = i.user?.phone || 'S/N';
+                const profileStr = i.subscription?.profile?.name || 'N/A';
+                
+                let statusClass = i.status === 'PENDING' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                let statusText = i.status === 'PENDING' ? 'Pendente' : 'Resolvido';
+
+                const date = new Date(i.created_at).toLocaleString('pt-PT');
+
+                return `<tr class="bg-white hover:bg-gray-50 border-b border-gray-100">
+                    <td class="px-6 py-4 font-medium"><div>${name}</div><div class="text-xs text-gray-400">${phone}</div></td>
+                    <td class="px-6 py-4 font-bold">${profileStr}</td>
+                    <td class="px-6 py-4 text-xs font-medium text-gray-800">${i.issue_type}</td>
+                    <td class="px-6 py-4 text-xs text-gray-500">${date}</td>
+                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusText}</span></td>
+                    <td class="px-6 py-4 text-right">
+                        ${i.status === 'PENDING' ? `<button onclick="markIssueResolved('${i.id}')" class="text-green-600 hover:text-green-800 text-xs font-bold">Marcar Resolvido</button>` : ''}
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function markIssueResolved(id) {
+            try {
+                const res = await apiCall(`/admin/issues/${id}/resolve`, 'POST');
+                if (res.success) {
+                    showToast('Problema marcado como resolvido!', 'success');
+                    await loadIssues();
+                } else {
+                    showToast(res.message, 'error');
+                }
+            } catch (e) {
+                showToast('Erro ao resolver problema', 'error');
+            }
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('text-gray-600'); });
             const activeNav = document.getElementById('nav-' + tabId);
@@ -1129,6 +1257,8 @@
 
             // Load data for specific tabs
             if (tabId === 'partners') loadPartners();
+            if (tabId === 'customers') loadCustomers();
+            if (tabId === 'issues') loadIssues();
         }
 
         function toggleDetails(id) { document.getElementById(id).classList.toggle('hidden'); }

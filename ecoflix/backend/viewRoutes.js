@@ -16,15 +16,15 @@ const noCacheHeaders = (req, res, next) => {
     next();
 };
 
-// Serve o frontend React
-router.use('/', express.static(path.join(__dirname, '../frontend/dist'), {
+// Serve o frontend HTML Puro
+router.use('/', express.static(path.join(__dirname, 'public'), {
     index: ['index.html'],
     maxAge: config.isDevelopment ? '0' : '1d'
 }));
 
-// Rota fallback para o React Router na Home
+// Rota fallback para a Home
 router.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Arquivos Estáticos do Admin (assets e afins do painel antigo)

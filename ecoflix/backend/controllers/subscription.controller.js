@@ -62,11 +62,12 @@ const getSubscriptionCredentials = async (req, res) => {
     try {
         const userId = req.user.id; // From Auth Middleware
 
-        // Get Active Subscription
-        const { data: sub, error } = await supabase
+        // Get all Active Subscriptions
+        const { data: subs, error } = await supabase
             .from('ecoflix_subscriptions')
             .select(`
                 *,
+                order:ecoflix_orders(plan_type),
                 profile:ecoflix_profiles!fk_subscriptions_profile (
                     pin,
                     name,
@@ -82,65 +83,75 @@ const getSubscriptionCredentials = async (req, res) => {
             `)
             .eq('user_id', userId)
             .eq('status', 'ACTIVE')
-            .single();
+            .order('created_at', { ascending: false });
 
-        if (error || !sub) {
-            // FALLBACK: check if admin manually assigned a profile to this user's phone
-            const userPhone = req.user.phone || '';
-            const cleanPhone = userPhone.replace(/[^0-9]/g, '').replace(/^244/, '');
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Erro ao buscar assinaturas: ' + error.message });
+        }
 
-            const { data: manualProfile } = await supabase
-                .from('ecoflix_profiles')
-                .select(`
-                    id, name, pin, expires_at, status, type,
-                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey (email, password)
-                `)
-                .or(`client_phone.eq.${cleanPhone},client_phone.eq.+244${cleanPhone},client_phone.eq.244${cleanPhone}`)
-                .eq('status', 'SOLD')
-                .single();
+        let allSubs = [];
 
-            if (!manualProfile) {
-                return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada.' });
-            }
+        // FALLBACK: check if admin manually assigned a profile to this user's phone
+        const userPhone = req.user.phone || '';
+        const cleanPhone = userPhone.replace(/[^0-9]/g, '').replace(/^244/, '');
 
-            if (!manualProfile.master_account) {
-                 return res.status(500).json({ success: false, message: 'Erro nos dados da assinatura (Conta Mestra em falta).' });
-            }
+        const { data: manualProfiles } = await supabase
+            .from('ecoflix_profiles')
+            .select(`
+                id, name, pin, expires_at, status, type,
+                master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey (email, password)
+            `)
+            .or(`client_phone.eq.${cleanPhone},client_phone.eq.+244${cleanPhone},client_phone.eq.244${cleanPhone}`)
+            .eq('status', 'SOLD')
+            .order('updated_at', { ascending: false });
 
-            return res.json({
-                success: true,
-                data: {
-                    id: 'manual-' + manualProfile.id,
-                    plan: manualProfile.type === 'TV' ? 'ULTRA' : 'ECONOMICO',
-                    expires_at: manualProfile.expires_at,
-                    profile_name: manualProfile.name,
-                    pin: manualProfile.pin || 'N/A',
-                    email: manualProfile.master_account.email,
-                    password: manualProfile.master_account.password
+        if (manualProfiles && manualProfiles.length > 0) {
+            manualProfiles.forEach(mp => {
+                if (mp.master_account) {
+                    allSubs.push({
+                        id: 'manual-' + mp.id,
+                        plan: mp.type === 'TV' ? 'ULTRA' : 'ECONOMICO',
+                        expires_at: mp.expires_at,
+                        profile_name: mp.name,
+                        pin: mp.pin || 'N/A',
+                        email: mp.master_account.email,
+                        password: mp.master_account.password,
+                        is_manual: true
+                    });
                 }
             });
         }
 
-        // Extract nested data
-        const profile = sub.profile;
-        // The master account credentials could be direct (EXCLUSIVE) or via profile (ECONOMICO/ULTRA)
-        const master = sub.account || profile?.master_account;
-
-        // Validation for missing data
-        if (!master) {
-            return res.status(500).json({ success: false, message: 'Erro nos dados da assinatura (Conta Mestra em falta).' });
+        if (subs && subs.length > 0) {
+            subs.forEach(sub => {
+                const profile = sub.profile;
+                const master = sub.account || profile?.master_account;
+                
+                if (master) {
+                    allSubs.push({
+                        id: sub.id,
+                        plan: sub.order?.plan_type || sub.plan_type || (sub.account ? 'FAMILIA' : 'ECONOMICO'),
+                        expires_at: sub.end_date,
+                        profile_name: profile ? profile.name : 'Exclusiva',
+                        pin: profile ? profile.pin : 'N/A',
+                        email: master.email,
+                        password: master.password,
+                        is_manual: false
+                    });
+                }
+            });
         }
+
+        // Remove duplicates by ID if a manual profile is also a formal subscription
+        const uniqueSubs = Array.from(new Map(allSubs.map(s => [s.id.replace('manual-', ''), s])).values());
+
+        if (uniqueSubs.length === 0) {
+            return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada.' });
+        }
+
         res.json({
             success: true,
-            data: {
-                id: sub.id,
-                plan: sub.plan_type,
-                expires_at: sub.expires_at,
-                profile_name: profile ? profile.name : 'Exclusiva',
-                pin: profile ? profile.pin : 'N/A',
-                email: master.email,
-                password: master.password
-            }
+            data: uniqueSubs
         });
 
     } catch (error) {
@@ -157,8 +168,37 @@ const reportIssue = async (req, res) => {
         const { subscription_id, issue_type, description } = req.body;
         // issue_type: 'PASSWORD_INCORRECT', 'SCREEN_LIMIT', 'LOCKED', 'OTHER'
 
-        // Log incident (MVP: Console/Admin Alert)
-        console.warn(`[Ticket] Incident Reported! Sub: ${subscription_id}, Type: ${issue_type}`);
+        let finalSubId = subscription_id;
+        let finalDesc = description || '';
+
+        if (subscription_id && subscription_id.startsWith('manual-')) {
+            finalSubId = null; // Cannot use foreign key for manual profiles
+            finalDesc = `[Manual Profile: ${subscription_id}] ` + finalDesc;
+        }
+
+        const { data, error } = await supabase
+            .from('ecoflix_issues')
+            .insert([{
+                subscription_id: finalSubId,
+                issue_type,
+                description: finalDesc,
+                status: 'OPEN'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Broadcast to Admins
+        try {
+            const websocket = require('../../../src/websocket');
+            websocket.broadcastToAdmins({
+                type: 'new_issue',
+                issue: data
+            });
+        } catch(e) {
+            console.error('Failed to broadcast issue:', e);
+        }
 
         res.json({ success: true, message: 'Problema reportado. A nossa equipa irá verificar em breve.' });
 

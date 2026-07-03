@@ -27,4 +27,8 @@ module.exports = (app) => {
     } else {
         logger.info('⚠️ REDIS_URL não definida: Sistema de filas EcoFlix desativado.');
     }
+
+    // 4. Inicializar Cron Jobs (SMS Automáticos)
+    const { initializeCron } = require('./cron/expiration.cron');
+    initializeCron();
 };

@@ -265,5 +265,17 @@ const sendRestoreSms = async (phone) => {
     return sendSms(phone, message);
 };
 
+const send5DaysExpirySms = async (phone) => {
+    const message = `A sua assinatura EcoFlix expira em 5 dias. Evite cortes! Aceda a ecokambio.com/minha-conta para renovar.`;
+    return sendSms(phone, message);
+};
+
+const sendFinalDayExpirySms = async (phone) => {
+    const message = `A sua assinatura EcoFlix termina hoje! Renove agora em ecokambio.com/minha-conta para continuar a assistir.`;
+    return sendSms(phone, message);
+};
+
 module.exports.sendSuspendSms = sendSuspendSms;
 module.exports.sendRestoreSms = sendRestoreSms;
+module.exports.send5DaysExpirySms = send5DaysExpirySms;
+module.exports.sendFinalDayExpirySms = sendFinalDayExpirySms;
