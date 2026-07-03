@@ -250,7 +250,7 @@ const targets = [
                             return results;
                         });
                     } else {
-                        log.warn('BCI: No exchange rate selectors found, skipping');
+                        log.warning('BCI: No exchange rate selectors found, skipping');
                     }
                 } else if (label === 'YETU') {
                     await page.waitForSelector('span.text-white', { timeout: 15000 });

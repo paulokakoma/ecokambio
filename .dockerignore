@@ -7,9 +7,19 @@ node_modules
 
 # Ficheiros de ambiente (devem ser geridos fora da imagem)
 .env
+.env.fly
 
 # Logs e ficheiros de depuração
 npm-debug.log
+logs/
+
+# Dados de sessão locais (não devem entrar na imagem)
+sessions/
+
+# Armazenamento local e certificados
+storage/
+scratch/
+certs/
 
 # Ficheiros Extra GIGANTES que travam o deploy
 ecopay
@@ -18,3 +28,7 @@ ecopay
 .claude
 .agent
 .agents
+
+# Ficheiros de desenvolvimento
+.DS_Store
+.gitkeep

@@ -3,9 +3,9 @@
   "retiredSessionsCount": 0,
   "sessions": [
     {
-      "id": "session_ydBQZRE4a5",
+      "id": "session_sgpJF0C3mG",
       "cookieJar": {
-        "version": "tough-cookie@4.1.4",
+        "version": "tough-cookie@6.0.0",
         "storeType": "MemoryCookieStore",
         "rejectPublicSuffixes": true,
         "enableLooseMode": false,
@@ -16,16 +16,16 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-05-12T19:43:38.588Z",
-      "createdAt": "2026-05-12T18:53:38.588Z",
+      "expiresAt": "2026-07-03T21:08:44.481Z",
+      "createdAt": "2026-07-03T20:18:44.481Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_VEQSfaCUz6",
+      "id": "session_mguBg1r0io",
       "cookieJar": {
-        "version": "tough-cookie@4.1.4",
+        "version": "tough-cookie@6.0.0",
         "storeType": "MemoryCookieStore",
         "rejectPublicSuffixes": true,
         "enableLooseMode": false,
@@ -34,52 +34,52 @@
         "cookies": [
           {
             "key": "_gid",
-            "value": "GA1.2.1614882709.1778612023",
-            "expires": "2026-05-13T18:53:43.000Z",
+            "value": "GA1.2.151243899.1783109929",
+            "expires": "2026-07-04T20:18:49.000Z",
             "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-05-12T18:53:44.749Z",
-            "lastAccessed": "2026-05-12T18:53:44.749Z"
+            "creation": "2026-07-03T20:18:53.245Z",
+            "lastAccessed": "2026-07-03T20:18:53.245Z"
           },
           {
             "key": "_gat_gtag_UA_49969076_1",
             "value": "1",
-            "expires": "2026-05-12T18:54:43.000Z",
+            "expires": "2026-07-03T20:19:50.000Z",
             "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-05-12T18:53:44.751Z",
-            "lastAccessed": "2026-05-12T18:53:44.751Z"
+            "creation": "2026-07-03T20:18:53.246Z",
+            "lastAccessed": "2026-07-03T20:18:53.246Z"
           },
           {
             "key": "_ga_GK7CBYM23R",
-            "value": "GS2.1.s1778612023$o1$g0$t1778612023$j60$l0$h0",
-            "expires": "2027-06-16T18:53:43.928Z",
+            "value": "GS2.1.s1783109930$o1$g0$t1783109930$j60$l0$h0",
+            "expires": "2027-08-07T20:18:50.865Z",
             "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-05-12T18:53:44.751Z",
-            "lastAccessed": "2026-05-12T18:53:44.751Z"
+            "creation": "2026-07-03T20:18:53.246Z",
+            "lastAccessed": "2026-07-03T20:18:53.246Z"
           },
           {
             "key": "_ga",
-            "value": "GA1.1.1029834079.1778612023",
-            "expires": "2027-06-16T18:53:43.929Z",
+            "value": "GA1.1.1123279564.1783109929",
+            "expires": "2027-08-07T20:18:50.866Z",
             "domain": "angocambio.ao",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-05-12T18:53:44.751Z",
-            "lastAccessed": "2026-05-12T18:53:44.751Z"
+            "creation": "2026-07-03T20:18:53.246Z",
+            "lastAccessed": "2026-07-03T20:18:53.246Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-05-12T19:43:38.593Z",
-      "createdAt": "2026-05-12T18:53:38.593Z",
-      "usageCount": 2,
+      "expiresAt": "2026-07-03T21:08:44.485Z",
+      "createdAt": "2026-07-03T20:18:44.485Z",
+      "usageCount": 1,
       "maxUsageCount": 50,
       "errorScore": 0
     }

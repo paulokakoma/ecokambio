@@ -14,7 +14,6 @@ process.on('unhandledRejection', (reason, promise) => {
 console.log('📦 [Server] Carregando: express, http, path...');
 const express = require("express");
 const http = require("http");
-const https = require("https"); 
 const path = require("path");
 
 console.log('📦 [Server] Carregando: session, compression, logger...');
@@ -63,8 +62,6 @@ const authRoutes = require("./src/routes/authRoutes");
 const publicRoutes = require("./src/routes/publicRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const viewRoutes = require("./src/routes/viewRoutes");
-const ecoflixRoutes = require("./src/netflix/routes");
-
 // Scraper
 const scraperController = require("./src/controllers/scraperController");
 const productController = require("./src/controllers/productController");
@@ -123,7 +120,7 @@ app.use(helmet({
             ],
             childSrc: ["'self'"],
             objectSrc: ["'none'"],
-            upgradeInsecureRequests: config.isDevelopment ? null : []
+            upgradeInsecureRequests: config.isDevelopment ? null : true
         },
     },
     hsts: config.isDevelopment ? false : {
@@ -134,6 +131,10 @@ app.use(helmet({
 }));
 app.use(compression()); // Enable Gzip compression
 app.use(cookieParser(config.session.secret)); // Parse signed cookies
+
+// Stripe Webhook (EcoFlix - Necessário raw body)
+app.use('/api/ecoflix/webhooks', express.raw({ type: 'application/json' }));
+
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
@@ -252,12 +253,6 @@ const defaultStaticOptions = {
 app.use(express.static("public", defaultStaticOptions));
 app.use('/admin/assets', isAdmin, express.static(path.join(__dirname, 'private'), defaultStaticOptions));
 
-// EcoFlix Module Static Files
-app.use('/netflix', express.static(path.join(__dirname, 'src/netflix/public'), {
-    index: ['index.html'],
-    maxAge: config.isDevelopment ? '0' : '1d'
-}));
-
 // ============================================================================
 // SEGURANÇA: Desativar cache em páginas de administração
 // Isto evita que dispositivos/redes memorizem dados sensíveis de acesso.
@@ -276,12 +271,9 @@ const noCacheHeaders = (req, res, next) => {
 app.use('/login', noCacheHeaders);
 app.use('/login.html', noCacheHeaders);
 app.use('/admin', noCacheHeaders);
-app.use('/netflix/adminflix.html', noCacheHeaders);
-app.use('/api/ecoflix/admin', noCacheHeaders);
-
-// Rota para a página "Sobre"
-app.get('/sobre', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'sobre.html'));
+// Rota para o checkout
+app.get('/checkout', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'checkout.html'));
 });
 
 // View Routes - handles all page rendering
@@ -306,10 +298,8 @@ app.use('/api/v1', apiResponse, apiKeyAuth.optional, apiV1Routes);
 
 // Legacy API routes - kept for backwards compatibility
 // These will redirect to v1 endpoints where possible
-app.get('/api/informal-rates', async (req, res, next) => {
-    // Forward to v1 endpoint
-    req.url = '/api/v1/rates/informal';
-    next('route');
+app.get('/api/informal-rates', (req, res) => {
+    res.redirect(301, '/api/v1/rates/informal');
 });
 
 // API Route for Frontend Configuration (legacy)
@@ -324,6 +314,12 @@ app.get('/api/config', (req, res) => {
 app.use("/api", authRoutes); // Contém /login, /logout, etc. Não deve ter `isAdmin` aqui.
 app.use("/api", publicRoutes); // Rotas públicas, sem `isAdmin`.
 
+// ============================================================================
+// Módulo EcoFlix (Microserviço Integrado - Monólito Modular)
+// Todas as rotas, views e queues do streaming estão isoladas neste ficheiro
+// ============================================================================
+require('./ecoflix/backend/index')(app);
+
 // Rotas de API para o Scraper (Público)
 // Usado para saber a saúde e o último sucesso do robô que busca os valores.
 app.get("/api/scraper/health", scraperController.getHealth);
@@ -331,9 +327,6 @@ app.get("/api/scraper/last-results", scraperController.getLastResults);
 
 // Rotas de API para o Scraper (Protegido - Apenas Admin)
 app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
-
-// Módulo EcoFlix (Rotas API partilhadas de uso misto, o próprio módulo trata a segurança)
-app.use("/api/ecoflix", ecoflixRoutes);
 
 // Integração Google Sheets - Exportação (Requer Token específico antes das regras normais do Admin)
 const adminController = require('./src/controllers/adminController');
@@ -385,7 +378,7 @@ app.get('*', (req, res, next) => {
         // Se for subdomínio de admin, verifica se está logado.
         // Se não estiver e não for a página de login, redireciona.
         if (!req.session.user && req.path !== '/login.html') {
-            return res.redirect('/login.html');
+            return res.redirect(`/login.html?redirect=${encodeURIComponent(req.originalUrl)}`);
         }
         // SECURITY: Prevent caching of admin pages
         res.set({
@@ -393,6 +386,7 @@ app.get('*', (req, res, next) => {
             'Pragma': 'no-cache',
             'Expires': '0'
         });
+        
         res.sendFile(path.join(__dirname, 'private', 'admin.html'));
     } else {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -431,14 +425,6 @@ app.use(Sentry.Handlers.errorHandler());
 // Error Handling Middleware - Deve ser o último middleware
 app.use(errorHandler);
 
-// EcoFlix Queues (Producers)
-if (process.env.REDIS_URL) {
-    require('./src/netflix/services/queue.service');
-    require('./src/netflix/services/sms_queue.service');
-} else {
-    logger.info('⚠️ REDIS_URL não definida: Sistema de filas EcoFlix (BullMQ) desativado no servidor web.');
-}
-
 // Scheduler
 const scheduler = require('./webscraper/scheduler');
 
@@ -454,9 +440,12 @@ if (require.main === module) {
         logger.info('📅 Agendamento via node-cron ativado');
 
         if (config.isDevelopment) {
-            logger.info(`Rotas Locais Ativas:`);
-            logger.info(`  📱 Plataforma EcoKambio: http://localhost:${config.port}`);
-            logger.info(`  🔐 Painel Administrativo: http://admin.localhost:${config.port}`);
+            logger.info(`Rotas Locais Ativas (EcoKambio):`);
+            logger.info(`  📱 Plataforma: http://localhost:${config.port}`);
+            logger.info(`  🔐 Painel Admin: http://admin.localhost:${config.port}`);
+            logger.info(`Rotas Locais Ativas (EcoFlix):`);
+            logger.info(`  🍿 Plataforma Streaming: http://localhost:${config.port}/ecoflix`);
+            logger.info(`  🎬 Painel Admin Flix: http://localhost:${config.port}/ecoflix/admin`);
             logger.info('   Use também o comando: npm run scrape para testar o scraping fora do horário.');
         }
     }).on('error', (e) => {

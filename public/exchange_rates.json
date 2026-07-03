@@ -1,60 +1,60 @@
 {
-  "lastUpdated": "2026-05-12T18:53:33.271Z",
+  "lastUpdated": "2026-06-30T09:05:35.285Z",
   "rates": [
     {
       "bank": "BFA",
       "currency": "USD",
-      "sell": "964,068"
+      "sell": "981,013"
     },
     {
       "bank": "BFA",
       "currency": "EUR",
-      "sell": "1153,376"
+      "sell": "1145,925"
     },
     {
       "bank": "BFA",
       "currency": "NAD",
-      "sell": "59,561"
+      "sell": "61,058"
     },
     {
       "bank": "BFA",
       "currency": "GBP",
-      "sell": "1330,189"
+      "sell": "1329,388"
     },
     {
       "bank": "BAI",
       "currency": "EUR",
-      "sell": "1163,3571"
+      "sell": "1153,764"
     },
     {
       "bank": "BAI",
       "currency": "GBP",
-      "sell": "1337,8617"
+      "sell": "1307,0307"
     },
     {
       "bank": "BAI",
       "currency": "USD",
-      "sell": "989,0811"
+      "sell": "987,7234"
     },
     {
       "bank": "BAI",
       "currency": "ZAR",
-      "sell": "60,0901"
+      "sell": "61,4463"
     },
     {
       "bank": "BNA",
       "currency": "USD",
-      "sell": "913,116"
+      "sell": "912,57"
     },
     {
       "bank": "BNA",
       "currency": "EUR",
-      "sell": "1074,007"
+      "sell": "1065,977"
     },
     {
       "bank": "BNA",
       "currency": "ZAR",
-      "sell": "55,475"
+      "sell": "56,771"
     }
   ]
 }

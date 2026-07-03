@@ -13,12 +13,21 @@ const init = (server) => {
     wss.on("connection", (ws, req) => {
         const params = new URLSearchParams(req.url.slice(1));
         ws.isAdmin = params.get('client') === 'admin';
+        ws.subscribedOrderId = null; // New: tracking order subscriptions
         console.log(`Cliente WebSocket conectado ${ws.isAdmin ? '(Admin)' : '(Usuário)'}.`);
         broadcastUserCount();
 
         ws.on('message', async (message) => {
             try {
                 const data = JSON.parse(message);
+                
+                // Subscription for EcoFlix Payment Updates
+                if (data.type === 'subscribe_order' && data.order_id) {
+                    ws.subscribedOrderId = String(data.order_id);
+                    console.log(`[WS] Client subscribed to order_id: ${ws.subscribedOrderId}`);
+                    return;
+                }
+
                 if (data.type === 'log_activity' && data.payload) {
                     const activityPayload = {
                         ...data.payload,
@@ -68,6 +77,17 @@ const broadcast = (data, target = 'all') => {
     });
 };
 
+const broadcastToOrder = (orderId, data) => {
+    if (!wss || !orderId) return;
+    const jsonData = JSON.stringify(data);
+    const targetId = String(orderId);
+    wss.clients.forEach((client) => {
+        if (client.readyState === client.OPEN && client.subscribedOrderId === targetId) {
+            client.send(jsonData);
+        }
+    });
+};
+
 const broadcastUserCount = () => {
     if (!wss) return;
     const userCount = Array.from(wss.clients).filter(c => !c.isAdmin).length;
@@ -79,4 +99,4 @@ const getOnlineUserCount = () => {
     return Array.from(wss.clients).filter(c => !c.isAdmin).length;
 };
 
-module.exports = { init, broadcast, getOnlineUserCount };
+module.exports = { init, broadcast, broadcastToOrder, getOnlineUserCount };

@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 // Secret should be set in environment variable JWT_SECRET
-const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret_in_production';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * Middleware to verify JWT token.

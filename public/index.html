@@ -3,9 +3,8 @@
 
 <head>
     <meta charset="UTF-8" />
-    <script src="https://quge5.com/88/tag.min.js" data-zone="233853" async data-cfasync="false"></script>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="monetag" content="03c9124e276a932c58c4b6c93f5feec1" />
 
 
 
@@ -1516,7 +1515,7 @@
                                 </a>
 
                                 <!-- EcoFlix Card -->
-                                <a href="/netflix"
+                                <a href="/ecoflix"
                                     class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
                                     <div
                                         class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700">
@@ -2795,15 +2794,11 @@
             const bnaBank = marketData?.formal_rates?.find(r => r.code?.toUpperCase() === 'BNA');
             let bnaRate = bnaBank?.usd_rate;
 
-            // Log para depuração: Verifique estes valores no console do navegador
-            console.log('DEBUG: marketData in loadAffiliateLinks:', marketData);
-            console.log('DEBUG: BNA Bank found:', bnaBank);
-            console.log('DEBUG: BNA USD Rate:', bnaRate);
+
 
             // --- MELHORIA: Fallback para buscar a taxa do BNA se não for encontrada ---
             // Se a taxa do BNA não veio nos dados do mercado, tenta buscá-la diretamente.
             if (!bnaRate || bnaRate <= 0) {
-                console.warn("Taxa BNA não encontrada nos dados do mercado. Tentando fallback...");
                 const { data: bnaData, error: bnaError } = await dbClient.from('exchange_rates').select('sell_rate').eq('provider_id', 1).eq('currency_pair', 'USD/AOA').single(); // Assumindo que o ID do BNA é 1
                 if (bnaError) console.error("Erro no fallback para buscar taxa BNA:", bnaError);
 
@@ -3346,7 +3341,6 @@
 
 
 <!-- Monetag Interstitial/Vinheta -->
-    <script>(function(s){s.dataset.zone='10933902',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </body>
 
 </html>

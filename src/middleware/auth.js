@@ -13,7 +13,7 @@ const isAdmin = (req, res, next) => {
     if (req.signedCookies.admin_auth === 'true') return next();
 
     // Para chamadas de API, retornar JSON 401 em vez de redirecionar (evita sucesso falso no frontend)
-    if (req.path.startsWith('/api')) {
+    if (req.originalUrl.startsWith('/api')) {
         return res.status(401).json({ success: false, message: 'Sessão expirada ou não autenticada.' });
     }
     // Para páginas, redireciona para login

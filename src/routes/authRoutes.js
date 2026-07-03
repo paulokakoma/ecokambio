@@ -12,6 +12,7 @@ router.post(
     handleValidationErrors,
     catchAsync(authController.login)
 );
+router.post('/register', catchAsync(authController.register));
 router.post('/logout', authController.logout);
 router.get('/me', isAdmin, authController.me);
 

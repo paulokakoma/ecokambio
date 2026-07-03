@@ -11,7 +11,7 @@ const TEST_USER = {
 };
 
 // Secret must match the one used in jwtAuth middleware.
-const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret_in_production';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * @route POST /api/v1/auth/login

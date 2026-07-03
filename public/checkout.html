@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoFlix - Checkout Rápido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/hmacSigner.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface-2: #1c1c26;
+            --border: #2a2a3a;
+            --brand: #e50914;
+            --brand-hover: #b20710;
+            --text: #ffffff;
+            --text-muted: #7a7a9a;
+            --success: #46d369;
+            --warning: #f5a623;
+            --whatsapp: #25D366;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(19,19,26,0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: rgba(229,9,20,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(229,9,20,0.1);
+        }
+        .card.selected {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 1px var(--brand), 0 8px 30px rgba(229,9,20,0.15);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-hover) 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(229,9,20,0.35);
+        }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-whatsapp {
+            background: var(--whatsapp);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-whatsapp:hover { opacity: 0.9; transform: translateY(-1px); }
+        .input-field {
+            width: 100%;
+            padding: 16px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(229,9,20,0.15);
+        }
+        .input-field::placeholder { color: var(--text-muted); }
+        .step { display: none; animation: fadeIn 0.35s ease; }
+        .step.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loader {
+            width: 22px; height: 22px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast {
+            padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            animation: slideIn 0.3s ease; max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        .toast.success { background: rgba(70,211,105,0.15); border: 1px solid rgba(70,211,105,0.3); color: var(--success); }
+        .toast.error { background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.3); color: var(--brand); }
+        .toast.info { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
+        .toast.hiding { animation: slideOut 0.3s ease forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideOut { to { opacity: 0; transform: translateX(100px); } }
+        .pulse-dot {
+            width: 8px; height: 8px; background: var(--success); border-radius: 50%;
+            display: inline-block; animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+        .badge-popular {
+            display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+            border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; background: rgba(229,9,20,0.15); color: var(--brand);
+        }
+        .contact-float {
+            position: fixed; bottom: 24px; right: 24px; z-index: 50;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+        }
+        .contact-badge {
+            background: rgba(19,19,26,0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+
+<nav class="glass" style="position:fixed;top:0;left:0;right:0;z-index:100;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:22px;font-weight:800;color:var(--brand);letter-spacing:-0.5px;">ECO</span>
+            <span style="font-size:22px;font-weight:300;color:var(--text);">FLIX</span>
+        </a>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;font-size:13px;">
+        <a href="#contato" style="color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:6px;" onclick="event.preventDefault();scrollToContact()">
+            <i class="fas fa-headset" style="color:var(--whatsapp);"></i> Ajuda
+        </a>
+        <span style="color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <i class="fas fa-shield-alt" style="color:var(--success);font-size:11px;"></i> Seguro
+        </span>
+    </div>
+</nav>
+
+<main style="padding-top:64px;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+
+<!-- STEP 1: Planos e Preços -->
+<div id="step-plans" class="step active" style="flex-direction:column;align-items:center;padding:40px 20px 100px;width:100%;max-width:1100px;">
+    <div style="text-align:center;margin-bottom:40px;">
+        <p style="color:var(--brand);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Streaming Angola</p>
+        <h1 style="font-size:36px;font-weight:800;margin-bottom:8px;letter-spacing:-1px;">
+            Netflix a partir de <span style="color:var(--brand);">4.500 Kz</span>/mês
+        </h1>
+        <p style="color:var(--text-muted);font-size:15px;">Sem fidelização. Receba os dados por SMS após o pagamento.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;width:100%;max-width:960px;">
+        <div class="card" style="padding:28px;cursor:pointer;" onclick="selectPlan('ECONOMICO',4500,this)">
+            <div style="margin-bottom:20px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(70,211,105,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                    <i class="fas fa-mobile-alt" style="color:var(--success);font-size:18px;"></i>
+                </div>
+                <h2 style="font-size:20px;font-weight:700;">Económico</h2>
+                <p style="color:var(--text-muted);font-size:13px;">1 dispositivo</p>
+            </div>
+            <div style="font-size:32px;font-weight:800;margin-bottom:20px;">4.500 <span style="font-size:14px;font-weight:400;color:var(--text-muted);">Kz/mês</span></div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;font-size:13px;">
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> Telemóvel, Tablet, PC</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> 1 Ecrã de cada vez</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> Qualidade 4K</li>
+            </ul>
+            <button class="btn-primary" onclick="event.stopPropagation();selectPlan('ECONOMICO',4500,this.parentElement)" style="padding:12px;">Escolher</button>
+        </div>
+        <div class="card" style="padding:28px;cursor:pointer;position:relative;border-color:var(--brand);" onclick="selectPlan('ULTRA',6500,this)">
+            <div style="position:absolute;top:12px;right:12px;"><span class="badge-popular"><i class="fas fa-star" style="font-size:10px;"></i> Popular</span></div>
+            <div style="margin-bottom:20px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(229,9,20,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                    <i class="fas fa-tv" style="color:var(--brand);font-size:18px;"></i>
+                </div>
+                <h2 style="font-size:20px;font-weight:700;">Ultra</h2>
+                <p style="color:var(--text-muted);font-size:13px;">Melhor custo-benefício</p>
+            </div>
+            <div style="font-size:32px;font-weight:800;margin-bottom:20px;">6.500 <span style="font-size:14px;font-weight:400;color:var(--text-muted);">Kz/mês</span></div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;font-size:13px;">
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> Todos os dispositivos</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> 1 Ecrã de cada vez</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> Qualidade 4K Ultra HD</li>
+            </ul>
+            <button class="btn-primary" onclick="event.stopPropagation();selectPlan('ULTRA',6500,this.parentElement)" style="padding:12px;">Escolher</button>
+        </div>
+        <div class="card" style="padding:28px;cursor:pointer;" onclick="selectPlan('FAMILIA',18000,this)">
+            <div style="margin-bottom:20px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                    <i class="fas fa-users" style="color:#3b82f6;font-size:18px;"></i>
+                </div>
+                <h2 style="font-size:20px;font-weight:700;">Família</h2>
+                <p style="color:var(--text-muted);font-size:13px;">Até 5 perfis</p>
+            </div>
+            <div style="font-size:32px;font-weight:800;margin-bottom:20px;">18.000 <span style="font-size:14px;font-weight:400;color:var(--text-muted);">Kz/mês</span></div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;font-size:13px;">
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> Telemóvel, TV, PC, Tablet</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> 4 Ecrãs simultâneos</li>
+                <li style="display:flex;align-items:center;gap:8px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--success);font-size:12px;"></i> 5 Perfis personalizados</li>
+            </ul>
+            <button class="btn-primary" onclick="event.stopPropagation();selectPlan('FAMILIA',18000,this.parentElement)" style="padding:12px;">Escolher</button>
+        </div>
+    </div>
+
+    <!-- Contact section inline -->
+    <div id="contato" class="card" style="padding:28px;width:100%;max-width:600px;margin-top:40px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(37,211,102,0.12);display:flex;align-items:center;justify-content:center;">
+                <i class="fab fa-whatsapp" style="color:var(--whatsapp);font-size:22px;"></i>
+            </div>
+            <div>
+                <p style="font-weight:600;font-size:15px;">Fale connosco</p>
+                <p style="color:var(--text-muted);font-size:13px;">Dúvidas? Estamos aqui para ajudar</p>
+            </div>
+        </div>
+        <a href="https://wa.me/244900000000" target="_blank" class="btn-whatsapp">
+            <i class="fab fa-whatsapp"></i> +244 900 000 000
+        </a>
+    </div>
+</div>
+
+<!-- STEP 2: Apenas Telefone -->
+<div id="step-phone" class="step" style="flex-direction:column;align-items:center;padding:40px 20px 80px;width:100%;max-width:460px;">
+    <div class="card" style="padding:36px;width:100%;">
+        <div style="text-align:center;margin-bottom:28px;">
+            <div style="width:56px;height:56px;border-radius:16px;background:rgba(229,9,20,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <i class="fas fa-shopping-cart" style="color:var(--brand);font-size:24px;"></i>
+            </div>
+            <h2 style="font-size:22px;font-weight:700;" id="step2-title">Plano Ultra</h2>
+            <p style="font-size:28px;font-weight:800;color:var(--brand);margin-top:4px;" id="step2-price">6.500 Kz/mês</p>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">Insira o seu telefone para gerar a referência de pagamento. As credenciais serão enviadas por SMS após confirmação.</p>
+        </div>
+        <form onsubmit="event.preventDefault();generatePayment()" style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+                <label style="font-size:13px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">Número de Telefone</label>
+                <div style="display:flex;gap:8px;">
+                    <span style="padding:16px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;color:var(--text-muted);font-weight:600;font-size:18px;display:flex;align-items:center;">+244</span>
+                    <input type="tel" id="phone-input" class="input-field" placeholder="900 000 000" maxlength="11" oninput="formatPhone(this)" required autofocus>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" id="btn-generate" style="padding:16px;">
+                <span id="btn-generate-text">Gerar Referência</span>
+            </button>
+        </form>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="https://wa.me/244900000000" target="_blank" style="color:var(--whatsapp);font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
+                <i class="fab fa-whatsapp"></i> Precisa de ajuda?
+            </a>
+        </div>
+    </div>
+    <button onclick="goBack('step-plans')" style="margin-top:16px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-arrow-left"></i> Ver todos os planos
+    </button>
+</div>
+
+<!-- STEP 3: Referência de Pagamento -->
+<div id="step-ref" class="step" style="flex-direction:column;align-items:center;padding:40px 20px 80px;width:100%;max-width:520px;">
+    <div class="card" style="padding:36px;width:100%;text-align:center;">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="fas fa-receipt" style="color:#3b82f6;font-size:28px;"></i>
+        </div>
+        <h2 style="font-size:20px;font-weight:700;">Pagamento por Referência</h2>
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">Use os dados abaixo para pagar no Multicaixa ou app bancário</p>
+        <div style="background:var(--surface-2);border-radius:16px;padding:24px;margin-bottom:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                    <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Entidade</p>
+                    <p style="font-size:24px;font-weight:800;letter-spacing:2px;" id="ref-entity">----</p>
+                </div>
+                <div>
+                    <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Valor</p>
+                    <p style="font-size:24px;font-weight:800;letter-spacing:1px;" id="ref-amount">---- Kz</p>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Referência</p>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg);border-radius:12px;padding:12px;">
+                    <p style="font-size:26px;font-weight:800;letter-spacing:3px;font-variant-numeric:tabular-nums;" id="ref-number">--- --- ---</p>
+                    <button onclick="copyRef()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:8px;border-radius:8px;"><i class="fas fa-copy" style="font-size:18px;"></i></button>
+                </div>
+            </div>
+        </div>
+        <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px;margin-bottom:20px;text-align:left;font-size:13px;color:var(--text-muted);">
+            <p style="display:flex;align-items:flex-start;gap:8px;">
+                <i class="fas fa-info-circle" style="color:#3b82f6;margin-top:2px;"></i>
+                <span>Vá a um ATM Multicaixa ou app de internet banking, escolha "Pagamentos" e introduza a Entidade e Referência acima. O crédito é automático e receberá os dados de acesso por SMS.</span>
+            </p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+            <span class="pulse-dot"></span>
+            <span style="font-size:14px;color:var(--text-muted);">A aguardar confirmação...</span>
+        </div>
+        <button class="btn-secondary" onclick="checkManual()" style="width:100%;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-weight:600;cursor:pointer;font-size:14px;transition:all 0.3s;">
+            <i class="fas fa-sync-alt"></i> Verificar manualmente
+        </button>
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Após pagar, os dados chegam por SMS para <strong id="ref-phone" style="color:var(--text);"></strong></p>
+            <p style="font-size:12px;color:var(--text-muted);">Problemas? <a href="https://wa.me/244900000000" target="_blank" style="color:var(--whatsapp);text-decoration:none;font-weight:600;">Fale connosco no WhatsApp</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- STEP 4: Sucesso -->
+<div id="step-success" class="step" style="flex-direction:column;align-items:center;padding:40px 20px 80px;width:100%;max-width:480px;">
+    <div class="card" style="padding:36px;width:100%;text-align:center;">
+        <div style="width:72px;height:72px;border-radius:50%;background:rgba(70,211,105,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:pulse 1.5s ease-in-out 3;">
+            <i class="fas fa-check" style="color:var(--success);font-size:32px;"></i>
+        </div>
+        <h2 style="font-size:24px;font-weight:700;margin-bottom:4px;">Pagamento Confirmado!</h2>
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">As credenciais foram enviadas para o seu telefone por SMS.</p>
+        <div style="background:var(--surface-2);border-radius:16px;padding:24px;margin-bottom:24px;text-align:left;">
+            <p style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:12px;"><i class="fas fa-check-circle"></i> SMS enviado com sucesso</p>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:10px;">
+                <i class="fas fa-mobile-alt" style="color:var(--whatsapp);font-size:20px;"></i>
+                <div>
+                    <p style="font-size:13px;color:var(--text-muted);">Recebido no número</p>
+                    <p style="font-weight:600;" id="success-phone">---</p>
+                </div>
+            </div>
+        </div>
+        <div style="background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.2);border-radius:12px;padding:16px;margin-bottom:20px;text-align:left;font-size:13px;">
+            <p style="display:flex;align-items:flex-start;gap:8px;">
+                <i class="fab fa-whatsapp" style="color:var(--whatsapp);margin-top:2px;"></i>
+                <span>Não recebeu o SMS? <a href="https://wa.me/244900000000" target="_blank" style="color:var(--whatsapp);font-weight:600;text-decoration:none;">Contacte-nos no WhatsApp</a> com o seu número de telefone e resolveremos rapidamente.</span>
+            </p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="https://netflix.com" target="_blank" class="btn-primary" style="text-decoration:none;display:block;text-align:center;padding:14px;">
+                <i class="fas fa-external-link-alt"></i> Ir para o Netflix
+            </a>
+            <a href="/" style="color:var(--text-muted);font-size:13px;text-decoration:none;padding:8px;">Voltar ao início</a>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<!-- Contact Floating Button -->
+<div class="contact-float">
+    <div class="contact-badge">
+        <i class="fab fa-whatsapp" style="color:var(--whatsapp);font-size:18px;"></i>
+        <div>
+            <p style="font-size:12px;color:var(--text-muted);">Precisa de ajuda?</p>
+            <a href="https://wa.me/244900000000" target="_blank" style="color:var(--text);font-weight:700;font-size:14px;text-decoration:none;">+244 900 000 000</a>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = '/api/ecoflix';
+const CONTACT_PHONE = '+244 900 000 000';
+const CONTACT_WA = '244900000000';
+
+let state = {
+    planType: null,
+    planPrice: null,
+    phone: '',
+    currentOrder: null,
+    pollingInterval: null
+};
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 4000);
+}
+
+function showStep(id) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+function formatPhone(input) {
+    let v = input.value.replace(/\D/g, '');
+    if (v.length > 9) v = v.slice(0, 9);
+    if (v.length > 6) v = v.slice(0, 3) + ' ' + v.slice(3, 6) + ' ' + v.slice(6);
+    else if (v.length > 3) v = v.slice(0, 3) + ' ' + v.slice(3);
+    input.value = v;
+}
+
+function formatKz(val) {
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' Kz';
+}
+
+function scrollToContact() {
+    document.querySelector('#contato').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+        document.querySelector('#contato').style.outline = '2px solid var(--whatsapp)';
+        document.querySelector('#contato').style.outlineOffset = '4px';
+    }, 500);
+}
+
+function goBack(step) {
+    stopPolling();
+    showStep(step);
+}
+
+function selectPlan(type, price, el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+    state.planType = type;
+    state.planPrice = price;
+    const labels = { 'ECONOMICO': 'Plano Económico', 'ULTRA': 'Plano Ultra', 'FAMILIA': 'Plano Família' };
+    document.getElementById('step2-title').textContent = labels[type] || type;
+    document.getElementById('step2-price').textContent = formatKz(price) + '/mês';
+    showStep('step-phone');
+    setTimeout(() => document.getElementById('phone-input').focus(), 350);
+}
+
+async function generatePayment() {
+    const raw = document.getElementById('phone-input').value.replace(/\D/g, '');
+    if (raw.length !== 9) {
+        return showToast('Insira um número de telefone válido (9 dígitos)', 'error');
+    }
+    state.phone = '+244' + raw;
+
+    const btn = document.getElementById('btn-generate');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div>';
+
+    try {
+        const data = {
+            phone: state.phone,
+            plan_type: state.planType,
+            payment_method: 'REFERENCIA'
+        };
+        const hmac = await getHmacHeaders(data);
+        const res = await fetch(`${API_BASE}/orders/quick`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...hmac },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.message || 'Erro ao gerar referência');
+
+        const order = result.data;
+        state.currentOrder = order;
+
+        document.getElementById('ref-entity').textContent = order.entity || '00001';
+        document.getElementById('ref-number').textContent = order.reference || '---';
+        document.getElementById('ref-amount').textContent = formatKz(order.amount);
+        document.getElementById('ref-phone').textContent = state.phone;
+
+        showStep('step-ref');
+        startPolling(order.reference || order.transaction_id);
+        showToast('Referência gerada! Pague no Multicaixa ou app bancário.', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+    }
+}
+
+async function getHmacHeaders(data) {
+    try {
+        if (window.HMACSign) return await window.HMACSign.signRequest(data);
+    } catch (e) {}
+    return {};
+}
+
+function startPolling(ref) {
+    stopPolling();
+    const cleanRef = ref.toString().replace(/\s/g, '');
+    let attempts = 0;
+    state.pollingInterval = setInterval(async () => {
+        attempts++;
+        if (attempts > 300) { stopPolling(); return; }
+        try {
+            const res = await fetch(`${API_BASE}/orders/${cleanRef}/status`);
+            const result = await res.json();
+            if (result.success && result.status === 'PAID') {
+                stopPolling();
+                showSuccess();
+            }
+        } catch (e) {}
+    }, 2000);
+}
+
+function stopPolling() {
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+    }
+}
+
+async function checkManual() {
+    if (!state.currentOrder) return;
+    const ref = (state.currentOrder.reference || state.currentOrder.transaction_id || '').toString().replace(/\s/g, '');
+    if (!ref) return showToast('Erro: referência não encontrada', 'error');
+    try {
+        const res = await fetch(`${API_BASE}/orders/${ref}/status`);
+        const data = await res.json();
+        if (data.success && data.status === 'PAID') {
+            stopPolling();
+            showSuccess();
+        } else {
+            showToast('Pagamento ainda não confirmado. Aguarde...', 'info');
+        }
+    } catch (e) {
+        showToast('Erro ao verificar', 'error');
+    }
+}
+
+function showSuccess() {
+    document.getElementById('success-phone').textContent = state.phone;
+    showStep('step-success');
+    showToast('Pagamento confirmado! Verifique o SMS com os dados de acesso.', 'success');
+}
+
+function copyRef() {
+    const ref = document.getElementById('ref-number').textContent.replace(/\s/g, '');
+    navigator.clipboard.writeText(ref).catch(() => {});
+    showToast('Referência copiada!', 'success');
+}
+</script>
+
+</body>
+</html>
