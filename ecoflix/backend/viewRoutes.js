@@ -53,4 +53,9 @@ router.get("/login", noCacheHeaders, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
+// Rota para a página Pública de Suporte
+router.get("/suporte", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "support.html"));
+});
+
 module.exports = router;

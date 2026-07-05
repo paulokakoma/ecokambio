@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Suporte - EcoFlix</title>
+    <link rel="icon" href="/assets/favicon.ico" sizes="any">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="/css/output.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- HMAC Client -->
+    <script src="/js/hmac-client.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen font-sans flex flex-col">
+    <!-- NAVBAR -->
+    <nav class="bg-black py-4 px-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-play-circle text-red-600 text-2xl"></i>
+                <span class="text-xl font-bold tracking-wider text-red-600">EcoFlix</span>
+            </div>
+            <a href="/ecoflix" class="text-sm font-bold text-gray-300 hover:text-white transition">Voltar à Loja</a>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-gray-700">
+            <div class="bg-gradient-to-r from-red-600 to-red-800 p-6 text-center">
+                <i class="fas fa-headset text-4xl text-white mb-3 drop-shadow-md"></i>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Precisa de Ajuda?</h1>
+                <p class="text-red-100 text-sm mt-1 font-medium">Preencha o formulário e vamos resolver em até 24h.</p>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <form id="supportForm" class="space-y-4">
+                    <!-- Telemóvel -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Seu Telemóvel (WhatsApp / SMS)</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 rounded-l bg-gray-700 text-gray-400 border border-r-0 border-gray-600 text-sm">
+                                +244
+                            </span>
+                            <input type="tel" id="phone" name="phone" required
+                                class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r bg-gray-900 border border-gray-600 text-white focus:ring-red-500 focus:border-red-500"
+                                placeholder="9XX XXX XXX" maxlength="9">
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Problema -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Tipo de Problema</label>
+                        <select id="issueType" required class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white focus:ring-red-500 focus:border-red-500">
+                            <option value="PASSWORD_INCORRECT">Senha da Netflix Incorreta</option>
+                            <option value="SCREEN_LIMIT">Erro de Tela Cheia (Muitas pessoas)</option>
+                            <option value="LOCKED">Conta Bloqueada / Pediu Código Familiar</option>
+                            <option value="NO_SMS">Não recebi os dados de acesso por SMS</option>
+                            <option value="PAYMENT_FAILED">Problemas com o Pagamento / Referência</option>
+                            <option value="OTHER">Outro Problema</option>
+                        </select>
+                    </div>
+
+                    <!-- Detalhes -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Detalhes Adicionais (Opcional)</label>
+                        <textarea id="issueDesc" rows="3"
+                            class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white focus:ring-red-500 focus:border-red-500"
+                            placeholder="Descreva o que aconteceu..."></textarea>
+                    </div>
+
+                    <div id="errorMessage" class="text-red-400 text-sm text-center font-medium hidden"></div>
+
+                    <!-- Submit -->
+                    <button type="submit" id="submitBtn"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded bg-red-600 text-white font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-lg shadow-red-600/30">
+                        Enviar Pedido de Suporte
+                    </button>
+                </form>
+
+                <div id="successState" class="hidden text-center space-y-4 py-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 text-green-500 mb-2">
+                        <i class="fas fa-check text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Pedido Enviado!</h3>
+                    <p class="text-gray-400 text-sm">A nossa equipa recebeu o seu pedido e irá analisar o caso. Entraremos em contacto pelo seu telemóvel.</p>
+                    <button onclick="window.location.href='/ecoflix'" class="mt-4 w-full py-3 px-4 border border-gray-600 rounded text-white font-bold hover:bg-gray-700 transition-colors">
+                        Voltar à Loja
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-black py-6 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 text-center text-gray-500 text-xs">
+            &copy; 2026 EcoKambio - EcoFlix.<br>Todos os direitos reservados.
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('supportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMessage');
+            const phoneInput = document.getElementById('phone');
+            
+            let phone = phoneInput.value.replace(/[^0-9]/g, '');
+            if (phone.length < 9) {
+                errorMsg.textContent = 'Por favor, insira um número válido (9 dígitos).';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> A Enviar...';
+            errorMsg.classList.add('hidden');
+
+            try {
+                const requestData = {
+                    phone: phone,
+                    issue_type: document.getElementById('issueType').value,
+                    description: document.getElementById('issueDesc').value
+                };
+
+                const hmacHeaders = await window.HMACSign.signRequest(requestData);
+
+                const response = await fetch('/api/ecoflix/support/public-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erro ao enviar pedido.');
+                }
+
+                // Show success
+                document.getElementById('supportForm').classList.add('hidden');
+                document.getElementById('successState').classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                errorMsg.textContent = error.message;
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = 'Enviar Pedido de Suporte';
+            }
+        });
+    </script>
+</body>
+</html>

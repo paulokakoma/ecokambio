@@ -43,6 +43,7 @@ router.post('/account/recover', catchAsync(authController.recoverCredentials));
 router.get('/subscription/credentials', catchAsync(authController.requireOtpAuth), catchAsync(subscriptionController.getSubscriptionCredentials));
 router.post('/subscription/renew', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(paymentController.renewSubscription));
 router.post('/subscription/report', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(subscriptionController.reportIssue));
+router.post('/support/public-report', validateSignature, catchAsync(subscriptionController.publicReportIssue));
 
 // Testing
 router.post('/test/simulate-webhook', catchAsync(paymentController.simulateWebhook));

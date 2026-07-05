@@ -41,50 +41,96 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
         }
     </style>
 
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen bg-slate-900 relative overflow-hidden font-sans">
 
+    <!-- Decorative Background -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-red-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[40vw] h-[40vw] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
 
-
-    <main class="flex-1 flex items-center justify-center py-12 px-4">
-        <div class="w-full max-w-sm p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+    <main class="flex-1 flex items-center justify-center py-12 px-4 relative z-10">
+        <div class="w-full max-w-md p-10 space-y-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] shadow-2xl">
             <div class="text-center">
-                <h1 class="text-4xl font-bold text-red-600 mb-6">EcoFlix</h1>
-                <h2 class="text-2xl font-bold text-slate-800">Acesso Restrito</h2>
-                <p class="mt-2 text-sm text-slate-600">Por favor, insira a senha de administrador.</p>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-600/20 text-red-500 mb-6 border border-red-500/30 shadow-[0_0_15px_rgba(220,38,38,0.3)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-white tracking-tight mb-2">EcoFlix</h1>
+                <p class="text-sm font-medium text-slate-300 tracking-wide uppercase">Acesso Restrito - Admin</p>
             </div>
+            
             <form id="login-form" class="mt-8 space-y-6">
-                <div class="rounded-md shadow-sm space-y-4">
+                <div class="space-y-5">
                     <div>
-                        <label for="username" class="sr-only">Email</label>
-                        <input id="username" name="username" type="email" required
-                            class="appearance-none rounded-md relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="email@exemplo.com" autocomplete="off">
+                        <label for="username" class="block text-sm font-medium text-slate-300 mb-1 ml-1">Email Autorizado</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                </svg>
+                            </div>
+                            <input id="username" name="username" type="email" required
+                                class="block w-full pl-11 pr-3 py-3 border border-slate-600 bg-slate-800/50 text-white rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all sm:text-sm"
+                                placeholder="admin@ecokambio.com" autocomplete="off">
+                        </div>
                     </div>
                     <div>
-                        <label for="password" class="sr-only">Senha</label>
-                        <input id="password" name="password" type="password" required
-                            class="appearance-none rounded-md relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Senha" autocomplete="off">
+                        <label for="password" class="block text-sm font-medium text-slate-300 mb-1 ml-1">Palavra-passe</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input id="password" name="password" type="password" required
+                                class="block w-full pl-11 pr-3 py-3 border border-slate-600 bg-slate-800/50 text-white rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all sm:text-sm"
+                                placeholder="••••••••" autocomplete="off">
+                        </div>
                     </div>
                 </div>
 
-                <div id="error-message" class="text-sm text-red-600 text-center h-4">Use o email autorizado e senha para aceder ao painel</div>
+                <div id="error-message" class="text-sm text-red-400 text-center h-4 font-medium transition-all"></div>
 
-                <div>
+                <div class="pt-2">
                     <button type="submit"
-                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Entrar
+                        class="relative w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-red-500 shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_25px_rgba(220,38,38,0.6)] transition-all transform hover:-translate-y-0.5">
+                        <span>Entrar no Painel</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     </button>
                 </div>
             </form>
         </div>
     </main>
+
+    <style>
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+    </style>
 
 
     <script>

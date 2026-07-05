@@ -17,17 +17,40 @@ const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
 // ============================================================================
 const getDashboard = async (req, res) => {
     try {
-        // Get available profiles count
-        const { count: freeProfiles } = await supabase
+        // 1. Get normally free profiles
+        const { count: normallyFree } = await supabase
             .from('ecoflix_profiles')
             .select('*', { count: 'exact', head: true })
             .eq('status', 'AVAILABLE');
 
-        // Get sold profiles count
-        const { count: soldProfiles } = await supabase
+        // 2. Get normally sold profiles
+        const { count: normallySold } = await supabase
             .from('ecoflix_profiles')
             .select('*', { count: 'exact', head: true })
             .eq('status', 'SOLD');
+
+        // 3. Get EXCLUSIVE master accounts and their subscriptions
+        const { data: exclusiveAccounts } = await supabase
+            .from('ecoflix_master_accounts')
+            .select('id, subscriptions:ecoflix_subscriptions(id, status)')
+            .eq('type', 'EXCLUSIVE');
+
+        let exclusiveFreeCount = 0;
+        let exclusiveSoldCount = 0;
+
+        if (exclusiveAccounts) {
+            exclusiveAccounts.forEach(acc => {
+                const hasActive = acc.subscriptions && acc.subscriptions.some(s => ['ACTIVE', 'SUSPENDED'].includes(s.status));
+                if (hasActive) {
+                    exclusiveSoldCount += 1;
+                } else {
+                    exclusiveFreeCount += 1;
+                }
+            });
+        }
+
+        const soldProfiles = (normallySold || 0) + exclusiveSoldCount;
+        const freeProfiles = (normallyFree || 0) + exclusiveFreeCount;
 
         // Get accounts expiring in 48h
         const twoDaysFromNow = new Date();
@@ -48,6 +71,9 @@ const getDashboard = async (req, res) => {
 
         const todayRevenue = (todaysOrders || []).reduce((sum, o) => sum + parseFloat(o.amount), 0);
         const todaySales = (todaysOrders || []).length;
+
+        const totalProfiles = (freeProfiles || 0) + (soldProfiles || 0);
+        const occupancyRate = totalProfiles > 0 ? Math.round(((soldProfiles || 0) / totalProfiles) * 100) : 0;
 
         let smsAvailable = '-';
         let smsSent = '-';
@@ -96,7 +122,7 @@ const getStock = async (req, res) => {
         const accountsWithProfiles = await Promise.all(accounts.map(async (acc) => {
             const { data: profiles } = await supabase
                 .from('ecoflix_profiles')
-                .select('id, name, pin, status, type, client_phone, client_name, expires_at, master_account_id')
+                .select('id, name, pin, status, type, client_phone, client_name, expires_at, master_account_id, total_revenue')
                 .eq('master_account_id', acc.id);
 
             const profilesData = profiles || [];
@@ -316,6 +342,21 @@ const updateProfile = async (req, res) => {
 
         if (error) throw error;
 
+        // Sync subscription status if profile status changed
+        if (status === 'AVAILABLE') {
+            await supabase
+                .from('ecoflix_subscriptions')
+                .update({ status: 'CANCELLED', updated_at: new Date() })
+                .eq('profile_id', id)
+                .in('status', ['ACTIVE', 'SUSPENDED']);
+        } else if (status === 'SUSPENDED') {
+            await supabase
+                .from('ecoflix_subscriptions')
+                .update({ status: 'SUSPENDED', updated_at: new Date() })
+                .eq('profile_id', id)
+                .in('status', ['ACTIVE']);
+        }
+
         // Send SMS if status changed to SOLD (Manual Sale)
         if (status === 'SOLD') {
             const phoneToSend = client_phone || profile.client_phone;
@@ -428,83 +469,39 @@ const getSmsLogs = async (req, res) => {
 // ============================================================================
 const getOrders = async (req, res) => {
     try {
-        const { status } = req.query;
+        const { status, page = 1, limit = 10 } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
 
         let query = supabase
             .from('ecoflix_orders')
             .select(`
                 *,
-                user:ecoflix_users(phone, name)
-            `)
+                user:ecoflix_users(name, phone),
+                subscription:ecoflix_subscriptions!fk_orders_subscription(
+                    plan_type, expires_at,
+                    profile:ecoflix_profiles!fk_subscriptions_profile(name, pin),
+                    account:ecoflix_master_accounts(email)
+                )
+            `, { count: 'exact' })
+            .order('status', { ascending: false })
             .order('created_at', { ascending: false });
 
         if (status) {
             query = query.eq('status', status);
-        } else {
-            // Exclude PENDING by default so admin doesn't see them
-            query = query.neq('status', 'PENDING');
         }
 
-        const { data: orders, error } = await query;
+        const from = (pageNum - 1) * limitNum;
+        const to = from + limitNum - 1;
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
+
         if (error) throw error;
 
-        res.json({ success: true, data: orders || [] });
+        res.json({ success: true, data: data || [], total: count, page: pageNum, limit: limitNum });
     } catch (error) {
         console.error('Get orders error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// ============================================================================
-// ADMIN: Clients (Base de Clientes)
-// ============================================================================
-const getClients = async (req, res) => {
-    try {
-        const { data: subs, error } = await supabase
-            .from('ecoflix_subscriptions')
-            .select(`
-                *,
-                user:ecoflix_users(phone, name),
-                profile:ecoflix_profiles!fk_subscriptions_profile(
-                    name, pin, type,
-                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email)
-                ),
-                account:ecoflix_master_accounts(email),
-                order:ecoflix_orders(plan_type)
-            `)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        res.json({ success: true, data: subs || [] });
-    } catch (error) {
-        console.error('Get clients error:', error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// ============================================================================
-// ADMIN: Issues (Reporte de Problemas)
-// ============================================================================
-const getIssues = async (req, res) => {
-    try {
-        const { data: issues, error } = await supabase
-            .from('ecoflix_issues')
-            .select(`
-                *,
-                subscription:ecoflix_subscriptions(
-                    plan_type, expires_at,
-                    user:ecoflix_users(phone)
-                )
-            `)
-            .order('status', { ascending: false }) // OPEN first
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        res.json({ success: true, data: issues || [] });
-    } catch (error) {
-        console.error('Get issues error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -553,13 +550,43 @@ const getInventoryStatus = async (req, res) => {
             .select('*', { count: 'exact', head: true })
             .eq('status', 'SUSPENDED');
 
+        // Fetch exclusive accounts to calculate their status directly based on subscriptions
+        const { data: exclusiveAccounts } = await supabase
+            .from('ecoflix_master_accounts')
+            .select('id, subscriptions:ecoflix_subscriptions(status)')
+            .eq('type', 'EXCLUSIVE');
+
+        let extraSold = 0;
+        let extraSuspended = 0;
+        let exclusiveAvailable = 0;
+
+        if (exclusiveAccounts) {
+            exclusiveAccounts.forEach(acc => {
+                if (!acc.subscriptions || acc.subscriptions.length === 0) {
+                    exclusiveAvailable += 1;
+                } else {
+                    const hasActive = acc.subscriptions.some(s => s.status === 'ACTIVE');
+                    const hasSuspended = acc.subscriptions.some(s => s.status === 'SUSPENDED');
+                    
+                    if (hasSuspended && !hasActive) {
+                        extraSuspended += 1;
+                    } else if (hasActive || hasSuspended) {
+                        extraSold += 1;
+                    } else {
+                        exclusiveAvailable += 1;
+                    }
+                }
+            });
+        }
+
         res.json({
             success: true,
             data: {
                 mobile_available: mobileAvailable || 0,
                 tv_available: tvAvailable || 0,
-                sold: soldTotal || 0,
-                suspended: suspendedTotal || 0
+                exclusive_available: exclusiveAvailable,
+                sold: (soldTotal || 0) + extraSold,
+                suspended: (suspendedTotal || 0) + extraSuspended
             }
         });
 
@@ -965,6 +992,51 @@ const updatePlans = async (req, res) => {
     }
 };
 
+// ============================================================================
+// ADMIN: Get Issues
+// ============================================================================
+const getIssues = async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('ecoflix_issues')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.json({ success: true, data: data || [] });
+    } catch (error) {
+        console.error('Get issues error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============================================================================
+// ADMIN: Get Clients
+// ============================================================================
+const getClients = async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const from = (pageNum - 1) * limitNum;
+        const to = from + limitNum - 1;
+
+        const { data, error, count } = await supabase
+            .from('ecoflix_users')
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (error) throw error;
+
+        res.json({ success: true, data: data || [], total: count, page: pageNum, limit: limitNum });
+    } catch (error) {
+        console.error('Get clients error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getPlans,
     updatePlans,
@@ -1093,6 +1165,9 @@ const suspendProfile = async (req, res) => {
             await smsService.sendSuspendSms(profile.client_phone, reason);
         }
 
+        const websocket = require('../../../src/websocket');
+        websocket.broadcast({ type: 'stock_update' }, 'all');
+
         res.json({ success: true, message: 'Perfil suspenso.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1126,6 +1201,9 @@ const restoreProfile = async (req, res) => {
             const smsService = require('../services/sms.service');
             await smsService.sendRestoreSms(profile.client_phone);
         }
+
+        const websocket = require('../../../src/websocket');
+        websocket.broadcast({ type: 'stock_update' }, 'all');
 
         res.json({ success: true, message: 'Perfil devolvido/restaurado.' });
     } catch (error) {

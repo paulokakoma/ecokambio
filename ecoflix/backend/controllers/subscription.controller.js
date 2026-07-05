@@ -67,7 +67,7 @@ const getSubscriptionCredentials = async (req, res) => {
             .from('ecoflix_subscriptions')
             .select(`
                 *,
-                order:ecoflix_orders(plan_type),
+                order:ecoflix_orders!ecoflix_subscriptions_order_id_fkey(plan_type),
                 profile:ecoflix_profiles!fk_subscriptions_profile (
                     pin,
                     name,
@@ -131,7 +131,7 @@ const getSubscriptionCredentials = async (req, res) => {
                     allSubs.push({
                         id: sub.id,
                         plan: sub.order?.plan_type || sub.plan_type || (sub.account ? 'FAMILIA' : 'ECONOMICO'),
-                        expires_at: sub.end_date,
+                        expires_at: sub.expires_at,
                         profile_name: profile ? profile.name : 'Exclusiva',
                         pin: profile ? profile.pin : 'N/A',
                         email: master.email,
@@ -142,8 +142,16 @@ const getSubscriptionCredentials = async (req, res) => {
             });
         }
 
-        // Remove duplicates by ID if a manual profile is also a formal subscription
-        const uniqueSubs = Array.from(new Map(allSubs.map(s => [s.id.replace('manual-', ''), s])).values());
+        // Remove duplicates if a manual profile is already tracked in a formal subscription
+        const formalProfileIds = new Set(subs ? subs.map(s => s.profile_id).filter(id => id) : []);
+        
+        let uniqueSubs = allSubs.filter(s => {
+            if (s.is_manual) {
+                const rawProfileId = s.id.replace('manual-', '');
+                if (formalProfileIds.has(rawProfileId)) return false;
+            }
+            return true;
+        });
 
         if (uniqueSubs.length === 0) {
             return res.status(404).json({ success: false, message: 'Nenhuma assinatura ativa encontrada.' });
@@ -151,7 +159,8 @@ const getSubscriptionCredentials = async (req, res) => {
 
         res.json({
             success: true,
-            data: uniqueSubs
+            data: uniqueSubs,
+            phone: userPhone || ''
         });
 
     } catch (error) {
@@ -314,7 +323,56 @@ const recoverCredentials = async (req, res) => {
     }
 };
 
+
+
+// ============================================================================
+// PUBLIC SUPPORT (NO AUTH)
+// ============================================================================
+const publicReportIssue = async (req, res) => {
+    try {
+        const { phone, issue_type, description } = req.body;
+        
+        if (!phone) {
+            return res.status(400).json({ success: false, message: 'Telefone obrigatório.' });
+        }
+
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const finalDesc = `[Suporte Público | Tel: ${cleanPhone}] ` + (description || '');
+
+        const { data, error } = await supabase
+            .from('ecoflix_issues')
+            .insert([{
+                subscription_id: null,
+                issue_type,
+                description: finalDesc,
+                status: 'OPEN'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Broadcast to Admins
+        try {
+            const websocket = require('../../../src/websocket');
+            websocket.broadcastToAdmins({
+                type: 'new_issue',
+                issue: data
+            });
+        } catch(e) {
+            console.error('Failed to broadcast issue:', e);
+        }
+
+        res.json({ success: true, message: 'Pedido de suporte enviado com sucesso.' });
+
+    } catch (error) {
+        console.error('Public Report error:', error);
+        res.status(500).json({ success: false, message: 'Erro ao enviar pedido.' });
+    }
+};
+
 module.exports = {
+    publicReportIssue,
     validateCoupon,
     getSubscriptionCredentials,
     reportIssue,

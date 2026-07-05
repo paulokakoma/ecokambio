@@ -665,6 +665,17 @@
                             <p id="coupon-message" class="text-xs mt-2 hidden"></p>
                         </div>
 
+                        <!-- Duration Select -->
+                        <div class="mb-4 pb-4 border-b border-[#222]">
+                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Duração</label>
+                            <select id="duration-select" onchange="changeDuration()" class="input-theme w-full px-3 py-2 rounded font-bold text-sm">
+                                <option value="1">1 Mês (30 Dias)</option>
+                                <option value="3">3 Meses (90 Dias)</option>
+                                <option value="6">6 Meses (180 Dias)</option>
+                                <option value="12">12 Meses (360 Dias)</option>
+                            </select>
+                        </div>
+
                         <!-- Total Final -->
                         <div class="flex justify-between items-center pt-2">
                             <span class="text-muted font-bold text-sm uppercase">Total a Pagar</span>
@@ -949,6 +960,13 @@
                     <p class="text-muted">A carregar detalhes...</p>
                 </div>
 
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Resumo da Assinatura</h2>
+                    <button onclick="goHome()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-brand"></i> Adquirir Nova Conta
+                    </button>
+                </div>
+
                 <div id="dashboard-content" class="hidden space-y-8">
                     <!-- Cards will be injected here by JS -->
                 </div>
@@ -969,6 +987,7 @@
         <div class="max-w-4xl mx-auto px-4">
             <p class="text-muted mb-4">Dúvidas? Ligue +244 938 948 994</p>
             <div class="flex justify-center gap-6 text-xs text-muted mb-4">
+                <a href="/ecoflix/suporte" class="hover:text-white transition">Suporte ao Cliente</a>
                 <a href="termos.html" class="hover:underline">Termos de Uso</a>
                 <a href="/privacidade.html" class="hover:underline">Privacidade</a>
             </div>
@@ -1018,6 +1037,23 @@
             sessionStorage.removeItem('ecoflix_user_phone');
             sessionStorage.removeItem('ecoflix_selected_plan');
             sessionStorage.removeItem('ecoflix_selected_price');
+        }
+
+        // === CHANGE DURATION ===
+        function changeDuration() {
+            // Re-apply logic simply by calling updateSummary or recalculating
+            const duration = parseInt(document.getElementById('duration-select').value) || 1;
+            let currentBase = selectedPlanPrice * duration;
+            
+            document.getElementById('summary-original-price').innerText = formatKz(currentBase);
+            
+            if (appliedCoupon) {
+                // If coupon is already applied, applyCoupon() will just re-validate and subtract
+                applyCoupon(); 
+            } else {
+                finalPrice = currentBase;
+                document.getElementById('summary-total-price').innerText = formatKz(finalPrice);
+            }
         }
 
         async function resumePendingOrder(order) {
@@ -1135,6 +1171,8 @@
         }
 
         function goHome(toSiteRoot = false) {
+            isRenewal = false;
+            targetSubscriptionId = null;
             if (toSiteRoot) {
                 window.location.href = '/';
                 return;
@@ -1233,10 +1271,16 @@
                     document.getElementById('global-loader').classList.add('flex');
                 }
 
+                const durationSelect = document.getElementById('duration-select');
+                const duration = durationSelect ? durationSelect.value : 1;
+
                 const requestData = {
                     phone: userPhone,
                     plan_type: selectedPlanType,
-                    payment_method: method
+                    payment_method: method,
+                    is_renewal: isRenewal,
+                    target_subscription_id: targetSubscriptionId,
+                    duration: duration
                 };
 
                 const hmacHeaders = await window.HMACSign.signRequest(requestData);
@@ -1330,8 +1374,12 @@
 
                     // Apply Discount
                     if (result.data.discount > 0) {
+                        const durationSelect = document.getElementById('duration-select');
+                        const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
+                        const currentBase = selectedPlanPrice * duration;
+
                         const discount = parseFloat(result.data.discount);
-                        finalPrice = Math.max(0, selectedPlanPrice - discount);
+                        finalPrice = Math.max(0, currentBase - discount);
                         updateSummary(finalPrice);
                     }
                 } else {
@@ -1645,7 +1693,9 @@
         }
 
         // ... existing state ...
+        // ... existing state ...
         let isRenewal = false;
+        let targetSubscriptionId = null;
 
         // ... existing code ...
 
@@ -1667,6 +1717,10 @@
                 document.getElementById('dashboard-loading').classList.add('hidden');
 
                 if (data.success && data.data && data.data.length > 0) {
+                    if (data.phone) {
+                        userPhone = data.phone;
+                        sessionStorage.setItem('ecoflix_user_phone', userPhone);
+                    }
                     window.currentSubscriptions = data.data; // Array of subs
                     
                     const container = document.getElementById('dashboard-content');
@@ -1746,6 +1800,13 @@
                                             </div>
                                         </div>
 
+                                        ${sub.pin === 'N/A' || sub.plan === 'FAMILIA' ? `
+                                        <!-- Exclusive Account Info -->
+                                        <div class="bg-black/40 p-3 rounded border border-gray-700 border-l-4 border-l-purple-500 col-span-1 md:col-span-2">
+                                            <label class="text-xs text-muted uppercase font-bold block mb-1">Tipo de Acesso</label>
+                                            <div class="font-bold text-lg text-white">Conta Mãe Exclusiva (Todos os Perfis)</div>
+                                        </div>
+                                        ` : `
                                         <!-- Profile -->
                                         <div class="bg-black/40 p-3 rounded border border-gray-700 border-l-4 border-l-blue-500">
                                             <label class="text-xs text-muted uppercase font-bold block mb-1">Seu Perfil</label>
@@ -1757,8 +1818,17 @@
                                             <label class="text-xs text-muted uppercase font-bold block mb-1">PIN do Perfil</label>
                                             <div class="font-mono text-xl text-white font-bold tracking-widest" id="dash-pin-${index}">${sub.pin}</div>
                                         </div>
+                                        `}
                                     </div>
 
+                                    ${sub.pin === 'N/A' || sub.plan === 'FAMILIA' ? `
+                                    <div class="mt-6 bg-purple-900/20 border border-purple-900/30 p-3 rounded text-xs text-purple-200 flex gap-2 items-start">
+                                        <i class="fas fa-info-circle mt-0.5"></i>
+                                        <div>
+                                            <strong>Dica:</strong> Pode alterar a senha principal e criar ou modificar os perfis como desejar.
+                                        </div>
+                                    </div>
+                                    ` : `
                                     <div class="mt-6 bg-red-900/20 border border-red-900/30 p-3 rounded text-xs text-red-200 flex gap-2 items-start">
                                         <i class="fas fa-exclamation-triangle mt-0.5"></i>
                                         <div>
@@ -1766,6 +1836,7 @@
                                             O sistema deteta alterações e pode bloquear o acesso.
                                         </div>
                                     </div>
+                                    `}
                                 </div>
 
                                 <!-- Actions -->
@@ -1826,6 +1897,8 @@
             else selectedPlanPrice = 18000;
 
             isRenewal = true;
+            targetSubscriptionId = sub.id;
+
             // Pre-set summary for renewal
             document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
             document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);

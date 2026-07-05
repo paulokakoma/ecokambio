@@ -1,6 +1,6 @@
 /**
  * Payment Controller
- * Handles HTTP requests for payments (AppyPay, Webhooks, Status Checks)
+ * Handles HTTP requests for payments (PayGo, Webhooks, Status Checks)
  */
 
 const crypto = require('crypto');
@@ -130,7 +130,7 @@ const initPayment = async (req, res) => {
 // ============================================================================
 const quickOrder = async (req, res) => {
     try {
-        const { phone, plan_type, payment_method } = req.body;
+        const { phone, plan_type, payment_method, is_renewal, target_subscription_id, duration } = req.body;
 
         const plans = await planService.getPlans();
 
@@ -138,17 +138,49 @@ const quickOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Plano inválido' });
         }
 
-        let user = await supabase.from('ecoflix_users').select('id, phone').eq('phone', phone).single();
+        const durationMonths = parseInt(duration) || 1;
+        const totalAmount = plans[plan_type].price * durationMonths;
 
-        if (!user.data) {
-            const { data: newUser } = await supabase
+        // Pré-validação de Stock antes de gerar a cobrança (não aplicável para renovações)
+        if (!is_renewal) {
+            const isExclusive = ['FAMILIA', 'COMPLETA', 'INTEIRA'].includes(plan_type);
+            if (isExclusive) {
+                const { data: accounts } = await supabase
+                    .from('ecoflix_master_accounts')
+                    .select('id, subscriptions:ecoflix_subscriptions(status)')
+                    .eq('type', 'EXCLUSIVE')
+                    .eq('status', 'ACTIVE');
+                const hasStock = accounts && accounts.some(acc => !acc.subscriptions || acc.subscriptions.filter(s => ['ACTIVE', 'SUSPENDED'].includes(s.status)).length === 0);
+                if (!hasStock) {
+                    return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
+                }
+            } else {
+                const { count } = await supabase
+                    .from('ecoflix_profiles')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('type', plan_type === 'ECONOMICO' ? 'MOBILE' : 'TV')
+                    .eq('status', 'AVAILABLE');
+                if (!count || count === 0) {
+                    return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
+                }
+            }
+        }
+
+        let { data: userData, error: userError } = await supabase.from('ecoflix_users').select('id, phone').eq('phone', phone).maybeSingle();
+
+        let user = userData;
+        if (!user) {
+            const { data: newUser, error: insertError } = await supabase
                 .from('ecoflix_users')
                 .insert({ phone, verified_at: new Date() })
                 .select('id, phone')
                 .single();
+            
+            if (insertError) {
+                console.error("Erro ao inserir novo utilizador:", insertError);
+                return res.status(500).json({ success: false, message: 'Falha ao registar cliente no sistema' });
+            }
             user = newUser;
-        } else {
-            user = user.data;
         }
 
         // Cancela qualquer pedido pendente anterior deste utilizador
@@ -161,7 +193,7 @@ const quickOrder = async (req, res) => {
 
         const provider = PaymentProviderFactory.getProvider(payment_method);
         const paymentResult = await provider.initiatePayment({
-            amount: plans[plan_type].price,
+            amount: totalAmount,
             phone,
             plan_type,
             payment_method,
@@ -178,9 +210,12 @@ const quickOrder = async (req, res) => {
                 transaction_id: paymentResult.transaction_id,
                 entity: paymentResult.entity,
                 plan_type,
-                amount: plans[plan_type].price,
+                amount: totalAmount,
                 phone,
-                payment_method: dbPaymentMethod
+                payment_method: dbPaymentMethod,
+                subscription_action: is_renewal ? 'RENEWAL' : 'NEW',
+                target_subscription_id: is_renewal ? target_subscription_id : null,
+                duration_months: durationMonths
             })
             .select()
             .single();

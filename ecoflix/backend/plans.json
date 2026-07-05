@@ -4,11 +4,11 @@
     "paygo_id": "74c04f17-9aa5-45f5-b729-bcfba5a8047d"
   },
   "ULTRA": {
-    "price": 6500,
-    "paygo_id": "d4dc5a89-ddca-4ae3-b8ea-15eecf3d106f"
+    "price": 65,
+    "paygo_id": "eeaab523-8307-4f71-ac29-6626cec11b8f"
   },
   "FAMILIA": {
-    "price": 18000,
-    "paygo_id": "296afa2d-7bd3-4fde-8458-c6813e0120ea"
+    "price": 180,
+    "paygo_id": "090d794c-58e2-4174-a4dd-6a790fc5d742"
   }
 }

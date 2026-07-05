@@ -101,8 +101,11 @@ const register = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    req.session.destroy();
+    if (req.session) {
+        req.session.destroy();
+    }
     res.clearCookie('connect.sid');
+    res.clearCookie('admin_auth');
     res.status(200).json({ success: true, message: 'Logout bem-sucedido.' });
 };
 

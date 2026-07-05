@@ -180,12 +180,14 @@ const sendDeliverySms = async (phone, creds) => {
         `Pagamento confirmado!\n\n` +
         `Aqui estão seus dados de acesso:\n` +
         `E-mail: ${creds.email}\n` +
-        `Senha: ${creds.password}\n` +
-        `Perfil: ${creds.profile}\n` +
-        `Pin: ${creds.pin}`;
+        `Senha: ${creds.password}\n`;
 
-    const profileName = creds.profile || '';
-    if (!profileName.toLowerCase().includes('exclusiva')) {
+    if (creds.pin !== 'N/A') {
+        message += `Perfil: ${creds.profile}\n` +
+                   `Pin: ${creds.pin}`;
+    }
+
+    if (creds.pin !== 'N/A') {
         message += `\nAVISO: Nao mude a senha para nao perder a conta!`;
     }
 
@@ -279,3 +281,18 @@ module.exports.sendSuspendSms = sendSuspendSms;
 module.exports.sendRestoreSms = sendRestoreSms;
 module.exports.send5DaysExpirySms = send5DaysExpirySms;
 module.exports.sendFinalDayExpirySms = sendFinalDayExpirySms;
+
+const sendAdminPinExpiredSms = async (adminPhone, email, profileName, newPin) => {
+    const message = `🚨 ALERTA ECOFLIX:\nO perfil '${profileName}' da conta '${email}' expirou.\nO sistema gerou o novo PIN: ${newPin}.\nAltere na Netflix imediatamente!`;
+    return sendSms(adminPhone, message);
+};
+module.exports.sendAdminPinExpiredSms = sendAdminPinExpiredSms;
+
+const sendSupportResolutionSms = async (phone, customMessage) => {
+    let message = 'EcoFlix: O problema que reportou foi resolvido. Aceda ao seu painel ou contacte-nos se precisar de mais ajuda.';
+    if (customMessage && customMessage.trim() !== '') {
+        message = `EcoFlix: O seu problema foi resolvido. Mensagem da equipa: ${customMessage}`;
+    }
+    return sendSms(phone, message);
+};
+module.exports.sendSupportResolutionSms = sendSupportResolutionSms;

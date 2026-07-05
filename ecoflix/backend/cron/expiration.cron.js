@@ -4,7 +4,7 @@ const { send5DaysExpirySms, sendFinalDayExpirySms } = require('../services/sms.s
 const logger = require('../../../src/config/logger');
 
 const initializeCron = () => {
-    // Run every day at 09:00 AM
+    // Run every day at 09:00 AM for Notifications
     cron.schedule('0 9 * * *', async () => {
         logger.info('[CRON] A iniciar verificação de assinaturas a expirar...');
         try {
@@ -14,7 +14,18 @@ const initializeCron = () => {
             logger.error(`[CRON] Erro na verificação de assinaturas: ${error.message}`);
         }
     });
-    logger.info('✅ SMS Cron jobs initialized (Daily at 09:00 AM)');
+
+    // Run every day at 00:01 AM for Expirations
+    cron.schedule('1 0 * * *', async () => {
+        logger.info('[CRON] A executar processamento de assinaturas expiradas...');
+        try {
+            await processExpirations();
+        } catch (error) {
+            logger.error(`[CRON] Erro no processamento de expiracoes: ${error.message}`);
+        }
+    });
+
+    logger.info('✅ SMS & Expiration Cron jobs initialized');
 };
 
 const notify5DaysExpiry = async () => {
@@ -81,8 +92,63 @@ const notifyFinalDayExpiry = async () => {
     logger.info(`[CRON] Notificações Último Dia enviadas: ${count}`);
 };
 
+const processExpirations = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Busca assinaturas que deveriam expirar
+    const { data: expiredSubs, error } = await supabase
+        .from('ecoflix_subscriptions')
+        .select(`
+            id, 
+            profile_id,
+            profile:ecoflix_profiles ( name, master_account:ecoflix_master_accounts(email) )
+        `)
+        .eq('status', 'ACTIVE')
+        .lt('end_date', today);
+
+    if (error) {
+        logger.error(`[CRON] Erro ao processar expirações: ${error.message}`);
+        return;
+    }
+
+    if (!expiredSubs || expiredSubs.length === 0) {
+        logger.info('[CRON] Nenhuma assinatura para expirar/reciclar hoje.');
+        return;
+    }
+
+    let count = 0;
+    const adminPhone = process.env.ADMIN_PHONE || '+244927862935'; // Fallback admin phone
+
+    for (const sub of expiredSubs) {
+        // 1. Marcar assinatura como EXPIRED
+        await supabase.from('ecoflix_subscriptions').update({ status: 'EXPIRED' }).eq('id', sub.id);
+        
+        // 2. Se for perfil partilhado, recicla o perfil
+        if (sub.profile_id) {
+            const newPin = Math.floor(Math.random() * 9000 + 1000).toString();
+            await supabase.from('ecoflix_profiles').update({
+                status: 'AVAILABLE',
+                client_phone: null,
+                client_name: null,
+                expires_at: null,
+                pin: newPin
+            }).eq('id', sub.profile_id);
+
+            // 3. Notificar Admin
+            const email = sub.profile?.master_account?.email || 'Desconhecido';
+            const profileName = sub.profile?.name || 'Desconhecido';
+            
+            const { sendAdminPinExpiredSms } = require('../services/sms.service');
+            await sendAdminPinExpiredSms(adminPhone, email, profileName, newPin);
+            count++;
+        }
+    }
+    logger.info(`[CRON] Expirações processadas e Admin notificado: ${count}`);
+};
+
 module.exports = {
     initializeCron,
-    notify5DaysExpiry, // Exported for manual testing
-    notifyFinalDayExpiry // Exported for manual testing
+    notify5DaysExpiry,
+    notifyFinalDayExpiry,
+    processExpirations
 };

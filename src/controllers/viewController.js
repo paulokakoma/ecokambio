@@ -6,9 +6,6 @@ const serveIndex = (req, res) => {
     if (req.isAdminSubdomain) {
         return res.redirect('/admin');
     }
-    if (req.isAdminFlixSubdomain) {
-        return res.redirect('/adminflix');
-    }
     res.sendFile(path.join(__dirname, "../../public", "index.html"));
 };
 

@@ -8,7 +8,7 @@ const websocket = require('../../../src/websocket');
 // ============================================================================
 
 const profileTypeForPlan = (planType) => {
-    const map = { ECONOMICO: 'MOBILE', ULTRA: 'TV', FAMILIA: 'EXCLUSIVE', COMPLETA: 'EXCLUSIVE' };
+    const map = { ECONOMICO: 'MOBILE', ULTRA: 'TV', FAMILIA: 'EXCLUSIVE', COMPLETA: 'EXCLUSIVE', INTEIRA: 'EXCLUSIVE' };
     return map[planType] || 'TV';
 };
 
@@ -38,7 +38,7 @@ const handleOutOfStock = async (order) => {
 // Post-payment sync: Guarantees all records are consistent
 // Runs after any successful payment assignment.
 // ============================================================================
-const syncAfterPayment = async ({ orderId, profileId, subscriptionId, phone, expiresAt }) => {
+const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscriptionId, phone, expiresAt, amount }) => {
     console.log(`[Sync] Running post-payment sync for order=${orderId}`);
 
     const updates = [];
@@ -59,7 +59,7 @@ const syncAfterPayment = async ({ orderId, profileId, subscriptionId, phone, exp
         );
     }
 
-    // 3. Ensure the profile has correct client info (the key fix for admin inconsistency)
+    // 3. Ensure the profile has correct client info
     if (profileId) {
         updates.push(
             supabase.from('ecoflix_profiles')
@@ -70,6 +70,17 @@ const syncAfterPayment = async ({ orderId, profileId, subscriptionId, phone, exp
                     updated_at: new Date()
                 })
                 .eq('id', profileId)
+        );
+    }
+
+    // 4. Track Revenue
+    if (amount && (profileId || masterAccountId)) {
+        updates.push(
+            supabase.rpc('increment_ecoflix_revenue', { 
+                p_profile_id: profileId || null,
+                p_master_account_id: masterAccountId || null,
+                p_amount: amount 
+            })
         );
     }
 
@@ -109,7 +120,8 @@ const assignProfile = async (order) => {
         return { success: false, message: 'STOCK_ESGOTADO' };
     }
 
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const durationMonths = order.duration_months || 1;
+    const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
     // Atomic update — only succeeds if profile is still AVAILABLE (race condition guard)
     const { data: claimed, error: claimError } = await supabase
@@ -160,7 +172,8 @@ const assignProfile = async (order) => {
         profileId: assignedProfile.id,
         subscriptionId: subscription.id,
         phone: order.phone,
-        expiresAt
+        expiresAt,
+        amount: order.amount
     });
 
     const account = assignedProfile.master_account;
@@ -196,7 +209,8 @@ const assignExclusiveAccount = async (order) => {
 
     if (!availableAccount) return { success: false, message: 'STOCK_ESGOTADO' };
 
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const durationMonths = order.duration_months || 1;
+    const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data: subscription, error: subError } = await supabase
         .from('ecoflix_subscriptions')
@@ -223,7 +237,8 @@ const assignExclusiveAccount = async (order) => {
         profileId: null,
         subscriptionId: subscription.id,
         phone: order.phone,
-        expiresAt
+        expiresAt,
+        amount: order.amount
     });
 
     const credentials = {
@@ -253,7 +268,8 @@ const extendSubscription = async (order) => {
     const currentExpiry = new Date(sub.expires_at);
     const now = new Date();
     const baseDate = currentExpiry > now ? currentExpiry : now;
-    const newExpiry = new Date(baseDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const durationMonths = order.duration_months || 1;
+    const newExpiry = new Date(baseDate.getTime() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
     // Sync all records
     await syncAfterPayment({
@@ -309,7 +325,7 @@ const processPayment = async (order) => {
             return await extendSubscription(order);
         }
 
-        const isExclusive = ['FAMILIA', 'COMPLETA'].includes(order.plan_type);
+        const isExclusive = ['FAMILIA', 'COMPLETA', 'INTEIRA'].includes(order.plan_type);
 
         const result = isExclusive
             ? await assignExclusiveAccount(order)
