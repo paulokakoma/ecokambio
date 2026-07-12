@@ -103,154 +103,107 @@ const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscript
 // ============================================================================
 // assignProfile — for ECONOMICO / ULTRA plans (shared profiles)
 // ============================================================================
-const assignProfile = async (order) => {
+const assignProfile = async (order, attempt = 1) => {
     const profileType = profileTypeForPlan(order.plan_type);
-    console.log(`[AssignProfile] Seeking AVAILABLE profile type=${profileType} for order=${order.id}`);
-
-    const { data: profile, error: profileError } = await supabase
-        .from('ecoflix_profiles')
-        .select('*, master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)')
-        .eq('type', profileType)
-        .eq('status', 'AVAILABLE')
-        .limit(1)
-        .single();
-
-    if (profileError || !profile) {
-        console.warn(`[AssignProfile] No AVAILABLE profile. Error: ${profileError?.message}`);
-        return { success: false, message: 'STOCK_ESGOTADO' };
-    }
+    console.log(`[AssignProfile] Executando RPC Atómica para order=${order.id} (Tentativa ${attempt})`);
 
     const durationMonths = order.duration_months || 1;
-    const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Atomic update — only succeeds if profile is still AVAILABLE (race condition guard)
-    const { data: claimed, error: claimError } = await supabase
-        .from('ecoflix_profiles')
-        .update({
-            status: 'SOLD',
-            client_phone: order.phone,
-            client_name: `${order.plan_type}_${order.phone}`,
-            expires_at: expiresAt,
-            updated_at: new Date()
-        })
-        .eq('id', profile.id)
-        .eq('status', 'AVAILABLE')
-        .select('*, master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)');
+    // Chamada à transação atómica RPC
+    const { data: result, error } = await supabase.rpc('assign_profile_atomic', {
+        p_order_id: order.id,
+        p_type: profileType,
+        p_phone: order.phone,
+        p_duration_months: durationMonths
+    });
 
-    if (claimError) throw claimError;
-
-    if (!claimed || claimed.length === 0) {
-        console.warn(`[AssignProfile] Race condition on profile ${profile.id}. Retrying...`);
-        return assignProfile(order);
+    if (error) {
+        console.error('[AssignProfile] Erro Fatal no RPC:', error.message);
+        throw error;
     }
 
-    const assignedProfile = claimed[0];
-    console.log(`[AssignProfile] Claimed profile id=${assignedProfile.id} name="${assignedProfile.name}"`);
+    if (!result.success) {
+        if (result.message === 'CONCURRENCY_LOCKED') {
+            if (attempt <= 3) {
+                console.warn(`[AssignProfile] Bloqueio transacional detetado para order=${order.id}. Tentando novamente em 200ms...`);
+                await new Promise(res => setTimeout(res, 200));
+                return assignProfile(order, attempt + 1);
+            }
+            console.warn(`[AssignProfile] Máximo de retries atingido para order=${order.id}.`);
+            return { success: false, message: 'STOCK_ESGOTADO' };
+        }
+        return { success: false, message: result.message }; // e.g. STOCK_ESGOTADO
+    }
 
-    // Create subscription
-    const { data: subscription, error: subError } = await supabase
-        .from('ecoflix_subscriptions')
-        .insert({
-            user_id: order.user_id,
-            profile_id: assignedProfile.id,
-            order_id: order.id,
-            plan_type: order.plan_type,
-            status: 'ACTIVE',
-            expires_at: expiresAt,
-            amount_paid: order.amount,
-            coupon_code: order.coupon_used || null,
-            start_date: new Date()
-        })
-        .select()
-        .single();
+    console.log(`[AssignProfile] Perfil atribuído com sucesso via RPC para order=${order.id}.`);
 
-    if (subError) throw subError;
+    const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Sync all records to guarantee consistency
+    // Sincronização pós-pagamento (Garante métricas de faturação e Websockets)
     await syncAfterPayment({
         orderId: order.id,
-        profileId: assignedProfile.id,
-        subscriptionId: subscription.id,
+        profileId: result.profile_id,
+        subscriptionId: result.subscription_id,
         phone: order.phone,
         expiresAt,
         amount: order.amount
     });
 
-    const account = assignedProfile.master_account;
-    if (!account) throw new Error(`Conta mãe não encontrada para perfil ${assignedProfile.id}`);
+    await sendCredentialsSms(order.phone, result.credentials);
 
-    const credentials = {
-        email: account.email,
-        password: account.password,
-        profile: assignedProfile.name,
-        pin: assignedProfile.pin
-    };
-
-    await sendCredentialsSms(order.phone, credentials);
-
-    return { success: true, credentials };
+    return { success: true, credentials: result.credentials };
 };
 
 // ============================================================================
 // assignExclusiveAccount — for FAMILIA / COMPLETA plans (exclusive accounts)
 // ============================================================================
-const assignExclusiveAccount = async (order) => {
-    const { data: accounts, error: accError } = await supabase
-        .from('ecoflix_master_accounts')
-        .select('*, subscriptions:ecoflix_subscriptions(id, status)')
-        .eq('type', 'EXCLUSIVE')
-        .eq('status', 'ACTIVE');
-
-    if (accError) return { success: false, message: 'STOCK_ESGOTADO' };
-
-    const availableAccount = accounts.find(acc =>
-        !acc.subscriptions || acc.subscriptions.filter(s => s.status === 'ACTIVE').length === 0
-    );
-
-    if (!availableAccount) return { success: false, message: 'STOCK_ESGOTADO' };
-
+const assignExclusiveAccount = async (order, attempt = 1) => {
+    console.log(`[AssignExclusive] Executando RPC Atómica para order=${order.id} (Tentativa ${attempt})`);
+    
     const durationMonths = order.duration_months || 1;
+
+    // Chamada à transação atómica RPC
+    const { data: result, error } = await supabase.rpc('assign_exclusive_account_atomic', {
+        p_order_id: order.id,
+        p_phone: order.phone,
+        p_duration_months: durationMonths
+    });
+
+    if (error) {
+        console.error('[AssignExclusive] Erro Fatal no RPC:', error.message);
+        throw error;
+    }
+
+    if (!result.success) {
+        if (result.message === 'CONCURRENCY_LOCKED') {
+            if (attempt <= 3) {
+                console.warn(`[AssignExclusive] Bloqueio transacional detetado para order=${order.id}. Retrying em 200ms...`);
+                await new Promise(res => setTimeout(res, 200));
+                return assignExclusiveAccount(order, attempt + 1);
+            }
+            return { success: false, message: 'STOCK_ESGOTADO' };
+        }
+        return { success: false, message: result.message };
+    }
+
+    console.log(`[AssignExclusive] Conta Exclusiva atribuída com sucesso via RPC para order=${order.id}.`);
+
     const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: subscription, error: subError } = await supabase
-        .from('ecoflix_subscriptions')
-        .insert({
-            user_id: order.user_id,
-            master_account_id: availableAccount.id,
-            profile_id: null,
-            order_id: order.id,
-            plan_type: order.plan_type,
-            status: 'ACTIVE',
-            expires_at: expiresAt,
-            amount_paid: order.amount,
-            coupon_code: order.coupon_used || null,
-            start_date: new Date()
-        })
-        .select()
-        .single();
-
-    if (subError) throw subError;
-
-    // Sync — no profile for exclusive, but order and subscription must be consistent
+    // Sync — no profile for exclusive, mas order e faturação atualizam
     await syncAfterPayment({
         orderId: order.id,
         profileId: null,
-        subscriptionId: subscription.id,
+        masterAccountId: result.master_account_id,
+        subscriptionId: result.subscription_id,
         phone: order.phone,
         expiresAt,
         amount: order.amount
     });
 
-    const credentials = {
-        email: availableAccount.email,
-        password: availableAccount.password,
-        profile: 'Conta Exclusiva (Todos os Perfis)',
-        pin: 'N/A'
-    };
+    await sendCredentialsSms(order.phone, result.credentials);
 
-    await sendCredentialsSms(order.phone, credentials);
-
-    return { success: true, credentials };
+    return { success: true, credentials: result.credentials };
 };
 
 // ============================================================================

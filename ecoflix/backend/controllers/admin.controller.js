@@ -278,6 +278,12 @@ const deleteAccount = async (req, res) => {
                 .in('profile_id', profileIds);
         }
 
+        // Also delete any subscriptions linked directly to the master account (EXCLUSIVE accounts)
+        await supabase
+            .from('ecoflix_subscriptions')
+            .delete()
+            .eq('master_account_id', id);
+
         const { error } = await supabase
             .from('ecoflix_master_accounts')
             .delete()
@@ -1016,21 +1022,35 @@ const getIssues = async (req, res) => {
 // ============================================================================
 const getClients = async (req, res) => {
     try {
-        const { page = 1, limit = 20 } = req.query;
+        const { page = 1, limit = 50 } = req.query;
         const pageNum = parseInt(page);
         const limitNum = parseInt(limit);
         const from = (pageNum - 1) * limitNum;
         const to = from + limitNum - 1;
 
         const { data, error, count } = await supabase
-            .from('ecoflix_users')
-            .select('*', { count: 'exact' })
+            .from('ecoflix_subscriptions')
+            .select(`
+                *,
+                user:ecoflix_users(*),
+                profile:ecoflix_profiles!fk_subscriptions_profile(
+                    *,
+                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(*)
+                ),
+                account:ecoflix_master_accounts(*)
+            `, { count: 'exact' })
             .order('created_at', { ascending: false })
             .range(from, to);
 
         if (error) throw error;
 
-        res.json({ success: true, data: data || [], total: count, page: pageNum, limit: limitNum });
+        // Map end_date to expires_at so frontend doesn't break
+        const mappedData = data.map(sub => ({
+            ...sub,
+            end_date: sub.expires_at // For renderCustomers compat
+        }));
+
+        res.json({ success: true, data: mappedData || [], total: count, page: pageNum, limit: limitNum });
     } catch (error) {
         console.error('Get clients error:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -1110,7 +1130,7 @@ const revokeProfile = async (req, res) => {
         if (activeSubscription?.user_id) {
             await supabase
                 .from('ecoflix_orders')
-                .update({ status: 'CANCELED', updated_at: new Date() })
+                .update({ status: 'CANCELLED', updated_at: new Date() })
                 .eq('user_id', activeSubscription.user_id)
                 .in('status', ['PENDING']);
         }

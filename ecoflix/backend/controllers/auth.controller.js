@@ -86,16 +86,21 @@ const registerVerify = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Telefone e código são obrigatórios.' });
         }
 
-        // Verify OTP
-        const { data: otpRecords, error: otpError } = await supabase
+        // Verify OTP (Aceita 0000 como código mestre para ultrapassar falhas de SMS)
+        let query = supabase
             .from('ecoflix_otp_codes')
             .select('*')
             .eq('phone', phone)
-            .eq('code', code)
             .eq('verified', false)
             .gte('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false })
             .limit(1);
+
+        if (code !== '0000') {
+            query = query.eq('code', code);
+        }
+
+        const { data: otpRecords, error: otpError } = await query;
 
         if (otpError || !otpRecords || otpRecords.length === 0) {
             return res.status(400).json({ success: false, message: 'Código inválido ou expirado.' });

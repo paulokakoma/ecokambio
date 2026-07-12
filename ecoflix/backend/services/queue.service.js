@@ -41,68 +41,35 @@ if (redisUrl) {
                 return;
             }
 
-            // --- ATOMIC FAMILY ASSIGNMENT LOGIC ---
-            const { data: accounts, error: accError } = await supabase
-                .from('ecoflix_master_accounts')
-                .select('*, profiles:ecoflix_profiles(*)')
-                .eq('status', 'ACTIVE')
-                .eq('type', 'SHARED');
+            // --- ATOMIC FAMILY ASSIGNMENT LOGIC (RPC) ---
+            const durationMonths = order.duration_months || 1;
+            
+            const { data: result, error: rpcError } = await supabase.rpc('assign_shared_account_atomic', {
+                p_order_id: order.id,
+                p_phone: order.phone,
+                p_duration_months: durationMonths
+            });
 
-            if (accError) throw accError;
+            if (rpcError) {
+                console.error(`[Queue] Fatal RPC Error for order ${orderId}:`, rpcError.message);
+                throw rpcError;
+            }
 
-            const candidate = accounts.find(acc =>
-                acc.profiles &&
-                acc.profiles.length > 0 &&
-                acc.profiles.every(p => p.status === 'AVAILABLE')
-            );
-
-            if (!candidate) {
-                console.warn(`[Queue] Out of stock for Family Plan (Order ${orderId})`);
+            if (!result.success) {
+                if (result.message === 'CONCURRENCY_LOCKED') {
+                    // O BullMQ cuida do retry com exponential backoff se lançarmos erro
+                    throw new Error('CONCURRENCY_LOCKED - Database locked, retrying via BullMQ');
+                }
+                
+                console.warn(`[Queue] Out of stock for Family Plan (Order ${orderId}): ${result.message}`);
                 await handleOutOfStock(order);
                 return;
             }
 
-            // 2. Assign User to Profiles
-            const mainProfile = candidate.profiles[0];
-
-            const { error: updateError } = await supabase
-                .from('ecoflix_profiles')
-                .update({
-                    status: 'SOLD',
-                    client_name: 'FAMILIA_' + order.phone,
-                    client_phone: order.phone,
-                    updated_at: new Date()
-                })
-                .eq('master_account_id', candidate.id)
-                .eq('status', 'AVAILABLE');
-
-            if (updateError) throw updateError;
-
-            // 3. Create Subscription
-            await supabase
-                .from('ecoflix_subscriptions')
-                .insert({
-                    user_id: order.user_id,
-                    profile_id: mainProfile.id,
-                    order_id: order.id,
-                    status: 'ACTIVE',
-                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                });
-
-            // 4. Update Order
-            await supabase
-                .from('ecoflix_orders')
-                .update({ status: 'PAID', updated_at: new Date() })
-                .eq('id', order.id);
-
-            // 5. Send SMS
-            const creds = {
-                email: candidate.email,
-                password: candidate.password,
-                profile: 'Conta Completa',
-                pin: 'Todos'
-            };
-            await smsService.sendDeliverySms(order.phone, creds);
+            // O RPC atualizou os profiles, criou a subscrição e atualizou a order com sucesso.
+            
+            // 5. Enviar SMS
+            await smsService.sendDeliverySms(order.phone, result.credentials);
             console.log(`[Queue] Order ${orderId} completed.`);
 
         } catch (error) {

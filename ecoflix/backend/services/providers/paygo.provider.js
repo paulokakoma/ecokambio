@@ -39,26 +39,36 @@ class PayGoProvider extends BasePaymentProvider {
 
         console.log(`[PayGo] POST /payments method=${apiMethod} product=${payload.product_id} amount=${payload.amount} phone=${cleanPhone}`);
 
-        const response = await axios.post(`${PAYGO_BASE_URL}/payments`, payload, { headers });
+        try {
+            const response = await axios.post(`${PAYGO_BASE_URL}/payments`, payload, { headers });
 
-        if (response.data?.payment_id) {
-            const d = response.data;
-            const refObj = d.reference || {};
-            console.log(`[PayGo] Success payment_id=${d.payment_id} ref=${refObj.reference_number} entity=${refObj.entity}`);
-            return {
-                success: true,
-                reference: refObj.reference_number || null,
-                entity: refObj.entity || null,
-                transaction_id: d.payment_id,
-                payment_id: d.payment_id,
-                message: this.paymentMethod === 'express'
-                    ? 'Pagamento Multicaixa Express iniciado'
-                    : 'Referência gerada com sucesso'
-            };
+            if (response.data?.payment_id) {
+                const d = response.data;
+                const refObj = d.reference || {};
+                console.log(`[PayGo] Success payment_id=${d.payment_id} ref=${refObj.reference_number} entity=${refObj.entity}`);
+                return {
+                    success: true,
+                    reference: refObj.reference_number || null,
+                    entity: refObj.entity || null,
+                    transaction_id: d.payment_id,
+                    payment_id: d.payment_id,
+                    message: this.paymentMethod === 'express'
+                        ? 'Pagamento Multicaixa Express iniciado'
+                        : 'Referência gerada com sucesso'
+                };
+            }
+
+            console.error('[PayGo] Resposta sem payment_id:', JSON.stringify(response.data));
+            throw new Error('PayGo: resposta inválida — sem payment_id');
+        } catch (error) {
+            // Extrair o erro real da API da PayGo
+            const apiErrorMsg = error.response?.data?.error || error.response?.data?.message;
+            if (apiErrorMsg) {
+                console.warn(`[PayGo] API Error: ${apiErrorMsg}`);
+                throw new Error(apiErrorMsg);
+            }
+            throw error;
         }
-
-        console.error('[PayGo] Resposta sem payment_id:', JSON.stringify(response.data));
-        throw new Error('PayGo: resposta inválida — sem payment_id');
     }
 
     async checkStatus(paymentId) {

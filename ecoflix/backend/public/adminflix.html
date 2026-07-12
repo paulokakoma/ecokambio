@@ -187,7 +187,7 @@
             <!-- 1. DASHBOARD -->
             <div id="panel-dashboard" class="panel">
                 <h1 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h1>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
                     <!-- Cards -->
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start">
@@ -236,6 +236,19 @@
                             <div class="p-2 bg-purple-100 rounded-lg text-purple-600"><i class="fas fa-coins"></i></div>
                         </div>
                         <div class="mt-4 flex items-center text-xs text-gray-500" id="dash-sales-count">...</div>
+                    </div>
+                    <!-- SMS Card -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-cyan-100 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-cyan-500 rounded-bl-full -mr-8 -mt-8 opacity-20">
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-cyan-600 uppercase">Saldo SMS</p>
+                                <h3 class="text-3xl font-bold text-gray-800 mt-2" id="dash-sms-available"><i class="fas fa-circle-notch fa-spin text-lg text-gray-400"></i></h3>
+                            </div>
+                            <div class="p-2 bg-cyan-100 rounded-lg text-cyan-600"><i class="fas fa-sms"></i></div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs text-gray-500">Enviados: <span id="dash-sms-sent" class="font-bold ml-1">...</span></div>
                     </div>
                 </div>
                 <!-- Gráfico e Atividade -->
@@ -377,50 +390,83 @@
             </div>
 
             <!-- 5. SUPORTE / PROBLEMAS -->
-            <div id="panel-issues" class="panel hidden">
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">Reporte de Problemas & Suporte</h1>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
-                            <tr>
-                                <th class="px-6 py-3">Cliente</th>
-                                <th class="px-6 py-3">Conta / Perfil</th>
-                                <th class="px-6 py-3">Problema Reportado</th>
-                                <th class="px-6 py-3">Data</th>
-                                <th class="px-6 py-3">Status</th>
-                                <th class="px-6 py-3 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="issues-table-body"></tbody>
-                    </table>
+            <div id="panel-issues" class="panel hidden h-[calc(100vh-100px)]">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Reporte de Problemas & Suporte</h1>
+                    <div class="flex gap-2">
+                        <span class="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm" id="total-issues-count">0 Tickets</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100%-60px)]">
+                    <!-- Left Column: Ticket List -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
+                        <div class="p-5 border-b border-gray-100 bg-white flex items-center justify-between sticky top-0 z-10">
+                            <h2 class="font-extrabold text-gray-800 text-lg">Caixa de Entrada</h2>
+                            <i class="fas fa-filter text-gray-400 cursor-pointer hover:text-blue-600 transition-colors"></i>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-3 space-y-3 bg-gray-50/30" id="issues-list-container">
+                            <!-- Cards inserted here via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Ticket Detail View -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full hidden" id="issue-detail-pane">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-gray-100 bg-white flex justify-between items-start sticky top-0 z-10">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-gray-900 mb-2" id="detail-issue-type">Problema</h2>
+                                <div class="flex items-center gap-4 text-sm text-gray-600 font-medium" id="detail-issue-context">
+                                    <span class="flex items-center gap-2"><i class="fas fa-user-circle text-gray-400"></i> Cliente</span>
+                                    <span class="flex items-center gap-2 border-l border-gray-200 pl-4"><i class="fas fa-tv text-gray-400"></i> Perfil</span>
+                                </div>
+                            </div>
+                            <div id="detail-status-badge"></div>
+                        </div>
+                        
+                        <!-- Chat/Issue Bubble -->
+                        <div class="p-6 flex-1 overflow-y-auto bg-gray-50/50">
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm mt-1">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-2xl relative">
+                                    <p class="text-gray-800 whitespace-pre-wrap leading-relaxed" id="detail-issue-desc">Descrição do problema...</p>
+                                    <p class="text-[11px] font-bold text-gray-400 mt-3 text-right uppercase tracking-wider" id="detail-issue-date">Data</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Area -->
+                        <div class="p-6 border-t border-gray-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]" id="resolution-area">
+                            <input type="hidden" id="resolveIssueId">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Mensagem de Resolução (Enviada via SMS ao Cliente)</label>
+                            <textarea id="resolveIssueMessage" rows="3" class="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all resize-none shadow-inner" placeholder="Escreva a nova senha ou instruções para o cliente (deixe em branco para mensagem padrão)..."></textarea>
+                            <div class="mt-4 flex justify-between items-center">
+                                <p class="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg"><i class="fas fa-exclamation-triangle mr-1.5"></i>Esta ação irá notificar o cliente via SMS.</p>
+                                <div class="flex gap-3">
+                                    <button onclick="closeIssueDetail()" class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-colors">Cancelar</button>
+                                    <button onclick="submitResolveIssue()" id="resolveSubmitBtn" class="px-6 py-2.5 text-sm font-bold text-white bg-green-600 hover:bg-green-700 shadow-md shadow-green-600/20 rounded-xl transition-all flex items-center transform hover:-translate-y-0.5">
+                                        <i class="fas fa-check-circle mr-2"></i> Resolver Ticket
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Empty State -->
+                    <div class="lg:col-span-2 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 h-full transition-all" id="issue-empty-state">
+                        <div class="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6">
+                            <i class="fas fa-inbox text-3xl text-gray-300"></i>
+                        </div>
+                        <p class="text-xl font-bold text-gray-700 mb-2">Caixa de Suporte</p>
+                        <p class="text-sm font-medium text-gray-500">Selecione um ticket na lista à esquerda para analisar e resolver os problemas dos clientes.</p>
+                    </div>
                 </div>
             </div>
 
         </div>
     </main>
-
-    
-    <!-- MODAL RESOLVER PROBLEMA -->
-    <div id="resolveIssueModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0" id="resolveIssueModalContent">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-gray-900">Resolver Problema</h3>
-                <button onclick="closeResolveModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="resolveIssueId">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Mensagem para o Cliente (Opcional)</label>
-                    <textarea id="resolveIssueMessage" rows="3" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-red-500 focus:border-red-500" placeholder="A sua nova senha é..."></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Se deixar em branco, o cliente receberá uma mensagem padrão informando que o problema foi resolvido.</p>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-                <button onclick="closeResolveModal()" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition">Cancelar</button>
-                <button onclick="submitResolveIssue()" id="resolveSubmitBtn" class="px-4 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition">Marcar como Resolvido</button>
-            </div>
-        </div>
-    </div>
 
     <!-- MODAL DE EDIÇÃO DE PERFIL -->
     <div id="profileModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
@@ -698,6 +744,10 @@
                 // Inject Dynamic Occupancy and Today Sales
                 document.getElementById('dash-occupancy').innerText = `${data.occupancyRate || 0}%`;
                 document.getElementById('dash-new-profiles').innerText = `+${data.todaySales || 0}`;
+                
+                // Inject SMS data
+                document.getElementById('dash-sms-available').innerText = data.smsAvailable !== undefined ? data.smsAvailable : '-';
+                document.getElementById('dash-sms-sent').innerText = data.smsSent !== undefined ? data.smsSent : '-';
             } catch (e) {
                 console.error('Dashboard load error:', e);
             }
@@ -1359,63 +1409,95 @@
             }
         }
 
+        let activeIssueId = null;
+
         function renderIssues() {
-            document.getElementById('issues-table-body').innerHTML = issuesData.map(i => {
-                
+            document.getElementById('total-issues-count').innerText = `${issuesData.length} Tickets`;
+            const listContainer = document.getElementById('issues-list-container');
+            
+            if(issuesData.length === 0) {
+                listContainer.innerHTML = `<div class="text-center p-6 text-gray-400 text-sm font-medium">Nenhum ticket encontrado.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = issuesData.map(i => {
                 let phone = i.subscription?.user?.phone || 'S/N';
                 let profileStr = i.subscription?.profile?.name || i.subscription?.account?.email || 'S/N';
                 
-                // Fallback for public issues
                 if (phone === 'S/N' && i.description && i.description.includes('Suporte Público')) {
                     const match = i.description.match(/Tel:\s*([0-9]+)\]/);
                     if (match && match[1]) phone = match[1];
                     profileStr = 'Público';
                 }
                 
-                const name = 'Cliente';
+                const isPending = i.status === 'PENDING';
+                const statusColor = isPending ? 'red' : 'green';
+                const statusText = isPending ? 'Pendente' : 'Resolvido';
+                const isActive = activeIssueId === i.id;
+                const activeClasses = isActive ? 'border-l-4 border-blue-600 bg-blue-50/50 shadow-sm' : 'border-l-4 border-transparent hover:bg-gray-50 hover:shadow-sm';
 
-                
-                let statusClass = i.status === 'PENDING' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-                let statusText = i.status === 'PENDING' ? 'Pendente' : 'Resolvido';
+                const shortDesc = i.description ? (i.description.length > 55 ? i.description.substring(0, 55) + '...' : i.description) : 'Sem descrição adicional.';
 
-                const date = new Date(i.created_at).toLocaleString('pt-PT');
-
-                return `<tr class="bg-white hover:bg-gray-50 border-b border-gray-100">
-                    <td class="px-6 py-4 font-medium"><div>${name}</div><div class="text-xs text-gray-400">${phone}</div></td>
-                    <td class="px-6 py-4 font-bold">${profileStr}</td>
-                    <td class="px-6 py-4 max-w-xs">
-                        <div class="text-xs font-bold text-gray-800">${i.issue_type}</div>
-                        <div class="text-xs text-gray-500 mt-1 whitespace-pre-wrap">${i.description || ''}</div>
-                    </td>
-                    <td class="px-6 py-4 text-xs text-gray-500">${date}</td>
-                    <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusText}</span></td>
-                    <td class="px-6 py-4 text-right">
-                        ${i.status === 'PENDING' ? `<button onclick="markIssueResolved('${i.id}')" class="text-green-600 hover:text-green-800 text-xs font-bold">Marcar Resolvido</button>` : ''}
-                    </td>
-                </tr>`;
+                return `
+                <div onclick="viewIssue('${i.id}')" class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer transition-all ${activeClasses}">
+                    <div class="flex justify-between items-start mb-2.5">
+                        <span class="font-extrabold text-gray-900 text-sm tracking-tight">${phone}</span>
+                        <span class="bg-${statusColor}-100 text-${statusColor}-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">${statusText}</span>
+                    </div>
+                    <div class="text-xs font-bold text-gray-800 mb-1 truncate">${i.issue_type}</div>
+                    <div class="text-[11px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">${shortDesc}</div>
+                    <div class="flex justify-between items-center text-[10px] font-medium text-gray-400 pt-2 border-t border-gray-50">
+                        <span class="flex items-center gap-1.5"><i class="fas fa-tv"></i> <span class="truncate max-w-[100px]">${profileStr}</span></span>
+                        <span>${new Date(i.created_at).toLocaleDateString('pt-PT')}</span>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        
-        function markIssueResolved(id) {
-            document.getElementById('resolveIssueId').value = id;
-            document.getElementById('resolveIssueMessage').value = '';
+        function viewIssue(id) {
+            activeIssueId = id;
+            renderIssues(); 
             
-            const modal = document.getElementById('resolveIssueModal');
-            const content = document.getElementById('resolveIssueModalContent');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            const issue = issuesData.find(i => i.id === id);
+            if (!issue) return;
+
+            document.getElementById('issue-empty-state').classList.add('hidden');
+            document.getElementById('issue-detail-pane').classList.remove('hidden');
+
+            let phone = issue.subscription?.user?.phone || 'S/N';
+            let profileStr = issue.subscription?.profile?.name || issue.subscription?.account?.email || 'S/N';
+            
+            if (phone === 'S/N' && issue.description && issue.description.includes('Suporte Público')) {
+                const match = issue.description.match(/Tel:\s*([0-9]+)\]/);
+                if (match && match[1]) phone = match[1];
+                profileStr = 'Público';
+            }
+
+            document.getElementById('detail-issue-type').innerText = issue.issue_type;
+            document.getElementById('detail-issue-context').innerHTML = `<span class="flex items-center gap-2"><i class="fas fa-phone text-gray-400"></i> <span class="font-bold text-gray-700">${phone}</span></span><span class="flex items-center gap-2 border-l border-gray-200 pl-4"><i class="fas fa-tv text-gray-400"></i> <span class="font-bold text-gray-700">${profileStr}</span></span>`;
+            document.getElementById('detail-issue-desc').innerText = issue.description || 'Sem descrição.';
+            document.getElementById('detail-issue-date').innerText = new Date(issue.created_at).toLocaleString('pt-PT');
+
+            const isPending = issue.status === 'PENDING';
+            const badgeClass = isPending ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+            const badgeText = isPending ? 'Pendente' : 'Resolvido';
+            document.getElementById('detail-status-badge').innerHTML = `<span class="${badgeClass} px-3 py-1.5 rounded-full text-xs font-extrabold uppercase shadow-sm tracking-wider">${badgeText}</span>`;
+
+            const resArea = document.getElementById('resolution-area');
+            if (isPending) {
+                resArea.classList.remove('hidden');
+                document.getElementById('resolveIssueId').value = id;
+                document.getElementById('resolveIssueMessage').value = '';
+            } else {
+                resArea.classList.add('hidden');
+            }
         }
 
-        function closeResolveModal() {
-            const modal = document.getElementById('resolveIssueModal');
-            const content = document.getElementById('resolveIssueModalContent');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 200);
+        function closeIssueDetail() {
+            activeIssueId = null;
+            renderIssues();
+            document.getElementById('issue-detail-pane').classList.add('hidden');
+            document.getElementById('issue-empty-state').classList.remove('hidden');
         }
 
         async function submitResolveIssue() {
@@ -1423,14 +1505,15 @@
             const message = document.getElementById('resolveIssueMessage').value;
             const btn = document.getElementById('resolveSubmitBtn');
             
+            const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processando...';
 
             try {
                 const { success } = await apiCall(`/admin/issues/${id}/resolve`, 'POST', { message });
                 if (success) {
                     showToast('Problema marcado como resolvido e SMS enviado!', 'success');
-                    closeResolveModal();
+                    closeIssueDetail();
                     loadIssues();
                 } else {
                     showToast('Erro ao resolver problema', 'error');
@@ -1439,7 +1522,7 @@
                 showToast('Erro ao resolver problema', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Marcar como Resolvido';
+                btn.innerHTML = originalText;
             }
         }
 

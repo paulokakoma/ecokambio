@@ -237,7 +237,7 @@ const quickOrder = async (req, res) => {
         });
     } catch (error) {
         console.error('Quick order error:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(400).json({ success: false, message: error.message });
     }
 };
 
@@ -328,7 +328,7 @@ const checkPaymentStatus = async (req, res) => {
                     } else if (providerStatus.status === 'FAILED') {
                         await supabase
                             .from('ecoflix_orders')
-                            .update({ status: 'FAILED', rejection_reason: 'Recusado na verificação' })
+                            .update({ status: 'CANCELLED', rejection_reason: 'Recusado na verificação' })
                             .eq('id', order.id);
                         order.status = 'FAILED';
                     }
@@ -559,7 +559,7 @@ const cancelOrder = async (req, res) => {
 
         await supabase
             .from('ecoflix_orders')
-            .update({ status: 'FAILED', rejection_reason: 'Cancelado pelo utilizador', updated_at: new Date() })
+            .update({ status: 'CANCELLED', rejection_reason: 'Cancelado pelo utilizador', updated_at: new Date() })
             .eq('id', id);
 
         res.json({ success: true, message: 'Pedido cancelado' });
