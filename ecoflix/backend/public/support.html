@@ -52,46 +52,14 @@
                         </div>
                     </div>
 
-                    <!-- Tipo de Problema -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Tipo de Problema</label>
-                        <select id="issueType" required class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white focus:ring-red-500 focus:border-red-500">
-                            <option value="PASSWORD_INCORRECT">Senha da Netflix Incorreta</option>
-                            <option value="SCREEN_LIMIT">Erro de Tela Cheia (Muitas pessoas)</option>
-                            <option value="LOCKED">Conta Bloqueada / Pediu Código Familiar</option>
-                            <option value="NO_SMS">Não recebi os dados de acesso por SMS</option>
-                            <option value="PAYMENT_FAILED">Problemas com o Pagamento / Referência</option>
-                            <option value="OTHER">Outro Problema</option>
-                        </select>
-                    </div>
-
-                    <!-- Detalhes -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Detalhes Adicionais (Opcional)</label>
-                        <textarea id="issueDesc" rows="3"
-                            class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white focus:ring-red-500 focus:border-red-500"
-                            placeholder="Descreva o que aconteceu..."></textarea>
-                    </div>
-
                     <div id="errorMessage" class="text-red-400 text-sm text-center font-medium hidden"></div>
 
                     <!-- Submit -->
                     <button type="submit" id="submitBtn"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded bg-red-600 text-white font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors shadow-lg shadow-red-600/30">
-                        Enviar Pedido de Suporte
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded bg-green-600 text-white font-bold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors shadow-lg shadow-green-600/30">
+                        <i class="fab fa-whatsapp text-xl mr-2"></i> Falar no WhatsApp
                     </button>
                 </form>
-
-                <div id="successState" class="hidden text-center space-y-4 py-4">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 text-green-500 mb-2">
-                        <i class="fas fa-check text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white">Pedido Enviado!</h3>
-                    <p class="text-gray-400 text-sm">A nossa equipa recebeu o seu pedido e irá analisar o caso. Entraremos em contacto pelo seu telemóvel.</p>
-                    <button onclick="window.location.href='/ecoflix'" class="mt-4 w-full py-3 px-4 border border-gray-600 rounded text-white font-bold hover:bg-gray-700 transition-colors">
-                        Voltar à Loja
-                    </button>
-                </div>
 
             </div>
         </div>
@@ -105,7 +73,7 @@
     </footer>
 
     <script>
-        document.getElementById('supportForm').addEventListener('submit', async (e) => {
+        document.getElementById('supportForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
             const btn = document.getElementById('submitBtn');
@@ -114,50 +82,20 @@
             
             let phone = phoneInput.value.replace(/[^0-9]/g, '');
             if (phone.length < 9) {
-                errorMsg.textContent = 'Por favor, insira um número válido (9 dígitos).';
+                errorMsg.textContent = 'Por favor, insira um número válido (mínimo 9 dígitos).';
                 errorMsg.classList.remove('hidden');
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> A Enviar...';
             errorMsg.classList.add('hidden');
-
-            try {
-                const requestData = {
-                    phone: phone,
-                    issue_type: document.getElementById('issueType').value,
-                    description: document.getElementById('issueDesc').value
-                };
-
-                const hmacHeaders = await window.HMACSign.signRequest(requestData);
-
-                const response = await fetch('/api/ecoflix/support/public-report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...hmacHeaders
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Erro ao enviar pedido.');
-                }
-
-                // Show success
-                document.getElementById('supportForm').classList.add('hidden');
-                document.getElementById('successState').classList.remove('hidden');
-
-            } catch (error) {
-                console.error(error);
-                errorMsg.textContent = error.message;
-                errorMsg.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerHTML = 'Enviar Pedido de Suporte';
-            }
+            
+            // Construir link do WhatsApp
+            // Substituir +244900000000 pelo número real de suporte quando definido pelo admin
+            const supportNumber = '244927862935'; 
+            const message = encodeURIComponent(`Olá! Sou o cliente do número ${phone} e preciso de ajuda com a minha subscrição EcoFlix.`);
+            
+            const whatsappUrl = `https://wa.me/${supportNumber}?text=${message}`;
+            window.location.href = whatsappUrl;
         });
     </script>
 </body>

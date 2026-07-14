@@ -17,6 +17,7 @@ const authController = require('./controllers/auth.controller');
 const paymentController = require('./controllers/payment.controller');
 const subscriptionController = require('./controllers/subscription.controller');
 const cronController = require('./controllers/cron.controller');
+const { sseConnect } = require('./controllers/sse.controller');
 
 
 // ============================================================================
@@ -94,6 +95,16 @@ router.post('/admin/issues/:id/resolve', isAdmin, catchAsync(adminController.res
 // Security & Recovery (Admin)
 router.get('/admin/accounts/:id/recovery', isAdmin, catchAsync(adminController.getRecoveryData));
 
+// Admin Support (WhatsApp/Quick Fixes)
+router.get('/admin/support/clients', isAdmin, catchAsync(adminController.getSupportClients));
+router.get('/admin/support/search/:phone', isAdmin, catchAsync(adminController.searchSupportClient));
+router.post('/admin/support/resend-sms', isAdmin, catchAsync(adminController.resendSms));
+router.post('/admin/support/suspend', isAdmin, catchAsync(adminController.suspendAccount));
+router.post('/admin/support/restore', isAdmin, catchAsync(adminController.restoreAccount));
+router.post('/admin/support/reset-password', isAdmin, catchAsync(adminController.resetPassword));
+router.get('/admin/settings', isAdmin, catchAsync(adminController.getSettings));
+router.post('/admin/settings', isAdmin, catchAsync(adminController.updateSettings));
+
 // Influencer/Referral Code Stats (Admin) - Legacy
 router.get('/admin/influencer-stats', isAdmin, catchAsync(adminController.getInfluencerStats));
 
@@ -102,6 +113,9 @@ router.get('/admin/partners', isAdmin, catchAsync(adminController.getPartnerStat
 router.post('/admin/partners', isAdmin, catchAsync(adminController.createPartner));
 router.post('/admin/partners/:id/pay', isAdmin, catchAsync(adminController.markPartnerPaid));
 router.get('/admin/sales-origin-chart', isAdmin, catchAsync(adminController.getSalesOriginChart));
+
+// SSE — Actualizações em tempo real para o painel admin
+router.get('/admin/events', isAdmin, sseConnect);
 
 // ============================================================================
 // CRON JOBS (Internal / Automated)

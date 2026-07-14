@@ -1,14 +1,28 @@
 const axios = require('axios');
-const BasePaymentProvider = require('./base.provider');
 
 const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
 
-class PayGoProvider extends BasePaymentProvider {
+// IDs de produtos fixos no PayGo por plano
+const PRODUCT_IDS = {
+    'ECONOMICO': 'd13a142b-9d1f-4788-b227-a41235d04e85',
+    'ULTRA':     '2d8240df-e851-4b10-aeaf-8054145a4de4',
+    'FAMILIA':   'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
+};
+
+const API_METHOD = {
+    express:    'multicaixa',
+    referencia: 'reference',
+};
+
+class PayGoProvider {
     constructor(paymentMethod) {
-        super();
-        this.apiKey = process.env.PAYGOOO_API_KEY;
-        this.webhookSecret = process.env.PAYGOOO_WEBHOOK_SECRET;
-        this.paymentMethod = paymentMethod; // 'express' | 'referencia'
+        this.apiKey          = process.env.PAYGOOO_API_KEY;
+        this.webhookSecret   = process.env.PAYGOOO_WEBHOOK_SECRET;
+        this.paymentMethod   = paymentMethod; // 'express' | 'referencia'
+    }
+
+    get headers() {
+        return { 'x-api-key': this.apiKey, 'Content-Type': 'application/json' };
     }
 
     async initiatePayment(order) {
@@ -16,85 +30,69 @@ class PayGoProvider extends BasePaymentProvider {
             throw new Error('PayGo: API key não configurada (PAYGOOO_API_KEY)');
         }
 
-        const headers = {
-            'x-api-key': this.apiKey,
-            'Content-Type': 'application/json'
-        };
-
-        const apiMethod = this.paymentMethod === 'express' ? 'multicaixa' : 'reference';
-        const productIds = {
-            'ECONOMICO': 'd13a142b-9d1f-4788-b227-a41235d04e85',
-            'ULTRA': '2d8240df-e851-4b10-aeaf-8054145a4de4',
-            'FAMILIA': 'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2'
-        };
+        const apiMethod  = API_METHOD[this.paymentMethod] || 'reference';
         const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '').replace(/^244/, '');
+
         const payload = {
             payment_method: apiMethod,
-            product_id: order.paygo_id || productIds[order.plan_type] || productIds['ULTRA'],
-            amount: order.amount,
-            customer_name: 'Cliente EcoFlix',
+            product_id:     order.paygo_id || PRODUCT_IDS[order.plan_type] || PRODUCT_IDS['ULTRA'],
+            amount:         order.amount,
+            customer_name:  'Cliente EcoFlix',
             customer_email: `cliente${Date.now()}@ecoflix.ao`,
-            customer_phone: cleanPhone
+            customer_phone: cleanPhone,
         };
 
         console.log(`[PayGo] POST /payments method=${apiMethod} product=${payload.product_id} amount=${payload.amount} phone=${cleanPhone}`);
 
         try {
-            const response = await axios.post(`${PAYGO_BASE_URL}/payments`, payload, { headers });
+            const { data } = await axios.post(`${PAYGO_BASE_URL}/payments`, payload, { headers: this.headers });
 
-            if (response.data?.payment_id) {
-                const d = response.data;
-                const refObj = d.reference || {};
-                console.log(`[PayGo] Success payment_id=${d.payment_id} ref=${refObj.reference_number} entity=${refObj.entity}`);
-                return {
-                    success: true,
-                    reference: refObj.reference_number || null,
-                    entity: refObj.entity || null,
-                    transaction_id: d.payment_id,
-                    payment_id: d.payment_id,
-                    message: this.paymentMethod === 'express'
-                        ? 'Pagamento Multicaixa Express iniciado'
-                        : 'Referência gerada com sucesso'
-                };
+            if (!data?.payment_id) {
+                console.error('[PayGo] Resposta sem payment_id:', JSON.stringify(data));
+                throw new Error('PayGo: resposta inválida — sem payment_id');
             }
 
-            console.error('[PayGo] Resposta sem payment_id:', JSON.stringify(response.data));
-            throw new Error('PayGo: resposta inválida — sem payment_id');
+            const refObj = data.reference || {};
+            console.log(`[PayGo] Success payment_id=${data.payment_id} ref=${refObj.reference_number} entity=${refObj.entity}`);
+
+            return {
+                success:        true,
+                reference:      refObj.reference_number || null,
+                entity:         refObj.entity || null,
+                transaction_id: data.payment_id,
+                payment_id:     data.payment_id,
+                message:        this.paymentMethod === 'express'
+                    ? 'Pagamento Multicaixa Express iniciado'
+                    : 'Referência gerada com sucesso',
+            };
         } catch (error) {
-            // Extrair o erro real da API da PayGo
-            const apiErrorMsg = error.response?.data?.error || error.response?.data?.message;
-            if (apiErrorMsg) {
-                console.warn(`[PayGo] API Error: ${apiErrorMsg}`);
-                throw new Error(apiErrorMsg);
+            const apiMsg = error.response?.data?.error || error.response?.data?.message;
+            if (apiMsg) {
+                console.warn(`[PayGo] API Error: ${apiMsg}`);
+                throw new Error(apiMsg);
             }
             throw error;
         }
     }
 
     async checkStatus(paymentId) {
-        if (!this.apiKey) {
-            return { status: 'PENDING' };
-        }
+        if (!this.apiKey) return { status: 'PENDING' };
 
         try {
-            const headers = { 'x-api-key': this.apiKey };
-            const response = await axios.get(`${PAYGO_BASE_URL}/payment-status/${paymentId}`, { headers });
-
-            const status = response.data?.payment?.status || response.data?.status || 'unknown';
-            const normalizedStatus = status.toLowerCase();
+            const { data } = await axios.get(`${PAYGO_BASE_URL}/payment-status/${paymentId}`, { headers: this.headers });
+            const raw    = (data?.payment?.status || data?.status || '').toLowerCase();
+            const PAID   = ['completed', 'paid', 'success'];
+            const FAILED = ['failed', 'cancelled'];
 
             return {
-                status: (normalizedStatus === 'completed' || normalizedStatus === 'paid' || normalizedStatus === 'success') ? 'PAID'
-                    : (normalizedStatus === 'failed' || normalizedStatus === 'cancelled') ? 'FAILED'
-                    : 'PENDING',
-                raw: response.data
+                status: PAID.includes(raw) ? 'PAID' : FAILED.includes(raw) ? 'FAILED' : 'PENDING',
+                raw:    data,
             };
         } catch (error) {
-            console.error('PayGo Status Check Error:', error.message);
+            console.error('[PayGo] Status Check Error:', error.message);
             return { status: 'PENDING' };
         }
     }
-
 }
 
 module.exports = PayGoProvider;

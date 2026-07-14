@@ -123,9 +123,18 @@
 
     <!-- SIDEBAR (Desktop) -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-20">
-        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+        <div class="h-16 flex items-center px-6 border-b border-gray-100 justify-between">
             <span class="text-2xl font-bold text-red-600">EcoFlix<span
                     class="text-gray-400 text-xs ml-1">Admin</span></span>
+            <div class="flex items-center gap-2">
+                <!-- Badge de notificações não lidas -->
+                <button id="notif-btn" onclick="openNotifications()" class="relative hidden">
+                    <i class="fas fa-bell text-gray-400 hover:text-gray-700 transition text-sm"></i>
+                    <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                </button>
+                <!-- Indicador de ligação SSE -->
+                <div id="sse-dot" title="A ligar..." class="w-2 h-2 rounded-full bg-gray-300 transition-colors"></div>
+            </div>
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -145,8 +154,8 @@
                 class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer">
                 <i class="fas fa-users w-5 text-center"></i> Clientes
             </div>
-            <div id="nav-issues" onclick="switchTab('issues')"
-                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer">
+            <div id="nav-suporte" onclick="switchTab('suporte')"
+                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
                 <i class="fas fa-headset w-5 text-center"></i> Suporte
             </div>
         </nav>
@@ -176,7 +185,7 @@
             <div onclick="switchTab('stock')" class="p-3 font-bold border-b">Inventário</div>
             <div onclick="switchTab('sales')" class="p-3 font-bold border-b">Vendas</div>
             <div onclick="switchTab('customers')" class="p-3 font-bold border-b">Clientes</div>
-            <div onclick="switchTab('issues')" class="p-3 font-bold border-b text-blue-600">Suporte</div>
+            <div onclick="switchTab('suporte')" class="p-3 font-bold border-b text-gray-600">Suporte</div>
             <div onclick="logout()" class="p-3 text-red-600 font-bold mt-4">Sair</div>
         </div>
     </div>
@@ -251,16 +260,49 @@
                         <div class="mt-4 flex items-center text-xs text-gray-500">Enviados: <span id="dash-sms-sent" class="font-bold ml-1">...</span></div>
                     </div>
                 </div>
-                <!-- Gráfico e Atividade -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Vendas Semanais</h3>
-                        <div class="h-64 bg-gray-50 rounded flex items-center justify-center text-gray-400"><canvas
-                                id="salesChart"></canvas></div>
+                <!-- Gráfico Vendas Semanais -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Gráfico de Vendas</h3>
+                        <select id="salesChartFilter" class="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500" onchange="updateChart()">
+                            <option value="daily">Últimos Dias (Diário)</option>
+                            <option value="weekly">Últimas Semanas (Semanal)</option>
+                            <option value="monthly" selected>Últimos Meses (Mensal)</option>
+                            <option value="quarterly">Por Trimestre</option>
+                            <option value="semiannual">Por Semestre</option>
+                            <option value="annual">Anual</option>
+                        </select>
                     </div>
+                    <div class="h-64 bg-gray-50 rounded flex items-center justify-center text-gray-400">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Secção Inferior (Top 5, Atividade, Configurações) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Top 5 Clientes -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Top 5 Clientes</h3>
+                        <ul class="space-y-4" id="top-clients-list"></ul>
+                    </div>
+                    
+                    <!-- Atividade Recente -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Atividade Recente</h3>
                         <ul class="space-y-4" id="recent-activity-list"></ul>
+                    </div>
+
+                    <!-- Configurações Adicionais -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Configurações de Suporte</h3>
+                        <div class="flex flex-col gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Número do WhatsApp (Suporte Cliente)</label>
+                                <input type="text" id="setting-support-whatsapp" placeholder="Ex: 244938948994" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            </div>
+                            <button onclick="saveSupportWhatsapp()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition w-full">Salvar Número</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -371,7 +413,14 @@
 
             <!-- 4. CLIENTES -->
             <div id="panel-customers" class="panel hidden">
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">Base de Clientes</h1>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h1 class="text-2xl font-bold text-gray-800">Base de Clientes</h1>
+                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                        <button onclick="renderCustomers('active')" id="btn-cust-active" class="px-4 py-2 text-sm font-bold rounded-md bg-white shadow-sm text-gray-800 transition-all">Ativos</button>
+                        <button onclick="renderCustomers('expired')" id="btn-cust-expired" class="px-4 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">Expirados</button>
+                        <button onclick="renderCustomers('suspended')" id="btn-cust-suspended" class="px-4 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">Cancelados</button>
+                    </div>
+                </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <table class="w-full text-sm text-left">
                         <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
@@ -389,78 +438,43 @@
                 </div>
             </div>
 
-            <!-- 5. SUPORTE / PROBLEMAS -->
-            <div id="panel-issues" class="panel hidden h-[calc(100vh-100px)]">
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Reporte de Problemas & Suporte</h1>
-                    <div class="flex gap-2">
-                        <span class="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm" id="total-issues-count">0 Tickets</span>
-                    </div>
+            <!-- 5. SUPORTE -->
+            <div id="panel-suporte" class="panel hidden">
+                <!-- Cabeçalho -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Suporte ao Cliente</h1>
+                    <p class="text-gray-500 text-sm mt-1">Pesquise pelo número de telefone para ver todos os pedidos do cliente.</p>
                 </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100%-60px)]">
-                    <!-- Left Column: Ticket List -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
-                        <div class="p-5 border-b border-gray-100 bg-white flex items-center justify-between sticky top-0 z-10">
-                            <h2 class="font-extrabold text-gray-800 text-lg">Caixa de Entrada</h2>
-                            <i class="fas fa-filter text-gray-400 cursor-pointer hover:text-blue-600 transition-colors"></i>
-                        </div>
-                        <div class="overflow-y-auto flex-1 p-3 space-y-3 bg-gray-50/30" id="issues-list-container">
-                            <!-- Cards inserted here via JS -->
-                        </div>
-                    </div>
 
-                    <!-- Right Column: Ticket Detail View -->
-                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full hidden" id="issue-detail-pane">
-                        <!-- Header -->
-                        <div class="p-6 border-b border-gray-100 bg-white flex justify-between items-start sticky top-0 z-10">
-                            <div>
-                                <h2 class="text-xl font-extrabold text-gray-900 mb-2" id="detail-issue-type">Problema</h2>
-                                <div class="flex items-center gap-4 text-sm text-gray-600 font-medium" id="detail-issue-context">
-                                    <span class="flex items-center gap-2"><i class="fas fa-user-circle text-gray-400"></i> Cliente</span>
-                                    <span class="flex items-center gap-2 border-l border-gray-200 pl-4"><i class="fas fa-tv text-gray-400"></i> Perfil</span>
-                                </div>
-                            </div>
-                            <div id="detail-status-badge"></div>
+                <!-- Barra de Pesquisa -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+                    <form id="suporteSearchForm" class="flex gap-3">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                            <input
+                                type="text"
+                                id="suporteSearchPhone"
+                                placeholder="Ex: 927862935"
+                                class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium text-gray-900 transition"
+                                required
+                            >
                         </div>
-                        
-                        <!-- Chat/Issue Bubble -->
-                        <div class="p-6 flex-1 overflow-y-auto bg-gray-50/50">
-                            <div class="flex gap-4">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm mt-1">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-2xl relative">
-                                    <p class="text-gray-800 whitespace-pre-wrap leading-relaxed" id="detail-issue-desc">Descrição do problema...</p>
-                                    <p class="text-[11px] font-bold text-gray-400 mt-3 text-right uppercase tracking-wider" id="detail-issue-date">Data</p>
-                                </div>
-                            </div>
-                        </div>
+                        <button
+                            type="submit"
+                            id="suporteSearchBtn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center gap-2"
+                        >
+                            <i class="fas fa-search"></i> Procurar
+                        </button>
+                    </form>
+                </div>
 
-                        <!-- Resolution Area -->
-                        <div class="p-6 border-t border-gray-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]" id="resolution-area">
-                            <input type="hidden" id="resolveIssueId">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Mensagem de Resolução (Enviada via SMS ao Cliente)</label>
-                            <textarea id="resolveIssueMessage" rows="3" class="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all resize-none shadow-inner" placeholder="Escreva a nova senha ou instruções para o cliente (deixe em branco para mensagem padrão)..."></textarea>
-                            <div class="mt-4 flex justify-between items-center">
-                                <p class="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg"><i class="fas fa-exclamation-triangle mr-1.5"></i>Esta ação irá notificar o cliente via SMS.</p>
-                                <div class="flex gap-3">
-                                    <button onclick="closeIssueDetail()" class="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-colors">Cancelar</button>
-                                    <button onclick="submitResolveIssue()" id="resolveSubmitBtn" class="px-6 py-2.5 text-sm font-bold text-white bg-green-600 hover:bg-green-700 shadow-md shadow-green-600/20 rounded-xl transition-all flex items-center transform hover:-translate-y-0.5">
-                                        <i class="fas fa-check-circle mr-2"></i> Resolver Ticket
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Column: Empty State -->
-                    <div class="lg:col-span-2 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 h-full transition-all" id="issue-empty-state">
-                        <div class="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6">
-                            <i class="fas fa-inbox text-3xl text-gray-300"></i>
-                        </div>
-                        <p class="text-xl font-bold text-gray-700 mb-2">Caixa de Suporte</p>
-                        <p class="text-sm font-medium text-gray-500">Selecione um ticket na lista à esquerda para analisar e resolver os problemas dos clientes.</p>
+                <!-- Resultados -->
+                <div id="suporteResults" class="space-y-4">
+                    <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center py-16 text-gray-400">
+                        <i class="fas fa-headset text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-base font-bold text-gray-500">Pesquise por um número de telefone</p>
+                        <p class="text-sm text-gray-400 mt-1">Os pedidos do cliente aparecerão aqui.</p>
                     </div>
                 </div>
             </div>
@@ -468,7 +482,7 @@
         </div>
     </main>
 
-    <!-- MODAL DE EDIÇÃO DE PERFIL -->
+            <!-- MODAL DE EDIÇÃO DE PERFIL -->
     <div id="profileModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
             id="profileModalContent">
@@ -735,6 +749,24 @@
         async function loadDashboard() {
             try {
                 const { data } = await apiCall('/admin/dashboard');
+                
+                if (data && data.chartData) {
+                    window.ecoflixChartData = data.chartData;
+                    
+                    const ctx = document.getElementById('salesChart').getContext('2d');
+                    if(window.salesChartInstance) window.salesChartInstance.destroy();
+                    
+                    window.salesChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: [{ label: 'Vendas (Kz)', data: [], borderColor: '#e50914', tension: 0.4 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                    
+                    updateChart();
+                }
                 document.getElementById('dash-free').innerText = data.freeProfiles || 0;
                 document.getElementById('dash-sold').innerText = data.soldProfiles || 0;
                 document.getElementById('dash-expiring').innerText = data.expiringAccounts || 0;
@@ -1169,8 +1201,34 @@
             }
         }
 
-        function renderCustomers() {
-            document.getElementById('customers-table-body').innerHTML = customersData.map(c => {
+        let currentCustomerFilter = 'active';
+        function renderCustomers(filter = currentCustomerFilter) {
+            currentCustomerFilter = filter;
+            
+            // Update tabs styling
+            ['active', 'expired', 'suspended'].forEach(f => {
+                const btn = document.getElementById('btn-cust-' + f);
+                if (!btn) return;
+                if (f === filter) {
+                    btn.className = 'px-4 py-2 text-sm font-bold rounded-md bg-white shadow-sm text-gray-800 transition-all';
+                } else {
+                    btn.className = 'px-4 py-2 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all';
+                }
+            });
+
+            const filteredData = customersData.filter(c => {
+                if (filter === 'active') return c.status === 'ACTIVE' || c.status === 'PENDING';
+                if (filter === 'expired') return c.status === 'EXPIRED';
+                if (filter === 'suspended') return c.status === 'SUSPENDED' || c.status === 'CANCELLED';
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                document.getElementById('customers-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">Nenhum cliente encontrado nesta categoria.</td></tr>`;
+                return;
+            }
+
+            document.getElementById('customers-table-body').innerHTML = filteredData.map(c => {
                 const name = c.user?.name || 'Cliente';
                 const phone = c.user?.phone || 'S/N';
                 const planType = c.order?.plan_type || c.profile?.type || 'N/A';
@@ -1305,7 +1363,7 @@
                     }
                     else if (data.type === 'new_issue') {
                         showToast(`Novo problema reportado: ${data.issue.issue_type}`, 'warning');
-                        await loadIssues();
+                        // await  (removed)
                     }
                     else if (data.type === 'new_user_activity') {
                         // Trata atividade de utilizadores
@@ -1371,6 +1429,10 @@
             }
         }
 
+        // =====
+
+        // ============================================================================
+        let issuesData = [];
         // ============================================================================
         // INIT & NAV
         // ============================================================================
@@ -1379,176 +1441,236 @@
             loadOrders();
             loadStock();
             loadCustomers();
-            loadIssues();
+            
             loadPlansPricing();
             await loadInventoryStats();
 
-            // Chart
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'],
-                    datasets: [{ label: 'Vendas (Kz)', data: [12000, 19000, 3000, 5000, 20000, 30000, 45000], borderColor: '#e50914', tension: 0.4 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            
+
         };
 
-        // ============================================================================
-        // ISSUES / SUPORTE
-        // ============================================================================
-        let issuesData = [];
-        async function loadIssues() {
-            try {
-                const { data } = await apiCall('/admin/issues');
-                issuesData = data || [];
-                renderIssues();
-            } catch (e) {
-                console.error('Issues load error:', e);
+        function updateChart() {
+            if(!window.ecoflixChartData || !window.salesChartInstance) return;
+            const filter = document.getElementById('salesChartFilter').value;
+            const selectedData = window.ecoflixChartData[filter];
+            if(selectedData) {
+                window.salesChartInstance.data.labels = selectedData.labels;
+                window.salesChartInstance.data.datasets[0].data = selectedData.data;
+                window.salesChartInstance.update();
             }
         }
 
-        let activeIssueId = null;
+        // ============================================================================
+        // SUPORTE — Pesquisa de Cliente
+        // ============================================================================
+        document.getElementById('suporteSearchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('suporteSearchPhone').value.trim();
+            const btn = document.getElementById('suporteSearchBtn');
+            searchClientByPhone(phone, 'suporteResults', btn);
+        });
 
-        function renderIssues() {
-            document.getElementById('total-issues-count').innerText = `${issuesData.length} Tickets`;
-            const listContainer = document.getElementById('issues-list-container');
-            
-            if(issuesData.length === 0) {
-                listContainer.innerHTML = `<div class="text-center p-6 text-gray-400 text-sm font-medium">Nenhum ticket encontrado.</div>`;
-                return;
-            }
+        async function searchClientByPhone(phone, resultsContainerId, btn) {
+            const originalHtml = btn ? btn.innerHTML : null;
+            if (btn) { btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>'; btn.disabled = true; }
 
-            listContainer.innerHTML = issuesData.map(i => {
-                let phone = i.subscription?.user?.phone || 'S/N';
-                let profileStr = i.subscription?.profile?.name || i.subscription?.account?.email || 'S/N';
-                
-                if (phone === 'S/N' && i.description && i.description.includes('Suporte Público')) {
-                    const match = i.description.match(/Tel:\s*([0-9]+)\]/);
-                    if (match && match[1]) phone = match[1];
-                    profileStr = 'Público';
+            try {
+                const { success, data } = await apiCall(`/admin/support/search/${phone}`);
+                const resultsContainer = document.getElementById(resultsContainerId);
+
+                if (!success || !data || data.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center py-16 text-gray-400">
+                            <i class="fas fa-user-slash text-3xl text-gray-300 mb-4"></i>
+                            <p class="text-base font-bold text-gray-500">Nenhum cliente encontrado</p>
+                            <p class="text-sm text-gray-400 mt-1">Verifique o número e tente novamente.</p>
+                        </div>`;
+                    return;
                 }
-                
-                const isPending = i.status === 'PENDING';
-                const statusColor = isPending ? 'red' : 'green';
-                const statusText = isPending ? 'Pendente' : 'Resolvido';
-                const isActive = activeIssueId === i.id;
-                const activeClasses = isActive ? 'border-l-4 border-blue-600 bg-blue-50/50 shadow-sm' : 'border-l-4 border-transparent hover:bg-gray-50 hover:shadow-sm';
 
-                const shortDesc = i.description ? (i.description.length > 55 ? i.description.substring(0, 55) + '...' : i.description) : 'Sem descrição adicional.';
+                const order = data[0];
+                const sub   = order.subscription || null;
+                const prof  = sub?.profile || null;
+                const master = prof?.master_account || null;
+                const hasSub = !!(sub && sub.id && prof);
+                const isCancelled = order.status === 'CANCELLED' || sub?.status === 'CANCELLED';
+                const showCredentials = hasSub && !isCancelled;
 
-                return `
-                <div onclick="viewIssue('${i.id}')" class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer transition-all ${activeClasses}">
-                    <div class="flex justify-between items-start mb-2.5">
-                        <span class="font-extrabold text-gray-900 text-sm tracking-tight">${phone}</span>
-                        <span class="bg-${statusColor}-100 text-${statusColor}-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">${statusText}</span>
+                const STATUS_MAP = {
+                    ACTIVE:    { label: 'ATIVO',     cls: 'bg-green-100 text-green-800 border border-green-200' },
+                    SOLD:      { label: 'VENDIDO',   cls: 'bg-blue-100 text-blue-800 border border-blue-200'   },
+                    SUSPENDED: { label: 'SUSPENSO',  cls: 'bg-red-100 text-red-800 border border-red-200'     },
+                    CANCELLED: { label: 'CANCELADO', cls: 'bg-gray-100 text-gray-600 border border-gray-200'  },
+                    EXPIRED:   { label: 'EXPIRADO',  cls: 'bg-amber-100 text-amber-800 border border-amber-200' },
+                };
+                const statusInfo = STATUS_MAP[order.status] || STATUS_MAP[sub?.status] || { label: order.status || sub?.status || '—', cls: 'bg-gray-100 text-gray-600 border border-gray-200' };
+                const isSuspended = sub?.status === 'SUSPENDED';
+                const paidDate = order.paid_at && new Date(order.paid_at).getFullYear() > 1970
+                    ? new Date(order.paid_at).toLocaleDateString('pt-PT')
+                    : '—';
+
+                resultsContainer.innerHTML = `
+                <div class="bg-white rounded-xl border ${isSuspended ? 'border-red-200' : (hasSub ? 'border-blue-100' : 'border-amber-200')} shadow-sm overflow-hidden">
+
+                    <!-- Topo: Identificação do Cliente -->
+                    <div class="px-6 py-5 flex items-center justify-between border-b border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full ${hasSub ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'} flex items-center justify-center text-xl font-bold shadow-inner">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 text-base">${order.phone}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Plano: <span class="font-semibold text-gray-600">${order.plan_type}</span> &nbsp;•&nbsp; Pedido: <span class="font-mono text-gray-500">#${order.id.slice(0, 8)}</span></p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${statusInfo.cls}">${statusInfo.label}</span>
                     </div>
-                    <div class="text-xs font-bold text-gray-800 mb-1 truncate">${i.issue_type}</div>
-                    <div class="text-[11px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">${shortDesc}</div>
-                    <div class="flex justify-between items-center text-[10px] font-medium text-gray-400 pt-2 border-t border-gray-50">
-                        <span class="flex items-center gap-1.5"><i class="fas fa-tv"></i> <span class="truncate max-w-[100px]">${profileStr}</span></span>
-                        <span>${new Date(i.created_at).toLocaleDateString('pt-PT')}</span>
+
+                    <!-- Corpo -->
+                    <div class="px-6 py-5">
+                        ${showCredentials ? `
+                        <!-- Com subscrição: mostra detalhes de acesso -->
+                        <div class="grid grid-cols-2 gap-4 mb-5">
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Perfil</p>
+                                <p class="font-bold text-gray-900">${prof.name || 'N/A'}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">PIN</p>
+                                <p class="font-mono font-bold text-gray-900 text-lg tracking-widest">${prof.pin || '—'}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Netflix</p>
+                                <p class="font-mono text-gray-900 text-sm truncate">${master?.email || 'N/A'}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Senha Netflix</p>
+                                <p class="font-mono text-blue-600 font-bold">${master?.password || 'N/A'}</p>
+                            </div>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://wa.me/${order.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Olá! Somos do suporte da EcoFlix.')}" target="_blank"
+                               class="px-4 py-2 bg-[#25D366] text-white text-sm font-bold rounded-lg hover:bg-[#128C7E] transition-colors flex items-center gap-2">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                            <button onclick="supportResendSms('${order.phone}', '${master?.email}', '${master?.password}', '${prof.name}', '${prof.pin}')"
+                                    class="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg hover:bg-blue-100 border border-blue-200 flex items-center gap-2">
+                                <i class="fas fa-sms"></i> Reenviar SMS
+                            </button>
+                            <button onclick="supportResetPassword('${master?.id}')"
+                                    class="px-4 py-2 bg-amber-50 text-amber-700 text-sm font-bold rounded-lg hover:bg-amber-100 border border-amber-200 flex items-center gap-2">
+                                <i class="fas fa-key"></i> Resetar Senha
+                            </button>
+                            ${!isSuspended ? `
+                            <button onclick="supportSuspend('${sub.id}', '${order.phone}')"
+                                    class="px-4 py-2 bg-red-50 text-red-700 text-sm font-bold rounded-lg hover:bg-red-100 border border-red-200 flex items-center gap-2 ml-auto">
+                                <i class="fas fa-ban"></i> Suspender
+                            </button>` : ''}
+                        </div>
+                        ` : isCancelled ? `
+                        <!-- Pedido Cancelado -->
+                        <div class="flex items-start gap-4 bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                            <i class="fas fa-times-circle text-gray-400 text-xl mt-0.5"></i>
+                            <div>
+                                <p class="font-bold text-gray-700 text-sm">Pedido Cancelado</p>
+                                <p class="text-gray-500 text-xs mt-0.5">Esta subscrição foi cancelada. O cliente não tem mais acesso a esta conta.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://wa.me/${order.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Olá! Somos do suporte da EcoFlix.')}" target="_blank"
+                               class="px-4 py-2 bg-[#25D366] text-white text-sm font-bold rounded-lg hover:bg-[#128C7E] transition-colors flex items-center gap-2">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        </div>
+                        ` : `
+                        <!-- Sem subscrição ativa -->
+                        <div class="flex items-start gap-4 bg-amber-50 border border-amber-100 rounded-lg p-4 mb-4">
+                            <i class="fas fa-exclamation-triangle text-amber-500 text-xl mt-0.5"></i>
+                            <div>
+                                <p class="font-bold text-amber-800 text-sm">Sem conta Netflix associada</p>
+                                <p class="text-amber-700 text-xs mt-0.5">Este cliente não tem uma subscrição ativa no momento. O último pedido foi em ${paidDate}.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://wa.me/${order.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Olá! Somos do suporte da EcoFlix.')}" target="_blank"
+                               class="px-4 py-2 bg-[#25D366] text-white text-sm font-bold rounded-lg hover:bg-[#128C7E] transition-colors flex items-center gap-2">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        </div>
+                        `}
                     </div>
                 </div>`;
-            }).join('');
-        }
-
-        function viewIssue(id) {
-            activeIssueId = id;
-            renderIssues(); 
-            
-            const issue = issuesData.find(i => i.id === id);
-            if (!issue) return;
-
-            document.getElementById('issue-empty-state').classList.add('hidden');
-            document.getElementById('issue-detail-pane').classList.remove('hidden');
-
-            let phone = issue.subscription?.user?.phone || 'S/N';
-            let profileStr = issue.subscription?.profile?.name || issue.subscription?.account?.email || 'S/N';
-            
-            if (phone === 'S/N' && issue.description && issue.description.includes('Suporte Público')) {
-                const match = issue.description.match(/Tel:\s*([0-9]+)\]/);
-                if (match && match[1]) phone = match[1];
-                profileStr = 'Público';
-            }
-
-            document.getElementById('detail-issue-type').innerText = issue.issue_type;
-            document.getElementById('detail-issue-context').innerHTML = `<span class="flex items-center gap-2"><i class="fas fa-phone text-gray-400"></i> <span class="font-bold text-gray-700">${phone}</span></span><span class="flex items-center gap-2 border-l border-gray-200 pl-4"><i class="fas fa-tv text-gray-400"></i> <span class="font-bold text-gray-700">${profileStr}</span></span>`;
-            document.getElementById('detail-issue-desc').innerText = issue.description || 'Sem descrição.';
-            document.getElementById('detail-issue-date').innerText = new Date(issue.created_at).toLocaleString('pt-PT');
-
-            const isPending = issue.status === 'PENDING';
-            const badgeClass = isPending ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-            const badgeText = isPending ? 'Pendente' : 'Resolvido';
-            document.getElementById('detail-status-badge').innerHTML = `<span class="${badgeClass} px-3 py-1.5 rounded-full text-xs font-extrabold uppercase shadow-sm tracking-wider">${badgeText}</span>`;
-
-            const resArea = document.getElementById('resolution-area');
-            if (isPending) {
-                resArea.classList.remove('hidden');
-                document.getElementById('resolveIssueId').value = id;
-                document.getElementById('resolveIssueMessage').value = '';
-            } else {
-                resArea.classList.add('hidden');
+            } catch (error) {
+                console.error(error);
+                showToast('Erro ao procurar cliente', 'error');
+            } finally {
+                if (btn) { btn.innerHTML = originalHtml; btn.disabled = false; }
             }
         }
 
-        function closeIssueDetail() {
-            activeIssueId = null;
-            renderIssues();
-            document.getElementById('issue-detail-pane').classList.add('hidden');
-            document.getElementById('issue-empty-state').classList.remove('hidden');
+        async function supportResendSms(phone, email, password, profile, pin) {
+            if(!confirm('Reenviar os dados de acesso por SMS para ' + phone + '?')) return;
+            try {
+                const { success, message } = await apiCall('/admin/support/resend-sms', 'POST', { phone, email, password, profile, pin });
+                showToast(message || 'Enviado', success ? 'success' : 'error');
+            } catch(e) { showToast('Erro', 'error'); }
         }
 
-        async function submitResolveIssue() {
-            const id = document.getElementById('resolveIssueId').value;
-            const message = document.getElementById('resolveIssueMessage').value;
-            const btn = document.getElementById('resolveSubmitBtn');
-            
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processando...';
+        async function supportSuspend(subId, phone) {
+            if(!confirm('Tem a certeza que deseja SUSPENDER esta conta e notificar o cliente?')) return;
+            try {
+                const { success, message } = await apiCall('/admin/support/suspend', 'POST', { subscription_id: subId, phone });
+                showToast(message || 'Suspenso', success ? 'success' : 'error');
+                const activePhone = document.getElementById('suporteSearchPhone').value.trim();
+                if (activePhone) searchClientByPhone(activePhone, 'suporteResults', null);
+            } catch(e) { showToast('Erro', 'error'); }
+        }
+
+        async function supportResetPassword(masterId) {
+            const newPassword = prompt('Introduza a nova senha da Netflix:');
+            if(!newPassword) return;
+
+            if(!confirm('ATENÇÃO: Isto vai enviar um SMS para TODOS os clientes ativos nesta conta. Continuar?')) return;
 
             try {
-                const { success } = await apiCall(`/admin/issues/${id}/resolve`, 'POST', { message });
-                if (success) {
-                    showToast('Problema marcado como resolvido e SMS enviado!', 'success');
-                    closeIssueDetail();
-                    loadIssues();
-                } else {
-                    showToast('Erro ao resolver problema', 'error');
-                }
-            } catch (e) {
-                showToast('Erro ao resolver problema', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+                showToast('A enviar SMS a todos os utilizadores...', 'info');
+                const { success, message } = await apiCall('/admin/support/reset-password', 'POST', { master_account_id: masterId, new_password: newPassword });
+                showToast(message || 'Sucesso', success ? 'success' : 'error');
+                const activePhone = document.getElementById('suporteSearchPhone').value.trim();
+                if (activePhone) searchClientByPhone(activePhone, 'suporteResults', null);
+            } catch(e) { showToast('Erro', 'error'); }
         }
 
 
+        // ============================================================================
+        
         function switchTab(tabId) {
             document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('text-gray-600'); });
             const activeNav = document.getElementById('nav-' + tabId);
-            activeNav.classList.add('active');
-            activeNav.classList.remove('text-gray-600');
+            if(activeNav) {
+                activeNav.classList.add('active');
+                activeNav.classList.remove('text-gray-600');
+            }
             document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
-            document.getElementById('panel-' + tabId).classList.remove('hidden');
+            const panel = document.getElementById('panel-' + tabId);
+            if(panel) panel.classList.remove('hidden');
 
             // Load data for specific tabs
-            if (tabId === 'partners') loadPartners();
-            if (tabId === 'customers') loadCustomers();
-            if (tabId === 'issues') loadIssues();
+            if (tabId === 'partners' && typeof loadPartners === 'function') loadPartners();
+            if (tabId === 'customers' && typeof loadCustomers === 'function') loadCustomers();
+            // tab issues loading removed
         }
 
         function toggleDetails(id, iconId) { 
-            document.getElementById(id).classList.toggle('hidden'); 
+            const el = document.getElementById(id);
+            if(el) el.classList.toggle('hidden'); 
             if(iconId && document.getElementById(iconId)) {
                 document.getElementById(iconId).classList.toggle('rotate-180');
             }
         }
 
-        // ============================================================================
         // PARTNERS MANAGEMENT
         // ============================================================================
         let partnersData = [];
@@ -1750,8 +1872,126 @@
                 }
             }
         });
+
+        async function saveSupportWhatsapp() {
+            const val = document.getElementById('setting-support-whatsapp').value;
+            if (!val) return alert('Insira um número válido.');
+            try {
+                const res = await apiCall('/admin/settings', 'POST', { key: 'SUPPORT_WHATSAPP', value: val });
+                if (res.success) alert(res.message);
+                else alert(res.message);
+            } catch(e) { alert('Erro ao salvar configuração.'); }
+        }
     </script>
     <script src="/js/components.js"></script>
+    <script>
+        // ============================================================================
+        // SEARCH CLIENT JS (NOVO SUPORTE)
+        // ============================================================================
+
+
+
+        // ============================================================================
+        // SSE — Actualizações em tempo real
+        // ============================================================================
+        (function initSSE() {
+            let unreadCount = 0;
+            const notifications = [];
+
+            const dot  = document.getElementById('sse-dot');
+            const btn  = document.getElementById('notif-btn');
+            const badge = document.getElementById('notif-badge');
+
+            function setDot(state) {
+                const STATES = {
+                    connecting: 'bg-yellow-400',
+                    connected:  'bg-green-400',
+                    error:      'bg-red-400',
+                };
+                dot.className = `w-2 h-2 rounded-full transition-colors ${STATES[state] || 'bg-gray-300'}`;
+                dot.title = { connecting: 'A ligar...', connected: 'Ligado (tempo real)', error: 'Sem ligação' }[state] || '';
+            }
+
+            function addNotification(icon, text, color) {
+                notifications.unshift({ icon, text, color, time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) });
+                if (notifications.length > 20) notifications.pop();
+                unreadCount++;
+                btn.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+            }
+
+            window.openNotifications = function() {
+                unreadCount = 0;
+                badge.classList.add('hidden');
+                badge.textContent = '0';
+                const list = notifications.slice(0, 10).map(n =>
+                    `<div class="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
+                        <div class="w-7 h-7 rounded-full ${n.color} flex items-center justify-center text-white text-xs flex-shrink-0 mt-0.5">
+                            <i class="fas fa-${n.icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-800">${n.text}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">${n.time}</p>
+                        </div>
+                    </div>`
+                ).join('') || '<p class="text-sm text-gray-400 text-center py-4">Sem notificações</p>';
+
+                const existing = document.getElementById('notif-panel');
+                if (existing) { existing.remove(); return; }
+
+                const panel = document.createElement('div');
+                panel.id = 'notif-panel';
+                panel.className = 'absolute top-16 left-4 right-4 bg-white rounded-xl shadow-xl border border-gray-200 z-50 max-h-80 overflow-y-auto';
+                panel.innerHTML = `
+                    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <span class="font-bold text-gray-800 text-sm">Notificações</span>
+                        <button onclick="document.getElementById('notif-panel').remove()" class="text-gray-400 hover:text-gray-600 text-xs"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="p-3">${list}</div>`;
+                document.querySelector('aside').style.position = 'relative';
+                document.querySelector('aside').appendChild(panel);
+            };
+
+            // Handlers por evento SSE
+            const HANDLERS = {
+                connected: () => {
+                    setDot('connected');
+                },
+                order_paid: (data) => {
+                    const amount = new Intl.NumberFormat('pt-AO').format(data.amount || 0);
+                    const msg = `Pagamento recebido — ${data.plan || ''} • ${amount} Kz`;
+                    showToast(msg, 'success');
+                    addNotification('check-circle', msg, 'bg-green-500');
+
+                    // Recarregar painel activo sem interromper o admin
+                    const active = document.querySelector('.panel:not(.hidden)')?.id?.replace('panel-', '');
+                    if (active === 'dashboard') loadDashboard();
+                    if (active === 'sales')     loadOrders();
+                    if (active === 'stock')     loadStock();
+                },
+            };
+
+            function connect() {
+                setDot('connecting');
+                const es = new EventSource('/api/ecoflix/admin/events');
+
+                Object.entries(HANDLERS).forEach(([event, handler]) => {
+                    es.addEventListener(event, (e) => {
+                        try { handler(JSON.parse(e.data)); } catch {}
+                    });
+                });
+
+                es.onerror = () => {
+                    setDot('error');
+                    // EventSource reconecta automaticamente — não precisamos de fazer nada
+                };
+            }
+
+            connect();
+        })();
+
+</script>
 </body>
 
 </html>

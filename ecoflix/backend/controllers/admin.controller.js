@@ -87,6 +87,116 @@ const getDashboard = async (req, res) => {
             console.error('Error fetching SMS balance:', smsError);
         }
 
+        // Calculate Top 5 Clients
+        const clientTotals = {};
+        if (todaysOrders) { // For performance, maybe allOrders? The requirement didn't specify timeframe, let's just fetch all recent orders.
+             const { data: allOrders } = await supabase.from('ecoflix_orders').select('phone, amount, created_at').order('created_at', { ascending: false }).limit(100);
+             if (allOrders) {
+                 allOrders.forEach(o => {
+                     if (o.phone) {
+                         clientTotals[o.phone] = (clientTotals[o.phone] || 0) + parseFloat(o.amount);
+                     }
+                 });
+             }
+        }
+        const topClients = Object.entries(clientTotals)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([phone, total]) => ({ phone, total }));
+
+
+        // Chart Data Aggregation
+        const chartData = {
+            daily: { labels: [], data: [] },
+            weekly: { labels: [], data: [] },
+            monthly: { labels: [], data: [] },
+            quarterly: { labels: [], data: [] },
+            semiannual: { labels: [], data: [] },
+            annual: { labels: [], data: [] }
+        };
+
+        const { data: allPaidOrders } = await supabase.from('ecoflix_orders')
+            .select('amount, paid_at')
+            .in('status', ['PAID', 'MANUAL'])
+            .order('paid_at', { ascending: true });
+
+        if (allPaidOrders && allPaidOrders.length > 0) {
+            const getWeek = (d) => {
+                const date = new Date(d.getTime());
+                date.setHours(0, 0, 0, 0);
+                date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+                const week1 = new Date(date.getFullYear(), 0, 4);
+                return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+            };
+
+            const aggregations = { daily: {}, weekly: {}, monthly: {}, quarterly: {}, semiannual: {}, annual: {} };
+
+            allPaidOrders.forEach(o => {
+                if (!o.paid_at) return;
+                const d = new Date(o.paid_at);
+                const amt = parseFloat(o.amount) || 0;
+                const year = d.getFullYear();
+                const month = d.getMonth() + 1;
+                const day = d.getDate();
+
+                // Daily: YYYY-MM-DD
+                const dailyKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                aggregations.daily[dailyKey] = (aggregations.daily[dailyKey] || 0) + amt;
+
+                // Weekly: YYYY-Www
+                const weekNum = getWeek(d);
+                const weeklyKey = `${year}-W${String(weekNum).padStart(2, '0')}`;
+                aggregations.weekly[weeklyKey] = (aggregations.weekly[weeklyKey] || 0) + amt;
+
+                // Monthly: YYYY-MM
+                const monthlyKey = `${year}-${String(month).padStart(2, '0')}`;
+                aggregations.monthly[monthlyKey] = (aggregations.monthly[monthlyKey] || 0) + amt;
+
+                // Quarterly: Q1-Q4
+                const q = Math.ceil(month / 3);
+                const quarterKey = `${year}-Q${q}`;
+                aggregations.quarterly[quarterKey] = (aggregations.quarterly[quarterKey] || 0) + amt;
+
+                // Semiannual: S1-S2
+                const s = Math.ceil(month / 6);
+                const semiKey = `${year}-S${s}`;
+                aggregations.semiannual[semiKey] = (aggregations.semiannual[semiKey] || 0) + amt;
+
+                // Annual: YYYY
+                const annualKey = `${year}`;
+                aggregations.annual[annualKey] = (aggregations.annual[annualKey] || 0) + amt;
+            });
+
+            // Convert back to arrays for Chart.js
+            for (const key of Object.keys(aggregations)) {
+                // To prevent huge charts, limit daily to last 14, weekly to last 12, monthly to last 12
+                let entries = Object.entries(aggregations[key]).sort((a, b) => a[0].localeCompare(b[0]));
+                
+                if (key === 'daily') entries = entries.slice(-14);
+                if (key === 'weekly') entries = entries.slice(-12);
+                if (key === 'monthly') entries = entries.slice(-12);
+
+                entries.forEach(([label, value]) => {
+                    chartData[key].labels.push(label);
+                    chartData[key].data.push(value);
+                });
+            }
+        }
+
+        // Recent Activity (mocked or from last orders)
+        // Recent Activity (mocked or from last orders)
+        const recentActivity = [];
+        const { data: recentOrders } = await supabase.from('ecoflix_orders').select('phone, plan_type, created_at').order('created_at', { ascending: false }).limit(5);
+        if (recentOrders) {
+            recentOrders.forEach(ro => {
+                const date = new Date(ro.created_at);
+                recentActivity.push({
+                    title: `Nova Subscrição ${ro.plan_type} - ${ro.phone}`,
+                    time: date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+                });
+            });
+        }
+
         res.json({
             success: true,
             data: {
@@ -96,7 +206,10 @@ const getDashboard = async (req, res) => {
                 todayRevenue,
                 todaySales,
                 smsAvailable,
-                smsSent
+                smsSent,
+                topClients,
+                recentActivity,
+                chartData
             }
         });
     } catch (error) {
@@ -975,18 +1088,26 @@ const updatePlans = async (req, res) => {
     try {
         const newPrices = req.body;
         const currentPlans = await planService.getPlans();
-        const paygoService = require('../services/paygo.service');
-        
+
         const plansToSave = {};
+        const PAYGO_API_KEY = process.env.PAYGOOO_API_KEY;
+        const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
+        const axios = require('axios');
+
         for (const [key, current] of Object.entries(currentPlans)) {
             const newPrice = parseInt(newPrices[key]);
-            
-            // If the price is different, we generate a new Product in PayGo
-            if (newPrice && newPrice !== current.price) {
-                 const newPaygoId = await paygoService.createProduct(`EcoFlix ${key}`, newPrice, 'https://ecokambio.com', `Acesso EcoFlix ${key}`);
-                 plansToSave[key] = { price: newPrice, paygo_id: newPaygoId };
+
+            // If the price differs and we have a PayGo key, create a new Product
+            if (newPrice && newPrice !== current.price && PAYGO_API_KEY) {
+                const { data: prod } = await axios.post(
+                    `${PAYGO_BASE_URL}/products`,
+                    { name: `EcoFlix ${key}`, price: newPrice, thank_you_url: 'https://ecokambio.com', description: `Acesso EcoFlix ${key}` },
+                    { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
+                );
+                const newPaygoId = prod?.product?.id || prod?.id;
+                plansToSave[key] = { price: newPrice, paygo_id: newPaygoId };
             } else {
-                 plansToSave[key] = current;
+                plansToSave[key] = { ...current, price: newPrice || current.price };
             }
         }
         
@@ -1231,5 +1352,248 @@ const restoreProfile = async (req, res) => {
     }
 };
 
-module.exports.suspendProfile = suspendProfile;
-module.exports.restoreProfile = restoreProfile;
+
+
+const getSupportClients = async (req, res) => {
+    try {
+
+        const query = req.query.q || '';
+        let { data: allSubscriptions, error } = await supabase
+            .from('ecoflix_subscriptions')
+            .select(`
+                id,
+                status,
+                expires_at,
+                profile:ecoflix_profiles!fk_subscriptions_profile (
+                    id, name, pin, client_phone, status,
+                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)
+                ),
+                account:ecoflix_master_accounts(email, password),
+                order:ecoflix_orders!ecoflix_subscriptions_order_id_fkey(phone, reference_id, plan_type, amount, paid_at, expires_at)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const groupedMap = new Map();
+
+        allSubscriptions.forEach(sub => {
+            if (!sub.order || !sub.order.phone) return;
+            const phone = sub.order.phone;
+            
+            // Search filter
+            if (query && !phone.includes(query) && !sub.order.reference_id.toLowerCase().includes(query.toLowerCase())) return;
+
+            if (!groupedMap.has(phone)) {
+                groupedMap.set(phone, {
+                    phone: phone,
+                    total_amount: 0,
+                    active_count: 0,
+                    subscriptions: []
+                });
+            }
+
+            const client = groupedMap.get(phone);
+            client.total_amount += sub.order.amount;
+            if (sub.status === 'ACTIVE') {
+                client.active_count += 1;
+            }
+
+            client.subscriptions.push(sub);
+        });
+
+        res.json({ success: true, data: Array.from(groupedMap.values()) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const resendSms = async (req, res) => {
+    try {
+        const { phone, email, password, profile, pin } = req.body;
+        const smsService = require('../services/sms.service');
+        await smsService.sendDeliverySms(phone, { email, password, profile, pin });
+        res.json({ success: true, message: 'SMS reenviado com sucesso.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const suspendAccount = async (req, res) => {
+    try {
+        const { subscription_id, phone } = req.body;
+        
+        await supabase
+            .from('ecoflix_subscriptions')
+            .update({ status: 'SUSPENDED' })
+            .eq('id', subscription_id);
+
+        const smsService = require('../services/sms.service');
+        await smsService.sendRevokeSms(phone, 'Partilha indevida de dados / Violação de Termos');
+
+        res.json({ success: true, message: 'Conta suspensa e cliente notificado.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const restoreAccount = async (req, res) => {
+    try {
+        const { subscription_id, phone } = req.body;
+
+        const { data: sub } = await supabase
+            .from('ecoflix_subscriptions')
+            .select('profile_id, status')
+            .eq('id', subscription_id)
+            .single();
+
+        if (!sub) throw new Error("Subscrição não encontrada.");
+
+        const { data: activeSubs } = await supabase
+            .from('ecoflix_subscriptions')
+            .select('id')
+            .eq('profile_id', sub.profile_id)
+            .eq('status', 'ACTIVE');
+
+        if (activeSubs && activeSubs.length > 0) {
+            throw new Error("Não é possível reativar. Este perfil já foi vendido ou alocado a outro utilizador.");
+        }
+
+        await supabase
+            .from('ecoflix_subscriptions')
+            .update({ status: 'ACTIVE' })
+            .eq('id', subscription_id);
+
+        await supabase
+            .from('ecoflix_profiles')
+            .update({ status: 'SOLD' })
+            .eq('id', sub.profile_id);
+
+        const smsService = require('../services/sms.service');
+        if (phone) {
+            await smsService.sendRestoreSms(phone);
+        }
+
+        res.json({ success: true, message: 'Conta reativada com sucesso e SMS enviado.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { master_account_id, new_password } = req.body;
+        
+        await supabase
+            .from('ecoflix_master_accounts')
+            .update({ password: new_password })
+            .eq('id', master_account_id);
+
+        res.json({ success: true, message: 'Palavra-passe atualizada com sucesso.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const fs = require('fs');
+const path = require('path');
+const SETTINGS_FILE = path.join(__dirname, '../settings.json');
+
+const getSettings = async (req, res) => {
+    try {
+        if (!fs.existsSync(SETTINGS_FILE)) {
+            return res.json({ success: true, settings: {} });
+        }
+        const settingsData = fs.readFileSync(SETTINGS_FILE, 'utf8');
+        res.json({ success: true, settings: JSON.parse(settingsData) });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const updateSettings = async (req, res) => {
+    try {
+        const { key, value } = req.body;
+        if (!key) throw new Error("Chave de configuração não fornecida.");
+
+        let currentSettings = {};
+        if (fs.existsSync(SETTINGS_FILE)) {
+            currentSettings = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+        }
+
+        currentSettings[key] = value;
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(currentSettings, null, 4));
+
+        res.json({ success: true, message: 'Configuração atualizada com sucesso.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+const searchSupportClient = async (req, res) => {
+    try {
+        const phone = req.params.phone;
+
+        // Fetch orders and their nested subscriptions and profiles
+        const { data, error } = await supabase
+            .from('ecoflix_orders')
+            .select(`
+                id,
+                plan_type,
+                paid_at,
+                phone,
+                subscription:ecoflix_subscriptions!ecoflix_subscriptions_order_id_fkey (
+                    id,
+                    status,
+                    profile:ecoflix_profiles!fk_subscriptions_profile (
+                        name,
+                        pin,
+                        master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey (
+                            id,
+                            email,
+                            password
+                        )
+                    )
+                )
+            `)
+            .like('phone', `%${phone}%`)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching support client:', error);
+            return res.json({ success: false, message: 'Erro ao pesquisar na base de dados.' });
+        }
+        
+        // Flatten subscription arrays (one-to-many relation returns arrays)
+        const formattedData = data.map(order => {
+            let sub = order.subscription;
+            if (Array.isArray(sub)) sub = sub.length > 0 ? sub[0] : null;
+            return { ...order, subscription: sub };
+        });
+
+        // Priority: most recent order that has an active subscription
+        // Fallback: just the most recent order (first item, already sorted desc)
+        const ACTIVE_STATUSES = ['ACTIVE', 'SOLD'];
+        const bestOrder =
+            formattedData.find(o => o.subscription && ACTIVE_STATUSES.includes(o.subscription.status)) ||
+            formattedData.find(o => o.subscription) ||
+            formattedData[0] ||
+            null;
+
+        res.json({ success: true, data: bestOrder ? [bestOrder] : [] });
+    } catch (e) {
+        console.error('searchSupportClient error:', e);
+        res.json({ success: false, message: 'Erro interno no servidor' });
+    }
+};
+
+module.exports.searchSupportClient = searchSupportClient;
+module.exports.getSupportClients = getSupportClients;
+module.exports.resendSms = resendSms;
+module.exports.suspendAccount = suspendAccount;
+module.exports.restoreAccount = restoreAccount;
+module.exports.resetPassword = resetPassword;
+module.exports.getSettings = getSettings;
+module.exports.updateSettings = updateSettings;
+

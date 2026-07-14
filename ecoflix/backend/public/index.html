@@ -946,6 +946,36 @@
             </div>
         </div>
 
+        <!-- TELA: CHECKOUT OTP (Express) -->
+        <div id="step-checkout-otp" class="hidden">
+            <div class="netflix-card rounded-md p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
+                <button onclick="showScreen('step-plan')"
+                    class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition text-sm">
+                    <i class="fas fa-arrow-left"></i> Alterar Número ou Plano
+                </button>
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold">Confirme o seu Número</h2>
+                    <p class="text-muted text-sm mt-1">Para pagar via Express, insira o código SMS enviado para <span id="checkout-phone-display" class="font-bold text-white"></span></p>
+                </div>
+
+                <form onsubmit="event.preventDefault(); submitCheckoutOtp();">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-muted mb-2 font-medium text-sm text-center">Código SMS</label>
+                            <input type="text" id="checkout-otp-code" required
+                                class="w-full bg-accent border border-gray-700/50 rounded px-4 py-3 text-white font-bold text-center text-3xl tracking-[0.5em]"
+                                placeholder="0000" maxlength="4" autocomplete="one-time-code" oninput="this.value = this.value.replace(/\D/g, '')">
+                        </div>
+
+                        <button id="btn-checkout-otp" type="submit"
+                            class="btn-primary w-full mt-8 py-4 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
+                            <span>Confirmar e Pagar via Express</span> <i class="fas fa-check-circle text-sm"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- TELA 7: DASHBOARD / MINHA ASSINATURA -->
         <div id="step-dashboard" class="hidden">
             <div class="max-w-4xl mx-auto animate-fade-in">
@@ -1239,6 +1269,9 @@
             showScreen('step-payment-method');
         }
 
+        let checkoutPendingMethod = null;
+        let checkoutPendingCardElement = null;
+
         // === PAGAMENTO ===
         async function selectPaymentMethod(method, cardElement) {
             let originalContent = '';
@@ -1258,6 +1291,42 @@
                     }
                     clearSession();
                     currentOrder = null;
+                }
+
+                // EXPRESS OTP INTERCEPT
+                if (method === 'EXPRESS' && !checkoutPendingMethod) {
+                    document.getElementById('global-loader').classList.remove('hidden');
+                    document.getElementById('global-loader').classList.add('flex');
+                    
+                    try {
+                        const requestData = { phone: userPhone };
+                        const hmacHeaders = await window.HMACSign.signRequest(requestData);
+                        
+                        const resp = await fetch(`${API_BASE}/auth/register-request`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', ...hmacHeaders },
+                            body: JSON.stringify(requestData)
+                        });
+                        
+                        const data = await resp.json();
+                        if (!data.success) throw new Error(data.message);
+                        
+                        checkoutPendingMethod = method;
+                        checkoutPendingCardElement = cardElement;
+                        
+                        document.getElementById('checkout-phone-display').innerText = userPhone;
+                        document.getElementById('checkout-otp-code').value = '';
+                        document.getElementById('global-loader').classList.add('hidden');
+                        document.getElementById('global-loader').classList.remove('flex');
+                        
+                        showScreen('step-checkout-otp');
+                        return;
+                    } catch(e) {
+                        document.getElementById('global-loader').classList.add('hidden');
+                        document.getElementById('global-loader').classList.remove('flex');
+                        showToast(e.message || 'Erro ao enviar SMS', 'error');
+                        return;
+                    }
                 }
 
                 if (method === 'EXPRESS') {
@@ -1618,17 +1687,67 @@
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.message);
 
-                // Save token and load dashboard
                 localStorage.setItem('ecoflix_token', data.token);
                 loadDashboard();
-                showToast('Bem-vindo de volta!', 'success');
             } catch (e) {
-                showToast(e.message || 'Código inválido', 'error');
+                showToast(e.message || 'Erro ao processar', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>Entrar na Minha Conta</span> <i class="fas fa-sign-in-alt text-sm"></i>';
             }
         }
+
+        async function submitCheckoutOtp() {
+            const input = document.getElementById('checkout-otp-code');
+            const code = input.value.trim();
+            if (code.length !== 4) {
+                showToast('O código deve ter 4 dígitos.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-checkout-otp');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> A validar...';
+
+            try {
+                const requestData = { phone: userPhone, code };
+                const hmacHeaders = await window.HMACSign.signRequest(requestData);
+
+                const resp = await fetch(`${API_BASE}/auth/register-verify`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        ...hmacHeaders
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.message);
+
+                // Validation Success! OTP passed.
+                // Re-trigger selectPaymentMethod without intercept
+                const methodToProceed = checkoutPendingMethod;
+                const cardElementToProceed = checkoutPendingCardElement;
+                
+                checkoutPendingMethod = null; 
+                checkoutPendingCardElement = null;
+                
+                // Show loader while order is created
+                document.getElementById('global-loader').classList.remove('hidden');
+                document.getElementById('global-loader').classList.add('flex');
+                
+                await selectPaymentMethod(methodToProceed, cardElementToProceed);
+
+            } catch (e) {
+                showToast(e.message || 'Erro ao validar código', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Confirmar e Pagar via Express</span> <i class="fas fa-check-circle text-sm"></i>';
+            }
+        }
+
+
 
         async function cancelOrder() {
             if (pollingInterval) clearInterval(pollingInterval);
@@ -1670,6 +1789,7 @@
                 document.getElementById('success-credentials').classList.remove('hidden');
                 document.getElementById('success-sms-info').classList.add('hidden');
             } else {
+                // Para pagamentos sem credenciais imediatas, mostramos apenas o aviso de SMS
                 document.getElementById('success-credentials').classList.add('hidden');
                 document.getElementById('success-sms-info').classList.remove('hidden');
             }
@@ -1847,11 +1967,11 @@
                                         <span class="font-bold">Renovar / Estender (+30 Dias)</span>
                                     </button>
 
-                                    <button onclick="reportProblem(${index})"
+                                    <a href="https://wa.me/${data.support_whatsapp || '244927862935'}?text=${encodeURIComponent('Olá, estou com problemas na minha subscrição #')}${sub.id.split('-')[0]}" target="_blank"
                                         class="netflix-card p-4 rounded hover:bg-gray-800 transition flex items-center justify-center gap-3 border border-gray-700 hover:border-gray-500">
-                                        <i class="fas fa-headset text-muted"></i>
+                                        <i class="fab fa-whatsapp text-[#25D366] text-xl"></i>
                                         <span class="font-bold text-muted">Reportar Problema</span>
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         `;
@@ -2034,7 +2154,7 @@
                         suporte técnico.</p>
 
                     <div class="space-y-3">
-                        <a href="https://wa.me/244938948994" target="_blank"
+                        <a href="https://wa.me/${data.support_whatsapp || '244927862935'}" target="_blank"
                             class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 rounded transition relative z-10 cursor-pointer">
                             <i class="fab fa-whatsapp text-xl"></i> <span>Conversar no WhatsApp</span>
                         </a>

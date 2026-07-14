@@ -25,6 +25,7 @@ const verifySignature = (payload, signature, secret) => {
 };
 
 const PaymentProviderFactory = require('../services/payment_factory.service');
+const { broadcast: sseBroadcast } = require('./sse.controller');
 
 // ============================================================================
 // CUSTOMER: Init Payment (Reference or Push)
@@ -519,6 +520,13 @@ const confirmPayment = async (req, res) => {
             websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
             websocket.broadcast({ type: 'stock_update' }, 'all');
             websocket.broadcast({ type: 'new_order', message: `Pagamento confirmado para o pedido ${order.id}` }, 'admin');
+            sseBroadcast('order_paid', {
+                order_id: order.id,
+                phone:    order.phone,
+                plan:     order.plan_type,
+                amount:   order.amount,
+                ts:       Date.now(),
+            });
         }
         res.json(result);
     } catch (error) {
@@ -629,6 +637,13 @@ const paygoWebhook = async (req, res) => {
                         websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
                         websocket.broadcast({ type: 'stock_update' }, 'all');
                         websocket.broadcast({ type: 'new_order', message: `Pagamento recebido via PayGo: ${order.amount} Kz` }, 'admin');
+                        sseBroadcast('order_paid', {
+                            order_id: order.id,
+                            phone:    order.phone,
+                            plan:     order.plan_type,
+                            amount:   order.amount,
+                            ts:       Date.now(),
+                        });
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
                     }
