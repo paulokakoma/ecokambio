@@ -1634,7 +1634,7 @@
 
             if (screenId === 'step-catalog') {
                 // Modo catálogo
-                backBtn.classList.add('hidden');
+                backBtn.classList.remove('hidden');
                 
                 accountBtn.classList.remove('hidden');
                 accountBtn.classList.add('flex');
@@ -1687,7 +1687,9 @@
             let currentId = '';
             screens.forEach(s => { if (!s.classList.contains('hidden')) currentId = s.id; });
 
-            if (currentId === 'step-checkout' || currentId === 'step-recover' || currentId === 'step-login-otp') {
+            if (currentId === 'step-catalog') {
+                window.location.href = '/';
+            } else if (currentId === 'step-checkout' || currentId === 'step-recover' || currentId === 'step-login-otp' || currentId === 'step-dashboard') {
                 goHome();
             } else if (currentId === 'step-payment-method') {
                 showScreen('step-checkout');
