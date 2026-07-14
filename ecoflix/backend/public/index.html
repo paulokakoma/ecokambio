@@ -1654,17 +1654,6 @@
                 accountBtn.classList.add('hidden');
                 accountBtn.classList.remove('flex');
                 backBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-recover' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
-                closeBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
-
-                // Update step dots
-                if (stepsEl) {
-                    const spans = stepsEl.querySelectorAll('span');
-                    spans.forEach((s, i) => {
-                        s.classList.remove('active', 'done');
-                        if (i + 1 === stepIdx) s.classList.add('active');
-                        else if (i + 1 < stepIdx) s.classList.add('done');
-                    });
-                }
             }
         }
 
