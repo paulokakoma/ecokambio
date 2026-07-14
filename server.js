@@ -80,6 +80,7 @@ app.use(helmet({
                 "'unsafe-eval'",
                 "https://cdn.jsdelivr.net",
                 "https://cdn.tailwindcss.com",
+                "https://unpkg.com",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
                 "https://www.google.com",
@@ -90,12 +91,17 @@ app.use(helmet({
                 "'self'",
                 "'unsafe-inline'",
                 "https://fonts.googleapis.com",
-                "https://cdnjs.cloudflare.com"
+                "https://cdnjs.cloudflare.com",
+                "https://cdn.jsdelivr.net",
+                "https://unpkg.com"
             ],
             fontSrc: [
                 "'self'",
+                "data:",
                 "https://fonts.gstatic.com",
-                "https://cdnjs.cloudflare.com"
+                "https://cdnjs.cloudflare.com",
+                "https://unpkg.com",
+                "https://cdn.jsdelivr.net"
             ],
             imgSrc: [
                 "'self'",

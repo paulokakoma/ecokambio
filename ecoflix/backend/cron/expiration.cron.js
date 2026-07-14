@@ -3,6 +3,10 @@ const supabase = require('../../../src/config/supabase');
 const { send5DaysExpirySms, sendFinalDayExpirySms } = require('../services/sms.service');
 const logger = require('../../../src/config/logger');
 
+// Helper: pause execution to avoid burst-sending SMS
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const SMS_BATCH_DELAY_MS = 500; // 500ms between each SMS in a batch
+
 const initializeCron = () => {
     // Run every day at 09:00 AM for Notifications
     cron.schedule('0 9 * * *', async () => {
@@ -30,15 +34,21 @@ const initializeCron = () => {
 
 const notify5DaysExpiry = async () => {
     // Busca assinaturas ativas cujo end_date é exatamente hoje + 5 dias
+    // e que ainda não foram notificadas hoje (sms_notified_at < hoje)
+    const targetDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
+
     const { data: subs, error } = await supabase
         .from('ecoflix_subscriptions')
         .select(`
             id, 
-            end_date, 
+            end_date,
+            sms_notified_at,
             user:ecoflix_users(phone, name)
         `)
         .eq('status', 'ACTIVE')
-        .eq('end_date', new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        .eq('end_date', targetDate)
+        .or(`sms_notified_at.is.null,sms_notified_at.lt.${today}`);
 
     if (error) {
         logger.error(`[CRON] Erro ao buscar assinaturas 5 dias: ${error.message}`);
@@ -54,7 +64,13 @@ const notify5DaysExpiry = async () => {
     for (const sub of subs) {
         if (sub.user?.phone) {
             await send5DaysExpirySms(sub.user.phone);
+            // Mark as notified to prevent duplicates
+            await supabase
+                .from('ecoflix_subscriptions')
+                .update({ sms_notified_at: new Date().toISOString() })
+                .eq('id', sub.id);
             count++;
+            await sleep(SMS_BATCH_DELAY_MS); // Throttle to avoid SMS burst
         }
     }
     logger.info(`[CRON] Notificações 5 dias enviadas: ${count}`);
@@ -62,15 +78,20 @@ const notify5DaysExpiry = async () => {
 
 const notifyFinalDayExpiry = async () => {
     // Busca assinaturas ativas cujo end_date é exatamente hoje
+    // e que ainda não foram notificadas hoje
+    const today = new Date().toISOString().split('T')[0];
+
     const { data: subs, error } = await supabase
         .from('ecoflix_subscriptions')
         .select(`
             id, 
-            end_date, 
+            end_date,
+            sms_notified_at,
             user:ecoflix_users(phone, name)
         `)
         .eq('status', 'ACTIVE')
-        .eq('end_date', new Date().toISOString().split('T')[0]);
+        .eq('end_date', today)
+        .or(`sms_notified_at.is.null,sms_notified_at.lt.${today}`);
 
     if (error) {
         logger.error(`[CRON] Erro ao buscar assinaturas 1 dia: ${error.message}`);
@@ -86,7 +107,13 @@ const notifyFinalDayExpiry = async () => {
     for (const sub of subs) {
         if (sub.user?.phone) {
             await sendFinalDayExpirySms(sub.user.phone);
+            // Mark as notified to prevent duplicates
+            await supabase
+                .from('ecoflix_subscriptions')
+                .update({ sms_notified_at: new Date().toISOString() })
+                .eq('id', sub.id);
             count++;
+            await sleep(SMS_BATCH_DELAY_MS); // Throttle to avoid SMS burst
         }
     }
     logger.info(`[CRON] Notificações Último Dia enviadas: ${count}`);

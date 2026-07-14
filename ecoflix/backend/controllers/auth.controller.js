@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const smsService = require('../services/sms.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const OTP_COOLDOWN_SECONDS = 120; // 2 minutes between OTP sends per phone
 
 // ============================================================================
 // CUSTOMER: Register (Step 1: Request OTP)
@@ -39,6 +40,30 @@ const registerRequest = async (req, res) => {
 
             if (insertError) throw insertError;
         }
+
+        // --- Rate Limiting: Prevent OTP spam ---
+        const cooldownThreshold = new Date(Date.now() - OTP_COOLDOWN_SECONDS * 1000);
+        const { data: recentOtp } = await supabase
+            .from('ecoflix_otp_codes')
+            .select('created_at')
+            .eq('phone', phone)
+            .eq('verified', false)
+            .gte('created_at', cooldownThreshold.toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (recentOtp) {
+            const sentAt = new Date(recentOtp.created_at);
+            const secondsElapsed = Math.floor((Date.now() - sentAt.getTime()) / 1000);
+            const secondsRemaining = OTP_COOLDOWN_SECONDS - secondsElapsed;
+            return res.status(429).json({
+                success: false,
+                message: `Aguarde ${secondsRemaining} segundos antes de solicitar um novo código.`,
+                retryAfter: secondsRemaining
+            });
+        }
+        // --- Fim do Rate Limiting ---
 
         // Generate 4-digit code
         const code = Math.floor(1000 + Math.random() * 9000).toString();

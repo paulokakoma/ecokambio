@@ -1,4 +1,3 @@
-const websocket = require("../../../src/websocket");
 /**
  * Admin Controller
  * Handles administrative tasks for EcoFlix (Accounts, Profiles, Stats, Partners)
@@ -246,9 +245,8 @@ const createAccount = async (req, res) => {
             .eq('id', account.id)
             .single();
 
-        // Broadcast stock update
-        websocket.broadcast({ type: 'stock_update' }, 'all');
-        websocket.broadcast({ type: 'new_order', message: `Nova conta ${email} adicionada` }, 'admin');
+        sseBroadcast('stock_update', { reason: 'add_stock' });
+        sseBroadcast('refresh_admin', { reason: 'add_stock' });
 
         res.status(201).json({ success: true, data: fullAccount });
     } catch (error) {
@@ -325,11 +323,8 @@ const updateAccount = async (req, res) => {
             }
         }
 
-        // Broadcast stock update
-        websocket.broadcast({ type: 'stock_update' }, 'all');
-        websocket.broadcast({ type: 'new_order', message: `Nova conta ${email} adicionada` }, 'admin');
-
-        sseBroadcast('refresh_admin', { reason: 'add_stock' });
+        sseBroadcast('stock_update', { reason: 'update_account' });
+        sseBroadcast('refresh_admin', { reason: 'update_account' });
         res.json({ success: true, data: account });
     } catch (error) {
         console.error('Update account error:', error);
@@ -372,6 +367,7 @@ const deleteAccount = async (req, res) => {
 
         if (error) throw error;
 
+        sseBroadcast('stock_update', { reason: 'delete_account' });
         sseBroadcast('refresh_admin', { reason: 'delete_account' });
         res.json({ success: true, message: 'Conta apagada com sucesso' });
     } catch (error) {
@@ -471,9 +467,7 @@ const updateProfile = async (req, res) => {
             }
         }
 
-        // Broadcast stock update
-        websocket.broadcast({ type: 'stock_update' }, 'all');
-
+        sseBroadcast('stock_update', { reason: 'update_profile' });
         sseBroadcast('refresh_admin', { reason: 'approve_order' });
         res.json({ success: true, data: profile });
     } catch (error) {
@@ -1240,6 +1234,7 @@ const revokeProfile = async (req, res) => {
         }
 
         console.log(`[Revoke] Profile ${id} revoked. client_phone=${clientPhone || 'unknown'}`);
+        sseBroadcast('stock_update', { reason: 'revoke_profile' });
         sseBroadcast('refresh_admin', { reason: 'revoke_profile' });
         res.json({ success: true, message: 'Perfil revogado com sucesso. O utilizador foi desconectado.' });
     } catch (error) {
@@ -1279,9 +1274,7 @@ const suspendProfile = async (req, res) => {
             await smsService.sendSuspendSms(profile.client_phone, reason);
         }
 
-        const websocket = require('../../../src/websocket');
-        websocket.broadcast({ type: 'stock_update' }, 'all');
-
+        sseBroadcast('stock_update', { reason: 'suspend_profile' });
         sseBroadcast('refresh_admin', { reason: 'suspend_profile' });
         res.json({ success: true, message: 'Perfil suspenso.' });
     } catch (error) {
@@ -1317,9 +1310,7 @@ const restoreProfile = async (req, res) => {
             await smsService.sendRestoreSms(profile.client_phone);
         }
 
-        const websocket = require('../../../src/websocket');
-        websocket.broadcast({ type: 'stock_update' }, 'all');
-
+        sseBroadcast('stock_update', { reason: 'return_profile' });
         sseBroadcast('refresh_admin', { reason: 'return_profile' });
         res.json({ success: true, message: 'Perfil devolvido/restaurado.' });
     } catch (error) {
@@ -1406,6 +1397,7 @@ const suspendAccount = async (req, res) => {
         const smsService = require('../services/sms.service');
         await smsService.sendRevokeSms(phone, 'Partilha indevida de dados / Violação de Termos');
 
+        sseBroadcast('stock_update', { reason: 'suspend_account' });
         sseBroadcast('refresh_admin', { reason: 'suspend_account' });
         res.json({ success: true, message: 'Conta suspensa e cliente notificado.' });
     } catch (error) {
@@ -1450,6 +1442,7 @@ const restoreAccount = async (req, res) => {
             await smsService.sendRestoreSms(phone);
         }
 
+        sseBroadcast('stock_update', { reason: 'reactivate_account' });
         sseBroadcast('refresh_admin', { reason: 'reactivate_account' });
         res.json({ success: true, message: 'Conta reativada com sucesso e SMS enviado.' });
     } catch (error) {

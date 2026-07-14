@@ -98,16 +98,32 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
+            left: 20px;
             z-index: 100;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
+        @media (min-width: 640px) {
+            #toast-container {
+                left: auto;
+                width: auto;
+            }
+        }
+
         .toast {
             transform: translateX(100%);
             transition: transform 0.3s ease-out;
-            min-width: 300px;
+            min-width: 0;
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .toast {
+                min-width: 300px;
+                width: auto;
+            }
         }
 
         .toast.show {
@@ -309,18 +325,18 @@
 
             <!-- 2. STOCK (INVENTÁRIO) -->
             <div id="panel-stock" class="panel hidden">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h1 class="text-2xl font-bold text-gray-800">Inventário de Contas Netflix</h1>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <button onclick="downloadCsv()"
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg"><i
-                                class="fas fa-file-csv"></i> Exportar Vendas</button>
+                                class="fas fa-file-csv"></i> <span class="hidden sm:inline">Exportar Vendas</span></button>
                         <button onclick="showSheetsInfo()"
                             class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm border border-green-300"><i
-                                class="fas fa-table"></i> Google Sheets</button>
+                                class="fas fa-table"></i> <span class="hidden sm:inline">Google Sheets</span></button>
                         <button onclick="openAccountModal('create')"
                             class="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg"><i
-                                class="fas fa-plus"></i> Nova Conta Mãe</button>
+                                class="fas fa-plus"></i> <span class="hidden sm:inline">Nova Conta Mãe</span></button>
                     </div>
                 </div>
 
@@ -382,29 +398,31 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-4 border-b border-gray-200 flex gap-4">
+                    <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3">
                         <input type="text" placeholder="Procurar Ref ou Telefone..."
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 md:w-80 pl-10">
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 sm:w-80 pl-10">
                         <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5">
                             <option>Todos os Estados</option>
                             <option>Pago</option>
                             <option>Pendente</option>
                         </select>
                     </div>
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
-                            <tr>
-                                <th class="px-6 py-3">ID</th>
-                                <th class="px-6 py-3">Cliente</th>
-                                <th class="px-6 py-3">Plano</th>
-                                <th class="px-6 py-3">Referência</th>
-                                <th class="px-6 py-3">Data</th>
-                                <th class="px-6 py-3">Estado</th>
-                                <th class="px-6 py-3 text-right">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="sales-table-body"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3">ID</th>
+                                    <th class="px-6 py-3">Cliente</th>
+                                    <th class="px-6 py-3">Plano</th>
+                                    <th class="px-6 py-3">Referência</th>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Estado</th>
+                                    <th class="px-6 py-3 text-right">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100" id="sales-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
                 <div id="sales-pagination" class="flex justify-center items-center gap-2 mt-4 pb-4">
                     <!-- Pagination buttons will be generated here -->
@@ -422,19 +440,21 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
-                            <tr>
-                                <th class="px-6 py-3">Cliente (Nome / Tel)</th>
-                                <th class="px-6 py-3">Plano</th>
-                                <th class="px-6 py-3">Conta Alocada (Email/Perfil)</th>
-                                <th class="px-6 py-3">Dias Restantes</th>
-                                <th class="px-6 py-3">Status</th>
-                                <th class="px-6 py-3 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100" id="customers-table-body"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3">Cliente (Nome / Tel)</th>
+                                    <th class="px-6 py-3">Plano</th>
+                                    <th class="px-6 py-3">Conta Alocada (Email/Perfil)</th>
+                                    <th class="px-6 py-3">Dias Restantes</th>
+                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100" id="customers-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -462,9 +482,9 @@
                         <button
                             type="submit"
                             id="suporteSearchBtn"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center gap-2"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg font-bold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center gap-2"
                         >
-                            <i class="fas fa-search"></i> Procurar
+                            <i class="fas fa-search"></i> <span class="hidden sm:inline">Procurar</span>
                         </button>
                     </form>
                 </div>
@@ -1331,58 +1351,8 @@
         // ============================================================================
         // POLLING / NOTIFICATIONS
         // ============================================================================
-        // REAL-TIME WEBSOCKETS
+        // Real-time via SSE apenas (sem WebSocket)
         // ============================================================================
-        function initWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}?client=admin`;
-            const ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => {
-                console.log('✅ Real-time WebSocket ligado');
-            };
-
-            ws.onmessage = async (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    console.log('WS Evento:', data);
-
-                    if (data.type === 'new_order') {
-                        showToast(data.message || 'Novo pedido recebido!', 'success');
-                        await loadDashboard();
-                        await loadOrders();
-                        renderCustomers();
-                    } 
-                    else if (data.type === 'payment_update') {
-                        showToast(`Estado de pagamento actualizado: ${data.status}`, 'info');
-                        await loadDashboard();
-                        await loadOrders();
-                    }
-                    else if (data.type === 'stock_update') {
-                        await loadStock();
-                        await loadDashboard();
-                        await loadCustomers();
-                    }
-                    else if (data.type === 'new_issue') {
-                        showToast(`Novo problema reportado: ${data.issue.issue_type}`, 'warning');
-                        // await  (removed)
-                    }
-                    else if (data.type === 'new_user_activity') {
-                        // Trata atividade de utilizadores
-                    }
-                } catch (err) {
-                    console.error('WS parse error:', err);
-                }
-            };
-
-            ws.onclose = () => {
-                console.warn('⚠️ WebSocket desligado. A tentar religar em 5s...');
-                setTimeout(initWebSocket, 5000);
-            };
-        }
-
-        // Iniciar WebSockets
-        initWebSocket();
 
         // ============================================================================
         // EXPORT FUNCTIONS
@@ -1966,20 +1936,37 @@
                     const msg = `Pagamento recebido — ${data.plan || ''} • ${amount} Kz`;
                     showToast(msg, 'success');
                     addNotification('check-circle', msg, 'bg-green-500');
-                    refreshActivePanel();
+                    refreshAllPanels();
                 },
                 refresh_admin: (data) => {
-                    refreshActivePanel();
+                    refreshAllPanels();
+                },
+                new_order: (data) => {
+                    const msg = data.message || 'Novo pedido recebido';
+                    showToast(msg, 'info');
+                    addNotification('shopping-cart', msg, 'bg-blue-500');
+                    refreshAllPanels();
+                },
+                stock_update: (data) => {
+                    refreshAllPanels();
+                },
+                payment_update: (data) => {
+                    showToast(`Pagamento actualizado: ${data.status || ''}`, 'info');
+                    addNotification('credit-card', `Pagamento ${data.status || 'actualizado'}`, 'bg-purple-500');
+                    refreshAllPanels();
+                },
+                new_issue: (data) => {
+                    const msg = data.issue ? `Novo problema: ${data.issue.issue_type}` : 'Novo problema reportado';
+                    showToast(msg, 'info');
+                    addNotification('exclamation-triangle', msg, 'bg-amber-500');
                 }
             };
 
-            function refreshActivePanel() {
-                const active = document.querySelector('.panel:not(.hidden)')?.id?.replace('panel-', '');
-                if (active === 'dashboard') loadDashboard();
-                if (active === 'sales')     loadOrders();
-                if (active === 'stock')     loadStock();
-                if (active === 'customers') loadCustomers();
-                if (active === 'partners')  loadPartners();
+            function refreshAllPanels() {
+                loadDashboard();
+                loadStock();
+                loadOrders();
+                loadCustomers();
             }
 
             function connect() {
@@ -1994,7 +1981,11 @@
 
                 es.onerror = () => {
                     setDot('error');
-                    // EventSource reconecta automaticamente — não precisamos de fazer nada
+                    // EventSource reconecta automaticamente
+                };
+
+                es.onopen = () => {
+                    setDot('connected');
                 };
             }
 

@@ -5,6 +5,7 @@
 
 const supabase = require('../../../src/config/supabase');
 const smsService = require('../services/sms.service');
+const { broadcast: sseBroadcast } = require('./sse.controller');
 
 // ============================================================================
 // CUSTOMER: Validate Coupon
@@ -199,16 +200,8 @@ const reportIssue = async (req, res) => {
 
         if (error) throw error;
 
-        // Broadcast to Admins
-        try {
-            const websocket = require('../../../src/websocket');
-            websocket.broadcastToAdmins({
-                type: 'new_issue',
-                issue: data
-            });
-        } catch(e) {
-            console.error('Failed to broadcast issue:', e);
-        }
+        sseBroadcast('new_issue', { issue: data });
+        sseBroadcast('refresh_admin', { reason: 'new_issue' });
 
         res.json({ success: true, message: 'Problema reportado. A nossa equipa irá verificar em breve.' });
 
@@ -353,16 +346,8 @@ const publicReportIssue = async (req, res) => {
 
         if (error) throw error;
 
-        // Broadcast to Admins
-        try {
-            const websocket = require('../../../src/websocket');
-            websocket.broadcastToAdmins({
-                type: 'new_issue',
-                issue: data
-            });
-        } catch(e) {
-            console.error('Failed to broadcast issue:', e);
-        }
+        sseBroadcast('new_issue', { issue: data });
+        sseBroadcast('refresh_admin', { reason: 'public_issue' });
 
         res.json({ success: true, message: 'Pedido de suporte enviado com sucesso.' });
 

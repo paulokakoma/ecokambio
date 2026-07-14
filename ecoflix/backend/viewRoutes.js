@@ -60,4 +60,9 @@ router.get("/suporte", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "support.html"));
 });
 
+// Redirecionar /mobile para a página principal (unificada)
+router.get("/mobile", (req, res) => {
+    res.redirect(301, '/ecoflix');
+});
+
 module.exports = router;

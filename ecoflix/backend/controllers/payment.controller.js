@@ -7,7 +7,6 @@ const crypto = require('crypto');
 const supabase = require('../../../src/config/supabase');
 const axios = require('axios');
 const planService = require('../services/plan.service');
-const websocket = require('../../../src/websocket');
 const paymentService = require('../services/payment.service');
 const { redisClient } = require('../../../src/config/redis');
 const jwt = require('jsonwebtoken');
@@ -518,9 +517,7 @@ const confirmPayment = async (req, res) => {
         // Process the payment via Service
         const result = await paymentService.processPayment(order);
         if (result.success) {
-            websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
-            websocket.broadcast({ type: 'stock_update' }, 'all');
-            websocket.broadcast({ type: 'new_order', message: `Pagamento confirmado para o pedido ${order.id}` }, 'admin');
+            sseBroadcast('payment_update', { order_id: order.id, status: 'PAID', ts: Date.now() });
             sseBroadcast('order_paid', {
                 order_id: order.id,
                 phone:    order.phone,
@@ -528,6 +525,7 @@ const confirmPayment = async (req, res) => {
                 amount:   order.amount,
                 ts:       Date.now(),
             });
+            sseBroadcast('refresh_admin', { reason: 'confirm_payment' });
         }
         res.json(result);
     } catch (error) {
@@ -636,9 +634,7 @@ const paygoWebhook = async (req, res) => {
                     // Atomic Assignment Logic via Service
                     const result = await paymentService.processPayment(order);
                     if (result.success) {
-                        websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
-                        websocket.broadcast({ type: 'stock_update' }, 'all');
-                        websocket.broadcast({ type: 'new_order', message: `Pagamento recebido via PayGo: ${order.amount} Kz` }, 'admin');
+                        sseBroadcast('payment_update', { order_id: order.id, status: 'PAID', ts: Date.now() });
                         sseBroadcast('order_paid', {
                             order_id: order.id,
                             phone:    order.phone,
@@ -646,6 +642,7 @@ const paygoWebhook = async (req, res) => {
                             amount:   order.amount,
                             ts:       Date.now(),
                         });
+                        sseBroadcast('refresh_admin', { reason: 'webhook_payment' });
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
                     }
@@ -669,8 +666,8 @@ const paygoWebhook = async (req, res) => {
                     .single();
 
                 if (order) {
-                    const websocket = require('../../../src/websocket');
-                    websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'CANCELLED' });
+                    sseBroadcast('payment_update', { order_id: order.id, status: 'CANCELLED', ts: Date.now() });
+                    sseBroadcast('refresh_admin', { reason: 'payment_cancelled' });
                 }
             }
         }
