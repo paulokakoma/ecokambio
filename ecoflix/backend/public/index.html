@@ -949,7 +949,7 @@
         <!-- TELA: CHECKOUT OTP (Express) -->
         <div id="step-checkout-otp" class="hidden">
             <div class="netflix-card rounded-md p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
-                <button onclick="showScreen('step-plan')"
+                <button onclick="cancelCheckoutOtp()"
                     class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition text-sm">
                     <i class="fas fa-arrow-left"></i> Alterar Número ou Plano
                 </button>
@@ -1067,6 +1067,14 @@
             sessionStorage.removeItem('ecoflix_user_phone');
             sessionStorage.removeItem('ecoflix_selected_plan');
             sessionStorage.removeItem('ecoflix_selected_price');
+            checkoutPendingMethod = null;
+            checkoutPendingCardElement = null;
+        }
+
+        function cancelCheckoutOtp() {
+            checkoutPendingMethod = null;
+            checkoutPendingCardElement = null;
+            showScreen('step-catalog');
         }
 
         // === CHANGE DURATION ===
@@ -1394,13 +1402,13 @@
                 console.error(error);
                 showToast(error.message, 'error');
                 showScreen('step-payment-method');
+            } finally {
+                document.getElementById('global-loader').classList.add('hidden');
+                document.getElementById('global-loader').classList.remove('flex');
                 if (cardElement && originalContent) {
                     cardElement.innerHTML = originalContent;
                     cardElement.style.pointerEvents = 'auto';
                 }
-            } finally {
-                document.getElementById('global-loader').classList.add('hidden');
-                document.getElementById('global-loader').classList.remove('flex');
             }
         }
 
