@@ -11,6 +11,10 @@
 
     <!-- Ícones (Font Awesome) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Swiper CSS (Carousel Mobile) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <!-- Fontes (Inter para texto, Bebas Neue para títulos) -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap"
@@ -382,55 +386,426 @@
             transform: translateY(-4px) scale(1.01);
             filter: brightness(1.05) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4));
         }
+
+        /* ===== WAITING PAYMENT SCREEN ===== */
+        .ambient-glow-pay {
+            position: fixed;
+            top: -20%; left: -10%; right: -10%; bottom: -20%;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(229, 9, 20, 0.15) 0%, transparent 50%);
+            animation: breathe-pay 6s ease-in-out infinite alternate;
+            display: none;
+        }
+        .waiting-active .ambient-glow-pay { display: block; }
+
+        .radar-wave {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(229, 9, 20, 0.5);
+            animation: radar-anim 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        .radar-wave:nth-child(2) { animation-delay: 0.5s; }
+        .radar-wave:nth-child(3) { animation-delay: 1s; }
+
+        .streaming-buffer {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .streaming-buffer::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 40%;
+            background: #E50914;
+            border-radius: 4px;
+            animation: buffer-slide 1.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 10px #E50914;
+        }
+
+        .shake-phone { animation: shake-anim 4s cubic-bezier(.36,.07,.19,.97) infinite; }
+
+        .pay-fade-out { opacity: 0; visibility: hidden; transition: all 0.5s ease; transform: translateY(-10px); }
+        .pay-fade-in  { opacity: 1 !important; visibility: visible !important; transition: all 0.6s cubic-bezier(0.34,1.56,0.64,1); transform: scale(1) !important; }
+        .pay-hidden   { opacity: 0; visibility: hidden; transform: scale(0.9); }
+
+        @keyframes breathe-pay {
+            0%   { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes radar-anim {
+            0%   { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        @keyframes buffer-slide {
+            0%   { transform: translateX(-50%); width: 20%; }
+            100% { transform: translateX(250%); width: 50%; }
+        }
+        @keyframes shake-anim {
+            0%, 85%, 100% { transform: rotate(0); }
+            87% { transform: rotate(10deg); }
+            89% { transform: rotate(-10deg); }
+            91% { transform: rotate(8deg); }
+            93% { transform: rotate(-8deg); }
+            95% { transform: rotate(5deg); }
+            97% { transform: rotate(-5deg); }
+        }
+
+        /* === SWIPER CAROUSEL (Mobile) === */
+        .plans-swiper {
+            width: 100%;
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            overflow: visible;
+        }
+        .plans-swiper .swiper-slide {
+            width: 70vw;
+            max-width: 290px;
+            height: auto;
+        }
+        .plans-swiper .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+            opacity: 0.5;
+            transform: scale(0.85);
+        }
+        .plans-swiper .swiper-slide-active .card-inner {
+            opacity: 1;
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .plans-swiper .swiper-pagination-bullet {
+            background: #4B5563;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+        .plans-swiper .swiper-pagination-bullet-active {
+            background: #E50914;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .btn-tap:active { transform: scale(0.96); transition: transform 0.1s; }
+        .price-loading { display: inline-block; width: 90px; height: 38px; background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; vertical-align: middle; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* === MOBILE HEADER === */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 60;
+            height: 56px;
+            padding: 0 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(9, 9, 11, 0.92);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+        }
+        .mobile-header.visible { display: flex; }
+        .mobile-header .mh-logo {
+            font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            color: #E50914;
+            letter-spacing: 0.08em;
+            transform: scaleY(1.15);
+            text-shadow: 0 2px 8px rgba(229,9,20,0.3);
+        }
+        .mobile-header .mh-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 0;
+            padding: 0 8px;
+        }
+        .mobile-header .mh-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.01em;
+        }
+        .mobile-header .mh-step {
+            display: flex;
+            gap: 4px;
+        }
+        .mobile-header .mh-step span {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.12);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mobile-header .mh-step span.active {
+            background: #E50914;
+            width: 28px;
+            box-shadow: 0 0 8px rgba(229,9,20,0.4);
+        }
+        .mobile-header .mh-step span.done {
+            background: rgba(229,9,20,0.4);
+        }
+        .mobile-header .mh-btn {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            color: rgba(255,255,255,0.7);
+        }
+        .mobile-header .mh-btn:active {
+            background: rgba(255,255,255,0.12);
+            transform: scale(0.92);
+        }
+        @media (min-width: 768px) {
+            .mobile-header { display: none !important; }
+        }
+
+        /* === SCREEN TRANSITIONS === */
+        #app > div { transition: opacity 0.3s ease, transform 0.3s ease; }
+        #app > div.screen-enter { animation: screenSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes screenSlideIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* === STAGGER ANIMATIONS === */
+        .stagger-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: staggerIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .stagger-card:nth-child(1) { animation-delay: 0.05s; }
+        .stagger-card:nth-child(2) { animation-delay: 0.12s; }
+        .stagger-card:nth-child(3) { animation-delay: 0.19s; }
+        .stagger-card:nth-child(4) { animation-delay: 0.26s; }
+        .stagger-card:nth-child(5) { animation-delay: 0.33s; }
+        @keyframes staggerIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === GLOW PULSE for highlighted card === */
+        .glow-red { box-shadow: 0 0 0 1px rgba(229,9,20,0.15), 0 4px 20px rgba(229,9,20,0.12), 0 0 40px rgba(229,9,20,0.06); }
+        .glow-green { box-shadow: 0 0 0 1px rgba(34,197,94,0.15), 0 4px 20px rgba(34,197,94,0.12); }
+        .glow-orange { box-shadow: 0 0 0 1px rgba(249,115,22,0.15), 0 4px 20px rgba(249,115,22,0.12); }
+
+
+
     </style>
 </head>
 
 <body class="flex flex-col min-h-screen">
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- MOBILE HEADER (NATIVE APP STYLE) -->
+    <header id="mobile-header" class="mobile-header visible lg:!hidden">
+        <!-- Esquerda: Voltar (passos) ou Logo (Catálogo) -->
+        <button onclick="mobileBack()" id="mobile-back-btn" class="mh-btn">
+            <i class="ph ph-caret-left" style="font-size:18px"></i>
+        </button>
+        <div id="mobile-logo-btn" class="hidden cursor-pointer active:scale-95 transition-transform" onclick="goHome()">
+            <span class="font-['Bebas_Neue'] text-xl text-[#E50914] tracking-widest drop-shadow-md">ECOFLIX</span>
+        </div>
+        
+        <!-- Centro: Título e Passos -->
+        <div class="mh-center" id="mobile-center-content">
+            <div id="mobile-header-title" class="mh-title">Planos</div>
+            <div id="mobile-header-steps" class="mh-step">
+                <span></span><span></span><span class="active"></span>
+            </div>
+        </div>
+        
+        <!-- Direita: Fechar (passos) ou Conta (Catálogo) -->
+        <button onclick="goHome()" id="mobile-close-btn" class="mh-btn">
+            <i class="ph ph-x" style="font-size:18px"></i>
+        </button>
+        <button onclick="showRecover()" id="mobile-account-btn" class="hidden mh-btn border-none bg-transparent">
+            <i class="fas fa-user-circle text-[22px] text-gray-300"></i>
+        </button>
+    </header>
 
-
-    <!-- NAVBAR -->
-    <nav class="glass-nav fixed w-full z-50 shadow-sm">
+    <!-- NAVBAR (DESKTOP) -->
+    <nav class="glass-nav hidden lg:block fixed top-0 w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-14 md:h-20 items-center">
+            <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3">
-                    <div class="cursor-pointer" onclick="goHome()" title="Planos EcoFlix">
-                        <h1 class="text-2xl md:text-4xl font-black"
+                    <div class="cursor-pointer active:scale-95 transition-transform" onclick="goHome()" title="Planos EcoFlix">
+                        <h1 class="text-4xl font-black"
                             style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 2px 2px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
                             <span style="color: #E50914;">ECOFLIX</span>
                         </h1>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 md:gap-4">
-
+                <div class="flex items-center gap-6">
                     <button onclick="showRecover()"
-                        class="text-xs md:text-sm font-medium text-muted hover:text-brand transition flex items-center gap-1 md:gap-2">
-                        <i class="fas fa-user-circle"></i> <span class="hidden md:inline">Minha Conta</span>
+                        class="text-gray-300 hover:text-white transition flex flex-col items-center gap-0.5 group active:scale-95">
+                        <i class="fas fa-user-circle text-2xl group-hover:text-[#E50914]"></i>
+                        <span class="text-xs font-medium">Conta</span>
                     </button>
                     <button onclick="openHelpModal()"
-                        class="text-xs md:text-sm font-medium text-muted hover:text-brand transition flex items-center gap-1 md:gap-2">
-                        <i class="far fa-question-circle"></i> <span class="hidden md:inline">Ajuda</span>
+                        class="text-gray-300 hover:text-white transition flex flex-col items-center gap-0.5 group active:scale-95">
+                        <i class="far fa-question-circle text-2xl group-hover:text-[#E50914]"></i>
+                        <span class="text-xs font-medium">Ajuda</span>
                     </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="h-14 md:h-20"></div>
+    <div id="navbar-spacer" class="h-14 lg:h-20"></div>
 
     <!-- ÁREA PRINCIPAL -->
-    <main class="flex-grow container mx-auto px-4 py-0 md:py-4 max-w-7xl relative z-10" id="app">
+    <main class="flex-grow container mx-auto px-4 py-0 lg:py-4 max-w-7xl relative z-10" id="app">
 
         <!-- TELA 1: CATÁLOGO DE PLANOS -->
         <div id="step-catalog" class="block animate-fade-in">
-            <div class="text-center mb-6 md:mb-12 mt-[10px]">
-                <h1 class="text-2xl md:text-5xl font-bold mb-2">Planos para todos os ecrãs.</h1>
-                <p class="text-base md:text-xl text-muted">Escolha a melhor opção. Cancele quando quiser.</p>
+            <div class="text-center mb-6 lg:mb-12 mt-[10px]">
+                <h1 class="text-2xl lg:text-5xl font-bold mb-2">Planos para todos os ecrãs.</h1>
+                <p class="text-base lg:text-xl text-muted">Escolha a melhor opção. Cancele quando quiser.</p>
             </div>
 
-            <!-- GRID DE 3 COLUNAS -->
-            <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
+            <!-- ===== SWIPER CAROUSEL (Mobile & Tablet) ===== -->
+            <div class="block lg:hidden relative -mx-4">
+                <div class="swiper myPlansSwiper plans-swiper">
+                    <div class="swiper-wrapper items-stretch">
+                        <!-- ECONÓMICO -->
+                        <div class="swiper-slide">
+                            <div class="card-inner bg-[#141414] border border-white/5 rounded-[2rem] p-6 flex flex-col justify-between shadow-2xl relative">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="bg-gray-800 text-gray-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Económico</span>
+                                        <h2 class="text-2xl font-bold text-white mt-3">Pessoal</h2>
+                                    </div>
+                                    <div class="mb-6 flex items-baseline gap-1">
+                                        <span id="mobile-price-economico" class="text-4xl font-black tracking-tighter"><span class="price-loading"></span></span>
+                                        <span class="text-gray-500 font-medium text-sm">/mês</span>
+                                    </div>
+                                    <div class="h-px w-full bg-white/5 mb-6"></div>
+                                    <div class="mb-6">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-3">Onde Assistir:</span>
+                                        <div class="flex gap-4">
+                                            <i class="ph-fill ph-device-mobile text-2xl text-white"></i>
+                                            <i class="ph-fill ph-laptop text-2xl text-white"></i>
+                                            <div class="relative opacity-30">
+                                                <i class="ph-fill ph-television text-2xl text-white"></i>
+                                                <i class="ph-bold ph-x absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#E50914] text-lg"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#10B981] mt-0.5 text-base"></i><span>1 Ecrã de cada vez</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#10B981] mt-0.5 text-base"></i><span>Qualidade Máxima (4K)</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300 opacity-50"><i class="ph-bold ph-x text-gray-500 mt-0.5 text-base"></i><span>Sem acesso à TV</span></li>
+                                    </ul>
+                                </div>
+                                <button onclick="selectPlan('ECONOMICO')"
+                                    class="btn-tap w-full mt-auto bg-white/10 hover:bg-white/20 text-white font-semibold py-4 rounded-2xl transition-colors">
+                                    Escolher Económico
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ULTRA -->
+                        <div class="swiper-slide">
+                            <div class="card-inner bg-gradient-to-br from-[#1a0809] to-[#141414] border border-[#E50914]/40 rounded-[2rem] p-6 flex flex-col justify-between relative shadow-[0_0_40px_rgba(229,9,20,0.15)]">
+                                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E50914] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_4px_10px_rgba(229,9,20,0.4)] whitespace-nowrap">
+                                    Recomendado
+                                </div>
+                                <div>
+                                    <div class="mb-4 mt-2">
+                                        <span class="text-[#E50914] text-[10px] font-bold uppercase tracking-wider">4K Ultra HDR</span>
+                                        <h2 class="text-2xl font-bold text-[#E50914] mt-1">Pessoal Ultra</h2>
+                                    </div>
+                                    <div class="mb-6 flex items-baseline gap-1">
+                                        <span id="mobile-price-ultra" class="text-4xl font-black tracking-tighter text-white"><span class="price-loading"></span></span>
+                                        <span class="text-gray-500 font-medium text-sm">/mês</span>
+                                    </div>
+                                    <div class="h-px w-full bg-[#E50914]/20 mb-6"></div>
+                                    <div class="mb-6">
+                                        <span class="text-[10px] font-bold text-[#E50914] uppercase tracking-wider block mb-3">Todos os Dispositivos:</span>
+                                        <div class="flex justify-between px-1 bg-[#E50914]/5 py-3 rounded-xl border border-[#E50914]/10">
+                                            <i class="ph-fill ph-television text-2xl text-white"></i>
+                                            <i class="ph-fill ph-laptop text-2xl text-gray-400"></i>
+                                            <i class="ph-fill ph-tablet text-2xl text-gray-400"></i>
+                                            <i class="ph-fill ph-device-mobile text-2xl text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>1 Ecrã de cada vez</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>Funciona em Smart TV</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>Resolução 4K Max</span></li>
+                                    </ul>
+                                </div>
+                                <button onclick="selectPlan('ULTRA')"
+                                    class="btn-tap w-full mt-auto bg-[#E50914] text-white font-semibold py-4 rounded-2xl shadow-[0_8px_20px_rgba(229,9,20,0.3)]">
+                                    Assinar o Ultra
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- FAMÍLIA -->
+                        <div class="swiper-slide">
+                            <div class="card-inner bg-[#141414] border border-[#F97316]/20 rounded-[2rem] p-6 flex flex-col justify-between shadow-2xl relative">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="bg-[#F97316]/10 text-[#F97316] text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider border border-[#F97316]/20">Família</span>
+                                        <h2 class="text-2xl font-bold text-white mt-3">Conta Inteira</h2>
+                                    </div>
+                                    <div class="mb-6 flex items-baseline gap-1">
+                                        <span id="mobile-price-familia" class="text-4xl font-black tracking-tighter"><span class="price-loading"></span></span>
+                                        <span class="text-gray-500 font-medium text-sm">/mês</span>
+                                    </div>
+                                    <div class="h-px w-full bg-white/5 mb-6"></div>
+                                    <div class="mb-6 bg-[#F97316]/5 p-3 rounded-xl border border-[#F97316]/10">
+                                        <div class="flex gap-4 justify-center">
+                                            <div class="flex items-center gap-2">
+                                                <i class="ph-fill ph-users text-xl text-[#F97316]"></i>
+                                                <span class="text-white font-bold text-sm">5 Perfis</span>
+                                            </div>
+                                            <div class="w-px h-6 bg-white/10"></div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="ph-fill ph-monitor-play text-xl text-[#F97316]"></i>
+                                                <span class="text-white font-bold text-sm">4 Ecrãs</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Conta 100% Exclusiva</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Partilha Multi-Casa</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Controlo Parental</span></li>
+                                    </ul>
+                                </div>
+                                <button onclick="selectPlan('FAMILIA')"
+                                    class="btn-tap w-full mt-auto bg-[#202020] border border-white/10 text-white font-semibold py-4 rounded-2xl">
+                                    Escolher Família
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="swiper-pagination relative mt-8"></div>
+                </div>
+            </div>
+
+            <!-- GRID DE 3 COLUNAS (Desktop) -->
+            <div class="hidden lg:grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
 
                 <!-- 1. PLANO ECONÓMICO -->
                 <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6">
@@ -595,37 +970,37 @@
         </div>
 
         <!-- TELA 2: NÚMERO DE TELEMÓVEL -->
-        <div id="step-checkout" class="hidden">
+        <div id="step-checkout" class="hidden px-4 md:px-0">
             <button onclick="goBack('step-catalog')"
-                class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition"><i
-                    class="fas fa-arrow-left"></i> Voltar aos planos</button>
-            <div class="netflix-card p-8 max-w-lg mx-auto rounded-md shadow-2xl">
-                <span class="text-muted text-xs font-bold tracking-widest uppercase mb-2 block">PASSO 2 DE 3</span>
-                <h2 class="text-3xl font-bold mb-6">O seu número</h2>
+                class="hidden lg:flex text-gray-400 hover:text-white mb-6 items-center gap-2 transition active:scale-95"><i
+                    class="fas fa-arrow-left"></i> <span class="text-sm font-medium">Voltar aos planos</span></button>
+            <div class="netflix-card p-5 sm:p-6 md:p-8 max-w-lg mx-auto rounded-2xl md:rounded-3xl shadow-2xl">
+                <span class="text-gray-500 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase mb-2 block">PASSO 2 DE 3</span>
+                <h2 class="text-2xl md:text-3xl font-bold mb-6">O seu número</h2>
 
-                <div class="bg-accent p-4 rounded mb-6 flex justify-between items-center border border-gray-500/20">
+                <div class="bg-white/5 p-4 rounded-xl mb-6 flex justify-between items-center border border-white/10">
                     <div>
-                        <div class="text-sm text-muted">Plano Selecionado</div>
-                        <div class="font-bold" id="selected-plan-name">Pessoal</div>
+                        <div class="text-xs md:text-sm text-gray-400">Plano Selecionado</div>
+                        <div class="font-bold text-white text-sm md:text-base" id="selected-plan-name">Pessoal</div>
                     </div>
-                    <div class="font-bold text-xl text-brand" id="selected-plan-price">4.500 Kz</div>
+                    <div class="font-bold text-lg md:text-xl text-[#E50914]" id="selected-plan-price">4.500 Kz</div>
                 </div>
 
                 <form id="phone-form" onsubmit="event.preventDefault(); submitPhone();">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-muted mb-2 font-medium text-sm">Número de Telemóvel</label>
+                            <label class="block text-gray-400 mb-2 font-medium text-xs md:text-sm">Número de Telemóvel</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-3.5 text-muted font-bold">+244</span>
+                                <span class="absolute left-4 top-[14px] md:top-4 text-gray-500 font-bold text-base md:text-lg">+244</span>
                                 <input type="tel" id="phone-input" placeholder="9XX XXX XXX" required maxlength="11"
                                     oninput="formatPhoneNumber(this)"
-                                    class="w-full input-theme pl-16 pr-4 py-3.5 rounded font-medium text-lg">
+                                    class="w-full bg-white/5 border border-white/10 text-white pl-[4.5rem] md:pl-[5rem] pr-4 py-3.5 md:py-4 rounded-xl font-medium text-base md:text-lg focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all outline-none">
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" id="btn-submit-phone"
-                        class="w-full mt-8 btn-primary font-bold py-4 rounded text-lg shadow-lg flex justify-center items-center gap-3">
+                        class="w-full mt-8 bg-[#E50914] hover:bg-[#f6121d] active:scale-[0.98] transition-all text-white font-bold py-3.5 md:py-4 rounded-xl text-base md:text-lg shadow-[0_8px_20px_rgba(229,9,20,0.3)] flex justify-center items-center gap-3">
                         <span>Continuar</span>
                         <i class="fas fa-chevron-right text-sm"></i>
                     </button>
@@ -635,239 +1010,300 @@
 
 
         <!-- TELA 4: MÉTODO DE PAGAMENTO -->
-        <div id="step-payment-method" class="hidden">
-            <div class="max-w-4xl mx-auto">
-                <div class="netflix-card p-6 rounded-md shadow-2xl">
-                    <span class="text-muted text-xs font-bold tracking-widest uppercase mb-2 block">PASSO 3 DE 3</span>
-                    <h2 class="text-3xl font-bold mb-6">Resumo e Pagamento</h2>
+        <div id="step-payment-method" class="hidden px-4 md:px-0">
+            <div class="max-w-lg mx-auto">
 
-                    <!-- Order Summary & Coupon -->
-                    <div class="bg-accent p-5 rounded-lg border border-gray-500/20 mb-8">
-                        <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-500/20">
+                <!-- Header -->
+                <div class="text-center mb-5 stagger-card">
+                    <span class="text-[#E50914] text-[10px] md:text-xs font-bold tracking-[0.18em] uppercase block mb-1.5">Passo 3 de 3</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Pagamento</h2>
+                </div>
+
+                <!-- Resumo do Pedido -->
+                <div class="stagger-card bg-gradient-to-r from-white/[0.06] to-white/[0.02] border border-white/[0.08] rounded-2xl md:rounded-3xl p-4 md:p-6 mb-3 md:mb-4 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-[#E50914] opacity-[0.04] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-[#E50914]/20 to-[#E50914]/5 flex items-center justify-center flex-shrink-0 border border-[#E50914]/10">
+                                <i class="ph-fill ph-television text-lg md:text-xl text-[#E50914]"></i>
+                            </div>
                             <div>
-                                <div class="text-sm text-muted">Plano Selecionado</div>
-                                <div class="font-bold text-lg" id="summary-plan-name">Pessoal</div>
-                            </div>
-                            <div class="font-bold text-xl text-white" id="summary-original-price">4.500 Kz</div>
-                        </div>
-
-                        <!-- Referral Code Input -->
-                        <div class="mb-4">
-                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Código de Indicação</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="coupon-input" placeholder="Ex: PANDORA"
-                                    class="input-theme flex-1 px-3 py-2 rounded uppercase font-bold text-sm tracking-wide">
-                                <button onclick="applyCoupon()" id="btn-apply-coupon"
-                                    class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 py-2 rounded text-sm transition">
-                                    Aplicar
-                                </button>
-                            </div>
-                            <p id="coupon-message" class="text-xs mt-2 hidden"></p>
-                        </div>
-
-                        <!-- Duration Select -->
-                        <div class="mb-4 pb-4 border-b border-[#222]">
-                            <label class="text-xs text-muted uppercase font-bold mb-2 block">Duração</label>
-                            <select id="duration-select" onchange="changeDuration()" class="input-theme w-full px-3 py-2 rounded font-bold text-sm">
-                                <option value="1">1 Mês (30 Dias)</option>
-                                <option value="3">3 Meses (90 Dias)</option>
-                                <option value="6">6 Meses (180 Dias)</option>
-                                <option value="12">12 Meses (360 Dias)</option>
-                            </select>
-                        </div>
-
-                        <!-- Total Final -->
-                        <div class="flex justify-between items-center pt-2">
-                            <span class="text-muted font-bold text-sm uppercase">Total a Pagar</span>
-                            <span class="font-bold text-2xl text-brand" id="summary-total-price">4.500 Kz</span>
-                        </div>
-                    </div>
-
-                    <p class="text-muted mb-6 text-sm">Selecione como prefere pagar a sua subscrição:</p>
-
-                    <!-- Payment Method Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 animate-fade-in">
-                        <!-- Express Payment Card -->
-                        <div onclick="selectPaymentMethod('EXPRESS', this)" 
-                             class="relative bg-gradient-to-br from-[#FF8C42] to-[#E8690B] p-6 rounded-2xl cursor-pointer overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-white/10">
-                            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity duration-500"></div>
-                            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
-                            
-                            <div class="flex flex-col h-full relative z-10">
-                                <div class="flex justify-between items-start mb-6">
-                                    <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-center shadow-inner border border-white/30">
-                                        <img src="assets/payment-methods/express_logo.svg" alt="Express" class="w-full h-full object-contain drop-shadow-md">
-                                    </div>
-                                    <div class="bg-white/25 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-sm flex items-center gap-1.5 border border-white/20">
-                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div> Instantâneo
-                                    </div>
-                                </div>
-                                <h3 class="text-xl font-bold text-white mb-1.5 drop-shadow-sm tracking-wide">Multicaixa Express</h3>
-                                <p class="text-white/90 text-sm font-medium mb-6 leading-relaxed">Aprovação automática na app do seu telemóvel.</p>
-                                
-                                <div class="mt-auto flex items-center text-white text-sm font-bold opacity-90 group-hover:opacity-100 transition-all group-hover:translate-x-2 duration-300">
-                                    Pagar Agora <i class="fas fa-arrow-right ml-2 text-white/80"></i>
-                                </div>
+                                <p id="summary-plan-name" class="font-bold text-white text-[15px] md:text-lg leading-tight">Pessoal</p>
+                                <p class="text-[11px] md:text-sm text-gray-500 mt-0.5">Subscrição mensal</p>
                             </div>
                         </div>
+                        <span class="font-bold text-white text-lg md:text-xl" id="summary-original-price">4.500 Kz</span>
+                    </div>
+                </div>
 
-                        <!-- Pagamento por Referência Card -->
-                        <div onclick="selectPaymentMethod('REFERENCIA', this)" 
-                             class="relative bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-6 rounded-2xl cursor-pointer overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-700/50 hover:border-gray-600">
-                            <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity duration-500"></div>
-                            <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-blue-500 opacity-5 rounded-full blur-2xl"></div>
-                            
-                            <div class="flex flex-col h-full relative z-10">
-                                <div class="flex justify-between items-start mb-6">
-                                    <div class="w-14 h-14 bg-white/5 backdrop-blur-sm rounded-xl p-2 flex items-center justify-center border border-white/10 shadow-inner">
-                                        <img src="assets/payment-methods/multicaixa_logo.png" alt="REF" class="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity">
-                                    </div>
-                                </div>
-                                <h3 class="text-xl font-bold text-white mb-1.5 drop-shadow-sm tracking-wide">Referência Multicaixa</h3>
-                                <p class="text-gray-400 text-sm font-medium mb-6 leading-relaxed">Pague em qualquer ATM ou no seu Internet Banking.</p>
-                                
-                                <div class="mt-auto flex items-center text-blue-400 text-sm font-bold opacity-90 group-hover:opacity-100 transition-all group-hover:translate-x-2 duration-300">
-                                    Gerar Referência <i class="fas fa-arrow-right ml-2 text-blue-400/80"></i>
-                                </div>
+                <!-- Duração -->
+                <div class="stagger-card bg-white/[0.04] border border-white/[0.06] rounded-2xl md:rounded-3xl p-4 md:p-6 mb-3 md:mb-4">
+                    <label class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2.5">Duração</label>
+                    <div class="relative">
+                        <select id="duration-select" onchange="changeDuration()"
+                            class="w-full bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-3 md:py-4 font-semibold text-sm md:text-base text-white focus:border-[#E50914]/50 focus:outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="1">1 Mês (30 Dias)</option>
+                            <option value="3">3 Meses (90 Dias)</option>
+                            <option value="6">6 Meses (180 Dias)</option>
+                            <option value="12">12 Meses (360 Dias)</option>
+                        </select>
+                        <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Código de Desconto -->
+                <div class="stagger-card bg-white/[0.04] border border-white/[0.06] rounded-2xl md:rounded-3xl mb-3 md:mb-4 overflow-hidden">
+                    <button onclick="toggleCouponSection(this)"
+                        class="w-full flex items-center justify-between p-4 md:p-6 text-left active:bg-white/[0.04] transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                                <i class="ph ph-tag text-gray-500 md:text-lg"></i>
+                            </div>
+                            <span class="text-sm md:text-base font-medium text-gray-400">Código de desconto</span>
+                        </div>
+                        <i class="ph ph-plus text-gray-600 text-sm md:text-base transition-transform duration-300 coupon-icon"></i>
+                    </button>
+                    <div class="coupon-body hidden px-4 md:px-6 pb-4 md:pb-6">
+                        <div class="flex gap-2">
+                            <input type="text" id="coupon-input" placeholder="Ex: PANDORA"
+                                class="flex-1 bg-white/[0.06] border border-white/[0.08] rounded-xl px-3 py-2.5 md:py-3 uppercase font-bold text-sm md:text-base text-white tracking-wide placeholder:text-gray-600 focus:border-[#E50914]/50 focus:outline-none transition-colors">
+                            <button onclick="applyCoupon()" id="btn-apply-coupon"
+                                class="bg-white/10 hover:bg-white/15 active:scale-95 text-white font-bold px-4 py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all flex-shrink-0">
+                                Aplicar
+                            </button>
+                        </div>
+                        <p id="coupon-message" class="text-xs md:text-sm mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="stagger-card bg-gradient-to-r from-[#E50914]/[0.08] to-[#E50914]/[0.02] border border-[#E50914]/[0.12] rounded-2xl md:rounded-3xl p-4 md:p-6 mb-6 md:mb-8 relative overflow-hidden">
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-[#E50914] opacity-[0.04] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <span class="text-gray-400 font-bold text-xs md:text-sm uppercase tracking-wider">Total a Pagar</span>
+                        <span class="font-extrabold text-[26px] md:text-3xl text-[#E50914] tabular-nums" id="summary-total-price">4.500 Kz</span>
+                    </div>
+                </div>
+
+                <!-- Métodos de Pagamento -->
+                <p class="text-center text-[10px] md:text-xs font-bold text-gray-600 uppercase tracking-[0.15em] mb-3 stagger-card">Escolha o método</p>
+
+                <div class="grid grid-cols-2 gap-3 md:gap-4 mb-5 md:mb-8">
+                    <!-- Express -->
+                    <button onclick="selectPaymentMethod('EXPRESS', this)"
+                        class="stagger-card relative bg-gradient-to-br from-[#FF8C42] via-[#F0731A] to-[#D85D0A] p-4 md:p-5 rounded-2xl text-left overflow-hidden group transition-all duration-300 active:scale-[0.96] hover:shadow-[0_8px_30px_rgba(255,140,66,0.25)] border border-white/10">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-white opacity-[0.12] rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
+                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-white opacity-[0.06] rounded-full blur-xl"></div>
+                        <div class="relative z-10">
+                            <div class="w-11 h-11 md:w-12 md:h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 border border-white/30 shadow-inner">
+                                <img src="assets/payment-methods/express_logo.svg" alt="Express" class="w-7 h-7 md:w-8 md:h-8 object-contain drop-shadow-md">
+                            </div>
+                            <p class="text-white font-bold text-[14px] md:text-base leading-tight mb-1.5">Multicaixa Express</p>
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                                <span class="text-white/80 text-[11px] md:text-xs font-medium">Instantâneo</span>
                             </div>
                         </div>
-                    </div>
+                    </button>
 
-                    <div class="bg-blue-900/20 border border-blue-900/30 p-4 rounded-lg text-sm text-muted mb-6">
-                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-                        Todos os métodos são seguros e processados instantaneamente
-                    </div>
+                    <!-- Referência -->
+                    <button onclick="selectPaymentMethod('REFERENCIA', this)"
+                        class="stagger-card relative bg-gradient-to-br from-[#1e293b] via-[#172033] to-[#0f172a] p-4 md:p-5 rounded-2xl text-left overflow-hidden group transition-all duration-300 active:scale-[0.96] hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] border border-blue-500/10 hover:border-blue-500/20">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500 opacity-[0.08] rounded-full blur-2xl group-hover:opacity-15 transition-opacity"></div>
+                        <div class="relative z-10">
+                            <div class="w-11 h-11 md:w-12 md:h-12 bg-white/[0.06] backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/[0.08]">
+                                <img src="assets/payment-methods/multicaixa_logo.png" alt="REF" class="w-7 h-7 md:w-8 md:h-8 object-contain opacity-90">
+                            </div>
+                            <p class="text-white font-bold text-[14px] md:text-base leading-tight mb-1.5">Referência</p>
+                            <span class="text-gray-400 text-[11px] md:text-xs font-medium">ATM ou NetBanking</span>
+                        </div>
+                    </button>
+                </div>
 
-                    <div class="text-center">
-                        <button onclick="showScreen('step-catalog')" class="text-sm text-muted hover:text-white transition">
-                            <i class="fas fa-arrow-left mr-2"></i> Voltar aos Planos
-                        </button>
-                    </div>
+                <!-- Segurança -->
+                <div class="flex items-center justify-center gap-2 text-gray-600 mb-3 stagger-card">
+                    <i class="ph-fill ph-shield-check text-sm md:text-base text-green-500/60"></i>
+                    <span class="text-[10px] md:text-xs font-semibold tracking-widest uppercase">Pagamento Seguro</span>
+                </div>
+
+                <!-- Voltar -->
+                <div class="text-center stagger-card pb-4">
+                    <button onclick="showScreen('step-catalog')" class="text-xs md:text-sm text-gray-600 hover:text-white transition py-2 px-4 active:scale-95">
+                        <i class="ph-bold ph-arrow-left mr-1"></i> Voltar aos Planos
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- TELA 5: CONFIRMAÇÃO PAGAMENTO (Referência) -->
-        <div id="step-payment-ref" class="hidden">
-            <div class="netflix-card rounded-md p-8 max-w-md mx-auto text-center shadow-2xl">
-                <div class="mb-6 flex justify-center"><i class="fas fa-receipt text-4xl text-muted animate-pulse"></i>
+        <div id="step-payment-ref" class="hidden px-4 md:px-0">
+            <div class="netflix-card rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 max-w-md mx-auto text-center shadow-2xl">
+                <div class="mb-4 md:mb-6 flex justify-center"><i class="fas fa-receipt text-3xl md:text-4xl text-gray-500 animate-pulse"></i>
                 </div>
-                <h2 class="text-2xl font-bold mb-2">Pagamento por Referência</h2>
-                <p class="text-muted text-sm mb-8">Utilize o Multicaixa Express ou um ATM.</p>
+                <h2 class="text-xl md:text-2xl font-bold mb-2">Pagamento por Referência</h2>
+                <p class="text-gray-400 text-xs md:text-sm mb-6 md:mb-8">Utilize o Multicaixa Express ou um ATM.</p>
 
-                <div class="bg-accent p-6 rounded border border-gray-500/20 mb-8 text-left space-y-4">
-                        <div class="flex justify-between items-center pb-4 border-b border-gray-500/20">
-                            <span class="text-muted text-sm uppercase">Entidade</span>
-                            <div class="flex items-center gap-3"><span class="font-mono text-xl" id="ref-entity">...</span><i
+                <div class="bg-white/5 p-4 md:p-6 rounded-xl border border-white/10 mb-6 md:mb-8 text-left space-y-4">
+                        <div class="flex justify-between items-center pb-4 border-b border-white/5">
+                            <span class="text-gray-400 text-xs md:text-sm uppercase tracking-wider font-medium">Entidade</span>
+                            <div class="flex items-center gap-3"><span class="font-mono text-lg md:text-xl font-bold text-white tracking-widest" id="ref-entity">...</span><i
                                     onclick="copyToClip(document.getElementById('ref-entity').innerText)"
-                                    class="far fa-copy text-muted hover:text-brand cursor-pointer"></i></div>
+                                    class="ph-bold ph-copy text-gray-400 hover:text-white cursor-pointer transition-colors text-lg active:scale-95"></i></div>
                         </div>
-                    <div class="flex justify-between items-center pb-4 border-b border-gray-500/20">
-                        <span class="text-muted text-sm uppercase">Referência</span>
-                        <div class="flex items-center gap-3"><span class="font-mono text-xl font-bold text-brand"
+                    <div class="flex justify-between items-center pb-4 border-b border-white/5">
+                        <span class="text-gray-400 text-xs md:text-sm uppercase tracking-wider font-medium">Referência</span>
+                        <div class="flex items-center gap-3"><span class="font-mono text-lg md:text-xl font-bold text-[#E50914] tracking-widest"
                                 id="ref-display">...</span><i onclick="copyToClipRef()"
-                                class="far fa-copy text-muted hover:text-brand cursor-pointer"></i></div>
+                                class="ph-bold ph-copy text-gray-400 hover:text-white cursor-pointer transition-colors text-lg active:scale-95"></i></div>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-muted text-sm uppercase">Valor</span>
-                        <span class="font-bold text-xl" id="pay-amount">...</span>
+                        <span class="text-gray-400 text-xs md:text-sm uppercase tracking-wider font-medium">Valor</span>
+                        <span class="font-bold text-lg md:text-xl text-white" id="pay-amount">...</span>
                     </div>
                 </div>
 
-                <div class="text-left text-xs text-muted mb-6 bg-blue-900/20 border border-blue-900/30 p-3 rounded">
+                <div class="text-left text-[10px] md:text-xs text-gray-300 mb-6 bg-blue-900/20 border border-blue-900/30 p-3 rounded-lg">
                     <p class="mb-1">⚠️ A referência expira em 24 horas.</p>
                     <p class="text-green-400 font-bold">⚡ A entrega é automática e instantânea após a confirmação do pagamento.</p>
                 </div>
 
                 <button onclick="cancelOrder()"
-                    class="text-xs text-muted hover:text-red-400 underline cursor-pointer">
+                    class="text-xs md:text-sm text-gray-500 hover:text-red-400 underline cursor-pointer active:scale-95 transition-all">
                     Cancelar pedido e voltar ao início
                 </button>
             </div>
         </div>
 
         <!-- TELA: AGUARDAR PAGAMENTO (Unificada) -->
+        <!-- TELA 5: A AGUARDAR PAGAMENTO EXPRESS -->
         <div id="step-waiting-payment" class="hidden">
-            <div class="netflix-card rounded-2xl p-10 max-w-md mx-auto text-center shadow-2xl border border-white/5">
+            <div class="ambient-glow-pay" id="pay-bg-glow"></div>
 
-                <!-- Animated ring -->
-                <div class="relative flex items-center justify-center mb-8">
-                    <div class="absolute w-24 h-24 rounded-full border-4 border-brand/20 animate-ping"></div>
-                    <div class="w-20 h-20 rounded-full bg-brand/10 flex items-center justify-center">
-                        <i class="fas fa-mobile-alt text-4xl text-brand"></i>
+            <div class="max-w-sm mx-auto flex flex-col items-center py-8 px-4 relative z-10 min-h-[60vh] justify-center">
+
+                <!-- ESTADO: A AGUARDAR -->
+                <div id="pay-loading-state" class="flex flex-col items-center w-full transition-all duration-500">
+
+                    <!-- Radar + Telemóvel -->
+                    <div class="relative w-32 h-32 mb-8 flex items-center justify-center">
+                        <div class="radar-wave"></div>
+                        <div class="radar-wave"></div>
+                        <div class="radar-wave"></div>
+                        <div class="relative z-10 bg-zinc-900 w-20 h-20 rounded-full flex items-center justify-center border border-zinc-800 shadow-[0_0_30px_rgba(229,9,20,0.3)] shake-phone">
+                            <i class="fas fa-mobile-alt text-4xl text-white"></i>
+                            <div class="absolute top-4 right-5 w-3 h-3 bg-red-500 rounded-full border-2 border-zinc-900 animate-pulse"></div>
+                        </div>
                     </div>
+
+                    <h2 class="text-2xl font-bold text-white mb-2 text-center">Confirme no Telemóvel</h2>
+                    <p class="text-sm text-zinc-400 text-center mb-8 px-2">
+                        Enviámos um pedido para o seu <span class="text-white font-semibold">Multicaixa Express</span>.<br>
+                        Assim que confirmar, as credenciais aparecem automaticamente.
+                    </p>
+
+                    <!-- Instruções Bento -->
+                    <div class="w-full bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 backdrop-blur-md mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 flex-shrink-0">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <p class="text-sm text-zinc-300 font-medium">1. Abra a notificação no ecrã</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 flex-shrink-0">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <p class="text-sm text-zinc-300 font-medium">2. Insira o seu PIN para aprovar</p>
+                        </div>
+                    </div>
+
+                    <!-- Timer + Barra streaming -->
+                    <div class="w-full flex flex-col items-center mb-8">
+                        <div class="flex items-center justify-between w-full mb-3 px-1">
+                            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-spinner fa-spin"></i> A aguardar pagamento
+                            </span>
+                            <span id="pay-timer" class="text-sm font-bold text-red-500 tabular-nums">05:00</span>
+                        </div>
+                        <div class="streaming-buffer"></div>
+                    </div>
+
+                    <button onclick="cancelOrder()"
+                        class="text-xs text-zinc-600 hover:text-red-400 underline cursor-pointer transition-colors">
+                        Cancelar e voltar ao início
+                    </button>
                 </div>
 
-                <h2 class="text-2xl font-bold mb-2">A processar o seu pagamento</h2>
-                <p class="text-muted text-sm mb-8">Aprove o pagamento no <strong class="text-white">Multicaixa Express</strong> no seu telemóvel.<br>Assim que confirmar, as credenciais aparecem automaticamente.</p>
-
-                <!-- Pulsing dots -->
-                <div class="flex justify-center gap-2 mb-8">
-                    <div class="w-2 h-2 bg-brand rounded-full animate-bounce" style="animation-delay:0s"></div>
-                    <div class="w-2 h-2 bg-brand rounded-full animate-bounce" style="animation-delay:.15s"></div>
-                    <div class="w-2 h-2 bg-brand rounded-full animate-bounce" style="animation-delay:.3s"></div>
+                <!-- ESTADO: SUCESSO (controlado pelo polling) -->
+                <div id="pay-success-state" class="pay-hidden flex flex-col items-center w-full text-center">
+                    <div class="relative w-28 h-28 mb-6 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+                        <div class="relative z-10 bg-green-500 w-20 h-20 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.4)]">
+                            <i class="fas fa-check text-4xl text-white"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Pagamento Aprovado!</h2>
+                    <p class="text-zinc-400 flex items-center justify-center gap-2">
+                        <i class="fas fa-spinner fa-spin"></i> A preparar o seu entretenimento...
+                    </p>
                 </div>
 
-                <button onclick="cancelOrder()"
-                    class="text-xs text-muted hover:text-red-400 underline cursor-pointer transition-colors">
-                    Cancelar e voltar ao início
-                </button>
             </div>
         </div>
 
         <!-- TELA 6: SUCESSO -->
-        <div id="step-success" class="hidden">
-            <div class="netflix-card rounded-md max-w-lg mx-auto shadow-2xl overflow-hidden border-0">
-                <div class="bg-gradient-to-r from-green-900 to-black p-8 text-center border-b border-white/10 relative">
-                    <div class="absolute inset-0 bg-brand opacity-10"></div>
-                    <i class="fas fa-check-circle text-5xl text-[#46d369] mb-4 relative z-10"></i>
-                    <h2 class="text-2xl font-bold text-white relative z-10">Tudo Pronto!</h2>
-                    <p class="text-gray-300 text-sm mt-1 relative z-10">Os dados foram enviados para o seu WhatsApp ou
+        <div id="step-success" class="hidden px-4 md:px-0">
+            <div class="netflix-card rounded-2xl md:rounded-3xl max-w-lg mx-auto shadow-2xl overflow-hidden border-0">
+                <div class="bg-gradient-to-r from-green-900 to-black p-6 md:p-8 text-center border-b border-white/10 relative">
+                    <div class="absolute inset-0 bg-[#E50914] opacity-10"></div>
+                    <i class="fas fa-check-circle text-4xl md:text-5xl text-[#46d369] mb-4 relative z-10"></i>
+                    <h2 class="text-xl md:text-2xl font-bold text-white relative z-10">Tudo Pronto!</h2>
+                    <p class="text-gray-300 text-xs md:text-sm mt-1 relative z-10">Os dados foram enviados para o seu WhatsApp ou
                         SMS.</p>
                 </div>
-                <div class="p-8 text-center">
-                    <p class="text-gray-300 mb-2">Pagamento recebido com sucesso.</p>
-                    <h3 class="text-xl font-bold mb-6 text-white leading-relaxed">As credenciais da sua conta Netflix
+                <div class="p-6 md:p-8 text-center">
+                    <p class="text-gray-300 text-sm md:text-base mb-2">Pagamento recebido com sucesso.</p>
+                    <h3 class="text-lg md:text-xl font-bold mb-6 text-white leading-relaxed">As credenciais da sua conta Netflix
                         foram geradas.</h3>
 
-                    <div id="success-credentials" class="hidden bg-accent/50 p-6 rounded-lg border border-white/10 mb-8 text-left">
-                        <h4 class="text-brand font-bold mb-4"><i class="fas fa-key mr-2"></i> Suas Credenciais</h4>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
-                                <span class="text-muted">Email:</span>
+                    <div id="success-credentials" class="hidden bg-white/5 p-4 md:p-6 rounded-xl border border-white/10 mb-6 md:mb-8 text-left">
+                        <h4 class="text-[#E50914] font-bold mb-4 flex items-center"><i class="ph-fill ph-key mr-2 text-lg"></i> Suas Credenciais</h4>
+                        <div class="space-y-3 text-xs md:text-sm">
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span class="text-gray-400">Email:</span>
                                 <div class="flex items-center gap-2">
-                                    <span id="succ-email" class="font-mono text-white"></span>
-                                    <button onclick="copyText('succ-email')" class="text-gray-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                                    <span id="succ-email" class="font-mono text-white text-xs md:text-sm"></span>
+                                    <button onclick="copyText('succ-email')" class="text-gray-500 hover:text-white transition-colors active:scale-95"><i class="ph-bold ph-copy text-lg"></i></button>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
-                                <span class="text-muted">Palavra-passe:</span>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span class="text-gray-400">Palavra-passe:</span>
                                 <div class="flex items-center gap-2">
-                                    <span id="succ-password" class="font-mono text-white"></span>
-                                    <button onclick="copyText('succ-password')" class="text-gray-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                                    <span id="succ-password" class="font-mono text-white text-xs md:text-sm"></span>
+                                    <button onclick="copyText('succ-password')" class="text-gray-500 hover:text-white transition-colors active:scale-95"><i class="ph-bold ph-copy text-lg"></i></button>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center border-b border-gray-700/50 pb-2">
-                                <span class="text-muted">Perfil:</span>
-                                <span id="succ-profile" class="font-bold text-white"></span>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span class="text-gray-400">Perfil:</span>
+                                <span id="succ-profile" class="font-bold text-white text-xs md:text-sm"></span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-muted">PIN do Perfil:</span>
-                                <span id="succ-pin" class="font-mono text-white font-bold text-lg"></span>
+                                <span class="text-gray-400">PIN do Perfil:</span>
+                                <span id="succ-pin" class="font-mono text-white font-bold text-base md:text-lg"></span>
                             </div>
                         </div>
                     </div>
 
-                    <div id="success-sms-info" class="bg-accent/50 p-6 rounded-lg border border-white/10 mb-8">
-                        <i class="fas fa-sms text-4xl text-brand mb-3"></i>
-                        <p class="text-sm text-muted">Verifique também as mensagens do seu telemóvel.</p>
+                    <div id="success-sms-info" class="bg-white/5 p-4 md:p-6 rounded-xl border border-white/10 mb-6 md:mb-8 flex flex-col items-center">
+                        <i class="ph-fill ph-chat-circle-text text-3xl md:text-4xl text-[#E50914] mb-3"></i>
+                        <p class="text-xs md:text-sm text-gray-400">Verifique também as mensagens do seu telemóvel.</p>
                     </div>
 
-                    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="https://www.netflix.com/br/login" target="_blank" class="btn-primary bg-white text-black hover:bg-gray-200 px-8 py-3 rounded font-bold shadow-lg w-full flex items-center justify-center gap-2 transition">
-                            <i class="fas fa-play"></i> Assistir na Netflix
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                        <a href="https://www.netflix.com/br/login" target="_blank" class="bg-white hover:bg-gray-200 active:scale-95 text-black font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full flex items-center justify-center gap-2 transition-all">
+                            <i class="ph-fill ph-play-circle text-lg md:text-xl"></i> Assistir na Netflix
                         </a>
-                        <button onclick="goHome()" class="btn-primary px-8 py-3 rounded font-bold shadow-lg w-full">
+                        <button onclick="goHome()" class="bg-[#E50914] hover:bg-[#f6121d] active:scale-95 text-white font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full transition-all">
                             Voltar ao Início
                         </button>
                     </div>
@@ -876,70 +1312,70 @@
         </div>
 
         <!-- TELA: RECUPERAR CREDENCIAIS -->
-        <div id="step-recover" class="hidden">
-            <div class="netflix-card rounded-md p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
+        <div id="step-recover" class="hidden px-4 md:px-0">
+            <div class="netflix-card rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
                 <button onclick="goHome()"
-                    class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition text-sm">
-                    <i class="fas fa-arrow-left"></i> Voltar
+                    class="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition text-sm active:scale-95">
+                    <i class="ph-bold ph-arrow-left"></i> <span class="font-medium">Voltar</span>
                 </button>
                 <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user-circle text-3xl text-brand"></i>
+                    <div class="w-14 h-14 md:w-16 md:h-16 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
+                        <i class="ph-fill ph-user-circle text-3xl md:text-4xl text-[#E50914]"></i>
                     </div>
-                    <h2 class="text-2xl font-bold">Minha Conta</h2>
-                    <p class="text-muted text-sm mt-1">Recupere as credenciais da sua conta Netflix.</p>
+                    <h2 class="text-xl md:text-2xl font-bold">Minha Conta</h2>
+                    <p class="text-gray-400 text-xs md:text-sm mt-1">Recupere as credenciais da sua conta Netflix.</p>
                 </div>
 
                 <form id="recover-form" onsubmit="event.preventDefault(); submitRecover();">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-muted mb-2 font-medium text-sm">Número de Telemóvel</label>
+                            <label class="block text-gray-400 mb-2 font-medium text-xs md:text-sm text-left">Número de Telemóvel</label>
                             <div class="relative">
-                                <span class="absolute left-4 top-3.5 text-muted font-bold">+244</span>
+                                <span class="absolute left-4 top-[14px] md:top-4 text-gray-500 font-bold text-base md:text-lg">+244</span>
                                 <input type="tel" id="recover-phone" placeholder="9XX XXX XXX" required maxlength="11"
                                     oninput="formatPhoneNumber(this)"
-                                    class="w-full input-theme pl-16 pr-4 py-3.5 rounded font-medium text-lg">
+                                    class="w-full bg-white/5 border border-white/10 text-white pl-[4.5rem] md:pl-[5rem] pr-4 py-3.5 md:py-4 rounded-xl font-medium text-base md:text-lg focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all outline-none">
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" id="btn-recover"
-                        class="w-full mt-8 btn-primary font-bold py-4 rounded text-lg shadow-lg flex justify-center items-center gap-3">
+                        class="w-full mt-8 bg-[#E50914] hover:bg-[#f6121d] active:scale-[0.98] transition-all text-white font-bold py-3.5 md:py-4 rounded-xl text-base md:text-lg shadow-lg flex justify-center items-center gap-3">
                         <span>Avançar</span>
-                        <i class="fas fa-arrow-right text-sm"></i>
+                        <i class="ph-bold ph-arrow-right text-sm"></i>
                     </button>
                 </form>
 
-                <p class="text-xs text-muted text-center mt-6">
+                <p class="text-[10px] md:text-xs text-gray-500 text-center mt-6">
                     Enviaremos um código SMS para o seu número para autenticação.
                 </p>
             </div>
         </div>
 
         <!-- TELA: LOGIN OTP -->
-        <div id="step-login-otp" class="hidden">
-            <div class="netflix-card rounded-md p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
+        <div id="step-login-otp" class="hidden px-4 md:px-0">
+            <div class="netflix-card rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
                 <button onclick="showScreen('step-recover')"
-                    class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition text-sm">
-                    <i class="fas fa-arrow-left"></i> Voltar
+                    class="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition text-sm active:scale-95">
+                    <i class="ph-bold ph-arrow-left"></i> <span class="font-medium">Voltar</span>
                 </button>
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold">Verificar Número</h2>
-                    <p class="text-muted text-sm mt-1">Insira o código de 4 dígitos enviado por SMS para <span id="login-phone-display" class="font-bold text-white"></span></p>
+                    <h2 class="text-xl md:text-2xl font-bold">Verificar Número</h2>
+                    <p class="text-gray-400 text-xs md:text-sm mt-1">Insira o código de 4 dígitos enviado por SMS para <br><span id="login-phone-display" class="font-bold text-white text-sm md:text-base mt-1 block"></span></p>
                 </div>
 
                 <form onsubmit="event.preventDefault(); submitLoginOtp();">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-muted mb-2 font-medium text-sm text-center">Código SMS</label>
+                            <label class="block text-gray-400 mb-2 font-medium text-xs md:text-sm text-center">Código SMS</label>
                             <input type="text" id="login-otp-code" required
-                                class="w-full bg-accent border border-gray-700/50 rounded px-4 py-3 text-white font-bold text-center text-3xl tracking-[0.5em]"
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 md:py-4 text-white font-bold text-center text-2xl md:text-3xl tracking-[0.4em] md:tracking-[0.5em] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all outline-none"
                                 placeholder="0000" maxlength="4" autocomplete="one-time-code" oninput="this.value = this.value.replace(/\D/g, '')">
                         </div>
 
                         <button id="btn-login-otp" type="submit"
-                            class="btn-primary w-full mt-8 py-4 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
-                            <span>Entrar na Minha Conta</span> <i class="fas fa-sign-in-alt text-sm"></i>
+                            class="bg-[#E50914] hover:bg-[#f6121d] active:scale-[0.98] transition-all text-white w-full mt-8 py-3.5 md:py-4 rounded-xl text-base md:text-lg font-bold shadow-lg flex items-center justify-center gap-2">
+                            <span>Entrar na Minha Conta</span> <i class="ph-bold ph-sign-in text-lg"></i>
                         </button>
                     </div>
                 </form>
@@ -947,29 +1383,29 @@
         </div>
 
         <!-- TELA: CHECKOUT OTP (Express) -->
-        <div id="step-checkout-otp" class="hidden">
-            <div class="netflix-card rounded-md p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
+        <div id="step-checkout-otp" class="hidden px-4 md:px-0">
+            <div class="netflix-card rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 max-w-md mx-auto shadow-2xl animate-fade-in">
                 <button onclick="cancelCheckoutOtp()"
-                    class="text-muted hover:text-brand mb-6 flex items-center gap-2 transition text-sm">
-                    <i class="fas fa-arrow-left"></i> Alterar Número ou Plano
+                    class="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition text-sm active:scale-95">
+                    <i class="ph-bold ph-arrow-left"></i> <span class="font-medium">Alterar Número ou Plano</span>
                 </button>
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold">Confirme o seu Número</h2>
-                    <p class="text-muted text-sm mt-1">Para pagar via Express, insira o código SMS enviado para <span id="checkout-phone-display" class="font-bold text-white"></span></p>
+                    <h2 class="text-xl md:text-2xl font-bold">Confirme o seu Número</h2>
+                    <p class="text-gray-400 text-xs md:text-sm mt-1">Para pagar via Express, insira o código SMS enviado para <br><span id="checkout-phone-display" class="font-bold text-white text-sm md:text-base mt-1 block"></span></p>
                 </div>
 
                 <form onsubmit="event.preventDefault(); submitCheckoutOtp();">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-muted mb-2 font-medium text-sm text-center">Código SMS</label>
+                            <label class="block text-gray-400 mb-2 font-medium text-xs md:text-sm text-center">Código SMS</label>
                             <input type="text" id="checkout-otp-code" required
-                                class="w-full bg-accent border border-gray-700/50 rounded px-4 py-3 text-white font-bold text-center text-3xl tracking-[0.5em]"
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 md:py-4 text-white font-bold text-center text-2xl md:text-3xl tracking-[0.4em] md:tracking-[0.5em] focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all outline-none"
                                 placeholder="0000" maxlength="4" autocomplete="one-time-code" oninput="this.value = this.value.replace(/\D/g, '')">
                         </div>
 
                         <button id="btn-checkout-otp" type="submit"
-                            class="btn-primary w-full mt-8 py-4 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
-                            <span>Confirmar e Pagar via Express</span> <i class="fas fa-check-circle text-sm"></i>
+                            class="bg-[#E50914] hover:bg-[#f6121d] active:scale-[0.98] transition-all text-white w-full mt-8 py-3.5 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg flex items-center justify-center gap-2">
+                            <span>Confirmar e Pagar</span> <i class="ph-bold ph-check-circle text-lg"></i>
                         </button>
                     </div>
                 </form>
@@ -977,35 +1413,35 @@
         </div>
 
         <!-- TELA 7: DASHBOARD / MINHA ASSINATURA -->
-        <div id="step-dashboard" class="hidden">
+        <div id="step-dashboard" class="hidden px-4 md:px-0">
             <div class="max-w-4xl mx-auto animate-fade-in">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold">Minha Assinatura</h2>
-                    <button onclick="logout()" class="text-sm text-muted hover:text-white"><i
-                            class="fas fa-sign-out-alt"></i> Sair</button>
+                <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold">Minha Assinatura</h2>
+                    <button onclick="logout()" class="text-sm md:text-base text-gray-400 hover:text-white transition-colors flex items-center gap-1 active:scale-95"><i
+                            class="ph-bold ph-sign-out"></i> Sair</button>
                 </div>
 
                 <div id="dashboard-loading" class="text-center py-12 hidden">
                     <div class="loader mx-auto mb-4"></div>
-                    <p class="text-muted">A carregar detalhes...</p>
+                    <p class="text-gray-400 text-sm md:text-base">A carregar detalhes...</p>
                 </div>
 
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold">Resumo da Assinatura</h2>
-                    <button onclick="goHome()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2">
-                        <i class="fas fa-plus-circle text-brand"></i> Adquirir Nova Conta
+                <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-200">Resumo da Assinatura</h2>
+                    <button onclick="goHome()" class="bg-white/10 hover:bg-white/20 active:scale-95 border border-white/5 text-white px-4 md:px-5 py-2.5 rounded-xl text-sm md:text-base font-bold transition flex items-center gap-2 shadow-lg">
+                        <i class="ph-fill ph-plus-circle text-[#E50914] text-lg"></i> Adquirir Nova Conta
                     </button>
                 </div>
 
-                <div id="dashboard-content" class="hidden space-y-8">
+                <div id="dashboard-content" class="hidden space-y-6 md:space-y-8">
                     <!-- Cards will be injected here by JS -->
                 </div>
 
-                <div id="dashboard-empty" class="hidden text-center py-12">
-                    <i class="fas fa-ghost text-4xl text-muted mb-4 opacity-50"></i>
-                    <h3 class="text-xl font-bold mb-2">Sem assinatura ativa</h3>
-                    <p class="text-muted mb-6">Ainda não tem uma assinatura ativa ou ela expirou há muito tempo.</p>
-                    <button onclick="goHome()" class="btn-primary px-6 py-2 rounded font-bold">Ver Planos</button>
+                <div id="dashboard-empty" class="hidden text-center py-12 bg-white/5 rounded-3xl border border-white/10 mt-6 md:mt-8">
+                    <i class="ph-fill ph-ghost text-5xl md:text-6xl text-gray-500 mb-4 opacity-50"></i>
+                    <h3 class="text-xl md:text-2xl font-bold mb-2">Sem assinatura ativa</h3>
+                    <p class="text-gray-400 text-sm md:text-base mb-6 md:mb-8 px-4">Ainda não tem uma assinatura ativa ou ela expirou há muito tempo.</p>
+                    <button onclick="goHome()" class="bg-[#E50914] hover:bg-[#f6121d] active:scale-95 text-white px-6 md:px-8 py-3 rounded-xl font-bold text-sm md:text-base transition-all shadow-lg">Ver Planos</button>
                 </div>
 
             </div>
@@ -1153,13 +1589,194 @@
 
         function showScreen(screenId) {
             document.querySelectorAll('#app > div').forEach(div => div.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
+            const target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+
+            // Reset stagger animations
+            target.querySelectorAll('.stagger-card').forEach(card => {
+                card.style.animation = 'none';
+                void card.offsetWidth;
+                card.style.animation = '';
+            });
+
+            // Mobile enter animation
+            if (window.innerWidth < 768) {
+                target.classList.remove('screen-enter');
+                void target.offsetWidth;
+                target.classList.add('screen-enter');
+            }
+
             window.scrollTo(0, 0);
+
+            // Mobile header visibility
+            updateMobileHeader(screenId);
+
             if (screenId === 'step-dashboard') {
                 sessionStorage.setItem('ecoflix_last_screen', screenId);
             } else {
                 sessionStorage.removeItem('ecoflix_last_screen');
             }
+            // Timer do ecrã de espera de pagamento
+            if (screenId === 'step-waiting-payment') {
+                startPayTimer();
+            } else {
+                stopPayTimer();
+            }
+        }
+
+        // === MOBILE HEADER LOGIC ===
+        const mobileScreenTitles = {
+            'step-catalog': '',
+            'step-checkout': 'O seu número',
+            'step-payment-method': 'Pagamento',
+            'step-checkout-otp': 'Verificar SMS',
+            'step-waiting-payment': 'A aguardar...',
+            'step-payment-ref': 'Referência',
+            'step-success': 'Sucesso',
+            'step-recover': 'Minha Conta',
+            'step-login-otp': 'Verificar SMS',
+            'step-dashboard': 'Minha Conta',
+        };
+
+        // step index: checkout=1, payment=2, waiting/ref/success=3
+        const mobileStepMap = {
+            'step-checkout': 1,
+            'step-checkout-otp': 1,
+            'step-payment-method': 2,
+            'step-waiting-payment': 3,
+            'step-payment-ref': 3,
+            'step-success': 3,
+        };
+
+        function updateMobileHeader(screenId) {
+            const header = document.getElementById('mobile-header');
+            const title = document.getElementById('mobile-header-title');
+            const backBtn = document.getElementById('mobile-back-btn');
+            const closeBtn = document.getElementById('mobile-close-btn');
+            const logoBtn = document.getElementById('mobile-logo-btn');
+            const accountBtn = document.getElementById('mobile-account-btn');
+            const centerContent = document.getElementById('mobile-center-content');
+            const stepsEl = document.getElementById('mobile-header-steps');
+            const titleText = mobileScreenTitles[screenId] || '';
+            const stepIdx = mobileStepMap[screenId] || 0;
+
+            // Ativa o Native App Header logic (visível by default no CSS `.lg:hidden`)
+            if (screenId === 'step-catalog') {
+                // Modo catálogo (Navbar Nativa Inicial)
+                backBtn.classList.add('hidden');
+                closeBtn.classList.add('hidden');
+                centerContent.classList.add('hidden');
+                
+                logoBtn.classList.remove('hidden');
+                accountBtn.classList.remove('hidden');
+                accountBtn.classList.add('flex');
+            } else {
+                // Modo Wizard/Passos (Navbar de Ação)
+                logoBtn.classList.add('hidden');
+                accountBtn.classList.add('hidden');
+                accountBtn.classList.remove('flex');
+                
+                centerContent.classList.remove('hidden');
+                
+                if (titleText) {
+                    title.textContent = titleText;
+                }
+                
+                backBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-recover' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
+                closeBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
+
+                // Update step dots
+                if (stepsEl) {
+                    const spans = stepsEl.querySelectorAll('span');
+                    spans.forEach((s, i) => {
+                        s.classList.remove('active', 'done');
+                        if (i + 1 === stepIdx) s.classList.add('active');
+                        else if (i + 1 < stepIdx) s.classList.add('done');
+                    });
+                }
+            }
+        }
+
+        function toggleCouponSection(btn) {
+            const body = btn.nextElementSibling;
+            const icon = btn.querySelector('.coupon-icon');
+            const isHidden = body.classList.contains('hidden');
+
+            if (isHidden) {
+                body.classList.remove('hidden');
+                body.style.maxHeight = '0';
+                body.style.overflow = 'hidden';
+                requestAnimationFrame(() => {
+                    body.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.style.opacity = '1';
+                });
+                icon.style.transform = 'rotate(45deg)';
+            } else {
+                body.style.maxHeight = '0';
+                body.style.opacity = '0';
+                setTimeout(() => body.classList.add('hidden'), 300);
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function mobileBack() {
+            const screens = document.querySelectorAll('#app > div:not(.hidden)');
+            let currentId = '';
+            screens.forEach(s => { if (!s.classList.contains('hidden')) currentId = s.id; });
+
+            if (currentId === 'step-checkout' || currentId === 'step-recover' || currentId === 'step-login-otp') {
+                goHome();
+            } else if (currentId === 'step-payment-method') {
+                showScreen('step-checkout');
+            } else if (currentId === 'step-checkout-otp') {
+                cancelCheckoutOtp();
+            } else if (currentId === 'step-waiting-payment' || currentId === 'step-payment-ref') {
+                cancelOrder();
+            } else {
+                goHome();
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const screens = document.querySelectorAll('#app > div:not(.hidden)');
+            screens.forEach(s => { if (!s.classList.contains('hidden')) updateMobileHeader(s.id); });
+        });
+
+        let _payTimerInterval = null;
+
+        function startPayTimer() {
+            stopPayTimer();
+            // Reset visual do success state
+            const loadingState = document.getElementById('pay-loading-state');
+            const successState = document.getElementById('pay-success-state');
+            const bgGlow = document.getElementById('pay-bg-glow');
+            if (loadingState) { loadingState.classList.remove('pay-fade-out'); loadingState.style.display = ''; }
+            if (successState) { successState.classList.remove('pay-fade-in'); successState.classList.add('pay-hidden'); }
+            if (bgGlow) bgGlow.style.background = '';
+
+            let timeLeft = 300;
+            const timerEl = document.getElementById('pay-timer');
+            if (!timerEl) return;
+            timerEl.innerText = '05:00';
+            timerEl.className = 'text-sm font-bold text-red-500 tabular-nums';
+
+            _payTimerInterval = setInterval(() => {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                const s = (timeLeft % 60).toString().padStart(2, '0');
+                timerEl.innerText = `${m}:${s}`;
+                if (timeLeft <= 60) timerEl.classList.add('animate-pulse');
+                if (timeLeft <= 0) {
+                    stopPayTimer();
+                    timerEl.innerText = 'Expirado';
+                    cancelOrder();
+                }
+            }, 1000);
+        }
+
+        function stopPayTimer() {
+            if (_payTimerInterval) { clearInterval(_payTimerInterval); _payTimerInterval = null; }
         }
 
         let planPrices = { ECONOMICO: 4500, ULTRA: 6500, FAMILIA: 18000 };
@@ -1179,6 +1796,14 @@
                     document.getElementById('display-price-economico').innerText = formatKz(planPrices.ECONOMICO);
                     document.getElementById('display-price-ultra').innerText = formatKz(planPrices.ULTRA);
                     document.getElementById('display-price-familia').innerText = formatKz(planPrices.FAMILIA);
+
+                    // Atualizar preços no carousel mobile
+                    const mEco = document.getElementById('mobile-price-economico');
+                    const mUlt = document.getElementById('mobile-price-ultra');
+                    const mFam = document.getElementById('mobile-price-familia');
+                    if (mEco) mEco.innerText = formatKz(planPrices.ECONOMICO);
+                    if (mUlt) mUlt.innerText = formatKz(planPrices.ULTRA);
+                    if (mFam) mFam.innerText = formatKz(planPrices.FAMILIA);
                     
                     document.getElementById('btn-economico').setAttribute('onclick', `selectPlan('ECONOMICO', ${planPrices.ECONOMICO})`);
                     document.getElementById('btn-ultra').setAttribute('onclick', `selectPlan('ULTRA', ${planPrices.ULTRA})`);
@@ -1191,7 +1816,8 @@
 
         function selectPlan(planKey, price) {
             selectedPlanType = planKey;
-            selectedPlanPrice = price;
+            selectedPlanPrice = price || planPrices[planKey];
+
 
             let planTitle = '';
             if (planKey === 'ECONOMICO') planTitle = 'Pessoal Económico (4K)';
@@ -1199,7 +1825,7 @@
             else planTitle = 'Conta Família (4K)';
 
             document.getElementById('selected-plan-name').innerText = planTitle;
-            document.getElementById('selected-plan-price').innerText = formatKz(price);
+            document.getElementById('selected-plan-price').innerText = formatKz(selectedPlanPrice);
             showScreen('step-checkout');
         }
 
@@ -1514,7 +2140,7 @@
                     const data = JSON.parse(event.data);
                     
                     if (data.type === 'stock_update') {
-                        loadPlans(); // Real-time refresh catalog
+                        fetchPlanPrices(); // Real-time refresh catalog
                     }
                     else if (data.type === 'payment_update' && currentOrder) {
                         // Received real-time update for the subscribed order
@@ -1786,9 +2412,33 @@
         });
 
         function showPaymentSuccess(credentials) {
-            // Se tiver credenciais, mas não tivermos o token de auto-login,
-            // podemos apenas mostrar o dashboard simulando-as temporariamente
-            // (Esta função é um fallback de segurança caso o token falhe)
+            stopPayTimer();
+
+            // Animação de sucesso no ecrã de espera antes de transitar
+            const loadingState = document.getElementById('pay-loading-state');
+            const successState = document.getElementById('pay-success-state');
+            const bgGlow = document.getElementById('pay-bg-glow');
+
+            if (loadingState && successState) {
+                loadingState.classList.add('pay-fade-out');
+                if (bgGlow) bgGlow.style.background = 'radial-gradient(circle at 50% 50%, rgba(34,197,94,0.15) 0%, transparent 50%)';
+
+                setTimeout(() => {
+                    loadingState.style.display = 'none';
+                    successState.classList.remove('pay-hidden');
+                    successState.classList.add('pay-fade-in');
+
+                    // Após 2s de celebração, transita para o ecrã de sucesso final
+                    setTimeout(() => {
+                        _finishSuccess(credentials);
+                    }, 2000);
+                }, 500);
+            } else {
+                _finishSuccess(credentials);
+            }
+        }
+
+        function _finishSuccess(credentials) {
             if (credentials && credentials.email) {
                 document.getElementById('succ-email').innerText = credentials.email;
                 document.getElementById('succ-password').innerText = credentials.password;
@@ -1797,7 +2447,6 @@
                 document.getElementById('success-credentials').classList.remove('hidden');
                 document.getElementById('success-sms-info').classList.add('hidden');
             } else {
-                // Para pagamentos sem credenciais imediatas, mostramos apenas o aviso de SMS
                 document.getElementById('success-credentials').classList.add('hidden');
                 document.getElementById('success-sms-info').classList.remove('hidden');
             }
@@ -2172,14 +2821,7 @@
                         </button>
                     </div>
 
-                    <!-- TEST ONLY BUTTON: Simular Pagamento -->
-                    <div class="mt-4 pt-4 border-t border-gray-700/50">
-                        <button onclick="simulatePaymentWebhook()" id="btn-simulate-webhook"
-                            class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded flex items-center justify-center gap-2 transition text-sm">
-                            <i class="fas fa-bug"></i> DEV: Simular Confirmação Webhook
-                        </button>
-                        <p class="text-xs text-center text-muted mt-2">Visível apenas para testes locais. Simula o webhook que o sistema Multicaixa/PayGo enviaria.</p>
-                    </div>
+
                 </div>
 
                 <div class="bg-gray-800/30 p-4 text-center border-t border-gray-700">
@@ -2352,6 +2994,33 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // Inicializar Swiper apenas quando visível (mobile)
+        function initPlansSwiper() {
+            if (window.innerWidth >= 1024) return;
+            const el = document.querySelector('.myPlansSwiper');
+            if (!el || el.dataset.swiperInit) return;
+            el.dataset.swiperInit = '1';
+            new Swiper('.myPlansSwiper', {
+                slidesPerView: 'auto',
+                centeredSlides: true,
+                spaceBetween: 12,
+                initialSlide: 1,
+                grabCursor: true,
+                speed: 600,
+                observer: true,
+                observeParents: true,
+                pagination: { el: '.plans-swiper .swiper-pagination', clickable: true },
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPlansSwiper);
+        } else {
+            initPlansSwiper();
+        }
+        window.addEventListener('resize', initPlansSwiper);
+    </script>
 </body>
 
 
