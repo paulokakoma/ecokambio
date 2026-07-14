@@ -680,35 +680,6 @@
             }
         }
 
-        /* Animação do logo Visa no header */
-        @keyframes heartbeat {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            14% {
-                transform: scale(1.1);
-            }
-
-            28% {
-                transform: scale(1);
-            }
-
-            42% {
-                transform: scale(1.1);
-            }
-
-            70% {
-                transform: scale(1);
-            }
-        }
-
-        .visa-heartbeat img {
-            animation: heartbeat 2.5s infinite;
-        }
-
         .slide-out-left {
             animation: slide-out-left 0.2s ease-out forwards;
         }
@@ -1083,13 +1054,6 @@
                         <span class="text-[11px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                     </a>
 
-                    <!-- Visa Card -->
-                    <a href="/visa"
-                        class="flex flex-col items-center group transition-transform hover:scale-105 duration-300 border-l border-gray-100 pl-4">
-                        <img src="/assets/visa.png" alt="Visa Virtual" class="h-14 w-auto object-contain"
-                            loading="lazy">
-                        <span class="text-[11px] font-semibold text-indigo-600 mt-1">Visa Virtual</span>
-                    </a>
                 </div>
 
                 <!-- Card Container (Mobile) - Rotating Content -->
@@ -1103,14 +1067,6 @@
                         <span class="text-[9px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                     </a>
 
-                    <!-- Visa Card -->
-                    <a href="/visa" id="header-visa-card"
-                        class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-0 pointer-events-none translate-x-full"
-                        title="Visa Virtual">
-                        <img src="/assets/visa.png" alt="Visa Virtual" class="w-full h-auto object-contain px-2"
-                            style="max-width: 160px; max-height: 90px;">
-                        <span class="text-[9px] font-semibold text-indigo-600 mt-1 text-nowrap">Visa Virtual</span>
-                    </a>
                 </div>
             </nav>
         </div>
@@ -1155,36 +1111,7 @@
                 }, { passive: true });
             }
 
-            // Automatic Card Rotation (Mobile Only)
-            const netflixCard = document.getElementById('header-netflix-card');
-            const visaCard = document.getElementById('header-visa-card');
-            let currentCard = 0; // 0 for Netflix, 1 for Visa
 
-            if (netflixCard && visaCard) {
-                setInterval(() => {
-                    if (currentCard === 0) {
-                        netflixCard.style.opacity = '0';
-                        netflixCard.style.transform = 'translateX(-20px)';
-                        netflixCard.style.pointerEvents = 'none';
-                        setTimeout(() => {
-                            visaCard.style.opacity = '1';
-                            visaCard.style.transform = 'translateX(0)';
-                            visaCard.style.pointerEvents = 'auto';
-                        }, 500);
-                        currentCard = 1;
-                    } else {
-                        visaCard.style.opacity = '0';
-                        visaCard.style.transform = 'translateX(20px)';
-                        visaCard.style.pointerEvents = 'none';
-                        setTimeout(() => {
-                            netflixCard.style.opacity = '1';
-                            netflixCard.style.transform = 'translateX(0)';
-                            netflixCard.style.pointerEvents = 'auto';
-                        }, 500);
-                        currentCard = 0;
-                    }
-                }, 6000);
-            }
         })();
     </script>
 
@@ -1492,27 +1419,8 @@
 
                         <!-- Serviços Digitais (Visa & Netflix) -->
                         <div class="mb-6">
-                            <div class="grid grid-cols-2 gap-3 md:gap-8 max-w-2xl mx-auto">
-                                <!-- Visa Virtual Card -->
-                                <a href="/visa"
-                                    class="group bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-row items-center text-left gap-4 md:flex-col md:items-center md:justify-center md:text-center md:aspect-auto">
-                                    <div
-                                        class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-700">
-                                    </div>
-                                    <div
-                                        class="relative z-10 w-12 h-12 md:w-14 md:h-14 bg-indigo-600 flex-shrink-0 flex items-center justify-center text-xl shadow-md shadow-indigo-200 rounded-xl md:rounded-2xl">
-                                        💳</div>
-                                    <div class="relative z-10 flex flex-col w-full">
-                                        <h4 class="font-bold text-sm md:text-lg text-slate-800 leading-none mb-1">Visa
-                                            Virtual</h4>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span
-                                                class="text-[9px] md:text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase">Instantâneo</span>
-                                        </div>
-                                        <p class="text-slate-500 text-[11px] md:text-xs leading-tight line-clamp-2">
-                                            Cartão para compras globais.</p>
-                                    </div>
-                                </a>
+                            <div class="grid grid-cols-1 gap-3 md:gap-8 max-w-sm mx-auto">
+
 
                                 <!-- EcoFlix Card -->
                                 <a href="/ecoflix/"

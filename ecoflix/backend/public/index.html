@@ -473,16 +473,16 @@
             flex-wrap: nowrap;
         }
         .plans-swiper .swiper-slide {
-            width: 70vw;
-            max-width: 250px;
+            width: 65vw;
+            max-width: 230px;
             height: auto;
         }
         .plans-swiper .card-inner {
             width: 100%;
             height: 100%;
             transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-            opacity: 0.6;
-            transform: scale(0.85);
+            opacity: 0.75;
+            transform: scale(0.88);
         }
         .plans-swiper .swiper-slide-active .card-inner {
             opacity: 1;
@@ -686,7 +686,7 @@
                     <div class="swiper-wrapper items-stretch">
                         <!-- ECONÓMICO -->
                         <div class="swiper-slide">
-                            <div class="card-inner bg-[#141414] border border-white/5 rounded-[2rem] p-6 flex flex-col justify-between shadow-2xl relative">
+                            <div class="card-inner bg-[#141414] border border-[#10B981]/40 rounded-[2rem] p-6 flex flex-col justify-between shadow-[0_0_40px_rgba(16,185,129,0.15)] relative">
                                 <div>
                                     <div class="mb-4">
                                         <span class="bg-gray-800 text-gray-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Económico</span>
@@ -761,7 +761,7 @@
 
                         <!-- FAMÍLIA -->
                         <div class="swiper-slide">
-                            <div class="card-inner bg-[#141414] border border-[#F97316]/20 rounded-[2rem] p-6 flex flex-col justify-between shadow-2xl relative">
+                            <div class="card-inner bg-[#141414] border border-[#F97316]/40 rounded-[2rem] p-6 flex flex-col justify-between shadow-[0_0_40px_rgba(249,115,22,0.15)] relative">
                                 <div>
                                     <div class="mb-4">
                                         <span class="bg-[#F97316]/10 text-[#F97316] text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider border border-[#F97316]/20">Família</span>
@@ -807,7 +807,7 @@
             <div class="hidden lg:grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
 
                 <!-- 1. PLANO ECONÓMICO -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6">
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-[#10B981] border border-[#10B981]/40 shadow-[0_0_40px_rgba(16,185,129,0.15)]">
                     <div
                         class="absolute top-0 right-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         ECONÓMICO</div>
@@ -843,8 +843,7 @@
                 </div>
 
                 <!-- 2. PLANO RECOMENDADO (ULTRA) -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-current shadow-2xl"
-                    style="border-top-color: var(--brand-color)">
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-[#E50914] border border-[#E50914]/40 shadow-[0_0_40px_rgba(229,9,20,0.15)]">
                     <div class="absolute top-0 right-0 bg-brand-color text-white text-[10px] font-bold px-3 py-1 rounded-bl"
                         style="background-color: var(--brand-color)">RECOMENDADO</div>
                     <div class="mb-4">
@@ -879,7 +878,7 @@
                 </div>
 
                 <!-- 3. PLANO FAMÍLIA (PREMIUM) -->
-                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6">
+                <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-[#F97316] border border-[#F97316]/40 shadow-[0_0_40px_rgba(249,115,22,0.15)]">
                     <div
                         class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         FAMÍLIA</div>
@@ -2968,7 +2967,7 @@
                 slidesPerView: 'auto',
                 centeredSlides: true,
                 spaceBetween: 16,
-                initialSlide: 1,
+                initialSlide: 0,
                 grabCursor: true,
                 speed: 400,
                 resistanceRatio: 0.65,
