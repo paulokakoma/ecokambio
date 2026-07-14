@@ -1,8 +1,8 @@
 const config = require('../config/env');
 
 const isAdmin = (req, res, next) => {
-    // Em produção, só permite acesso ao admin via subdomínio admin
-    if (!config.isDevelopment && !req.isAdminSubdomain && req.path.startsWith('/admin')) {
+    // Em produção, só permite acesso ao admin via subdomínio admin ou adminflix
+    if (!config.isDevelopment && !req.isAdminSubdomain && !req.isAdminflixSubdomain && req.path.startsWith('/admin')) {
         return res.status(403).send('Acesso ao admin apenas via subdomínio admin.');
     }
 

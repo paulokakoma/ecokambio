@@ -4,8 +4,8 @@
  * Isto permite uma melhor escalabilidade, pois o envio de SMS ou provisionamento não bloqueia os pedidos do utilizador.
  */
 require('dotenv').config();
-const { startSmsWorker } = require('./src/netflix/services/sms_queue.service');
-const { startFamilyPlanWorker } = require('./src/netflix/services/queue.service');
+const { startSmsWorker } = require('./ecoflix/backend/services/sms_queue.service');
+const { startFamilyPlanWorker } = require('./ecoflix/backend/services/queue.service');
 
 console.log('🚀 [Worker] A iniciar os Serviços em Segundo Plano do EcoFlix...');
 

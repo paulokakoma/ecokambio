@@ -279,8 +279,20 @@
                     </div>
                 </div>
 
-                <!-- Secção Inferior (Top 5, Atividade, Configurações) -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Configurações de Suporte -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Configurações de Suporte</h3>
+                    <div class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Número do WhatsApp (Suporte Cliente)</label>
+                            <input type="text" id="setting-support-whatsapp" placeholder="Ex: 244938948994" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                        <button onclick="saveSupportWhatsapp()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-md transition whitespace-nowrap">Salvar Número</button>
+                    </div>
+                </div>
+
+                <!-- Secção Inferior (Top 5, Atividade) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Top 5 Clientes -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Top 5 Clientes</h3>
@@ -291,18 +303,6 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Atividade Recente</h3>
                         <ul class="space-y-4" id="recent-activity-list"></ul>
-                    </div>
-
-                    <!-- Configurações Adicionais -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Configurações de Suporte</h3>
-                        <div class="flex flex-col gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Número do WhatsApp (Suporte Cliente)</label>
-                                <input type="text" id="setting-support-whatsapp" placeholder="Ex: 244938948994" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                            </div>
-                            <button onclick="saveSupportWhatsapp()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition w-full">Salvar Número</button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1857,8 +1857,7 @@
             sessionStorage.setItem('admin_session_alive', 'true');
         }
 
-        // Run check immediately
-        checkSessionIntegrity();
+        // checkSessionIntegrity();
 
         // Additional security: logout on visibility change (tab switch/minimize) - Optional
         document.addEventListener('visibilitychange', function () {
