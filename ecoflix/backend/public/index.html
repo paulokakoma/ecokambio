@@ -1281,7 +1281,7 @@
         let checkoutPendingCardElement = null;
 
         // === PAGAMENTO ===
-        async function selectPaymentMethod(method, cardElement) {
+        async function selectPaymentMethod(method, cardElement, skipOtp = false) {
             let originalContent = '';
             try {
                 if (currentOrder) {
@@ -1302,7 +1302,7 @@
                 }
 
                 // EXPRESS OTP INTERCEPT
-                if (method === 'EXPRESS' && !checkoutPendingMethod) {
+                if (method === 'EXPRESS' && !skipOtp) {
                     document.getElementById('global-loader').classList.remove('hidden');
                     document.getElementById('global-loader').classList.add('flex');
                     
@@ -1745,7 +1745,7 @@
                 document.getElementById('global-loader').classList.remove('hidden');
                 document.getElementById('global-loader').classList.add('flex');
                 
-                await selectPaymentMethod(methodToProceed, cardElementToProceed);
+                await selectPaymentMethod(methodToProceed, cardElementToProceed, true);
 
             } catch (e) {
                 showToast(e.message || 'Erro ao validar código', 'error');

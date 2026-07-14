@@ -222,6 +222,7 @@ const quickOrder = async (req, res) => {
             .single();
 
         if (error) throw error;
+        sseBroadcast('refresh_admin', { reason: 'new_order' });
 
         res.status(201).json({
             success: true,
@@ -570,6 +571,7 @@ const cancelOrder = async (req, res) => {
             .update({ status: 'CANCELLED', rejection_reason: 'Cancelado pelo utilizador', updated_at: new Date() })
             .eq('id', id);
 
+        sseBroadcast('refresh_admin', { reason: 'cancel_order' });
         res.json({ success: true, message: 'Pedido cancelado' });
     } catch (error) {
         console.error('Cancel order error:', error);

@@ -5,8 +5,13 @@ const subdomainMiddleware = (req, res, next) => {
     const host = req.get('host') || '';
 
     let isAdminSubdomain = false;
+    let isAdminflixSubdomain = false;
 
-    if (forwardedHost.startsWith('admin.ecokambio.com') || forwardedHost.startsWith('admin.')) {
+    if (forwardedHost.startsWith('adminflix.ecokambio.com') || forwardedHost.startsWith('adminflix.')) {
+        isAdminflixSubdomain = true;
+    } else if (host.startsWith('adminflix.ecokambio.com') || host.startsWith('adminflix.')) {
+        isAdminflixSubdomain = true;
+    } else if (forwardedHost.startsWith('admin.ecokambio.com') || forwardedHost.startsWith('admin.')) {
         isAdminSubdomain = true;
     } else if (host.startsWith('admin.ecokambio.com') || host.startsWith('admin.')) {
         isAdminSubdomain = true;
@@ -14,13 +19,16 @@ const subdomainMiddleware = (req, res, next) => {
         // Fallback for localhost and other cases
         const hostWithoutPort = host.split(':')[0];
         const parts = hostWithoutPort.split('.');
-        if (parts[0] === 'admin' && parts.length > 1) {
+        if (parts[0] === 'adminflix' && parts.length > 1) {
+            isAdminflixSubdomain = true;
+        } else if (parts[0] === 'admin' && parts.length > 1) {
             isAdminSubdomain = true;
         }
     }
 
     req.isAdminSubdomain = isAdminSubdomain;
-    req.isMainDomain = !isAdminSubdomain;
+    req.isAdminflixSubdomain = isAdminflixSubdomain;
+    req.isMainDomain = !isAdminSubdomain && !isAdminflixSubdomain;
 
     if (process.env.NODE_ENV === 'development') {
         const userLog = req.session ? (req.session.user ? JSON.stringify(req.session.user) : 'Guest') : 'NoSessionModule';

@@ -152,16 +152,17 @@
             errorDiv.textContent = '';
 
             try {
+                const targetUrl = window.location.hostname.startsWith('adminflix') ? '/' : '/ecoflix/admin';
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ username, password, redirect: '/ecoflix/admin' }),
+                    body: JSON.stringify({ username, password, redirect: targetUrl }),
                 });
 
                 if (response.ok) {
                     sessionStorage.setItem('admin_session_alive', 'true');
-                    window.location.href = '/ecoflix/admin';
+                    window.location.href = targetUrl;
                 } else {
                     const data = await response.json().catch(() => ({ message: 'Ocorreu um erro. Tente novamente.' }));
                     errorDiv.textContent = data.message || 'Senha incorreta.';

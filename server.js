@@ -156,6 +156,18 @@ app.set('trust proxy', 1);
 // Apply subdomain middleware early to detect admin.localhost vs localhost
 app.use(subdomainMiddleware);
 
+// URL Rewrite para adminflix
+app.use((req, res, next) => {
+    if (req.isAdminflixSubdomain) {
+        if (req.path === '/') {
+            req.url = '/ecoflix/admin';
+        } else if (req.path === '/login') {
+            req.url = '/ecoflix/login';
+        }
+    }
+    next();
+});
+
 // Configuração de Sessão
 let sessionStore;
 

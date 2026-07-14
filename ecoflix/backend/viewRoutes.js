@@ -39,7 +39,8 @@ router.use('/admin', express.static(path.join(__dirname, 'public'), {
 router.get("/admin", noCacheHeaders, (req, res) => {
     // Check signed cookie for admin authentication
     if (req.signedCookies.admin_auth !== 'true') {
-        return res.redirect('/ecoflix/login?redirect=/ecoflix/admin');
+        const loginUrl = req.isAdminflixSubdomain ? '/login' : '/ecoflix/login?redirect=/ecoflix/admin';
+        return res.redirect(loginUrl);
     }
     res.sendFile(path.join(__dirname, "public", "adminflix.html"));
 });
@@ -48,7 +49,8 @@ router.get("/admin", noCacheHeaders, (req, res) => {
 router.get("/login", noCacheHeaders, (req, res) => {
     // Se já estiver logado, vai direto para o admin
     if (req.signedCookies.admin_auth === 'true') {
-        return res.redirect('/ecoflix/admin');
+        const adminUrl = req.isAdminflixSubdomain ? '/' : '/ecoflix/admin';
+        return res.redirect(adminUrl);
     }
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });

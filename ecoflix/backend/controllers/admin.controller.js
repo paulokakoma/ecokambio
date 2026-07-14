@@ -8,6 +8,7 @@ const supabase = require('../../../src/config/supabase');
 const { redisClient } = require('../../../src/config/redis');
 const smsService = require('../services/sms.service');
 const planService = require('../services/plan.service');
+const { broadcast: sseBroadcast } = require('./sse.controller');
 
 // Helper: Generate random PIN
 const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
@@ -17,93 +18,90 @@ const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
 // ============================================================================
 const getDashboard = async (req, res) => {
     try {
-        // 1. Get normally free profiles
-        const { count: normallyFree } = await supabase
-            .from('ecoflix_profiles')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'AVAILABLE');
+        const today = new Date().toISOString().split('T')[0];
+        const twoDaysFromNow = new Date();
+        twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
 
-        // 2. Get normally sold profiles
-        const { count: normallySold } = await supabase
-            .from('ecoflix_profiles')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'SOLD');
+        // Fetch data concurrently for high performance
+        const [
+            normallyFreeRes,
+            normallySoldRes,
+            exclusiveAccountsRes,
+            expiringAccountsRes,
+            todaysOrdersRes,
+            smsBalanceRes,
+            recentOrdersRes,
+            topClientsOrdersRes,
+            allPaidOrdersRes
+        ] = await Promise.allSettled([
+            supabase.from('ecoflix_profiles').select('*', { count: 'exact', head: true }).eq('status', 'AVAILABLE'),
+            supabase.from('ecoflix_profiles').select('*', { count: 'exact', head: true }).eq('status', 'SOLD'),
+            supabase.from('ecoflix_master_accounts').select('id, subscriptions:ecoflix_subscriptions(id, status)').eq('type', 'EXCLUSIVE'),
+            supabase.from('ecoflix_master_accounts').select('*', { count: 'exact', head: true }).lte('renewal_date', twoDaysFromNow.toISOString().split('T')[0]).eq('status', 'ACTIVE'),
+            supabase.from('ecoflix_orders').select('amount').eq('status', 'PAID').gte('paid_at', today),
+            smsService.checkBalance(),
+            supabase.from('ecoflix_orders').select('phone, plan_type, created_at').order('created_at', { ascending: false }).limit(5),
+            supabase.from('ecoflix_orders').select('phone, amount').order('created_at', { ascending: false }).limit(100),
+            supabase.from('ecoflix_orders').select('amount, paid_at').in('status', ['PAID', 'MANUAL']).order('paid_at', { ascending: true })
+        ]);
 
-        // 3. Get EXCLUSIVE master accounts and their subscriptions
-        const { data: exclusiveAccounts } = await supabase
-            .from('ecoflix_master_accounts')
-            .select('id, subscriptions:ecoflix_subscriptions(id, status)')
-            .eq('type', 'EXCLUSIVE');
+        // Process Counts
+        const normallyFree = normallyFreeRes.status === 'fulfilled' ? normallyFreeRes.value.count || 0 : 0;
+        const normallySold = normallySoldRes.status === 'fulfilled' ? normallySoldRes.value.count || 0 : 0;
+        const exclusiveAccounts = exclusiveAccountsRes.status === 'fulfilled' ? exclusiveAccountsRes.value.data || [] : [];
+        const expiringAccounts = expiringAccountsRes.status === 'fulfilled' ? expiringAccountsRes.value.count || 0 : 0;
 
         let exclusiveFreeCount = 0;
         let exclusiveSoldCount = 0;
+        exclusiveAccounts.forEach(acc => {
+            const hasActive = acc.subscriptions && acc.subscriptions.some(s => ['ACTIVE', 'SUSPENDED'].includes(s.status));
+            if (hasActive) {
+                exclusiveSoldCount++;
+            } else {
+                exclusiveFreeCount++;
+            }
+        });
 
-        if (exclusiveAccounts) {
-            exclusiveAccounts.forEach(acc => {
-                const hasActive = acc.subscriptions && acc.subscriptions.some(s => ['ACTIVE', 'SUSPENDED'].includes(s.status));
-                if (hasActive) {
-                    exclusiveSoldCount += 1;
-                } else {
-                    exclusiveFreeCount += 1;
-                }
-            });
-        }
+        const soldProfiles = normallySold + exclusiveSoldCount;
+        const freeProfiles = normallyFree + exclusiveFreeCount;
 
-        const soldProfiles = (normallySold || 0) + exclusiveSoldCount;
-        const freeProfiles = (normallyFree || 0) + exclusiveFreeCount;
+        // Process Orders
+        const todaysOrders = todaysOrdersRes.status === 'fulfilled' ? todaysOrdersRes.value.data || [] : [];
+        const todayRevenue = todaysOrders.reduce((sum, o) => sum + parseFloat(o.amount || 0), 0);
+        const todaySales = todaysOrders.length;
 
-        // Get accounts expiring in 48h
-        const twoDaysFromNow = new Date();
-        twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
-        const { count: expiringAccounts } = await supabase
-            .from('ecoflix_master_accounts')
-            .select('*', { count: 'exact', head: true })
-            .lte('renewal_date', twoDaysFromNow.toISOString().split('T')[0])
-            .eq('status', 'ACTIVE');
-
-        // Get today's revenue
-        const today = new Date().toISOString().split('T')[0];
-        const { data: todaysOrders } = await supabase
-            .from('ecoflix_orders')
-            .select('amount')
-            .eq('status', 'PAID')
-            .gte('paid_at', today);
-
-        const todayRevenue = (todaysOrders || []).reduce((sum, o) => sum + parseFloat(o.amount), 0);
-        const todaySales = (todaysOrders || []).length;
-
-        const totalProfiles = (freeProfiles || 0) + (soldProfiles || 0);
-        const occupancyRate = totalProfiles > 0 ? Math.round(((soldProfiles || 0) / totalProfiles) * 100) : 0;
-
+        // Process SMS
         let smsAvailable = '-';
         let smsSent = '-';
-        try {
-            const smsBalanceRes = await smsService.checkBalance();
-            if (smsBalanceRes && smsBalanceRes.success && smsBalanceRes.data && smsBalanceRes.data.company_info) {
-                smsAvailable = smsBalanceRes.data.company_info.sms_available;
-                smsSent = smsBalanceRes.data.company_info.sms_sent;
-            }
-        } catch (smsError) {
-            console.error('Error fetching SMS balance:', smsError);
+        const smsCheck = smsBalanceRes.status === 'fulfilled' ? smsBalanceRes.value : null;
+        if (smsCheck && smsCheck.success && smsCheck.data && smsCheck.data.company_info) {
+            smsAvailable = smsCheck.data.company_info.sms_available;
+            smsSent = smsCheck.data.company_info.sms_sent;
         }
 
-        // Calculate Top 5 Clients
+        // Process Top Clients
         const clientTotals = {};
-        if (todaysOrders) { // For performance, maybe allOrders? The requirement didn't specify timeframe, let's just fetch all recent orders.
-             const { data: allOrders } = await supabase.from('ecoflix_orders').select('phone, amount, created_at').order('created_at', { ascending: false }).limit(100);
-             if (allOrders) {
-                 allOrders.forEach(o => {
-                     if (o.phone) {
-                         clientTotals[o.phone] = (clientTotals[o.phone] || 0) + parseFloat(o.amount);
-                     }
-                 });
-             }
-        }
+        const topClientsOrders = topClientsOrdersRes.status === 'fulfilled' ? topClientsOrdersRes.value.data || [] : [];
+        topClientsOrders.forEach(o => {
+            if (o.phone) {
+                clientTotals[o.phone] = (clientTotals[o.phone] || 0) + parseFloat(o.amount || 0);
+            }
+        });
         const topClients = Object.entries(clientTotals)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5)
             .map(([phone, total]) => ({ phone, total }));
 
+        // Process Recent Activity
+        const recentActivity = [];
+        const recentOrders = recentOrdersRes.status === 'fulfilled' ? recentOrdersRes.value.data || [] : [];
+        recentOrders.forEach(ro => {
+            const date = new Date(ro.created_at);
+            recentActivity.push({
+                title: `Nova Subscrição ${ro.plan_type} - ${ro.phone}`,
+                time: date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+            });
+        });
 
         // Chart Data Aggregation
         const chartData = {
@@ -115,12 +113,8 @@ const getDashboard = async (req, res) => {
             annual: { labels: [], data: [] }
         };
 
-        const { data: allPaidOrders } = await supabase.from('ecoflix_orders')
-            .select('amount, paid_at')
-            .in('status', ['PAID', 'MANUAL'])
-            .order('paid_at', { ascending: true });
-
-        if (allPaidOrders && allPaidOrders.length > 0) {
+        const allPaidOrders = allPaidOrdersRes.status === 'fulfilled' ? allPaidOrdersRes.value.data || [] : [];
+        if (allPaidOrders.length > 0) {
             const getWeek = (d) => {
                 const date = new Date(d.getTime());
                 date.setHours(0, 0, 0, 0);
@@ -139,37 +133,29 @@ const getDashboard = async (req, res) => {
                 const month = d.getMonth() + 1;
                 const day = d.getDate();
 
-                // Daily: YYYY-MM-DD
                 const dailyKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 aggregations.daily[dailyKey] = (aggregations.daily[dailyKey] || 0) + amt;
 
-                // Weekly: YYYY-Www
                 const weekNum = getWeek(d);
                 const weeklyKey = `${year}-W${String(weekNum).padStart(2, '0')}`;
                 aggregations.weekly[weeklyKey] = (aggregations.weekly[weeklyKey] || 0) + amt;
 
-                // Monthly: YYYY-MM
                 const monthlyKey = `${year}-${String(month).padStart(2, '0')}`;
                 aggregations.monthly[monthlyKey] = (aggregations.monthly[monthlyKey] || 0) + amt;
 
-                // Quarterly: Q1-Q4
                 const q = Math.ceil(month / 3);
                 const quarterKey = `${year}-Q${q}`;
                 aggregations.quarterly[quarterKey] = (aggregations.quarterly[quarterKey] || 0) + amt;
 
-                // Semiannual: S1-S2
                 const s = Math.ceil(month / 6);
                 const semiKey = `${year}-S${s}`;
                 aggregations.semiannual[semiKey] = (aggregations.semiannual[semiKey] || 0) + amt;
 
-                // Annual: YYYY
                 const annualKey = `${year}`;
                 aggregations.annual[annualKey] = (aggregations.annual[annualKey] || 0) + amt;
             });
 
-            // Convert back to arrays for Chart.js
             for (const key of Object.keys(aggregations)) {
-                // To prevent huge charts, limit daily to last 14, weekly to last 12, monthly to last 12
                 let entries = Object.entries(aggregations[key]).sort((a, b) => a[0].localeCompare(b[0]));
                 
                 if (key === 'daily') entries = entries.slice(-14);
@@ -183,26 +169,12 @@ const getDashboard = async (req, res) => {
             }
         }
 
-        // Recent Activity (mocked or from last orders)
-        // Recent Activity (mocked or from last orders)
-        const recentActivity = [];
-        const { data: recentOrders } = await supabase.from('ecoflix_orders').select('phone, plan_type, created_at').order('created_at', { ascending: false }).limit(5);
-        if (recentOrders) {
-            recentOrders.forEach(ro => {
-                const date = new Date(ro.created_at);
-                recentActivity.push({
-                    title: `Nova Subscrição ${ro.plan_type} - ${ro.phone}`,
-                    time: date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
-                });
-            });
-        }
-
         res.json({
             success: true,
             data: {
-                freeProfiles: freeProfiles || 0,
-                soldProfiles: soldProfiles || 0,
-                expiringAccounts: expiringAccounts || 0,
+                freeProfiles,
+                soldProfiles,
+                expiringAccounts,
                 todayRevenue,
                 todaySales,
                 smsAvailable,
@@ -223,27 +195,22 @@ const getDashboard = async (req, res) => {
 // ============================================================================
 const getStock = async (req, res) => {
     try {
-        // 1. Buscar todas as contas mãe
+        // 1. Fetch all accounts and their profiles in a single query
         const { data: accounts, error } = await supabase
             .from('ecoflix_master_accounts')
-            .select('*')
+            .select('*, profiles:ecoflix_profiles!ecoflix_profiles_master_account_id_fkey(*)')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        // 2. Para cada conta, buscar os seus perfis separadamente
-        const accountsWithProfiles = await Promise.all(accounts.map(async (acc) => {
-            const { data: profiles } = await supabase
-                .from('ecoflix_profiles')
-                .select('id, name, pin, status, type, client_phone, client_name, expires_at, master_account_id, total_revenue')
-                .eq('master_account_id', acc.id);
-
-            const profilesData = profiles || [];
+        // 2. Process data in memory
+        const accountsWithProfiles = accounts.map((acc) => {
+            const profilesData = acc.profiles || [];
             const total = profilesData.length > 0 ? profilesData.length : 5;
             const occupied = profilesData.filter(p => p.status === 'SOLD').length;
 
             return { ...acc, profiles: profilesData, total, occupied };
-        }));
+        });
 
         res.json({ success: true, data: accountsWithProfiles });
     } catch (error) {
@@ -362,6 +329,7 @@ const updateAccount = async (req, res) => {
         websocket.broadcast({ type: 'stock_update' }, 'all');
         websocket.broadcast({ type: 'new_order', message: `Nova conta ${email} adicionada` }, 'admin');
 
+        sseBroadcast('refresh_admin', { reason: 'add_stock' });
         res.json({ success: true, data: account });
     } catch (error) {
         console.error('Update account error:', error);
@@ -404,6 +372,7 @@ const deleteAccount = async (req, res) => {
 
         if (error) throw error;
 
+        sseBroadcast('refresh_admin', { reason: 'delete_account' });
         res.json({ success: true, message: 'Conta apagada com sucesso' });
     } catch (error) {
         console.error('Delete account error:', error);
@@ -505,6 +474,7 @@ const updateProfile = async (req, res) => {
         // Broadcast stock update
         websocket.broadcast({ type: 'stock_update' }, 'all');
 
+        sseBroadcast('refresh_admin', { reason: 'approve_order' });
         res.json({ success: true, data: profile });
     } catch (error) {
         console.error('Update profile error:', error);
@@ -698,6 +668,7 @@ const getInventoryStatus = async (req, res) => {
             });
         }
 
+        sseBroadcast('refresh_admin', { reason: 'resolve_issue' });
         res.json({
             success: true,
             data: {
@@ -1112,6 +1083,7 @@ const updatePlans = async (req, res) => {
         }
         
         const updatedPlans = await planService.updatePlans(plansToSave);
+        sseBroadcast('refresh_admin', { reason: 'update_plans' });
         res.json({ success: true, data: updatedPlans, message: 'Preços atualizados com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar planos:', error);
@@ -1268,6 +1240,7 @@ const revokeProfile = async (req, res) => {
         }
 
         console.log(`[Revoke] Profile ${id} revoked. client_phone=${clientPhone || 'unknown'}`);
+        sseBroadcast('refresh_admin', { reason: 'revoke_profile' });
         res.json({ success: true, message: 'Perfil revogado com sucesso. O utilizador foi desconectado.' });
     } catch (error) {
         console.error('Revoke profile error:', error);
@@ -1309,6 +1282,7 @@ const suspendProfile = async (req, res) => {
         const websocket = require('../../../src/websocket');
         websocket.broadcast({ type: 'stock_update' }, 'all');
 
+        sseBroadcast('refresh_admin', { reason: 'suspend_profile' });
         res.json({ success: true, message: 'Perfil suspenso.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1346,6 +1320,7 @@ const restoreProfile = async (req, res) => {
         const websocket = require('../../../src/websocket');
         websocket.broadcast({ type: 'stock_update' }, 'all');
 
+        sseBroadcast('refresh_admin', { reason: 'return_profile' });
         res.json({ success: true, message: 'Perfil devolvido/restaurado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1431,6 +1406,7 @@ const suspendAccount = async (req, res) => {
         const smsService = require('../services/sms.service');
         await smsService.sendRevokeSms(phone, 'Partilha indevida de dados / Violação de Termos');
 
+        sseBroadcast('refresh_admin', { reason: 'suspend_account' });
         res.json({ success: true, message: 'Conta suspensa e cliente notificado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1474,6 +1450,7 @@ const restoreAccount = async (req, res) => {
             await smsService.sendRestoreSms(phone);
         }
 
+        sseBroadcast('refresh_admin', { reason: 'reactivate_account' });
         res.json({ success: true, message: 'Conta reativada com sucesso e SMS enviado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

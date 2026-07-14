@@ -18,8 +18,8 @@ const axios = require('axios');
 const supabase = require('../../../src/config/supabase');
 
 const TELCO_BASE_URL = 'https://www.telcosms.co.ao/api/v2';
-const TELCO_API_KEY  = process.env.TELCO_API_KEY;
-const SMS_PROVIDER   = (process.env.SMS_PROVIDER || 'TELCO').toUpperCase();
+const TELCO_API_KEY = process.env.TELCO_API_KEY;
+const SMS_PROVIDER = (process.env.SMS_PROVIDER || 'TELCO').toUpperCase();
 
 // ============================================================================
 // Phone Normalization
@@ -32,9 +32,9 @@ const SMS_PROVIDER   = (process.env.SMS_PROVIDER || 'TELCO').toUpperCase();
 const normalizePhone = (phone) => {
     let clean = phone.replace(/[\s\-]/g, '');
 
-    if (clean.startsWith('+244'))   return clean.slice(4);  // remove +244
+    if (clean.startsWith('+244')) return clean.slice(4);  // remove +244
     if (clean.startsWith('244') && clean.length === 12) return clean.slice(3); // remove 244
-    if (clean.length === 9)         return clean;           // já está correto
+    if (clean.length === 9) return clean;           // já está correto
     return clean;
 };
 
@@ -184,11 +184,11 @@ const sendDeliverySms = async (phone, creds) => {
 
     if (creds.pin !== 'N/A') {
         message += `Perfil: ${creds.profile}\n` +
-                   `Pin: ${creds.pin}`;
+            `Pin: ${creds.pin}`;
     }
 
     if (creds.pin !== 'N/A') {
-        message += `\nAVISO: Nao mude a senha para nao perder a conta!`;
+        message += `\nAVISO: Não mude a senha para evitar ser banido!`;
     }
 
     return sendSms(phone, message);
@@ -202,11 +202,11 @@ const sendDeliverySms = async (phone, creds) => {
  */
 const sendRenewalSms = async (phone, newExpiry) => {
     const date = new Date(newExpiry).toLocaleDateString('pt-PT');
-    const message = 
-        `EcoFlix - Renovacao Concluida!\n\n` +
-        `A sua subscricao foi renovada com sucesso.\n` +
+    const message =
+        `EcoFlix - Renovação Concluida!\n\n` +
+        `A sua subscrição foi renovada com sucesso.\n` +
         `Nova Validade: ${date}\n\n` +
-        `Obrigado pela sua preferencia!`;
+        `Obrigado pela sua preferência!`;
     return sendSms(phone, message);
 };
 
@@ -216,12 +216,12 @@ const sendRenewalSms = async (phone, newExpiry) => {
  * @param {{ email: string, password: string, pin?: string }} creds
  */
 const sendPasswordUpdateSms = async (phone, creds) => {
-    let message = 
-        `EcoFlix - Alerta de Seguranca\n\n` +
+    let message =
+        `EcoFlix - Alerta de Segurança\n\n` +
         `A senha da sua conta Netflix foi atualizada.\n` +
         `Email: ${creds.email}\n` +
         `Nova Senha: ${creds.password}\n`;
-    
+
     if (creds.pin) {
         message += `O seu PIN mantem-se: ${creds.pin}\n`;
     }
@@ -233,9 +233,9 @@ const sendPasswordUpdateSms = async (phone, creds) => {
  * @param {string} phone 
  */
 const sendRevokeSms = async (phone, reason = 'Violação de Termos') => {
-    const message = 
+    const message =
         `EcoFlix - Alerta de Conta\n\n` +
-        `A sua subscricao foi revogada.\n` +
+        `A sua subscrição foi revogada.\n` +
         `Motivo: ${reason}\n\n` +
         `Contacte o suporte se julga ser um erro.`;
     return sendSms(phone, message);
@@ -252,18 +252,18 @@ module.exports = {
 };
 
 const sendSuspendSms = async (phone, reason = 'Violação de Termos') => {
-    const message = 
+    const message =
         `EcoFlix - Alerta de Conta\n\n` +
-        `A sua subscricao foi suspensa.\n` +
+        `A sua subscrição foi suspensa.\n` +
         `Motivo: ${reason}\n\n` +
         `Contacte o suporte imediatamente para resolver.`;
     return sendSms(phone, message);
 };
 
 const sendRestoreSms = async (phone) => {
-    const message = 
+    const message =
         `EcoFlix - Conta Restaurada\n\n` +
-        `Boas noticias! A sua subscricao foi reactivada e ja pode voltar a usar o servico.`;
+        `Boas noticias! A sua subscrição foi reactivada e já pode voltar a usar o serviço.`;
     return sendSms(phone, message);
 };
 

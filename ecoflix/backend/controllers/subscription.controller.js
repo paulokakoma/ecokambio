@@ -82,7 +82,6 @@ const getSubscriptionCredentials = async (req, res) => {
                 )
             `)
             .eq('user_id', userId)
-            .eq('status', 'ACTIVE')
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -124,6 +123,8 @@ const getSubscriptionCredentials = async (req, res) => {
 
         if (subs && subs.length > 0) {
             subs.forEach(sub => {
+                if (sub.status !== 'ACTIVE') return; // Skip suspended or pending subscriptions
+
                 const profile = sub.profile;
                 const master = sub.account || profile?.master_account;
                 
