@@ -620,22 +620,12 @@
         <button onclick="mobileBack()" id="mobile-back-btn" class="mh-btn">
             <i class="ph ph-caret-left" style="font-size:18px"></i>
         </button>
-        <div id="mobile-logo-btn" class="hidden cursor-pointer active:scale-95 transition-transform" onclick="goHome()">
+        <!-- Centro: Logo SEMPRE VISÍVEL -->
+        <div class="mh-center cursor-pointer active:scale-95 transition-transform" onclick="goHome()">
             <span class="font-['Bebas_Neue'] text-xl text-[#E50914] tracking-widest drop-shadow-md">ECOFLIX</span>
         </div>
         
-        <!-- Centro: Título e Passos -->
-        <div class="mh-center" id="mobile-center-content">
-            <div id="mobile-header-title" class="mh-title">Planos</div>
-            <div id="mobile-header-steps" class="mh-step">
-                <span></span><span></span><span class="active"></span>
-            </div>
-        </div>
-        
-        <!-- Direita: Fechar (passos) ou Conta (Catálogo) -->
-        <button onclick="goHome()" id="mobile-close-btn" class="mh-btn">
-            <i class="ph ph-x" style="font-size:18px"></i>
-        </button>
+        <!-- Direita: Conta (apenas Catálogo) -->
         <button onclick="showRecover()" id="mobile-account-btn" class="hidden mh-btn border-none bg-transparent">
             <i class="fas fa-user-circle text-[22px] text-gray-300"></i>
         </button>
@@ -1638,50 +1628,22 @@
             'step-dashboard': 'Minha Conta',
         };
 
-        // step index: checkout=1, payment=2, waiting/ref/success=3
-        const mobileStepMap = {
-            'step-checkout': 1,
-            'step-checkout-otp': 1,
-            'step-payment-method': 2,
-            'step-waiting-payment': 3,
-            'step-payment-ref': 3,
-            'step-success': 3,
-        };
-
         function updateMobileHeader(screenId) {
-            const header = document.getElementById('mobile-header');
-            const title = document.getElementById('mobile-header-title');
             const backBtn = document.getElementById('mobile-back-btn');
-            const closeBtn = document.getElementById('mobile-close-btn');
-            const logoBtn = document.getElementById('mobile-logo-btn');
             const accountBtn = document.getElementById('mobile-account-btn');
-            const centerContent = document.getElementById('mobile-center-content');
-            const stepsEl = document.getElementById('mobile-header-steps');
-            const titleText = mobileScreenTitles[screenId] || '';
-            const stepIdx = mobileStepMap[screenId] || 0;
 
-            // Ativa o Native App Header logic (visível by default no CSS `.lg:hidden`)
             if (screenId === 'step-catalog') {
-                // Modo catálogo (Navbar Nativa Inicial)
+                // Modo catálogo
                 backBtn.classList.add('hidden');
-                closeBtn.classList.add('hidden');
-                centerContent.classList.add('hidden');
                 
-                logoBtn.classList.remove('hidden');
                 accountBtn.classList.remove('hidden');
                 accountBtn.classList.add('flex');
             } else {
-                // Modo Wizard/Passos (Navbar de Ação)
-                logoBtn.classList.add('hidden');
+                // Modo Passos
+                backBtn.classList.remove('hidden');
+                
                 accountBtn.classList.add('hidden');
                 accountBtn.classList.remove('flex');
-                
-                centerContent.classList.remove('hidden');
-                
-                if (titleText) {
-                    title.textContent = titleText;
-                }
-                
                 backBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-recover' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
                 closeBtn.style.visibility = (screenId === 'step-success' || screenId === 'step-dashboard') ? 'hidden' : 'visible';
 
