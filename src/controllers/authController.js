@@ -104,12 +104,24 @@ const logout = (req, res) => {
     if (req.session) {
         req.session.destroy();
     }
-    res.clearCookie('connect.sid');
-    res.clearCookie('admin_auth', {
+    
+    const options = {
         httpOnly: true,
         sameSite: 'lax',
         secure: !config.isDevelopment
-    });
+    };
+    
+    // Clear on current host
+    res.clearCookie('connect.sid', options);
+    res.clearCookie('admin_auth', options);
+    
+    // Clear on parent domain to wipe out old lingering cookies
+    if (!config.isDevelopment) {
+        const domainOptions = { ...options, domain: '.ecokambio.com' };
+        res.clearCookie('connect.sid', domainOptions);
+        res.clearCookie('admin_auth', domainOptions);
+    }
+    
     res.status(200).json({ success: true, message: 'Logout bem-sucedido.' });
 };
 
