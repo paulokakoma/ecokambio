@@ -120,7 +120,7 @@ app.use(helmet({
             ],
             childSrc: ["'self'"],
             objectSrc: ["'none'"],
-            upgradeInsecureRequests: config.isDevelopment ? null : true
+            upgradeInsecureRequests: config.isDevelopment ? null : []
         },
     },
     hsts: config.isDevelopment ? false : {
