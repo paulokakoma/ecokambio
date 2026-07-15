@@ -1,0 +1,21 @@
+
+> currency-main@1.0.0 start
+> node server.js --host 0.0.0.0
+
+🏁 [Server] Processo Node iniciado. A carregar módulos...
+📦 [Server] Carregando: express, http, path...
+📦 [Server] Carregando: session, compression, logger...
+📦 [Server] Carregando: Sentry...
+📦 [Server] Carregando: Redis Client...
+[Redis] REDIS_URL not set. Redis disabled.
+📦 [Server] Carregando: Middleware e Rotas...
+Sentry Skipped (No DSN)
+09:14:58 [32minfo[39m: 📁 A utilizar FileStore para gestão de sessões
+[SMS Queue] Redis not configured. SMS queue disabled.
+09:14:58 [32minfo[39m: ⚠️ REDIS_URL não definida: Sistema de filas EcoFlix desativado.
+09:14:58 [32minfo[39m: ✅ SMS & Expiration Cron jobs initialized
+📅 Agendador inicializado. O Scraper irá correr a cada 6 horas (0 */6 * * *)
+✅ Agendador configurado e pronto a rodar
+
+❌ ERRO FATAL: A porta 3000 encontra-se ocupada!
+   Verifique se outro processo da aplicação está já a utilizar esta porta do computador.

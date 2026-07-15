@@ -144,7 +144,7 @@ const processExpirations = async () => {
     }
 
     let count = 0;
-    const adminPhone = process.env.ADMIN_PHONE || '+244927862935'; // Fallback admin phone
+    const adminPhone = process.env.ADMIN_PHONE || '+244938948994'; // Fallback admin phone
 
     for (const sub of expiredSubs) {
         // 1. Marcar assinatura como EXPIRED

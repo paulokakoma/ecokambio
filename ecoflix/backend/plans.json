@@ -1,14 +1,14 @@
 {
   "ECONOMICO": {
-    "price": 10,
-    "paygo_id": "74c04f17-9aa5-45f5-b729-bcfba5a8047d"
+    "price": 5000,
+    "paygo_id": "41021d3a-8a69-4c2b-b1d7-b7a6594845e4"
   },
   "ULTRA": {
-    "price": 65,
-    "paygo_id": "eeaab523-8307-4f71-ac29-6626cec11b8f"
+    "price": 7000,
+    "paygo_id": "6f68d941-c1e3-4831-a8e4-a53aa9ae644a"
   },
   "FAMILIA": {
-    "price": 180,
-    "paygo_id": "090d794c-58e2-4174-a4dd-6a790fc5d742"
+    "price": 18000,
+    "paygo_id": "59f18155-3cff-435d-8ba4-974f91acb5b9"
   }
 }

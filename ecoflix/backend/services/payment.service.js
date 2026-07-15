@@ -2,6 +2,7 @@ const supabase = require('../../../src/config/supabase');
 const { smsQueue } = require('./sms_queue.service');
 const smsService = require('./sms.service');
 const websocket = require('../../../src/websocket');
+const stockMonitor = require('./stock-monitor.service');
 
 // ============================================================================
 // Helpers
@@ -293,6 +294,11 @@ const processPayment = async (order) => {
         if (order.coupon_used) {
             await addPartnerCommission(order.coupon_used, order.plan_type);
         }
+
+        // Verificar stock e notificar admin se necessário
+        stockMonitor.checkAndNotify().catch(err => {
+            console.error('[StockMonitor] Erro na verificação:', err.message);
+        });
 
         return { success: true, credentials: result.credentials };
 

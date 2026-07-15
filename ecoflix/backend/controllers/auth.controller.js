@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const smsService = require('../services/sms.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const OTP_COOLDOWN_SECONDS = 120; // 2 minutes between OTP sends per phone
+const OTP_COOLDOWN_SECONDS = 86400; // 24 hours between OTP sends per phone
 
 // ============================================================================
 // CUSTOMER: Register (Step 1: Request OTP)

@@ -145,21 +145,29 @@ const quickOrder = async (req, res) => {
         if (!is_renewal) {
             const isExclusive = ['FAMILIA', 'COMPLETA', 'INTEIRA'].includes(plan_type);
             if (isExclusive) {
-                const { data: accounts } = await supabase
+                const { data: accounts, error } = await supabase
                     .from('ecoflix_master_accounts')
                     .select('id, subscriptions:ecoflix_subscriptions(status)')
                     .eq('type', 'EXCLUSIVE')
                     .eq('status', 'ACTIVE');
+                if (error) {
+                    console.error("Supabase Error checking exclusive stock:", error);
+                    return res.status(500).json({ success: false, message: `Erro interno ao verificar stock: ${error.message}` });
+                }
                 const hasStock = accounts && accounts.some(acc => !acc.subscriptions || acc.subscriptions.filter(s => ['ACTIVE', 'SUSPENDED'].includes(s.status)).length === 0);
                 if (!hasStock) {
                     return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
                 }
             } else {
-                const { count } = await supabase
+                const { count, error } = await supabase
                     .from('ecoflix_profiles')
                     .select('*', { count: 'exact', head: true })
                     .eq('type', plan_type === 'ECONOMICO' ? 'MOBILE' : 'TV')
                     .eq('status', 'AVAILABLE');
+                if (error) {
+                    console.error("Supabase Error checking stock:", error);
+                    return res.status(500).json({ success: false, message: `Erro interno ao verificar stock: ${error.message}` });
+                }
                 if (!count || count === 0) {
                     return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
                 }

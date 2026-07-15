@@ -212,7 +212,7 @@
             <!-- 1. DASHBOARD -->
             <div id="panel-dashboard" class="panel">
                 <h1 class="text-2xl font-bold text-gray-800 mb-6">Visão Geral</h1>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
                     <!-- Cards -->
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                         <div class="flex justify-between items-start">
@@ -237,18 +237,6 @@
                         </div>
                         <div class="mt-4 flex items-center text-xs text-gray-500"><span
                                 id="dash-occupancy" class="text-blue-600 font-bold mr-1">...</span> ocupação</div>
-                    </div>
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-red-100 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-red-500 rounded-bl-full -mr-8 -mt-8 opacity-20">
-                        </div>
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-medium text-red-500 uppercase">A Expirar (48h)</p>
-                                <h3 class="text-3xl font-bold text-red-600 mt-2" id="dash-expiring"><i class="fas fa-circle-notch fa-spin text-lg text-red-400"></i></h3>
-                            </div>
-                            <div class="p-2 bg-red-100 rounded-lg text-red-600"><i class="fas fa-clock"></i></div>
-                        </div>
-                        <div class="mt-4 flex items-center text-xs text-red-500">Renovar urgente!</div>
                     </div>
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-purple-100 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500 rounded-bl-full -mr-8 -mt-8 opacity-20">
@@ -307,19 +295,10 @@
                     </div>
                 </div>
 
-                <!-- Secção Inferior (Top 5, Atividade) -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Top 5 Clientes -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Top 5 Clientes</h3>
-                        <ul class="space-y-4" id="top-clients-list"></ul>
-                    </div>
-                    
-                    <!-- Atividade Recente -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Atividade Recente</h3>
-                        <ul class="space-y-4" id="recent-activity-list"></ul>
-                    </div>
+                <!-- Top 5 Clientes -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Top 5 Clientes</h3>
+                    <ul class="space-y-4" id="top-clients-list"></ul>
                 </div>
             </div>
 
@@ -791,7 +770,6 @@
                 }
                 document.getElementById('dash-free').innerText = data.freeProfiles || 0;
                 document.getElementById('dash-sold').innerText = data.soldProfiles || 0;
-                document.getElementById('dash-expiring').innerText = data.expiringAccounts || 0;
                 document.getElementById('dash-revenue').innerText = new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(data.todayRevenue || 0);
                 document.getElementById('dash-sales-count').innerText = `${data.todaySales || 0} vendas`;
                 
@@ -815,6 +793,7 @@
                 const { data } = await apiCall('/admin/stock');
                 stockData = data || [];
                 renderStock();
+                loadInventoryStats(); // Update the top summary cards automatically
             } catch (e) {
                 console.error('Stock load error:', e);
             }
@@ -1001,7 +980,7 @@
                     await apiCall(`/admin/accounts/${id}`, 'PUT', { email, password, renewal_date, type });
                     showToast("Conta Mãe atualizada com sucesso!", 'success');
                 }
-                await loadStock();
+                await refreshAllPanels();
                 closeModal('account');
             } catch (e) {
                 // Error already shown by apiCall
@@ -1014,7 +993,7 @@
 
             try {
                 await apiCall(`/admin/accounts/${id}`, 'DELETE');
-                await loadStock();
+                await refreshAllPanels();
                 closeModal('account');
                 showToast("Conta Mãe removida com sucesso.", 'info');
             } catch (e) {
@@ -1081,7 +1060,9 @@
 
             try {
                 await apiCall(`/admin/profiles/${profileId}`, 'PUT', { status: 'AVAILABLE' });
-                await loadStock();
+                await refreshAllPanels();
+                const accId = document.getElementById('editAccountId').value;
+                if (accId) openAccountDetails(accId);
                 closeModal('profile');
                 showToast("Perfil libertado com sucesso!", 'info');
             } catch (e) {
@@ -1105,8 +1086,9 @@
                     client_phone: status !== 'AVAILABLE' ? client_phone : null,
                     expires_at: status !== 'AVAILABLE' ? expires_at : null
                 });
-                await loadStock();
-                await loadStock();
+                await refreshAllPanels();
+                const accId = document.getElementById('editAccountId').value;
+                if (accId) openAccountDetails(accId);
                 closeModal('profile');
                 if (status === 'SOLD') {
                     showToast(`Perfil vendido! SMS enviado para ${client_phone}`, 'success');
@@ -1161,7 +1143,6 @@
                     <td class="px-6 py-4 text-gray-500 text-xs">${date}</td>
                     <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusLabel}</span></td>
                     <td class="px-6 py-4 text-right">
-                        ${s.status === 'PENDING' ? `<button onclick="confirmPayment('${s.id}')" class="text-green-600 hover:text-green-800 text-xs font-bold">Confirmar</button>` : ''}
                     </td>
                 </tr>`;
             }).join('');
@@ -1201,7 +1182,7 @@
             try {
                 await apiCall(`/admin/orders/${orderId}/confirm`, 'POST');
                 await loadOrders();
-                await loadStock();
+                await refreshAllPanels();
                 await loadDashboard();
                 showToast('Pagamento confirmado com sucesso!', 'success');
             } catch (e) {
@@ -1297,7 +1278,7 @@
                     showToast('Cliente suspenso com sucesso', 'success');
                     await loadCustomers();
                     await loadDashboard();
-                    await loadStock();
+                    await refreshAllPanels();
                 } else {
                     showToast(res.message, 'error');
                 }
@@ -1314,7 +1295,7 @@
                     showToast('Acesso restaurado com sucesso', 'success');
                     await loadCustomers();
                     await loadDashboard();
-                    await loadStock();
+                    await refreshAllPanels();
                 } else {
                     showToast(res.message, 'error');
                 }
@@ -1772,10 +1753,10 @@
         }
 
         function openPartnerModal() {
-            const code = prompt('Código do parceiro (ex: PANDORA):');
+            const code = prompt('Código do parceiro (ex: ECOKAMBIO):');
             if (!code) return;
 
-            const name = prompt('Nome do parceiro (ex: Chelcia Pandora):');
+            const name = prompt('Nome do parceiro (ex: EcoKambio):');
             if (!name) return;
 
             const commMobile = prompt('Comissão por venda Mobile (Kz):', '500');
@@ -1962,11 +1943,24 @@
                 }
             };
 
-            function refreshAllPanels() {
-                loadDashboard();
-                loadStock();
-                loadOrders();
-                loadCustomers();
+            async function refreshAllPanels() {
+                await Promise.all([
+                    loadDashboard(),
+                    loadInventoryStats(),
+                    loadStock().then(() => {
+                        // Update account details panel if it's currently open
+                        const detailsPanel = document.getElementById('panel-account-details');
+                        if (detailsPanel && !detailsPanel.classList.contains('hidden')) {
+                            const emailEl = document.getElementById('detailsPanelEmail');
+                            if (emailEl) {
+                                const acc = stockData.find(a => a.email === emailEl.innerText);
+                                if (acc) openAccountDetails(acc.id);
+                            }
+                        }
+                    }),
+                    loadOrders(),
+                    loadCustomers()
+                ]);
             }
 
             function connect() {
@@ -1990,6 +1984,10 @@
             }
 
             connect();
+            
+            // Fallback de segurança: atualiza silenciosamente os dados a cada 15 segundos
+            // Isto garante que a tela nunca precisa de reload manual, mesmo se o SSE falhar
+            setInterval(refreshAllPanels, 15000);
         })();
 
 </script>

@@ -17,9 +17,10 @@ const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
 // ============================================================================
 const getDashboard = async (req, res) => {
     try {
-        const today = new Date().toISOString().split('T')[0];
-        const twoDaysFromNow = new Date();
-        twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const twoDaysFromNow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
+        const twoDaysStr = `${twoDaysFromNow.getFullYear()}-${String(twoDaysFromNow.getMonth() + 1).padStart(2, '0')}-${String(twoDaysFromNow.getDate()).padStart(2, '0')}`;
 
         // Fetch data concurrently for high performance
         const [
@@ -36,11 +37,11 @@ const getDashboard = async (req, res) => {
             supabase.from('ecoflix_profiles').select('*', { count: 'exact', head: true }).eq('status', 'AVAILABLE'),
             supabase.from('ecoflix_profiles').select('*', { count: 'exact', head: true }).eq('status', 'SOLD'),
             supabase.from('ecoflix_master_accounts').select('id, subscriptions:ecoflix_subscriptions(id, status)').eq('type', 'EXCLUSIVE'),
-            supabase.from('ecoflix_master_accounts').select('*', { count: 'exact', head: true }).lte('renewal_date', twoDaysFromNow.toISOString().split('T')[0]).eq('status', 'ACTIVE'),
+            supabase.from('ecoflix_master_accounts').select('*', { count: 'exact', head: true }).gte('renewal_date', today).lte('renewal_date', twoDaysStr).eq('status', 'ACTIVE'),
             supabase.from('ecoflix_orders').select('amount').eq('status', 'PAID').gte('paid_at', today),
             smsService.checkBalance(),
-            supabase.from('ecoflix_orders').select('phone, plan_type, created_at').order('created_at', { ascending: false }).limit(5),
-            supabase.from('ecoflix_orders').select('phone, amount').order('created_at', { ascending: false }).limit(100),
+            supabase.from('ecoflix_orders').select('phone, plan_type, created_at').neq('status', 'PENDING').order('created_at', { ascending: false }).limit(5),
+            supabase.from('ecoflix_orders').select('phone, amount').neq('status', 'PENDING').order('created_at', { ascending: false }).limit(100),
             supabase.from('ecoflix_orders').select('amount, paid_at').in('status', ['PAID', 'MANUAL']).order('paid_at', { ascending: true })
         ]);
 
@@ -90,17 +91,6 @@ const getDashboard = async (req, res) => {
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5)
             .map(([phone, total]) => ({ phone, total }));
-
-        // Process Recent Activity
-        const recentActivity = [];
-        const recentOrders = recentOrdersRes.status === 'fulfilled' ? recentOrdersRes.value.data || [] : [];
-        recentOrders.forEach(ro => {
-            const date = new Date(ro.created_at);
-            recentActivity.push({
-                title: `Nova Subscrição ${ro.plan_type} - ${ro.phone}`,
-                time: date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
-            });
-        });
 
         // Chart Data Aggregation
         const chartData = {
@@ -168,6 +158,9 @@ const getDashboard = async (req, res) => {
             }
         }
 
+        const totalSlots = freeProfiles + soldProfiles;
+        const occupancyRate = totalSlots > 0 ? Math.round((soldProfiles / totalSlots) * 100) : 0;
+
         res.json({
             success: true,
             data: {
@@ -179,8 +172,8 @@ const getDashboard = async (req, res) => {
                 smsAvailable,
                 smsSent,
                 topClients,
-                recentActivity,
-                chartData
+                chartData,
+                occupancyRate
             }
         });
     } catch (error) {
@@ -263,16 +256,61 @@ const updateAccount = async (req, res) => {
         const { id } = req.params;
         const { email, password, renewal_date, type, status, notes, notify_users, recovery_email, recovery_password } = req.body;
 
-        // Fetch original account to see if password changed
+        const updatePayload = { email, password, renewal_date, type, status, notes, updated_at: new Date() };
+        if (recovery_email !== undefined) updatePayload.recovery_email = recovery_email || null;
+        if (recovery_password !== undefined) updatePayload.recovery_password = recovery_password || null;
+
+        // Fetch original account to see if password changed and check type change logic
         const { data: originalAccount } = await supabase
             .from('ecoflix_master_accounts')
             .select('password, type')
             .eq('id', id)
             .single();
 
-        const updatePayload = { email, password, renewal_date, type, status, notes, updated_at: new Date() };
-        if (recovery_email !== undefined) updatePayload.recovery_email = recovery_email || null;
-        if (recovery_password !== undefined) updatePayload.recovery_password = recovery_password || null;
+        // Handle Type Changes (SHARED <-> EXCLUSIVE)
+        if (originalAccount && originalAccount.type !== type) {
+            if (originalAccount.type === 'SHARED' && type === 'EXCLUSIVE') {
+                // Changing to EXCLUSIVE: Check if any profiles are SOLD
+                const { data: soldProfiles } = await supabase
+                    .from('ecoflix_profiles')
+                    .select('id')
+                    .eq('master_account_id', id)
+                    .eq('status', 'SOLD');
+                    
+                if (soldProfiles && soldProfiles.length > 0) {
+                    return res.status(400).json({ success: false, message: 'Não é possível alterar para Exclusiva: existem perfis vendidos nesta conta.' });
+                }
+                
+                // If no profiles are sold, delete all profiles since it's now an exclusive account
+                await supabase
+                    .from('ecoflix_profiles')
+                    .delete()
+                    .eq('master_account_id', id);
+                    
+            } else if (originalAccount.type === 'EXCLUSIVE' && type === 'SHARED') {
+                // Changing to SHARED: Check if there are any active/suspended subscriptions directly on the master account
+                const { data: activeSubs } = await supabase
+                    .from('ecoflix_subscriptions')
+                    .select('id')
+                    .eq('master_account_id', id)
+                    .is('profile_id', null)
+                    .in('status', ['ACTIVE', 'SUSPENDED']);
+                    
+                if (activeSubs && activeSubs.length > 0) {
+                    return res.status(400).json({ success: false, message: 'Não é possível alterar para Compartilhada: esta conta exclusiva já está atribuída a um cliente.' });
+                }
+                
+                // Se não estiver vendida, podemos alterar para SHARED.
+                // Criamos apenas 4 perfis, pois o 5º perfil é o principal da conta (não é vendido).
+                const profilesToInsert = [
+                    { master_account_id: id, name: 'Perfil 1', pin: '1111', type: 'TV', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 2', pin: '2222', type: 'TV', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 3', pin: '3333', type: 'TV', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 4', pin: '4444', type: 'MOBILE', status: 'AVAILABLE' }
+                ];
+                await supabase.from('ecoflix_profiles').insert(profilesToInsert);
+            }
+        }
 
         const { data: account, error } = await supabase
             .from('ecoflix_master_accounts')
@@ -572,6 +610,8 @@ const getOrders = async (req, res) => {
 
         if (status) {
             query = query.eq('status', status);
+        } else {
+            query = query.neq('status', 'PENDING');
         }
 
         const from = (pageNum - 1) * limitNum;
