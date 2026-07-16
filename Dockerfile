@@ -65,6 +65,13 @@ RUN apk add --no-cache \
 # Copiar dependências de produção
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
 
+# Configurar Playwright para usar o Chromium do sistema Alpine
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PLAYWRIGHT_BROWSERS_PATH=0
+
+# Instalar browsers do Playwright (necessário para crawlee)
+RUN npx playwright install chromium
+
 # Copiar código da aplicação PRIMEIRO
 COPY . .
 

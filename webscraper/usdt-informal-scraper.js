@@ -11,16 +11,32 @@ async function scrapeInformalUSDT() {
     console.log('💡 Strategy: Calcular USDT, ZAR, BRL, GBP com base na taxa Informal USD/AOA e taxas de câmbio da Binance');
 
     try {
-        // 1. Fetch cross rates from Binance
+        // 1. Fetch cross rates from Binance (with fallback endpoints)
         console.log('📡 Fetching cross rates from Binance...');
         const symbols = '["USDTUSD","USDTZAR","USDTBRL","GBPUSDT"]';
-        const binanceResponse = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`);
+        const binanceEndpoints = [
+            `https://api.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`,
+            `https://api1.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`,
+            `https://api2.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`,
+            `https://api3.binance.com/api/v3/ticker/price?symbols=${encodeURIComponent(symbols)}`,
+        ];
 
-        if (!binanceResponse.ok) {
-            throw new Error(`Binance API error: ${binanceResponse.status}`);
+        let binanceData = null;
+        for (const endpoint of binanceEndpoints) {
+            try {
+                const resp = await fetch(endpoint);
+                if (resp.ok) {
+                    binanceData = await resp.json();
+                    break;
+                }
+            } catch (e) {
+                continue;
+            }
         }
 
-        const binanceData = await binanceResponse.json();
+        if (!binanceData) {
+            throw new Error('All Binance API endpoints returned errors (geo-blocked)');
+        }
         
         let usdtToUsd = 0, usdtToZar = 0, usdtToBrl = 0, gbpToUsdt = 0;
         binanceData.forEach(ticker => {

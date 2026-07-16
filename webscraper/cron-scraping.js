@@ -1,4 +1,4 @@
-const { PuppeteerCrawler, Dataset } = require('crawlee');
+const { PlaywrightCrawler, Dataset } = require('crawlee');
 const { writeFile } = require('fs/promises');
 const path = require('path');
 
@@ -26,8 +26,7 @@ const targets = [
 (async () => {
     console.log('🚀 Starting Cron Scraper...');
 
-    const crawler = new PuppeteerCrawler({
-        // Critical for Docker environments + stealth options
+    const crawler = new PlaywrightCrawler({
         launchContext: {
             launchOptions: {
                 args: [
@@ -39,7 +38,7 @@ const targets = [
                     '--disable-gpu',
                     '--window-size=1920,1080'
                 ],
-                ignoreHTTPSErrors: true
+                headless: true,
             }
         },
         // Retry configuration for failed requests
@@ -54,10 +53,12 @@ const targets = [
             const userAgent = getRandomUserAgent();
 
             // Set user agent
-            await page.setUserAgent(userAgent);
+            await page.setExtraHTTPHeaders({
+                'User-Agent': userAgent,
+            });
 
             // Set realistic viewport
-            await page.setViewport({ width: 1920, height: 1080 });
+            await page.setViewportSize({ width: 1920, height: 1080 });
 
             // Set extra HTTP headers to look more like a real browser
             await page.setExtraHTTPHeaders({
@@ -74,7 +75,7 @@ const targets = [
             });
 
             // Hide webdriver flag
-            await page.evaluateOnNewDocument(() => {
+            await page.addInitScript(() => {
                 Object.defineProperty(navigator, 'webdriver', { get: () => false });
                 Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
                 Object.defineProperty(navigator, 'languages', { get: () => ['pt-PT', 'pt', 'en-US', 'en'] });
@@ -88,7 +89,7 @@ const targets = [
             try {
                 if (label === 'BAI') {
                     // Try to wait for page load fully
-                    await page.waitForNetworkIdle({ timeout: 15000 }).catch(() => { });
+                    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
                     
                     const selectors = ['table.table-striped', 'table', '.cambio', '.taxas', '[class*="rate"]', '[class*="cambio"]'];
                     let foundSelector = null;
@@ -194,7 +195,7 @@ const targets = [
                     log.info('BCI: Waiting for page to fully load...');
 
                     // Wait for page load
-                    await page.waitForNetworkIdle({ timeout: 30000 }).catch(() => { });
+                    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => { });
 
                     // Try multiple selectors for BCI rates
                     const selectors = ['table', '.exchange-rates', '.cambio', '.taxas', '[class*="rate"]', '[class*="cambio"]'];
@@ -293,7 +294,7 @@ const targets = [
     );
 
     await crawler.run();
-    console.log('✅ Puppeteer scraping completed');
+    console.log('✅ Playwright scraping completed');
 
     // Helper function for bank-specific parsing
     function parseRate(rateStr, bankLabel) {

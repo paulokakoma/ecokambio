@@ -27,6 +27,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cheerio": "^1.0.0",
     "@aws-sdk/client-s3": "^3.932.0",
     "@sentry/node": "^7.100.0",
     "@supabase/supabase-js": "^2.43.5",
@@ -59,7 +60,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
-    "cheerio": "^1.0.0",
     "concurrently": "^8.2.2",
     "nodemon": "^3.1.4",
     "tailwindcss": "^3.4.4"

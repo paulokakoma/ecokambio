@@ -41,19 +41,43 @@ async function scrapeFormalUSDT() {
 
         console.log(`✅ USDT/AOA: ${usdtAoa.toFixed(2)} AOA`);
 
-        // 3. Fetch USDT/USD from Binance
-        console.log('📡 Fetching USDT/USD rate from Binance...');
-        const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTUSD');
+        // 3. Fetch USDT/USD from Binance (with CoinGecko fallback)
+        console.log('📡 Fetching USDT/USD rate...');
+        let usdtUsd = null;
 
-        if (!binanceResponse.ok) {
-            throw new Error(`Binance API error: ${binanceResponse.status}`);
+        // Try Binance first
+        const binanceEndpoints = [
+            'https://api.binance.com/api/v3/ticker/price?symbol=USDTUSD',
+            'https://api1.binance.com/api/v3/ticker/price?symbol=USDTUSD',
+            'https://api2.binance.com/api/v3/ticker/price?symbol=USDTUSD',
+            'https://api3.binance.com/api/v3/ticker/price?symbol=USDTUSD',
+        ];
+
+        for (const endpoint of binanceEndpoints) {
+            try {
+                const resp = await fetch(endpoint);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    usdtUsd = parseFloat(data.price);
+                    if (usdtUsd && !isNaN(usdtUsd)) break;
+                }
+            } catch (e) {
+                continue;
+            }
         }
 
-        const binanceData = await binanceResponse.json();
-        const usdtUsd = parseFloat(binanceData.price);
+        // Fallback to CoinGecko if Binance is geo-blocked
+        if (!usdtUsd) {
+            console.log('⚠️  Binance unavailable, trying CoinGecko...');
+            const cgResp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd');
+            if (cgResp.ok) {
+                const cgData = await cgResp.json();
+                usdtUsd = cgData.tether?.usd;
+            }
+        }
 
         if (!usdtUsd || isNaN(usdtUsd)) {
-            throw new Error('Invalid USDT/USD rate from Binance');
+            throw new Error('Could not fetch USDT/USD from any source');
         }
 
         console.log(`✅ USDT/USD: ${usdtUsd.toFixed(6)} USD`);

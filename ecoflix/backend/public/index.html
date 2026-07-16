@@ -77,7 +77,7 @@
     <main class="flex-grow container mx-auto px-4 py-0 lg:py-4 max-w-7xl relative z-10 flex flex-col items-center" id="app">
 
         <!-- TELA 1: CATÁLOGO DE PLANOS -->
-        <div id="step-catalog" class="block animate-fade-in">
+        <div id="step-catalog" class="block animate-fade-in w-full">
             <div class="text-center mb-6 lg:mb-12 mt-[10px]">
                 <h1 class="text-2xl lg:text-5xl font-bold mb-2">Planos para todos os ecrãs.</h1>
                 <p class="text-base lg:text-xl text-muted">Escolha a melhor opção. Cancele quando quiser.</p>
@@ -471,7 +471,7 @@
                     </button>
                     <div class="coupon-body hidden px-4 md:px-6 pb-4 md:pb-6">
                         <div class="flex gap-2">
-                            <input type="text" id="coupon-input" placeholder="Ex: PANDORA"
+                            <input type="text" id="coupon-input" placeholder="Ex: ecokambio"
                                 class="flex-1 bg-white/[0.06] border border-white/[0.08] rounded-xl px-3 py-2.5 md:py-3 uppercase font-bold text-sm md:text-base text-white tracking-wide placeholder:text-gray-600 focus:border-[#E50914]/50 focus:outline-none transition-colors">
                             <button onclick="applyCoupon()" id="btn-apply-coupon"
                                 class="bg-white/10 hover:bg-white/15 active:scale-95 text-white font-bold px-4 py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all flex-shrink-0">
@@ -582,7 +582,7 @@
 
         <!-- TELA: AGUARDAR PAGAMENTO (Unificada) -->
         <!-- TELA 5: A AGUARDAR PAGAMENTO EXPRESS -->
-        <div id="step-waiting-payment" class="hidden">
+        <div id="step-waiting-payment" class="hidden w-full">
             <div class="ambient-glow-pay" id="pay-bg-glow"></div>
 
             <div class="max-w-sm mx-auto flex flex-col items-center py-8 px-4 relative z-10 min-h-[60vh] justify-center">
