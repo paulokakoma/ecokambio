@@ -37,7 +37,7 @@ class PayGoProvider {
 
         const payload = {
             payment_method: apiMethod,
-            product_id:     order.paygo_id || PRODUCT_IDS[order.plan_type] || PRODUCT_IDS['ULTRA'],
+            product_id:     order.paygo_id,
             amount:         order.amount,
             customer_name:  'Cliente EcoFlix',
             customer_email: `cliente${Date.now()}@ecoflix.ao`,

@@ -26,6 +26,34 @@ const verifySignature = (payload, signature, secret) => {
 const PaymentProviderFactory = require('../services/payment_factory.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
 
+// Helper to get correct PayGo product ID dynamically if amount differs from base plan
+const getDynamicPaygoId = async (plan_type, amount, plans) => {
+    const basePlan = plans[plan_type];
+    if (!basePlan || !basePlan.paygo_id) return null;
+    if (amount === basePlan.price) return basePlan.paygo_id;
+    
+    try {
+        const PAYGO_API_KEY = process.env.PAYGOOO_API_KEY;
+        const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
+        if (!PAYGO_API_KEY) return basePlan.paygo_id;
+
+        const { data: prod } = await axios.post(
+            `${PAYGO_BASE_URL}/products`,
+            { 
+                name: `EcoFlix ${plan_type} Custom`, 
+                price: amount, 
+                thank_you_url: 'https://ecokambio.com', 
+                description: `Acesso EcoFlix ${plan_type} (${amount} Kz)` 
+            },
+            { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
+        );
+        return prod?.product?.id || prod?.id || basePlan.paygo_id;
+    } catch (err) {
+        console.error('[Payment] Erro ao criar produto PayGo dinâmico:', err.message);
+        return basePlan.paygo_id;
+    }
+};
+
 // ============================================================================
 // CUSTOMER: Init Payment (Reference or Push)
 // ============================================================================
@@ -38,6 +66,11 @@ const initPayment = async (req, res) => {
 
         if (!plans[plan_type]) {
             return res.status(400).json({ success: false, message: 'Plano inválido' });
+        }
+
+        if (!plans[plan_type].paygo_id) {
+            console.error(`[Payment] paygo_id em falta para o plano ${plan_type}. Reconfigure o plano no admin.`);
+            return res.status(500).json({ success: false, message: 'Configuração do plano incompleta. Contacte o administrador.' });
         }
 
         let amount = plans[plan_type].price;
@@ -76,13 +109,14 @@ const initPayment = async (req, res) => {
         // --- PAIMENT GATEWAY INTEGRATION ---
         let paymentResult;
         try {
+            const dynamicPaygoId = await getDynamicPaygoId(plan_type, amount, plans);
             const provider = PaymentProviderFactory.getProvider(payment_method);
             paymentResult = await provider.initiatePayment({
                 amount,
                 phone,
                 plan_type,
                 payment_method,
-                paygo_id: plans[plan_type].paygo_id
+                paygo_id: dynamicPaygoId
             });
         } catch (error) {
             return res.status(502).json({ success: false, message: error.message });
@@ -138,6 +172,11 @@ const quickOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Plano inválido' });
         }
 
+        if (!plans[plan_type].paygo_id) {
+            console.error(`[Payment] paygo_id em falta para o plano ${plan_type}. Reconfigure o plano no admin.`);
+            return res.status(500).json({ success: false, message: 'Configuração do plano incompleta. Contacte o administrador.' });
+        }
+
         const durationMonths = parseInt(duration) || 1;
         let totalAmount = plans[plan_type].price * durationMonths;
         let couponUsed = null;
@@ -158,7 +197,13 @@ const quickOrder = async (req, res) => {
                         return res.status(400).json({ success: false, message: 'O lote deste código esgotou.' });
                     }
                 }
-                if (coupon.discount_amount > 0) {
+                const discType = coupon.discount_type || 'flat';
+                const discValue = parseFloat(coupon.discount_value) || 0;
+                if (discType === 'percent' && discValue > 0) {
+                    totalAmount = Math.max(0, totalAmount - (totalAmount * discValue / 100));
+                } else if (discType === 'flat' && discValue > 0) {
+                    totalAmount = Math.max(0, totalAmount - discValue);
+                } else if (coupon.discount_amount > 0) {
                     totalAmount = Math.max(0, totalAmount - coupon.discount_amount);
                 }
                 couponUsed = coupon.code;
@@ -265,13 +310,14 @@ const quickOrder = async (req, res) => {
             .eq('user_id', user.id)
             .eq('status', 'PENDING');
 
+        const dynamicPaygoId = await getDynamicPaygoId(plan_type, totalAmount, plans);
         const provider = PaymentProviderFactory.getProvider(payment_method);
         const paymentResult = await provider.initiatePayment({
             amount: totalAmount,
             phone,
             plan_type,
             payment_method,
-            paygo_id: plans[plan_type].paygo_id
+            paygo_id: dynamicPaygoId
         });
 
         const dbPaymentMethod = payment_method === 'EXPRESS' ? 'MCX_PUSH' : 'REFERENCE';
@@ -526,12 +572,14 @@ const renewSubscription = async (req, res) => {
         // --- PAYMENT PROVIDER ---
         let paymentResult;
         try {
+            const dynamicPaygoId = await getDynamicPaygoId(sub.plan_type, amount, plans);
             const provider = PaymentProviderFactory.getProvider(payment_method);
             paymentResult = await provider.initiatePayment({
                 amount,
                 phone: req.user.phone,
                 plan_type: sub.plan_type,
-                payment_method
+                payment_method,
+                paygo_id: dynamicPaygoId
             });
         } catch (e) {
             return res.status(502).json({ success: false, message: e.message });

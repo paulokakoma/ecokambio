@@ -22,6 +22,7 @@ const validateCoupon = async (req, res) => {
             .single();
 
         if (error || !coupon) {
+            console.error('[Coupon] Lookup error:', error?.message, '| code:', code?.toUpperCase());
             return res.status(404).json({ success: false, message: 'Código inválido' });
         }
 
@@ -45,6 +46,8 @@ const validateCoupon = async (req, res) => {
             success: true,
             data: {
                 code: coupon.code,
+                discount_type: coupon.discount_type || 'flat',
+                discount_value: parseFloat(coupon.discount_value) || 0,
                 discount: coupon.discount_amount,
                 message: `Código ${coupon.code} aplicado com sucesso!`
             }

@@ -238,6 +238,18 @@ const createAccount = async (req, res) => {
             .eq('id', account.id)
             .single();
 
+        // Set first profile to TV by default
+        if (fullAccount && fullAccount.profiles && fullAccount.profiles.length > 0) {
+            const firstProfile = fullAccount.profiles[0];
+            if (firstProfile.type !== 'TV') {
+                await supabase
+                    .from('ecoflix_profiles')
+                    .update({ type: 'TV' })
+                    .eq('id', firstProfile.id);
+                firstProfile.type = 'TV';
+            }
+        }
+
         sseBroadcast('stock_update', { reason: 'add_stock' });
         sseBroadcast('refresh_admin', { reason: 'add_stock' });
 
@@ -1047,24 +1059,31 @@ const getSalesOriginChart = async (req, res) => {
 
 const createPartner = async (req, res) => {
     try {
-        const { code, partner_name, commission_mobile, commission_tv, inventory_tag } = req.body;
+        const { code, partner_name, commission_mobile, commission_tv, inventory_tag, discount_type, discount_value } = req.body;
 
         if (!code || !partner_name) {
             return res.status(400).json({ success: false, message: 'Código e nome são obrigatórios' });
         }
 
+        const insertData = {
+            code: code.toUpperCase(),
+            partner_name,
+            commission_mobile: commission_mobile || 500,
+            commission_tv: commission_tv || 700,
+            inventory_tag: inventory_tag || null,
+            status: 'ACTIVE',
+            usage_count: 0,
+            total_commission_due: 0
+        };
+
+        if (discount_type === 'flat' || discount_type === 'percent') {
+            insertData.discount_type = discount_type;
+            insertData.discount_value = parseFloat(discount_value) || 0;
+        }
+
         const { data, error } = await supabase
             .from('ecoflix_coupons')
-            .insert({
-                code: code.toUpperCase(),
-                partner_name,
-                commission_mobile: commission_mobile || 500,
-                commission_tv: commission_tv || 700,
-                inventory_tag: inventory_tag || null,
-                status: 'ACTIVE',
-                usage_count: 0,
-                total_commission_due: 0
-            })
+            .insert(insertData)
             .select()
             .single();
 
@@ -1072,6 +1091,113 @@ const createPartner = async (req, res) => {
         res.status(201).json({ success: true, data });
     } catch (error) {
         console.error('Create Partner Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getPartnerDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data: coupon, error } = await supabase
+            .from('ecoflix_coupons')
+            .select('*')
+            .or(`code.eq.${id},id.eq.${id}`)
+            .single();
+
+        if (error || !coupon) {
+            return res.status(404).json({ success: false, message: 'Parceiro não encontrado' });
+        }
+
+        const { data: orders } = await supabase
+            .from('ecoflix_orders')
+            .select('id, plan_type, amount, status, phone, user:ecoflix_users(phone, name), created_at')
+            .eq('coupon_used', coupon.code)
+            .eq('status', 'PAID')
+            .order('created_at', { ascending: false });
+
+        const partnerOrders = orders || [];
+        const salesMobile = partnerOrders.filter(o => o.plan_type === 'ECONOMICO');
+        const salesTV = partnerOrders.filter(o => o.plan_type === 'ULTRA' || o.plan_type === 'FAMILIA');
+
+        const revenueGenerated = partnerOrders.reduce((sum, o) => sum + (parseFloat(o.amount) || 0), 0);
+        const commMobile = (salesMobile.length * (coupon.commission_mobile || 500));
+        const commTV = (salesTV.length * (coupon.commission_tv || 700));
+        const totalCommissionDue = parseFloat(coupon.total_commission_due) || (commMobile + commTV);
+
+        const recentOrders = partnerOrders.slice(0, 20).map(o => ({
+            id: o.id,
+            plan_type: o.plan_type,
+            amount: parseFloat(o.amount) || 0,
+            phone: o.phone || o.user?.phone || '-',
+            client_name: o.user?.name || 'Cliente',
+            created_at: o.created_at
+        }));
+
+        const uniquePhones = [...new Set(partnerOrders.map(o => o.phone || o.user?.phone).filter(Boolean))];
+
+        res.json({
+            success: true,
+            data: {
+                id: coupon.id,
+                code: coupon.code,
+                partner_name: coupon.partner_name,
+                commission_mobile: parseFloat(coupon.commission_mobile) || 500,
+                commission_tv: parseFloat(coupon.commission_tv) || 700,
+                discount_type: coupon.discount_type || 'flat',
+                discount_value: parseFloat(coupon.discount_value) || 0,
+                inventory_tag: coupon.inventory_tag,
+                status: coupon.status,
+                created_at: coupon.created_at,
+                last_paid_at: coupon.last_paid_at,
+                stats: {
+                    total_customers: uniquePhones.length,
+                    sales_mobile: salesMobile.length,
+                    sales_tv: salesTV.length,
+                    total_sales: partnerOrders.length,
+                    revenue_generated: revenueGenerated,
+                    commission_mobile_total: commMobile,
+                    commission_tv_total: commTV,
+                    total_commission_due: totalCommissionDue
+                },
+                recent_orders: recentOrders
+            }
+        });
+    } catch (error) {
+        console.error('Partner Detail Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const updatePartner = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { code, partner_name, commission_mobile, commission_tv, discount_type, discount_value, status } = req.body;
+
+        const updateData = {};
+        if (code !== undefined) updateData.code = code.toUpperCase();
+        if (partner_name !== undefined) updateData.partner_name = partner_name;
+        if (commission_mobile !== undefined) updateData.commission_mobile = parseFloat(commission_mobile);
+        if (commission_tv !== undefined) updateData.commission_tv = parseFloat(commission_tv);
+        if (discount_type !== undefined) updateData.discount_type = discount_type;
+        if (discount_value !== undefined) updateData.discount_value = parseFloat(discount_value);
+        if (status !== undefined) updateData.status = status;
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ success: false, message: 'Nenhum dado para atualizar' });
+        }
+
+        const { data, error } = await supabase
+            .from('ecoflix_coupons')
+            .update(updateData)
+            .or(`code.eq.${id},id.eq.${id}`)
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error('Update Partner Error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -1104,13 +1230,24 @@ const updatePlans = async (req, res) => {
 
             // If the price differs and we have a PayGo key, create a new Product
             if (newPrice && newPrice !== current.price && PAYGO_API_KEY) {
-                const { data: prod } = await axios.post(
-                    `${PAYGO_BASE_URL}/products`,
-                    { name: `EcoFlix ${key}`, price: newPrice, thank_you_url: 'https://ecokambio.com', description: `Acesso EcoFlix ${key}` },
-                    { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
-                );
-                const newPaygoId = prod?.product?.id || prod?.id;
-                plansToSave[key] = { price: newPrice, paygo_id: newPaygoId };
+                try {
+                    const { data: prod } = await axios.post(
+                        `${PAYGO_BASE_URL}/products`,
+                        { name: `EcoFlix ${key}`, price: newPrice, thank_you_url: 'https://ecokambio.com', description: `Acesso EcoFlix ${key}` },
+                        { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
+                    );
+                    const newPaygoId = prod?.product?.id || prod?.id;
+                    if (newPaygoId) {
+                        console.log(`[Plans] Novo produto PayGo para ${key}: price=${newPrice} paygo_id=${newPaygoId}`);
+                        plansToSave[key] = { price: newPrice, paygo_id: newPaygoId };
+                    } else {
+                        console.warn(`[Plans] PayGo não retornou product_id para ${key}. Resposta:`, JSON.stringify(prod));
+                        plansToSave[key] = { price: newPrice, paygo_id: current.paygo_id };
+                    }
+                } catch (paygoErr) {
+                    console.error(`[Plans] Erro ao criar produto PayGo para ${key}:`, paygoErr.message);
+                    plansToSave[key] = { price: newPrice, paygo_id: current.paygo_id };
+                }
             } else {
                 plansToSave[key] = { ...current, price: newPrice || current.price };
             }
@@ -1251,6 +1388,8 @@ module.exports = {
     getInfluencerStats,
     getRecoveryData,
     getPartnerStats,
+    getPartnerDetail,
+    updatePartner,
     markPartnerPaid,
     getSalesOriginChart,
     createPartner

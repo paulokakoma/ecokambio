@@ -111,6 +111,8 @@ router.get('/admin/influencer-stats', isAdmin, catchAsync(adminController.getInf
 
 // Partner/Affiliate Management (Admin)
 router.get('/admin/partners', isAdmin, catchAsync(adminController.getPartnerStats));
+router.get('/admin/partners/:id', isAdmin, catchAsync(adminController.getPartnerDetail));
+router.put('/admin/partners/:id', isAdmin, catchAsync(adminController.updatePartner));
 router.post('/admin/partners', isAdmin, catchAsync(adminController.createPartner));
 router.post('/admin/partners/:id/pay', isAdmin, catchAsync(adminController.markPartnerPaid));
 router.get('/admin/sales-origin-chart', isAdmin, catchAsync(adminController.getSalesOriginChart));

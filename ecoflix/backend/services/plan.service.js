@@ -6,21 +6,25 @@ const REDIS_KEY = 'ecoflix:plans';
 const FILE_PATH = path.join(__dirname, '../plans.json');
 
 const DEFAULT_PLANS = {
-    'ECONOMICO': { price: 5000, paygo_id: 'd13a142b-9d1f-4788-b227-a41235d04e85' },
+    'ECONOMICO': { price: 5000, paygo_id: '21000741-6784-421c-b2bc-7607518f4419' },
     'ULTRA': { price: 7000, paygo_id: '2d8240df-e851-4b10-aeaf-8054145a4de4' },
     'FAMILIA': { price: 18000, paygo_id: 'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2' }
 };
 
 const parseData = (dataStr) => {
     const parsed = JSON.parse(dataStr);
-    if (parsed.ECONOMICO && typeof parsed.ECONOMICO === 'number') {
-        return {
-            'ECONOMICO': { price: parsed.ECONOMICO, paygo_id: DEFAULT_PLANS.ECONOMICO.paygo_id },
-            'ULTRA': { price: parsed.ULTRA, paygo_id: DEFAULT_PLANS.ULTRA.paygo_id },
-            'FAMILIA': { price: parsed.FAMILIA, paygo_id: DEFAULT_PLANS.FAMILIA.paygo_id }
-        };
+    const result = {};
+    for (const key of Object.keys(DEFAULT_PLANS)) {
+        const raw = parsed[key];
+        if (raw && typeof raw === 'object') {
+            result[key] = { price: raw.price || DEFAULT_PLANS[key].price, paygo_id: raw.paygo_id || DEFAULT_PLANS[key].paygo_id };
+        } else if (typeof raw === 'number') {
+            result[key] = { price: raw, paygo_id: DEFAULT_PLANS[key].paygo_id };
+        } else {
+            result[key] = { ...DEFAULT_PLANS[key] };
+        }
     }
-    return parsed;
+    return result;
 };
 
 /**
@@ -29,17 +33,23 @@ const parseData = (dataStr) => {
  */
 const getPlans = async () => {
     try {
+        let plans;
         if (redisClient && redisClient.status === 'ready') {
             const data = await redisClient.get(REDIS_KEY);
             if (data) {
-                return parseData(data);
+                plans = parseData(data);
             }
         } else {
             if (fs.existsSync(FILE_PATH)) {
                 const data = fs.readFileSync(FILE_PATH, 'utf8');
-                if (data) return parseData(data);
+                if (data) plans = parseData(data);
             }
         }
+        if (!plans) plans = { ...DEFAULT_PLANS };
+        for (const [k, v] of Object.entries(plans)) {
+            console.log(`[Plans] ${k}: price=${v.price} paygo_id=${v.paygo_id || 'MISSING'}`);
+        }
+        return plans;
     } catch (e) {
         console.error('Erro ao ler planos:', e.message);
     }
@@ -52,7 +62,6 @@ const getPlans = async () => {
  */
 const updatePlans = async (newPlans) => {
     try {
-        // Validação
         const plansToSave = {
             'ECONOMICO': newPlans.ECONOMICO || DEFAULT_PLANS.ECONOMICO,
             'ULTRA': newPlans.ULTRA || DEFAULT_PLANS.ULTRA,
@@ -61,10 +70,15 @@ const updatePlans = async (newPlans) => {
 
         if (redisClient && redisClient.status === 'ready') {
             await redisClient.set(REDIS_KEY, JSON.stringify(plansToSave));
+            console.log('[Plans] Redis cache atualizado:', REDIS_KEY);
         } else {
             fs.writeFileSync(FILE_PATH, JSON.stringify(plansToSave, null, 2), 'utf8');
         }
         
+        for (const [k, v] of Object.entries(plansToSave)) {
+            console.log(`[Plans] Guardado ${k}: price=${v.price} paygo_id=${v.paygo_id}`);
+        }
+
         return plansToSave;
     } catch (e) {
         console.error('Erro ao guardar planos:', e.message);

@@ -91,6 +91,7 @@
         /* Modal Overlay */
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
         }
 
         /* Toast Notification */
@@ -129,6 +130,19 @@
         .toast.show {
             transform: translateX(0);
         }
+
+        #mobile-menu > div:first-child {
+            transform: translateX(-100%);
+            transition: transform 0.2s ease-in-out;
+        }
+        #mobile-menu:not(.hidden) > div:first-child {
+            transform: translateX(0);
+        }
+        .mobile-nav-item.bg-red-50 {
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -136,6 +150,22 @@
 
     <!-- Toast Container -->
     <div id="toast-container"></div>
+
+    <!-- CUSTOM DIALOG -->
+    <div id="app-dialog" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all">
+            <div class="p-4 sm:p-6 text-center">
+                <div id="app-dialog-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas text-xl text-white"></i>
+                </div>
+                <p id="app-dialog-message" class="text-gray-700 text-sm leading-relaxed"></p>
+            </div>
+            <div id="app-dialog-actions" class="bg-gray-50 px-4 sm:px-6 py-4 flex justify-center gap-3">
+                <button id="app-dialog-cancel" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-bold px-5 py-2 rounded-lg transition hidden">Cancelar</button>
+                <button id="app-dialog-ok" class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition">OK</button>
+            </div>
+        </div>
+    </div>
 
     <!-- SIDEBAR (Desktop) -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-20">
@@ -193,27 +223,31 @@
     <div
         class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 px-4 h-16 flex items-center justify-between">
         <span class="text-xl font-bold text-red-600">EcoFlix</span>
-        <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-gray-600">
+        <button onclick="openMobileMenu()" class="text-gray-600">
             <i class="fas fa-bars text-xl"></i>
         </button>
     </div>
 
     <!-- MOBILE MENU OVERLAY -->
-    <div id="mobile-menu" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"
-        onclick="this.classList.add('hidden')">
-        <div class="bg-white w-64 h-full pt-16 p-4 space-y-2">
-            <div onclick="switchTab('dashboard')" class="p-3 font-bold border-b">Visão Geral</div>
-            <div onclick="switchTab('stock')" class="p-3 font-bold border-b">Inventário</div>
-            <div onclick="switchTab('sales')" class="p-3 font-bold border-b">Vendas</div>
-            <div onclick="switchTab('customers')" class="p-3 font-bold border-b">Clientes</div>
-            <div onclick="switchTab('suporte')" class="p-3 font-bold border-b text-gray-600">Suporte</div>
-            <div onclick="switchTab('partners')" class="p-3 font-bold border-b">Parceiros</div>
-            <div onclick="logout()" class="p-3 text-red-600 font-bold mt-4">Sair</div>
+    <div id="mobile-menu" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity duration-200"
+        onclick="closeMobileMenu()">
+        <div class="bg-white w-72 max-w-[80vw] h-full pt-4 p-4 space-y-1 shadow-xl transform transition-transform duration-200" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <span class="text-lg font-bold text-red-600">EcoFlix<span class="text-gray-400 text-xs ml-1">Admin</span></span>
+                <button onclick="closeMobileMenu()" class="text-gray-400 hover:text-gray-600 p-1"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div onclick="switchTab('dashboard'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm">Visão Geral</div>
+            <div onclick="switchTab('stock'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm">Inventário</div>
+            <div onclick="switchTab('sales'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm">Vendas</div>
+            <div onclick="switchTab('customers'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm">Clientes</div>
+            <div onclick="switchTab('suporte'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm text-gray-600">Suporte</div>
+            <div onclick="switchTab('partners'); closeMobileMenu()" class="mobile-nav-item p-3 font-bold rounded-lg cursor-pointer hover:bg-gray-100 transition text-sm">Parceiros</div>
+            <div class="border-t border-gray-100 my-2"></div>
+            <div onclick="logout()" class="p-3 text-red-600 font-bold rounded-lg hover:bg-red-50 transition cursor-pointer text-sm">Sair</div>
         </div>
     </div>
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-
-        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50 min-h-0">
+        <div class="flex-1 overflow-y-auto bg-gray-50 min-h-0">
 
             <!-- 1. DASHBOARD -->
             <div id="panel-dashboard" class="panel">
@@ -326,7 +360,7 @@
                 </div>
 
                 <!-- STOCK STATS CARDS -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6" id="inventory-stats-container">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6" id="inventory-stats-container">
                     <!-- Loaded via JS -->
                 </div>
 
@@ -373,7 +407,7 @@
                     <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-tags text-blue-500"></i> Gestão de Preços
                     </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="plans-pricing-container">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="plans-pricing-container">
                         <div class="text-sm text-gray-500 py-2">A carregar preços...</div>
                     </div>
                     <div class="mt-4 flex justify-end">
@@ -402,7 +436,6 @@
                                     <th class="px-6 py-3">Referência</th>
                                     <th class="px-6 py-3">Data</th>
                                     <th class="px-6 py-3">Estado</th>
-                                    <th class="px-6 py-3 text-right">Ação</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100" id="sales-table-body"></tbody>
@@ -484,92 +517,210 @@
                 </div>
             </div>
 
-        </div>
-
         <!-- PAINEL: PARCEIROS / INFLUENCIADORES -->
         <div id="panel-partners" class="panel hidden min-w-0">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h1 class="text-2xl font-bold text-gray-800">Parceiros & Influenciadores</h1>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                <h1 class="text-xl font-bold text-gray-800">Parceiros & Influenciadores</h1>
                 <button onclick="openPartnerModal()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-md transition-all flex items-center gap-2">
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md transition-all flex items-center gap-2">
                     <i class="fas fa-plus"></i> Novo Parceiro
                 </button>
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-medium text-gray-500">Total Parceiros</span>
-                        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><i class="fas fa-handshake text-blue-600 text-sm"></i></div>
+                        <span class="text-[11px] font-medium text-gray-500">Total</span>
+                        <div class="w-6 h-6 bg-blue-50 rounded flex items-center justify-center"><i class="fas fa-handshake text-blue-600 text-[10px]"></i></div>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="partner-count">0</p>
+                    <p class="text-xl font-bold text-gray-900" id="partner-count">0</p>
                 </div>
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-medium text-gray-500">Activos</span>
-                        <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center"><i class="fas fa-check-circle text-green-600 text-sm"></i></div>
+                        <span class="text-[11px] font-medium text-gray-500">Activos</span>
+                        <div class="w-6 h-6 bg-green-50 rounded flex items-center justify-center"><i class="fas fa-check-circle text-green-600 text-[10px]"></i></div>
                     </div>
-                    <p class="text-2xl font-bold text-green-600" id="partner-active">0</p>
+                    <p class="text-xl font-bold text-green-600" id="partner-active">0</p>
                 </div>
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-medium text-gray-500">Comissão Pendente</span>
-                        <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center"><i class="fas fa-dollar-sign text-red-600 text-sm"></i></div>
+                        <span class="text-[11px] font-medium text-gray-500">Comissão Pendente</span>
+                        <div class="w-6 h-6 bg-red-50 rounded flex items-center justify-center"><i class="fas fa-dollar-sign text-red-600 text-[10px]"></i></div>
                     </div>
-                    <p class="text-2xl font-bold text-red-600" id="partner-pending">0 Kz</p>
+                    <p class="text-xl font-bold text-red-600" id="partner-pending">0 Kz</p>
                 </div>
             </div>
 
             <!-- Sales Origin Chart -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-                <h2 class="text-sm font-bold text-gray-800 mb-3"><i class="fas fa-chart-pie mr-2 text-gray-400"></i> Origem das Vendas</h2>
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <div class="w-32 h-32 flex-shrink-0">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 mb-4">
+                <h2 class="text-xs font-bold text-gray-800 mb-2"><i class="fas fa-chart-pie mr-1 text-gray-400"></i> Origem das Vendas</h2>
+                <div class="flex flex-col md:flex-row items-center gap-3">
+                    <div class="w-24 h-24 flex-shrink-0">
                         <canvas id="salesOriginChart"></canvas>
                     </div>
-                    <div id="sales-origin-legend" class="flex-1 space-y-1"></div>
+                    <div id="sales-origin-legend" class="flex-1 space-y-0.5"></div>
                 </div>
             </div>
 
             <!-- Partners Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-users mr-2 text-gray-400"></i> Lista de Parceiros</h2>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h2 class="text-sm font-bold text-gray-800"><i class="fas fa-users mr-1 text-gray-400"></i> Lista de Parceiros</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+                        <thead class="bg-gray-50 text-gray-600 text-[11px] uppercase">
                             <tr>
-                                <th class="px-6 py-3">Parceiro</th>
-                                <th class="px-6 py-3">Código</th>
-                                <th class="px-6 py-3 text-center">Vendas Mobile</th>
-                                <th class="px-6 py-3 text-center">Vendas TV</th>
-                                <th class="px-6 py-3 text-right">Comissão Devida</th>
-                                <th class="px-6 py-3 text-center">Último Pagamento</th>
-                                <th class="px-6 py-3 text-right">Acção</th>
+                                <th class="px-4 py-2">Parceiro</th>
+                                <th class="px-4 py-2">Código</th>
+                                <th class="px-4 py-2 text-center">Mobile</th>
+                                <th class="px-4 py-2 text-center">TV</th>
+                                <th class="px-4 py-2 text-right">Comissão</th>
+                                <th class="px-4 py-2 text-center">Pagamento</th>
                             </tr>
                         </thead>
                         <tbody id="partners-table-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">A carregar...</td></tr>
+                            <tr><td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">A carregar...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+        <!-- PARTNER DETAIL PANEL -->
+        <div id="panel-partner-detail" class="panel hidden min-w-0 overflow-y-auto">
+            <div class="flex items-center gap-4 mb-4 flex-wrap">
+                <button onclick="closePartnerDetail()" class="bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <h1 class="text-xl font-bold text-gray-800" id="pdPartnerName">Detalhes do Parceiro</h1>
+                <span id="pdPartnerStatus" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase"></span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                    <div class="text-[11px] text-gray-500 mb-1">Código</div>
+                    <div class="font-mono font-bold text-gray-900 text-sm" id="pdCode">-</div>
+                </div>
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                    <div class="text-[11px] text-gray-500 mb-1">Clientes Únicos</div>
+                    <div class="text-xl font-bold text-blue-600" id="pdCustomers">0</div>
+                </div>
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                    <div class="text-[11px] text-gray-500 mb-1">Receita Gerada</div>
+                    <div class="text-xl font-bold text-green-600" id="pdRevenue">0 Kz</div>
+                </div>
+                <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+                    <div class="text-[11px] text-gray-500 mb-1">Comissão Devida</div>
+                    <div class="text-xl font-bold text-red-600" id="pdCommission">0 Kz</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3"><i class="fas fa-cog mr-1 text-gray-400"></i> Configurações</h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Comissão Mobile (Kz/un)</label>
+                                <input type="number" id="pdCommMobile" class="w-full border border-gray-300 rounded p-2 text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Comissão TV (Kz/un)</label>
+                                <input type="number" id="pdCommTV" class="w-full border border-gray-300 rounded p-2 text-sm font-bold">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Desconto Tipo</label>
+                                <select id="pdDiscountType" class="w-full border border-gray-300 rounded p-2 text-sm" onchange="toggleDetailDiscountValue()">
+                                    <option value="none">Sem desconto</option>
+                                    <option value="flat">Valor fixo (Kz)</option>
+                                    <option value="percent">Percentual (%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Desconto Valor</label>
+                                <input type="number" id="pdDiscountValue" class="w-full border border-gray-300 rounded p-2 text-sm" min="0" disabled>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Código</label>
+                                <div class="flex gap-1">
+                                    <input type="text" id="pdNewCode" class="flex-1 border border-gray-300 rounded p-2 text-sm font-mono uppercase">
+                                    <button onclick="generateDetailCode()" class="bg-gray-100 hover:bg-gray-200 px-2 rounded border border-gray-300"><i class="fas fa-dice text-gray-500 text-xs"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-gray-500 mb-1">Estado</label>
+                                <select id="pdStatus" class="w-full border border-gray-300 rounded p-2 text-sm">
+                                    <option value="ACTIVE">Activo</option>
+                                    <option value="INACTIVE">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="savePartnerDetail()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 rounded-lg transition">
+                            <i class="fas fa-save mr-1"></i> Guardar Alterações
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3"><i class="fas fa-wallet mr-1 text-gray-400"></i> Pagamento</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm"><span class="text-gray-500">Vendas Mobile</span><span class="font-bold" id="pdSalesMobile">0</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-gray-500">Vendas TV</span><span class="font-bold" id="pdSalesTV">0</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-gray-500">Total Vendas</span><span class="font-bold" id="pdTotalSales">0</span></div>
+                        <div class="border-t border-gray-100 pt-2 flex justify-between text-sm"><span class="text-gray-500">Comissão Mobile</span><span class="font-bold text-gray-700" id="pdCommMobileTotal">0 Kz</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-gray-500">Comissão TV</span><span class="font-bold text-gray-700" id="pdCommTVTotal">0 Kz</span></div>
+                        <div class="border-t border-gray-100 pt-2 flex justify-between"><span class="text-sm font-bold text-gray-700">Total a Pagar</span><span class="text-lg font-bold text-red-600" id="pdTotalDue">0 Kz</span></div>
+                        <div class="flex justify-between text-xs text-gray-400"><span>Último Pagamento</span><span id="pdLastPaid">Nunca</span></div>
+                    </div>
+                    <div class="mt-3">
+                        <button onclick="payPartnerFromDetail()" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg transition" id="pdPayBtn">
+                            <i class="fas fa-check mr-1"></i> Pagar Comissão
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h2 class="text-sm font-bold text-gray-800"><i class="fas fa-receipt mr-1 text-gray-400"></i> Vendas Recentes</h2>
+                </div>
+                <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 text-gray-600 text-[11px] uppercase sticky top-0">
+                            <tr>
+                                <th class="px-4 py-2">Data</th>
+                                <th class="px-4 py-2">Cliente</th>
+                                <th class="px-4 py-2">Plano</th>
+                                <th class="px-4 py-2 text-right">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdOrdersBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-xs">Nenhuma venda registada</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+
     </main>
 
             <!-- MODAL DE EDIÇÃO DE PERFIL -->
     <div id="profileModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0 max-h-[85vh] flex flex-col"
             id="profileModalContent">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
                 <h3 class="text-lg font-bold text-gray-900">Gerir Perfil</h3>
                 <button onclick="closeModal('profile')" class="text-gray-400 hover:text-gray-600"><i
                         class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
                 <input type="hidden" id="editAccountId">
                 <input type="hidden" id="editProfileIndex">
                 <div><label class="block text-sm font-medium text-gray-700 mb-1">Nome</label><input type="text"
@@ -605,7 +756,7 @@
                             class="w-full border border-gray-300 rounded-lg p-2.5 text-sm" placeholder="DD/MM"></div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-between">
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 flex justify-between flex-shrink-0">
                 <button onclick="resetProfileSlot()"
                     class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-4 py-2 rounded"><i
                         class="fas fa-trash-alt mr-1"></i> Libertar</button>
@@ -622,14 +773,14 @@
 
     <!-- NOVO: MODAL DE CONTA MÃE -->
     <div id="accountModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0 max-h-[85vh] flex flex-col"
             id="accountModalContent">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
                 <h3 class="text-lg font-bold text-gray-900" id="accountModalTitle">Nova Conta Mãe</h3>
                 <button onclick="closeModal('account')" class="text-gray-400 hover:text-gray-600"><i
                         class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
                 <input type="hidden" id="manageAccountId">
                 <input type="hidden" id="manageAccountMode"> <!-- create/edit -->
 
@@ -658,7 +809,7 @@
                     </select>
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-between">
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 flex justify-between flex-shrink-0">
                 <button onclick="deleteAccount()" id="btnDeleteAccount"
                     class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-4 py-2 rounded hidden">
                     <i class="fas fa-trash-alt mr-1"></i> Apagar Conta
@@ -676,13 +827,14 @@
 
     <!-- MODAL: NOVO PARCEIRO -->
     <div id="partnerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0 max-h-[85vh] flex flex-col"
             id="partnerModalContent">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-gray-900">Novo Parceiro / Influenciador</h3>
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
+                <h3 class="text-lg font-bold text-gray-900" id="partnerModalTitle">Novo Parceiro / Influenciador</h3>
                 <button onclick="closePartnerModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+                <input type="hidden" id="partnerEditId">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Parceiro</label>
                     <input type="text" id="partnerName" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
@@ -692,13 +844,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Código Promocional</label>
                     <div class="flex gap-2">
                         <input type="text" id="partnerCode" class="flex-1 border border-gray-300 rounded-lg p-2.5 text-sm font-mono uppercase tracking-wider"
-                            placeholder="Clique no dado para gerar" maxlength="20" readonly>
+                            placeholder="Clique no dado para gerar" maxlength="20">
                         <button onclick="generatePartnerCode()" class="bg-gray-100 hover:bg-gray-200 px-3 rounded-lg border border-gray-300 text-sm font-bold" title="Gerar código a partir do nome">
                             <i class="fas fa-dice"></i>
                         </button>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Comissão Mobile (Kz)</label>
                         <input type="number" id="partnerCommMobile" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
@@ -710,8 +862,26 @@
                             value="700" min="0">
                     </div>
                 </div>
+                <div class="border-t border-gray-100 pt-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Desconto para Clientes</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">Tipo</label>
+                            <select id="partnerDiscountType" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm" onchange="toggleCreateDiscountValue()">
+                                <option value="none">Sem desconto</option>
+                                <option value="flat">Valor fixo (Kz)</option>
+                                <option value="percent">Percentual (%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-500 mb-1">Valor</label>
+                            <input type="number" id="partnerDiscountValue" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                                value="0" min="0" disabled>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <div class="bg-gray-50 px-4 sm:px-6 py-4 flex justify-end gap-3 flex-shrink-0">
                 <button onclick="closePartnerModal()"
                     class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-bold px-4 py-2 rounded-lg transition">Cancelar</button>
                 <button onclick="submitPartner()"
@@ -765,6 +935,78 @@
                 toast.classList.remove('show');
                 setTimeout(() => { container.removeChild(toast); }, 300);
             }, 4000);
+        }
+
+        // ============================================================================
+        // CUSTOM DIALOGS (replace alert/confirm)
+        // ============================================================================
+        function showDialog(message, type = 'info') {
+            return new Promise(resolve => {
+                const dialog = document.getElementById('app-dialog');
+                const iconEl = document.getElementById('app-dialog-icon');
+                const msgEl = document.getElementById('app-dialog-message');
+                const okBtn = document.getElementById('app-dialog-ok');
+                const cancelBtn = document.getElementById('app-dialog-cancel');
+
+                const styles = {
+                    info:    { bg: 'bg-blue-500', icon: 'fa-info-circle' },
+                    success: { bg: 'bg-green-500', icon: 'fa-check-circle' },
+                    error:   { bg: 'bg-red-500', icon: 'fa-exclamation-circle' },
+                    warning: { bg: 'bg-amber-500', icon: 'fa-exclamation-triangle' },
+                };
+                const s = styles[type] || styles.info;
+                iconEl.className = `w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${s.bg}`;
+                iconEl.innerHTML = `<i class="fas ${s.icon} text-xl text-white"></i>`;
+                msgEl.innerHTML = message;
+                cancelBtn.classList.add('hidden');
+                okBtn.textContent = 'OK';
+
+                dialog.classList.remove('hidden');
+
+                const close = (val) => {
+                    dialog.classList.add('hidden');
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(val);
+                };
+                okBtn.onclick = () => close(true);
+            });
+        }
+
+        function showConfirm(message, type = 'warning') {
+            return new Promise(resolve => {
+                const dialog = document.getElementById('app-dialog');
+                const iconEl = document.getElementById('app-dialog-icon');
+                const msgEl = document.getElementById('app-dialog-message');
+                const okBtn = document.getElementById('app-dialog-ok');
+                const cancelBtn = document.getElementById('app-dialog-cancel');
+
+                const styles = {
+                    info:    { bg: 'bg-blue-500', icon: 'fa-info-circle' },
+                    success: { bg: 'bg-green-500', icon: 'fa-check-circle' },
+                    error:   { bg: 'bg-red-500', icon: 'fa-exclamation-circle' },
+                    warning: { bg: 'bg-amber-500', icon: 'fa-exclamation-triangle' },
+                };
+                const s = styles[type] || styles.warning;
+                iconEl.className = `w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${s.bg}`;
+                iconEl.innerHTML = `<i class="fas ${s.icon} text-xl text-white"></i>`;
+                msgEl.innerHTML = message;
+                cancelBtn.classList.remove('hidden');
+                okBtn.textContent = 'Confirmar';
+                okBtn.className = 'bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+
+                dialog.classList.remove('hidden');
+
+                const close = (val) => {
+                    dialog.classList.add('hidden');
+                    okBtn.className = 'bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(val);
+                };
+                okBtn.onclick = () => close(true);
+                cancelBtn.onclick = () => close(false);
+            });
         }
 
         // ============================================================================
@@ -1021,13 +1263,12 @@
                 </div>
             `).join('');
 
-            // Esconder todos e mostrar apenas o detalhe
+            // Hide all panels, show details
             document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
             document.getElementById('panel-account-details').classList.remove('hidden');
         }
 
         function closeAccountDetails() {
-            // Voltar para a tab ativa (stock)
             document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
             document.getElementById('panel-stock').classList.remove('hidden');
         }
@@ -1035,7 +1276,7 @@
         async function viewRecovery(id) {
             try {
                 const { data } = await apiCall(`/admin/accounts/${id}/recovery`);
-                alert(`RECUPERAÇÃO\n\nEmail: ${data.recovery_email || 'N/A'}\nSenha: ${data.recovery_password || 'N/A'}`);
+                showDialog(`RECUPERAÇÃO<br><br>Email: <strong>${data.recovery_email || 'N/A'}</strong><br>Senha: <strong>${data.recovery_password || 'N/A'}</strong>`, 'success');
             } catch (e) {
                 // Error shown by apiCall
             }
@@ -1045,17 +1286,22 @@
         // MODAL FUNCTIONS
         // ============================================================================
         function showModal(id, contentId) {
-            const el = document.getElementById(id); const content = document.getElementById(contentId);
+            const el = document.getElementById(id);
+            const content = document.getElementById(contentId);
             el.classList.remove('hidden');
-            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
         }
 
         function closeModal(type) {
             const id = type === 'account' ? 'accountModal' : 'profileModal';
             const contentId = type === 'account' ? 'accountModalContent' : 'profileModalContent';
+            const el = document.getElementById(id);
             const content = document.getElementById(contentId);
-            content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => document.getElementById(id).classList.add('hidden'), 200);
+            if (!el) return;
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            el.classList.add('hidden');
         }
 
         // ============================================================================
@@ -1108,23 +1354,25 @@
                     showToast("Conta Mãe atualizada com sucesso!", 'success');
                 }
                 await refreshAllPanels();
-                closeModal('account');
             } catch (e) {
                 // Error already shown by apiCall
+            } finally {
+                closeModal('account');
             }
         }
 
         async function deleteAccount() {
             const id = document.getElementById('manageAccountId').value;
-            if (!confirm("Apagar esta conta e todos os perfis?")) return;
+            if (!await showConfirm("Apagar esta conta e todos os perfis?")) return;
 
             try {
                 await apiCall(`/admin/accounts/${id}`, 'DELETE');
                 await refreshAllPanels();
-                closeModal('account');
                 showToast("Conta Mãe removida com sucesso.", 'info');
             } catch (e) {
                 // Error already shown
+            } finally {
+                closeModal('account');
             }
         }
 
@@ -1182,18 +1430,17 @@
         }
 
         async function resetProfileSlot() {
-            if (!confirm("Resetar este perfil? O cliente será removido.")) return;
+            if (!await showConfirm("Resetar este perfil? O cliente será removido.")) return;
             const profileId = document.getElementById('editProfileIndex').value;
 
             try {
                 await apiCall(`/admin/profiles/${profileId}`, 'PUT', { status: 'AVAILABLE' });
                 await refreshAllPanels();
-                const accId = document.getElementById('editAccountId').value;
-                if (accId) openAccountDetails(accId);
-                closeModal('profile');
                 showToast("Perfil libertado com sucesso!", 'info');
             } catch (e) {
                 // Error already shown
+            } finally {
+                closeModal('profile');
             }
         }
 
@@ -1214,9 +1461,6 @@
                     expires_at: status !== 'AVAILABLE' ? expires_at : null
                 });
                 await refreshAllPanels();
-                const accId = document.getElementById('editAccountId').value;
-                if (accId) openAccountDetails(accId);
-                closeModal('profile');
                 if (status === 'SOLD') {
                     showToast(`Perfil vendido! SMS enviado para ${client_phone}`, 'success');
                 } else {
@@ -1224,6 +1468,8 @@
                 }
             } catch (e) {
                 // Error already shown
+            } finally {
+                closeModal('profile');
             }
         }
 
@@ -1237,7 +1483,7 @@
         async function loadOrders() {
             try {
                 // Show loader
-                document.getElementById('sales-table-body').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-circle-notch fa-spin"></i> A carregar histórico...</td></tr>`;
+                document.getElementById('sales-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500"><i class="fas fa-circle-notch fa-spin"></i> A carregar histórico...</td></tr>`;
                 
                 const { data, total } = await apiCall(`/admin/orders?page=${currentSalesPage}&limit=${salesPerPage}`);
                 ordersData = data || [];
@@ -1252,7 +1498,7 @@
             const totalPages = Math.ceil(totalSalesCount / salesPerPage) || 1;
 
             if (ordersData.length === 0) {
-                document.getElementById('sales-table-body').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Nenhum histórico encontrado.</td></tr>`;
+                document.getElementById('sales-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Nenhum histórico encontrado.</td></tr>`;
                 renderSalesPagination(totalPages);
                 return;
             }
@@ -1266,11 +1512,9 @@
                     <td class="px-6 py-4 font-mono text-gray-500 text-xs">#${s.id.slice(0, 8)}</td>
                     <td class="px-6 py-4 font-medium"><div>${s.user?.name || 'Cliente'}</div><div class="text-xs text-gray-400">${s.phone || s.user?.phone || '-'}</div></td>
                     <td class="px-6 py-4 text-xs font-bold text-gray-600">${s.plan_type} (${Number(s.amount).toLocaleString()} Kz)</td>
-                    <td class="px-6 py-4 font-mono text-xs">${s.reference_id || '-'}</td>
+                    <td class="px-6 py-4 font-mono text-xs">${s.reference_id || '<express>'}</td>
                     <td class="px-6 py-4 text-gray-500 text-xs">${date}</td>
                     <td class="px-6 py-4"><span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${statusLabel}</span></td>
-                    <td class="px-6 py-4 text-right">
-                    </td>
                 </tr>`;
             }).join('');
 
@@ -1305,7 +1549,7 @@
         }
 
         async function confirmPayment(orderId) {
-            if (!confirm('Confirmar pagamento manualmente?')) return;
+            if (!await showConfirm('Confirmar pagamento manualmente?')) return;
             try {
                 await apiCall(`/admin/orders/${orderId}/confirm`, 'POST');
                 await loadOrders();
@@ -1398,7 +1642,7 @@
         }
 
         async function suspendClient(profileId) {
-            if (!confirm('Deseja realmente suspender este cliente? O acesso será cortado imediatamente.')) return;
+            if (!await showConfirm('Deseja realmente suspender este cliente? O acesso será cortado imediatamente.')) return;
             try {
                 const res = await apiCall(`/admin/profiles/${profileId}/suspend`, 'POST');
                 if (res.success) {
@@ -1415,7 +1659,7 @@
         }
 
         async function restoreClient(profileId) {
-            if (!confirm('Deseja restaurar o acesso deste cliente?')) return;
+            if (!await showConfirm('Deseja restaurar o acesso deste cliente?')) return;
             try {
                 const res = await apiCall(`/admin/profiles/${profileId}/restore`, 'POST');
                 if (res.success) {
@@ -1472,8 +1716,7 @@
         function showSheetsInfo() {
             const token = "VER_NO_ENV (SHEETS_SYNC_TOKEN)";
             const url = window.location.origin + "/api/ecoflix/admin/export-sales-auto?token=" + token;
-            // Simple alert for now as requested
-            alert("Copie a fórmula para o Google Sheets (Célula A1):\n\n=IMPORTDATA(\"" + url + "\")\n\n(Nota: Substitua o token no URL pelo valor definido no .env)");
+            showDialog("Copie a fórmula para o Google Sheets (Célula A1):<br><br><code class='bg-gray-100 px-2 py-1 rounded text-xs'>=IMPORTDATA(\"" + url + "\")</code><br><br><small class='text-gray-400'>Nota: Substitua o token no URL pelo valor definido no .env</small>", 'info')
         }
 
         async function loadInventoryStats() {
@@ -1610,7 +1853,7 @@
                     <div class="px-6 py-5">
                         ${showCredentials ? `
                         <!-- Com subscrição: mostra detalhes de acesso -->
-                        <div class="grid grid-cols-2 gap-4 mb-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                             <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Perfil</p>
                                 <p class="font-bold text-gray-900">${prof.name || 'N/A'}</p>
@@ -1691,7 +1934,7 @@
         }
 
         async function supportResendSms(phone, email, password, profile, pin) {
-            if(!confirm('Reenviar os dados de acesso por SMS para ' + phone + '?')) return;
+            if(!await showConfirm('Reenviar os dados de acesso por SMS para ' + phone + '?')) return;
             try {
                 const { success, message } = await apiCall('/admin/support/resend-sms', 'POST', { phone, email, password, profile, pin });
                 showToast(message || 'Enviado', success ? 'success' : 'error');
@@ -1699,7 +1942,7 @@
         }
 
         async function supportSuspend(subId, phone) {
-            if(!confirm('Tem a certeza que deseja SUSPENDER esta conta e notificar o cliente?')) return;
+            if(!await showConfirm('Tem a certeza que deseja SUSPENDER esta conta e notificar o cliente?')) return;
             try {
                 const { success, message } = await apiCall('/admin/support/suspend', 'POST', { subscription_id: subId, phone });
                 showToast(message || 'Suspenso', success ? 'success' : 'error');
@@ -1712,7 +1955,7 @@
             const newPassword = prompt('Introduza a nova senha da Netflix:');
             if(!newPassword) return;
 
-            if(!confirm('ATENÇÃO: Isto vai enviar um SMS para TODOS os clientes ativos nesta conta. Continuar?')) return;
+            if(!await showConfirm('ATENÇÃO: Isto vai enviar um SMS para TODOS os clientes ativos nesta conta. Continuar?')) return;
 
             try {
                 showToast('A enviar SMS a todos os utilizadores...', 'info');
@@ -1733,6 +1976,14 @@
                 activeNav.classList.add('active');
                 activeNav.classList.remove('text-gray-600');
             }
+            // Mobile nav active state
+            document.querySelectorAll('.mobile-nav-item').forEach(el => { el.classList.remove('bg-red-50', 'text-red-600'); });
+            const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+            const tabNames = ['dashboard', 'stock', 'sales', 'customers', 'suporte', 'partners'];
+            const idx = tabNames.indexOf(tabId);
+            if (idx >= 0 && mobileNavItems[idx]) {
+                mobileNavItems[idx].classList.add('bg-red-50', 'text-red-600');
+            }
             document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
             const panel = document.getElementById('panel-' + tabId);
             if(panel) panel.classList.remove('hidden');
@@ -1740,7 +1991,21 @@
             // Load data for specific tabs
             if (tabId === 'partners' && typeof loadPartners === 'function') loadPartners();
             if (tabId === 'customers' && typeof loadCustomers === 'function') loadCustomers();
-            // tab issues loading removed
+        }
+
+        function openMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.remove('hidden');
+            // Highlight current active tab
+            const activeNav = document.querySelector('.nav-item.active');
+            if (activeNav) {
+                const tabId = activeNav.id.replace('nav-', '');
+                switchTab(tabId);
+            }
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
         }
 
         function toggleDetails(id, iconId) { 
@@ -1780,55 +2045,169 @@
         function renderPartners() {
             const tbody = document.getElementById('partners-table-body');
             if (partnersData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">Nenhum parceiro cadastrado</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">Nenhum parceiro cadastrado</td></tr>';
                 return;
             }
 
             tbody.innerHTML = partnersData.map(p => {
-                const commMobile = (p.sales_mobile || 0) * (p.commission_mobile || 500);
-                const commTV = (p.sales_tv || 0) * (p.commission_tv || 700);
-                const totalCalc = commMobile + commTV;
-                const totalDue = p.total_commission_due || totalCalc;
-                const lastPaid = p.last_paid_at ? new Date(p.last_paid_at).toLocaleDateString('pt-PT') : 'Nunca';
+                const totalDue = p.total_commission_due || 0;
 
                 return `
-                <tr class="bg-white hover:bg-gray-50 transition">
-                    <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">${p.partner_name}</div>
+                <tr class="bg-white hover:bg-gray-50 transition cursor-pointer" onclick="openPartnerDetail('${p.id || p.code}')">
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-gray-900 text-sm">${p.partner_name}</div>
                     </td>
-                    <td class="px-6 py-4">
-                        <span class="bg-gray-100 px-3 py-1 rounded font-mono font-bold text-gray-800">${p.code}</span>
+                    <td class="px-4 py-3">
+                        <span class="bg-gray-100 px-2 py-0.5 rounded font-mono font-bold text-gray-800 text-xs">${p.code}</span>
                     </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="font-bold text-lg">${p.sales_mobile || 0}</span>
-                        <span class="text-xs text-gray-400 block">${p.commission_mobile || 500} Kz/un</span>
+                    <td class="px-4 py-3 text-center text-sm">
+                        <span class="font-bold">${p.sales_mobile || 0}</span>
                     </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="font-bold text-lg">${p.sales_tv || 0}</span>
-                        <span class="text-xs text-gray-400 block">${p.commission_tv || 700} Kz/un</span>
+                    <td class="px-4 py-3 text-center text-sm">
+                        <span class="font-bold">${p.sales_tv || 0}</span>
                     </td>
-                    <td class="px-6 py-4 text-right">
-                        <span class="font-bold text-lg ${totalDue > 0 ? 'text-red-600' : 'text-green-600'}">${formatKz(totalDue)}</span>
+                    <td class="px-4 py-3 text-right">
+                        <span class="font-bold text-sm ${totalDue > 0 ? 'text-red-600' : 'text-green-600'}">${formatKz(totalDue)}</span>
                     </td>
-                    <td class="px-6 py-4 text-center text-gray-500 text-sm">${lastPaid}</td>
-                    <td class="px-6 py-4 text-right">
-                        ${totalDue > 0 ? `<button onclick="payPartner('${p.code}', ${totalDue})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold"><i class="fas fa-check mr-1"></i>Pagar</button>` : '<span class="text-green-600 text-xs font-bold"><i class="fas fa-check-circle"></i> Pago</span>'}
+                    <td class="px-4 py-3 text-center text-gray-500 text-xs">
+                        ${p.last_paid_at ? new Date(p.last_paid_at).toLocaleDateString('pt-PT') : 'Nunca'}
                     </td>
                 </tr>
                 `;
             }).join('');
         }
 
-        async function payPartner(code, amount) {
-            if (!confirm(`Confirmar pagamento de ${formatKz(amount)} ao parceiro ${code}?`)) return;
+        let currentPartnerDetail = null;
+
+        async function openPartnerDetail(idOrCode) {
+            try {
+                const { data } = await apiCall(`/admin/partners/${idOrCode}`);
+                currentPartnerDetail = data;
+
+                document.getElementById('pdPartnerName').textContent = data.partner_name;
+                document.getElementById('pdCode').textContent = data.code;
+
+                const statusEl = document.getElementById('pdPartnerStatus');
+                statusEl.textContent = data.status === 'ACTIVE' ? 'Activo' : 'Inactivo';
+                statusEl.className = data.status === 'ACTIVE'
+                    ? 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700'
+                    : 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-500';
+
+                document.getElementById('pdCustomers').textContent = data.stats.total_customers;
+                document.getElementById('pdRevenue').textContent = formatKz(data.stats.revenue_generated);
+                document.getElementById('pdCommission').textContent = formatKz(data.stats.total_commission_due);
+
+                document.getElementById('pdCommMobile').value = data.commission_mobile;
+                document.getElementById('pdCommTV').value = data.commission_tv;
+                document.getElementById('pdNewCode').value = data.code;
+                document.getElementById('pdStatus').value = data.status;
+
+                const dt = data.discount_type || 'none';
+                document.getElementById('pdDiscountType').value = dt;
+                document.getElementById('pdDiscountValue').value = data.discount_value || 0;
+                document.getElementById('pdDiscountValue').disabled = (dt === 'none');
+
+                document.getElementById('pdSalesMobile').textContent = data.stats.sales_mobile;
+                document.getElementById('pdSalesTV').textContent = data.stats.sales_tv;
+                document.getElementById('pdTotalSales').textContent = data.stats.total_sales;
+                document.getElementById('pdCommMobileTotal').textContent = formatKz(data.stats.commission_mobile_total);
+                document.getElementById('pdCommTVTotal').textContent = formatKz(data.stats.commission_tv_total);
+                document.getElementById('pdTotalDue').textContent = formatKz(data.stats.total_commission_due);
+                document.getElementById('pdLastPaid').textContent = data.last_paid_at
+                    ? new Date(data.last_paid_at).toLocaleDateString('pt-PT')
+                    : 'Nunca';
+
+                const payBtn = document.getElementById('pdPayBtn');
+                if (data.stats.total_commission_due <= 0) {
+                    payBtn.disabled = true;
+                    payBtn.className = 'w-full bg-gray-300 text-gray-500 text-sm font-bold py-2 rounded-lg cursor-not-allowed';
+                } else {
+                    payBtn.disabled = false;
+                    payBtn.className = 'w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg transition';
+                }
+
+                const ordersBody = document.getElementById('pdOrdersBody');
+                if (data.recent_orders.length === 0) {
+                    ordersBody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 text-xs">Nenhuma venda registada</td></tr>';
+                } else {
+                    ordersBody.innerHTML = data.recent_orders.map(o => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 text-xs text-gray-500">${new Date(o.created_at).toLocaleDateString('pt-PT')}</td>
+                            <td class="px-4 py-2 text-xs">${o.client_name} <span class="text-gray-400">${o.phone}</span></td>
+                            <td class="px-4 py-2 text-xs font-bold">${o.plan_type}</td>
+                            <td class="px-4 py-2 text-xs text-right font-bold">${formatKz(o.amount)}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
+                document.getElementById('panel-partner-detail').classList.remove('hidden');
+            } catch (e) {
+                console.error('Partner detail error:', e);
+            }
+        }
+
+        function closePartnerDetail() {
+            document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
+            document.getElementById('panel-partners').classList.remove('hidden');
+        }
+
+        function generateDetailCode() {
+            const name = currentPartnerDetail?.partner_name || '';
+            if (!name) return;
+            const slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z]/g, '').substring(0, 8).toUpperCase();
+            const digits = String(Math.floor(1000 + Math.random() * 9000));
+            document.getElementById('pdNewCode').value = slug + digits;
+        }
+
+        async function savePartnerDetail() {
+            if (!currentPartnerDetail) return;
+            const id = currentPartnerDetail.id;
+            const code = document.getElementById('pdNewCode').value.trim().toUpperCase();
+            const commission_mobile = parseFloat(document.getElementById('pdCommMobile').value) || 0;
+            const commission_tv = parseFloat(document.getElementById('pdCommTV').value) || 0;
+            const discount_type = document.getElementById('pdDiscountType').value;
+            const discount_value = parseFloat(document.getElementById('pdDiscountValue').value) || 0;
+            const status = document.getElementById('pdStatus').value;
+
+            try {
+                await apiCall(`/admin/partners/${id}`, 'PUT', {
+                    code, commission_mobile, commission_tv,
+                    discount_type: discount_type === 'none' ? null : discount_type,
+                    discount_value, status
+                });
+                showToast('Parceiro atualizado com sucesso!', 'success');
+                await loadPartners();
+                await openPartnerDetail(id);
+            } catch (e) {}
+        }
+
+        async function payPartnerFromDetail() {
+            if (!currentPartnerDetail) return;
+            const code = currentPartnerDetail.code;
+            const amount = currentPartnerDetail.stats.total_commission_due;
+            if (amount <= 0) return;
+
+            if (!await showConfirm(`Confirmar pagamento de ${formatKz(amount)} ao parceiro ${code}?`)) return;
 
             try {
                 await apiCall(`/admin/partners/${code}/pay`, 'POST', { amount_paid: amount });
                 showToast('Pagamento registado com sucesso!', 'success');
-                loadPartners(); // Reload data
-            } catch (e) {
-                // Error shown by apiCall
-            }
+                await loadPartners();
+                await openPartnerDetail(currentPartnerDetail.id);
+            } catch (e) {}
+        }
+
+        function toggleDetailDiscountValue() {
+            const dt = document.getElementById('pdDiscountType').value;
+            document.getElementById('pdDiscountValue').disabled = (dt === 'none');
+            if (dt === 'none') document.getElementById('pdDiscountValue').value = 0;
+        }
+
+        function toggleCreateDiscountValue() {
+            const dt = document.getElementById('partnerDiscountType').value;
+            document.getElementById('partnerDiscountValue').disabled = (dt === 'none');
+            if (dt === 'none') document.getElementById('partnerDiscountValue').value = 0;
         }
 
         async function loadSalesOriginChart() {
@@ -1881,25 +2260,44 @@
         // ============================================================================
         // PARTNER MODAL
         // ============================================================================
-        function openPartnerModal() {
-            document.getElementById('partnerName').value = '';
-            document.getElementById('partnerCode').value = '';
-            document.getElementById('partnerCommMobile').value = '500';
-            document.getElementById('partnerCommTV').value = '700';
+        function openPartnerModal(editData = null) {
+            const title = document.getElementById('partnerModalTitle');
+            const editId = document.getElementById('partnerEditId');
+
+            if (editData) {
+                title.textContent = 'Editar Parceiro';
+                editId.value = editData.id;
+                document.getElementById('partnerName').value = editData.partner_name;
+                document.getElementById('partnerCode').value = editData.code;
+                document.getElementById('partnerCommMobile').value = editData.commission_mobile || 500;
+                document.getElementById('partnerCommTV').value = editData.commission_tv || 700;
+                const dt = editData.discount_type || 'none';
+                document.getElementById('partnerDiscountType').value = dt;
+                document.getElementById('partnerDiscountValue').value = editData.discount_value || 0;
+                document.getElementById('partnerDiscountValue').disabled = (dt === 'none');
+            } else {
+                title.textContent = 'Novo Parceiro / Influenciador';
+                editId.value = '';
+                document.getElementById('partnerName').value = '';
+                document.getElementById('partnerCode').value = '';
+                document.getElementById('partnerCommMobile').value = '500';
+                document.getElementById('partnerCommTV').value = '700';
+                document.getElementById('partnerDiscountType').value = 'none';
+                document.getElementById('partnerDiscountValue').value = '0';
+                document.getElementById('partnerDiscountValue').disabled = true;
+            }
             const modal = document.getElementById('partnerModal');
             const content = document.getElementById('partnerModalContent');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
         }
 
         function closePartnerModal() {
             const content = document.getElementById('partnerModalContent');
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => document.getElementById('partnerModal').classList.add('hidden'), 200);
+            document.getElementById('partnerModal').classList.add('hidden');
         }
 
         function generatePartnerCode() {
@@ -1911,28 +2309,36 @@
         }
 
         async function submitPartner() {
+            const editId = document.getElementById('partnerEditId').value;
             const name = document.getElementById('partnerName').value.trim();
             const code = document.getElementById('partnerCode').value.trim().toUpperCase();
             const commMobile = parseInt(document.getElementById('partnerCommMobile').value) || 500;
             const commTV = parseInt(document.getElementById('partnerCommTV').value) || 700;
+            const discountType = document.getElementById('partnerDiscountType').value;
+            const discountValue = parseFloat(document.getElementById('partnerDiscountValue').value) || 0;
 
             if (!name) { showToast('Insira o nome do parceiro', 'error'); return; }
             if (!code) { showToast('Clique no dado para gerar o código', 'error'); return; }
 
-            await createPartner(code, name, commMobile, commTV);
             closePartnerModal();
-        }
-
-        async function createPartner(code, partner_name, commission_mobile, commission_tv) {
             try {
-                await apiCall('/admin/partners', 'POST', {
-                    code, partner_name, commission_mobile, commission_tv
-                });
-                showToast('Parceiro criado com sucesso!', 'success');
-                loadPartners();
-            } catch (e) {
-                // Error shown by apiCall
-            }
+                if (editId) {
+                    await apiCall(`/admin/partners/${editId}`, 'PUT', {
+                        code, partner_name: name, commission_mobile: commMobile, commission_tv: commTV,
+                        discount_type: discountType === 'none' ? null : discountType,
+                        discount_value: discountValue
+                    });
+                    showToast('Parceiro atualizado com sucesso!', 'success');
+                } else {
+                    await apiCall('/admin/partners', 'POST', {
+                        code, partner_name: name, commission_mobile: commMobile, commission_tv: commTV,
+                        discount_type: discountType === 'none' ? null : discountType,
+                        discount_value: discountValue
+                    });
+                    showToast('Parceiro criado com sucesso!', 'success');
+                }
+                await loadPartners();
+            } catch (e) {}
         }
 
         // === SECURITY: Auto-logout when tab closes ===
@@ -1989,12 +2395,11 @@
 
         async function saveSupportWhatsapp() {
             const val = document.getElementById('setting-support-whatsapp').value;
-            if (!val) return alert('Insira um número válido.');
+            if (!val) { showDialog('Insira um número válido.', 'error'); return; }
             try {
                 const res = await apiCall('/admin/settings', 'POST', { key: 'SUPPORT_WHATSAPP', value: val });
-                if (res.success) alert(res.message);
-                else alert(res.message);
-            } catch(e) { alert('Erro ao salvar configuração.'); }
+                showDialog(res.message, res.success ? 'success' : 'error');
+            } catch(e) { showDialog('Erro ao salvar configuração.', 'error'); }
         }
     </script>
     <script src="/js/components.js"></script>
@@ -2107,20 +2512,19 @@
                 await Promise.all([
                     loadDashboard(),
                     loadInventoryStats(),
-                    loadStock().then(() => {
-                        // Update account details panel if it's currently open
-                        const detailsPanel = document.getElementById('panel-account-details');
-                        if (detailsPanel && !detailsPanel.classList.contains('hidden')) {
-                            const emailEl = document.getElementById('detailsPanelEmail');
-                            if (emailEl) {
-                                const acc = stockData.find(a => a.email === emailEl.innerText);
-                                if (acc) openAccountDetails(acc.id);
-                            }
-                        }
-                    }),
+                    loadStock(),
                     loadOrders(),
                     loadCustomers()
                 ]);
+                // Refresh account details panel if it's currently open
+                const detailsPanel = document.getElementById('panel-account-details');
+                if (detailsPanel && !detailsPanel.classList.contains('hidden')) {
+                    const emailEl = document.getElementById('detailsPanelEmail');
+                    if (emailEl) {
+                        const acc = stockData.find(a => a.email === emailEl.innerText);
+                        if (acc) openAccountDetails(acc.id);
+                    }
+                }
             }
 
             function connect() {

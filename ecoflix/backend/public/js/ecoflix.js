@@ -59,6 +59,7 @@ function changeDuration() {
     } else {
         finalPrice = currentBase;
         document.getElementById('summary-total-price').innerText = formatKz(finalPrice);
+        removeDiscountDisplay();
     }
 }
 
@@ -491,7 +492,9 @@ async function submitPhone() {
 
     userPhone = '+244' + phoneClean;
 
-    finalPrice = selectedPlanPrice;
+    if (!appliedCoupon) {
+        finalPrice = selectedPlanPrice;
+    }
     document.getElementById('summary-plan-name').innerText = document.getElementById('selected-plan-name').innerText;
     document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
     document.getElementById('summary-total-price').innerText = formatKz(finalPrice);
@@ -641,14 +644,25 @@ async function applyCoupon() {
             appliedCoupon = result.data.code;
             input.classList.add('border-[#46d369]');
 
-            if (result.data.discount > 0) {
+            if (result.data.discount_value > 0 || result.data.discount > 0) {
                 const durationSelect = document.getElementById('duration-select');
                 const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
                 const currentBase = selectedPlanPrice * duration;
 
-                const discount = parseFloat(result.data.discount);
+                let discount = 0;
+                if (result.data.discount_value > 0) {
+                    if (result.data.discount_type === 'percent') {
+                        discount = currentBase * (result.data.discount_value / 100);
+                    } else {
+                        discount = result.data.discount_value * duration;
+                    }
+                } else {
+                    discount = parseFloat(result.data.discount);
+                }
+
                 finalPrice = Math.max(0, currentBase - discount);
                 updateSummary(finalPrice);
+                updateDiscountDisplay(currentBase, discount);
             }
         } else {
             msg.classList.remove('text-[#46d369]');
@@ -658,6 +672,7 @@ async function applyCoupon() {
             appliedCoupon = null;
             finalPrice = selectedPlanPrice;
             updateSummary(finalPrice);
+            removeDiscountDisplay();
             input.classList.remove('border-[#46d369]');
         }
     } catch (error) {
@@ -672,6 +687,29 @@ async function applyCoupon() {
 function updateSummary(price) {
     document.getElementById('summary-total-price').innerText = formatKz(price);
     document.getElementById('pay-amount').innerText = formatKz(price);
+}
+
+function updateDiscountDisplay(original, discount) {
+    let el = document.getElementById('discount-line');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'discount-line';
+        el.className = 'flex justify-between items-center text-sm mb-2';
+        const totalSection = document.getElementById('summary-total-price').closest('.flex').parentElement;
+        totalSection.parentElement.insertBefore(el, totalSection);
+    }
+    el.innerHTML = `
+        <span class="text-[#46d369] font-medium text-xs md:text-sm flex items-center gap-1">
+            <i class="fas fa-tag"></i> Desconto
+        </span>
+        <span class="text-[#46d369] font-bold text-sm">-${formatKz(discount)}</span>
+    `;
+    el.classList.remove('hidden');
+}
+
+function removeDiscountDisplay() {
+    const el = document.getElementById('discount-line');
+    if (el) el.classList.add('hidden');
 }
 
 // ============================================================================
