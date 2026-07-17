@@ -91,8 +91,9 @@ if (redisUrl) {
 }
 
 const handleOutOfStock = async (order) => {
-    await smsService.sendSms(order.phone, 'EcoFlix: Pagamento recebido. Conta Família em preparação. Enviaremos em breve.');
-    await supabase.from('ecoflix_orders').update({ status: 'PAID' }).eq('id', order.id);
+    await supabase.from('ecoflix_orders').update({ status: 'STOCK_OUT' }).eq('id', order.id);
+    const websocket = require('../../../src/websocket');
+    websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'STOCK_OUT' });
 };
 
 module.exports = {

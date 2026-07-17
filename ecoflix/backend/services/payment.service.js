@@ -3,6 +3,10 @@ const { smsQueue } = require('./sms_queue.service');
 const smsService = require('./sms.service');
 const websocket = require('../../../src/websocket');
 const stockMonitor = require('./stock-monitor.service');
+const { redisClient } = require('../../../src/config/redis');
+
+// In-memory guard for SMS idempotency (Redis-backed when available)
+const smsSentGuard = new Set();
 
 // ============================================================================
 // Helpers
@@ -13,7 +17,31 @@ const profileTypeForPlan = (planType) => {
     return map[planType] || 'TV';
 };
 
-const sendCredentialsSms = async (phone, credentials) => {
+const sendCredentialsSms = async (phone, credentials, orderId) => {
+    // IDEMPOTENCY GUARD: Prevent sending duplicate SMS for the same order
+    const guardKey = `sms_sent:${orderId || phone}`;
+    
+    // Check Redis first
+    if (redisClient && redisClient.status === 'ready') {
+        const alreadySent = await redisClient.get(guardKey);
+        if (alreadySent) {
+            console.log(`[SMS] Duplicate prevented for order=${orderId}, phone=${phone}`);
+            return { success: true, duplicate: true };
+        }
+        await redisClient.set(guardKey, '1', 'EX', 3600); // 1 hour TTL
+    } else {
+        // Fallback to in-memory guard
+        if (smsSentGuard.has(guardKey)) {
+            console.log(`[SMS] Duplicate prevented (memory) for order=${orderId}, phone=${phone}`);
+            return { success: true, duplicate: true };
+        }
+        smsSentGuard.add(guardKey);
+        // Clean up after 1 hour
+        setTimeout(() => smsSentGuard.delete(guardKey), 3600000);
+    }
+
+    console.log(`[SMS] Sending credentials to ${phone} for order=${orderId}`);
+
     if (smsQueue) {
         await smsQueue.add('enviar-credencial', { phone, credentials }, {
             attempts: 3,
@@ -150,7 +178,7 @@ const assignProfile = async (order, attempt = 1) => {
         amount: order.amount
     });
 
-    await sendCredentialsSms(order.phone, result.credentials);
+    await sendCredentialsSms(order.phone, result.credentials, order.id);
 
     return { success: true, credentials: result.credentials };
 };
@@ -202,7 +230,7 @@ const assignExclusiveAccount = async (order, attempt = 1) => {
         amount: order.amount
     });
 
-    await sendCredentialsSms(order.phone, result.credentials);
+    await sendCredentialsSms(order.phone, result.credentials, order.id);
 
     return { success: true, credentials: result.credentials };
 };
@@ -275,6 +303,21 @@ const processPayment = async (order) => {
     try {
         console.log(`[ProcessPayment] order=${order.id} plan=${order.plan_type} action=${order.subscription_action || 'NEW'}`);
 
+        // IDEMPOTENCY: Only process PENDING orders. Check + mark atomically.
+        const { data: locked, error: lockErr } = await supabase
+            .from('ecoflix_orders')
+            .update({ paid_at: new Date(), updated_at: new Date() })
+            .eq('id', order.id)
+            .eq('status', 'PENDING')
+            .is('paid_at', null)
+            .select('id')
+            .single();
+
+        if (lockErr || !locked) {
+            console.log(`[ProcessPayment] Order ${order.id} already processed or locked. Skipping.`);
+            return { success: false, message: 'Pedido já processado' };
+        }
+
         if (order.subscription_action === 'RENEWAL' && order.target_subscription_id) {
             return await extendSubscription(order);
         }
@@ -286,6 +329,11 @@ const processPayment = async (order) => {
             : await assignProfile(order);
 
         if (!result.success) {
+            // Revert to PENDING so it can be retried
+            await supabase
+                .from('ecoflix_orders')
+                .update({ status: 'PENDING', updated_at: new Date() })
+                .eq('id', order.id);
             return result.message === 'STOCK_ESGOTADO'
                 ? handleOutOfStock(order)
                 : result;
@@ -295,7 +343,7 @@ const processPayment = async (order) => {
             await addPartnerCommission(order.coupon_used, order.plan_type);
         }
 
-        // Verificar stock e notificar admin se necessário
+        // Verificar stock e notificar admin se necessário (throttled internally)
         stockMonitor.checkAndNotify().catch(err => {
             console.error('[StockMonitor] Erro na verificação:', err.message);
         });
@@ -304,6 +352,12 @@ const processPayment = async (order) => {
 
     } catch (error) {
         console.error('[ProcessPayment] Error:', error.message);
+        // Revert to PENDING on unexpected error
+        await supabase
+            .from('ecoflix_orders')
+            .update({ status: 'PENDING', updated_at: new Date() })
+            .eq('id', order.id)
+            .eq('status', 'PROCESSING');
         return { success: false, message: error.message };
     }
 };

@@ -117,7 +117,7 @@ const getSettings = async (req, res) => {
         let query = supabase.from('site_settings').select('key, value');
 
         if (isPublicRequest) {
-            query = query.in('key', ['social_media_links', 'visa_image_url']);
+            query = query.in('key', ['social_media_links']);
         }
 
         const { data, error } = await query;
@@ -137,66 +137,6 @@ const getSettings = async (req, res) => {
         res.status(200).json(settingsObject);
     } catch (error) {
         handleSupabaseError(error, res);
-    }
-};
-
-const updateVisaSettings = async (req, res) => {
-    const { visa_title, visa_fee_percent, visa_min_load, visa_whatsapp_number } = req.body;
-    let newImageUrl;
-
-    try {
-        if (req.file) {
-            console.log("Ficheiro de imagem recebido para /api/visa-settings. A processar...");
-
-            const optimizedBuffer = await sharp(req.file.buffer)
-                .resize({ width: 800, height: 800, fit: 'inside' })
-                .webp({ quality: 85 })
-                .toBuffer();
-
-            const fileName = `visa-card-image-${Date.now()}.webp`;
-
-            // Upload to Supabase Storage
-            const { data: uploadData, error: uploadError } = await supabase.storage.from('site-assets')
-                .upload(fileName, optimizedBuffer, {
-                    contentType: 'image/webp',
-                    upsert: true,
-                });
-
-            if (uploadError) throw uploadError;
-
-            const { data: urlData } = supabase.storage.from('site-assets').getPublicUrl(fileName);
-            if (!urlData?.publicUrl) throw new Error('Não foi possível obter o URL público do arquivo');
-
-            newImageUrl = urlData.publicUrl;
-        }
-
-        const settingsToUpsert = [
-            { key: 'visa_title', value: String(visa_title || '') },
-            { key: 'visa_fee_percent', value: String(visa_fee_percent || '0') },
-            { key: 'visa_min_load', value: String(visa_min_load || '') },
-            { key: 'visa_whatsapp_number', value: String(visa_whatsapp_number || '') },
-        ];
-
-        if (newImageUrl) {
-            settingsToUpsert.push({ key: 'visa_image_url', value: newImageUrl });
-        }
-
-        const { error: upsertError } = await supabase
-            .from('site_settings')
-            .upsert(settingsToUpsert, { onConflict: 'key' });
-
-        if (upsertError) throw upsertError;
-
-        res.status(200).json({
-            success: true,
-            message: `Configurações do Cartão Visa atualizadas com sucesso.${newImageUrl ? ' Nova imagem guardada.' : ''}`,
-            newImageUrl: newImageUrl
-        });
-
-    } catch (error) {
-        console.error("Erro ao atualizar configurações do Cartão Visa:", error);
-        if (error.code) return handleSupabaseError(error, res);
-        return res.status(500).json({ message: error.message || "Erro interno ao atualizar as configurações do Cartão Visa." });
     }
 };
 
@@ -452,7 +392,7 @@ const getDashboardStats = async (req, res) => {
             today_access: rpcData.today_views || 0,
             newVisitorsToday: rpcData.new_visitors_today || 0,
             monthlyAffiliateClicks: rpcData.monthly_affiliate_clicks || 0,
-            monthlyVisaClicks: rpcData.monthly_visa_clicks || 0,
+
             weeklyViews: rpcData.weekly_views || 0,
             monthlyViews: rpcData.monthly_views || 0,
             onlineUsers: currentOnlineUsers
@@ -475,14 +415,13 @@ const getDashboardStats = async (req, res) => {
         weekStartDate.setUTCHours(0, 0, 0, 0);
         const weekStart = weekStartDate.toISOString();
 
-        const [activeBanksRes, todayViewsRes, weeklyViewsRes, monthlyViewsRes, newVisitorsRes, monthlyAffiliateClicksRes, monthlyVisaClicksRes, monthlyWhatsappClicksRes, monthlyProductSharesRes] = await Promise.all([
+        const [activeBanksRes, todayViewsRes, weeklyViewsRes, monthlyViewsRes, newVisitorsRes, monthlyAffiliateClicksRes, monthlyWhatsappClicksRes, monthlyProductSharesRes] = await Promise.all([
             supabase.from('rate_providers').select('id', { count: 'exact', head: true }).eq('type', 'FORMAL').eq('is_active', true),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: todayStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: weekStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'page_view', start_time: monthStart, end_time: todayEnd }),
             supabase.rpc('count_distinct_sessions', { event: 'first_visit', start_time: todayStart, end_time: todayEnd }),
             supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'affiliate_click').gte('created_at', monthStart),
-            supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'visa_cta_click').gte('created_at', monthStart),
             supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_click').gte('created_at', monthStart),
             supabase.from('user_activity').select('id', { count: 'exact', head: true }).eq('event_type', 'product_share').gte('created_at', monthStart)
         ]);
@@ -494,7 +433,7 @@ const getDashboardStats = async (req, res) => {
             monthlyViews: monthlyViewsRes.data || 0,
             newVisitorsToday: newVisitorsRes.data || 0,
             monthlyAffiliateClicks: monthlyAffiliateClicksRes.count || 0,
-            monthlyVisaClicks: monthlyVisaClicksRes.count || 0,
+
             monthlyWhatsappClicks: monthlyWhatsappClicksRes.count || 0,
             monthlyProductShares: monthlyProductSharesRes.count || 0,
             onlineUsers: currentOnlineUsers
@@ -814,7 +753,7 @@ module.exports = {
     getCurrencies,
     getSettings,
     updateSettings,
-    updateVisaSettings,
+
     updateInformalRates,
     createSupporter,
     trackPartnerClick,

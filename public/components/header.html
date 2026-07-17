@@ -19,14 +19,7 @@
                         loading="lazy">
                     <span class="text-[11px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                 </a>
-                
-                <!-- Visa Card -->
-                <a href="/visa"
-                    class="flex flex-col items-center group transition-transform hover:scale-105 duration-300 border-l border-gray-100 pl-4">
-                    <img src="/assets/visa.png" alt="Visa Virtual" class="h-14 w-auto object-contain"
-                        loading="lazy">
-                    <span class="text-[11px] font-semibold text-indigo-600 mt-1">Visa Virtual</span>
-                </a>
+
             </div>
 
             <!-- Card Container (Mobile) - Rotating Content -->
@@ -40,14 +33,6 @@
                     <span class="text-[9px] font-semibold text-red-600 mt-1">Netflix Angola</span>
                 </a>
 
-                <!-- Visa Card -->
-                <a href="/visa" id="header-visa-card"
-                    class="header-card absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out opacity-0 pointer-events-none translate-x-full"
-                    title="Visa Virtual">
-                    <img src="/assets/visa.png" alt="Visa Virtual" class="w-full h-auto object-contain px-2"
-                        style="max-width: 160px; max-height: 90px;">
-                    <span class="text-[9px] font-semibold text-indigo-600 mt-1 text-nowrap">Visa Virtual</span>
-                </a>
             </div>
         </nav>
     </div>
@@ -102,39 +87,6 @@
             }, { passive: true });
         }
 
-        // Automatic Card Rotation (Mobile Only)
-        const netflixCard = document.getElementById('header-netflix-card');
-        const visaCard = document.getElementById('header-visa-card');
-        let currentCard = 0; // 0 for Netflix, 1 for Visa
 
-        if (netflixCard && visaCard) {
-            setInterval(() => {
-                if (currentCard === 0) {
-                    // Switch to Visa
-                    netflixCard.style.opacity = '0';
-                    netflixCard.style.transform = 'translateX(-20px)';
-                    netflixCard.style.pointerEvents = 'none';
-
-                    setTimeout(() => {
-                        visaCard.style.opacity = '1';
-                        visaCard.style.transform = 'translateX(0)';
-                        visaCard.style.pointerEvents = 'auto';
-                    }, 500);
-                    currentCard = 1;
-                } else {
-                    // Switch to Netflix
-                    visaCard.style.opacity = '0';
-                    visaCard.style.transform = 'translateX(20px)';
-                    visaCard.style.pointerEvents = 'none';
-
-                    setTimeout(() => {
-                        netflixCard.style.opacity = '1';
-                        netflixCard.style.transform = 'translateX(0)';
-                        netflixCard.style.pointerEvents = 'auto';
-                    }, 500);
-                    currentCard = 0;
-                }
-            }, 6000); // 6 seconds per card
-        }
     })();
 </script>

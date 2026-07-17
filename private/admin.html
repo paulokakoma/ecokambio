@@ -463,15 +463,6 @@
                 </svg>
                 <span>Produtos</span>
             </a>
-            <a href="#cartao_visa" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z">
-                    </path>
-                </svg>
-                <span>Cartão Visa</span>
-            </a>
             <div class="border-t border-slate-700/50 my-4"></div>
             <a href="#configuracoes" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -917,92 +908,6 @@
                 </div>
             </section>
 
-            <!-- Cartão Visa Section -->
-            <section id="cartao_visa" class="admin-section hidden">
-                <h2 class="text-3xl font-bold text-slate-800 mb-6">Gerir Cartão Visa</h2>
-                <div class="card p-6 md:p-8 max-w-3xl mx-auto">
-                    <form id="visa-settings-form" class="space-y-6">
-                        <!-- Valores e Taxas -->
-                        <div class="pb-4">
-                            <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center space-x-2">
-                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                    </path>
-                                </svg>
-                                <span>Valores e Taxas</span>
-                            </h3>
-                            <div class="mb-4"><label for="visa_setting_title"
-                                    class="block text-sm font-medium text-slate-700">Título Principal</label><input
-                                    type="text" id="visa_setting_title" name="visa_title" class="mt-1"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="mb-4 md:mb-0"><label for="visa_fee_percent"
-                                        class="block text-sm font-medium text-slate-700">Taxa (%)</label><input
-                                        type="number" id="visa_fee_percent" name="visa_fee_percent" class="mt-1"
-                                        placeholder="Ex: 5.5" step="0.1"></div>
-                                <div><label for="visa_setting_min_load"
-                                        class="block text-sm font-medium text-slate-700">Carregamento Mínimo
-                                        (USD)</label><input type="number" id="visa_setting_min_load"
-                                        name="visa_min_load" class="mt-1" placeholder="Ex: 50"></div>
-                            </div>
-                        </div>
-
-                        <!-- Imagem do Cartão -->
-                        <div class="pt-6 border-t border-slate-200">
-                            <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center space-x-2">
-                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                                <span>Imagem do Cartão</span>
-                            </h3>
-                            <div class="flex items-center gap-4">
-                                <img id="visa-image-preview" src="/assets/visa.png" alt="Prévia da imagem do cartão"
-                                    class="h-24 w-auto rounded-lg shadow-md border border-slate-200">
-                                <div>
-                                    <label for="visa_image_upload"
-                                        class="cursor-pointer text-sm font-medium text-indigo-600 hover:text-indigo-800">Trocar
-                                        imagem...</label>
-                                    <input type="file" id="visa_image_upload" name="visa_image" class="hidden"
-                                        accept="image/*">
-                                    <p class="text-xs text-slate-500 mt-1">A imagem será otimizada para a web.</p>
-                                </div>
-                            </div>
-                            <div id="visa-upload-progress-container" class="hidden pt-4">
-                                <p id="visa-upload-progress-text" class="text-center text-sm text-slate-600 mb-2"></p>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div id="visa-upload-progress-bar"
-                                        class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-                                        style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Link de Ação -->
-                        <div class="pt-6 border-t border-slate-200">
-                            <h3 class="text-lg font-semibold text-slate-700 mb-4 flex items-center space-x-2">
-                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z">
-                                    </path>
-                                </svg>
-                                <span>Link de Ação</span>
-                            </h3>
-                            <div><label for="visa_setting_whatsapp_number"
-                                    class="block text-sm font-medium text-slate-700">Número de WhatsApp para o CTA (ex:
-                                    244912345678)</label><input type="tel" id="visa_setting_whatsapp_number"
-                                    name="visa_whatsapp_number" class="mt-1"></div>
-                        </div>
-
-                        <div class="flex justify-end pt-4"><button type="submit" class="btn-primary">Guardar
-                                Alterações</button></div>
-                    </form>
-                </div>
-            </section>
 
             <!-- Configurações Section -->
 
@@ -1724,7 +1629,6 @@
                 loadAffiliateLinks(),
                 loadSupporters(),
                 loadSettings(),
-                loadVisaSettings(),
                 updateScraperHealthUI()
             ]);
             // Renderiza os gráficos e preenche seletores APÓS os dados principais serem carregados
@@ -2017,19 +1921,7 @@
             }
         }
 
-        async function loadVisaSettings() {
-            try {
-                const settings = await apiCall('/api/visa-settings', 'GET');
-                document.getElementById('visa_setting_title').value = settings.visa_title || ''; // eslint-disable-line
-                document.getElementById('visa_fee_percent').value = settings.visa_fee_percent || '';
-                document.getElementById('visa_setting_min_load').value = settings.visa_min_load || '';
-                document.getElementById('visa_setting_whatsapp_number').value = settings.visa_whatsapp_number || '';
-                document.getElementById('visa-image-preview').src = settings.visa_image_url || '/assets/visa.png';
 
-            } catch (error) {
-                showError('Erro ao carregar configurações do Cartão Visa.');
-            }
-        }
 
         // --- Funções de Carregamento de Dados ---
         async function loadDashboardData() {
@@ -2062,7 +1954,7 @@
         }
 
         function displayDashboardErrorState() {
-            const statCards = ['online-users-stat', 'today-access-stat', 'weekly-access-stat', 'monthly-access-stat', 'new-visitors-stat', 'error-stat', 'affiliate-clicks-stat', 'visa-clicks-stat'];
+            const statCards = ['online-users-stat', 'today-access-stat', 'weekly-access-stat', 'monthly-access-stat', 'new-visitors-stat', 'error-stat', 'affiliate-clicks-stat'];
             statCards.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = `<span class="text-danger-color text-lg" title="Erro ao carregar">!</span>`;
@@ -2311,12 +2203,10 @@
             document.getElementById('add-province-btn')?.addEventListener('click', handleAddProvince);
             document.getElementById('activity-period-selector')?.addEventListener('change', renderDashboardCharts);
             document.getElementById('clear-activity-filter-btn')?.addEventListener('click', () => filterActivityFeed(null));
-            document.getElementById('visa_image_upload')?.addEventListener('change', handleVisaImagePreview);
             document.getElementById('reset-stats-btn')?.addEventListener('click', handleResetStats);
             document.getElementById('force-refresh-btn')?.addEventListener('click', handleForceRefresh);
             document.getElementById('trigger-scraper-btn')?.addEventListener('click', handleTriggerScraper);
             document.getElementById('bank-search-input')?.addEventListener('input', handleBankSearch);
-            document.getElementById('visa-settings-form')?.addEventListener('submit', handleVisaSettingsFormSubmit);
             document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
             document.getElementById('affiliate-search-input')?.addEventListener('input', handleAffiliateSearch);
             document.body.addEventListener('click', handleGlobalClick);
@@ -2946,37 +2836,6 @@
 
         }
 
-        function handleVisaImagePreview(event) {
-            const input = event.target;
-            const file = input.files[0];
-            const preview = document.getElementById('visa-image-preview');
-            const maxSize = 5 * 1024 * 1024; // 5MB
-
-            if (file) {
-                // Validação de tamanho
-                if (file.size > maxSize) {
-                    showError('O arquivo é muito grande. O tamanho máximo é 5MB.');
-                    input.value = ''; // Limpa o input
-                    return;
-                }
-                // Validação de tipo
-                if (!file.type.startsWith('image/')) {
-                    showError('Por favor, selecione um arquivo de imagem válido.');
-                    input.value = ''; // Limpa o input
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            } else {
-                // Se o usuário cancelar a seleção, podemos reverter para a imagem original se tivermos o URL guardado
-                // Por agora, não fazemos nada, mantendo a imagem que estava antes.
-                // Se quiser reverter, precisaria guardar o `src` original antes de abrir o seletor de arquivos.
-            }
-        }
 
 
         function setupSupporterBannerPreview() {
@@ -3035,78 +2894,7 @@
             });
         }
 
-        async function handleVisaSettingsFormSubmit(e) { // eslint-disable-line
-            e.preventDefault();
-            const form = e.target;
-            const saveButton = form.querySelector('button[type="submit"]');
-            const originalButtonText = saveButton.textContent;
 
-            const progressContainer = document.getElementById('visa-upload-progress-container');
-            const progressBar = document.getElementById('visa-upload-progress-bar');
-            const progressText = document.getElementById('visa-upload-progress-text');
-
-            const formData = new FormData(form);
-
-            saveButton.disabled = true;
-            saveButton.textContent = 'A guardar...';
-
-            // Mostra a barra de progresso se um arquivo foi selecionado
-            if (document.getElementById('visa_image_upload').files.length > 0) {
-                progressContainer.classList.remove('hidden');
-                progressBar.style.width = '0%';
-                progressText.textContent = 'A iniciar upload...';
-            }
-
-            try {
-                // Usar XMLHttpRequest para monitorar o progresso do upload
-                const result = await new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/api/visa-settings', true);
-                    xhr.credentials = true; // Equivalente ao 'credentials: include' do fetch
-
-                    xhr.upload.onprogress = function (event) {
-                        if (event.lengthComputable) {
-                            const percentComplete = (event.loaded / event.total) * 100;
-                            progressBar.style.width = percentComplete + '%';
-                            progressText.textContent = `A enviar imagem... ${Math.round(percentComplete)}%`;
-                        }
-                    };
-
-                    xhr.onload = function () {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            progressText.textContent = 'Processando no servidor...';
-                            resolve(JSON.parse(xhr.responseText));
-                        } else {
-                            const errorData = JSON.parse(xhr.responseText);
-                            reject(new Error(errorData.message || `Erro HTTP ${xhr.status}`));
-                        }
-                    };
-
-                    xhr.onerror = function () {
-                        reject(new Error('Erro de rede durante o upload.'));
-                    };
-
-                    xhr.send(formData);
-                });
-
-                showToast('Configurações do Cartão Visa guardadas com sucesso!');
-                if (result.newImageUrl) {
-                    document.getElementById('visa-image-preview').src = result.newImageUrl;
-                }
-                // Limpa o input de arquivo para evitar reenvio acidental
-                document.getElementById('visa_image_upload').value = '';
-
-            } catch (e) {
-                console.error('Error updating Visa settings:', e);
-                showError(e.message || 'Erro desconhecido ao guardar as configurações do Cartão Visa.');
-            } finally {
-                saveButton.disabled = false;
-                saveButton.textContent = originalButtonText;
-                progressContainer.classList.add('hidden');
-                progressBar.style.width = '0%';
-                progressText.textContent = '';
-            }
-        }
 
         function handleBankSearch(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
@@ -3258,7 +3046,6 @@
             else if (formId === 'informal-form') handleInformalRateSubmit(e);
             else if (formId === 'province-form') handleProvinceFormSubmit(e);
             else if (formId === 'settings-form') handleSettingsFormSubmit(e);
-            else if (formId === 'visa-settings-form') handleVisaSettingsFormSubmit(e);
         }
 
         async function handleLogout() {

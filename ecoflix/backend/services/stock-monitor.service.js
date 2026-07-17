@@ -12,12 +12,12 @@ const supabase = require('../../../src/config/supabase');
 const smsService = require('./sms.service');
 
 const ADMIN_PHONE = process.env.ADMIN_PHONE || '+244938948994';
-const STOCK_THRESHOLD = 2;
+const STOCK_THRESHOLD = 1;
 const SMS_BALANCE_THRESHOLD = 20;
 
-// Cache para evitar spam de notificações (1 hora)
+// Cache para evitar spam de notificações (6 horas)
 const notificationCache = new Map();
-const NOTIFICATION_COOLDOWN_MS = 60 * 60 * 1000;
+const NOTIFICATION_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 
 /**
  * Verifica se já notificou recentemente para evitar spam

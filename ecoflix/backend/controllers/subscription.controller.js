@@ -278,7 +278,7 @@ const recoverCredentials = async (req, res) => {
                 pin: manualProfile.pin || 'N/A'
             };
 
-            await smsService.sendDeliverySms(cleanPhone, creds, false); // false = profile (not EXCLUSIVE)
+            await smsService.sendDeliverySms(cleanPhone, creds);
 
             return res.json({
                 success: true,
@@ -304,7 +304,7 @@ const recoverCredentials = async (req, res) => {
             pin: profile ? profile.pin : 'N/A'
         };
 
-        await smsService.sendDeliverySms(cleanPhone, creds, sub.plan_type === 'FAMILIA');
+        await smsService.sendDeliverySms(cleanPhone, creds);
 
         res.json({
             success: true,

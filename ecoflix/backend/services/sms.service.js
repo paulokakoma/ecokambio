@@ -85,6 +85,14 @@ const sendSms = async (to, text) => {
 
     const recipient = normalizePhone(to);
 
+    // Validate phone: must be exactly 9 digits (Angolan number)
+    if (!/^\d{9}$/.test(recipient)) {
+        const err = `[SMS] Número inválido: "${to}" → normalizado para "${recipient}". A ignorar envio.`;
+        console.error(err);
+        await logSmsToDb(to, text, 'FAILED', err);
+        return { success: false, error: err };
+    }
+
     try {
         const url = `${TELCO_BASE_URL}/send_message`;
 

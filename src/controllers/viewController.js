@@ -62,13 +62,6 @@ const serveAbout = (req, res) => {
     res.sendFile(path.join(__dirname, "../../public", "sobre.html"));
 };
 
-const serveVisa = (req, res) => {
-    if (req.isAdminSubdomain) {
-        return res.status(404).send('Página não encontrada');
-    }
-    res.sendFile(path.join(__dirname, "../../public", "visa.html"));
-};
-
 const serveTerms = (req, res) => {
     if (req.isAdminSubdomain) {
         return res.status(404).send('Página não encontrada');
@@ -175,7 +168,6 @@ module.exports = {
     serveAdmin,
     serveAdminSecret,
     serveAbout,
-    serveVisa,
     serveTerms,
     servePrivacy,
     serveRobots,

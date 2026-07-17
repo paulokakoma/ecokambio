@@ -9,6 +9,8 @@ let appliedCoupon = null;
 let userPhone = null;
 let pollingInterval = null;
 let countdownInterval = null;
+let planStock = { ECONOMICO: true, ULTRA: true, FAMILIA: true };
+let pendingSuggestedPlan = null;
 
 // === PERSISTÊNCIA DE SESSÃO (sessionStorage) ===
 function saveSession() {
@@ -262,7 +264,7 @@ function stopPayTimer() {
     if (_payTimerInterval) { clearInterval(_payTimerInterval); _payTimerInterval = null; }
 }
 
-let planPrices = { ECONOMICO: 4500, ULTRA: 6500, FAMILIA: 18000 };
+let planPrices = { ECONOMICO: 5000, ULTRA: 7000, FAMILIA: 18000 };
 
 async function fetchPlanPrices() {
     try {
@@ -271,8 +273,8 @@ async function fetchPlanPrices() {
         if (data && data.success && data.data) {
             const fetchedPlans = data.data;
             planPrices = {
-                ECONOMICO: fetchedPlans.ECONOMICO?.price || fetchedPlans.ECONOMICO || 4500,
-                ULTRA: fetchedPlans.ULTRA?.price || fetchedPlans.ULTRA || 6500,
+                ECONOMICO: fetchedPlans.ECONOMICO?.price || fetchedPlans.ECONOMICO || 5000,
+                ULTRA: fetchedPlans.ULTRA?.price || fetchedPlans.ULTRA || 7000,
                 FAMILIA: fetchedPlans.FAMILIA?.price || fetchedPlans.FAMILIA || 18000
             };
             
@@ -296,7 +298,114 @@ async function fetchPlanPrices() {
 
 fetchPlanPrices();
 
-function selectPlan(planKey, price) {
+async function fetchPlanStock() {
+    try {
+        const res = await fetch('/api/ecoflix/public/stock');
+        const data = await res.json();
+        if (data.success && data.data) {
+            planStock = {
+                ECONOMICO: data.data.ECONOMICO?.available ?? false,
+                ULTRA: data.data.ULTRA?.available ?? false,
+                FAMILIA: data.data.FAMILIA?.available ?? false
+            };
+            updateStockBadges();
+        }
+    } catch (e) {
+        console.error('Erro ao verificar stock', e);
+    }
+}
+
+function updateStockBadges() {
+    ['ECONOMICO', 'ULTRA', 'FAMILIA'].forEach(plan => {
+        const isAvailable = planStock[plan];
+
+        const desktopBadge = document.getElementById(`stock-badge-${plan}`);
+        if (desktopBadge) {
+            desktopBadge.classList.toggle('hidden', isAvailable);
+        }
+
+        const mobileBadge = document.getElementById(`stock-badge-mobile-${plan}`);
+        if (mobileBadge) {
+            mobileBadge.classList.toggle('hidden', isAvailable);
+        }
+    });
+}
+
+function showStockSuggestion(planKey) {
+    const modal = document.getElementById('stock-suggestion-modal');
+    const msgEl = document.getElementById('suggestion-message');
+    const btnText = document.getElementById('suggested-plan-btn-text');
+    const btnGo = document.getElementById('btn-go-suggested');
+
+    let suggested = null;
+    let planName = planKey === 'ECONOMICO' ? 'Económico' : planKey === 'ULTRA' ? 'Ultra' : 'Família';
+
+    if (planKey === 'ECONOMICO' && planStock.ULTRA) {
+        suggested = 'ULTRA';
+        const diff = planPrices.ULTRA - planPrices.ECONOMICO;
+        msgEl.innerHTML = `Plano <strong class="text-white">${planName}</strong> esgotado.<br>Tens o <strong class="text-[#E50914]">Ultra</strong> por +${formatKz(diff)}.`;
+        btnText.textContent = `Assinar Ultra — ${formatKz(planPrices.ULTRA)}/mês`;
+        btnGo.classList.remove('hidden');
+    } else if (planKey === 'ULTRA' && planStock.ECONOMICO) {
+        suggested = 'ECONOMICO';
+        const diff = planPrices.ULTRA - planPrices.ECONOMICO;
+        msgEl.innerHTML = `Plano <strong class="text-white">${planName}</strong> esgotado.<br>Tens o <strong class="text-[#10B981]">Económico</strong> por ${formatKz(planPrices.ECONOMICO)} (economiza ${formatKz(diff)}).`;
+        btnText.textContent = `Assinar Económico — ${formatKz(planPrices.ECONOMICO)}/mês`;
+        btnGo.classList.remove('hidden');
+    } else if (planKey === 'FAMILIA' && planStock.ULTRA) {
+        suggested = 'ULTRA';
+        const diff = planPrices.FAMILIA - planPrices.ULTRA;
+        msgEl.innerHTML = `Plano <strong class="text-white">${planName}</strong> esgotado.<br>Tens o <strong class="text-[#E50914]">Ultra</strong> por ${formatKz(planPrices.ULTRA)} (economiza ${formatKz(diff)}).`;
+        btnText.textContent = `Assinar Ultra — ${formatKz(planPrices.ULTRA)}/mês`;
+        btnGo.classList.remove('hidden');
+    } else if (planKey === 'FAMILIA' && planStock.ECONOMICO) {
+        suggested = 'ECONOMICO';
+        const diff = planPrices.FAMILIA - planPrices.ECONOMICO;
+        msgEl.innerHTML = `Plano <strong class="text-white">${planName}</strong> esgotado.<br>Tens o <strong class="text-[#10B981]">Económico</strong> por ${formatKz(planPrices.ECONOMICO)} (economiza ${formatKz(diff)}).`;
+        btnText.textContent = `Assinar Económico — ${formatKz(planPrices.ECONOMICO)}/mês`;
+        btnGo.classList.remove('hidden');
+    } else {
+        msgEl.innerHTML = `Plano <strong class="text-white">${planName}</strong> esgotado.<br>Tenta novamente mais tarde.`;
+        btnGo.classList.add('hidden');
+    }
+
+    pendingSuggestedPlan = suggested;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function goToSuggestedPlan() {
+    const plan = pendingSuggestedPlan;
+    closeSuggestionModal();
+    if (!plan) return;
+
+    selectedPlanType = plan;
+    selectedPlanPrice = planPrices[plan];
+
+    let planTitle = '';
+    if (plan === 'ECONOMICO') planTitle = 'Pessoal Económico (4K)';
+    else if (plan === 'ULTRA') planTitle = 'Pessoal Ultra (4K)';
+    else planTitle = 'Conta Família (4K)';
+
+    document.getElementById('selected-plan-name').innerText = planTitle;
+    document.getElementById('selected-plan-price').innerText = formatKz(selectedPlanPrice);
+    showScreen('step-checkout');
+}
+
+function closeSuggestionModal() {
+    const modal = document.getElementById('stock-suggestion-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    pendingSuggestedPlan = null;
+}
+
+async function selectPlan(planKey, price) {
+    await fetchPlanStock();
+    if (!planStock[planKey]) {
+        showStockSuggestion(planKey);
+        return;
+    }
+
     selectedPlanType = planKey;
     selectedPlanPrice = price || planPrices[planKey];
 
@@ -434,7 +543,8 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
             payment_method: method,
             is_renewal: isRenewal,
             target_subscription_id: targetSubscriptionId,
-            duration: duration
+            duration: duration,
+            coupon_code: appliedCoupon || null
         };
 
         const hmacHeaders = await window.HMACSign.signRequest(requestData);
@@ -449,7 +559,13 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
         });
 
         const result = await response.json();
-        if (!result.success) throw new Error(result.message || 'Erro ao criar pedido');
+        if (!result.success) {
+            if (result.suggested_plan) {
+                showStockSuggestion(selectedPlanType);
+                return;
+            }
+            throw new Error(result.message || 'Erro ao criar pedido');
+        }
 
         currentOrder = result.data;
         saveSession();
@@ -583,6 +699,7 @@ function initUserWebSocket() {
             
             if (data.type === 'stock_update') {
                 fetchPlanPrices();
+                fetchPlanStock();
             }
             else if (data.type === 'payment_update' && currentOrder) {
                 const txId = currentOrder.transaction_id || currentOrder.reference;
@@ -836,8 +953,8 @@ async function cancelOrder() {
 window.addEventListener('beforeunload', function (e) {
     if (currentOrder && currentOrder.order_id) {
         const url = `${API_BASE}/orders/${currentOrder.order_id}/cancel`;
-        const headers = new Blob([JSON.stringify({ phone: userPhone })], {type: 'application/json'});
-        navigator.sendBeacon(url, headers);
+        const blob = new Blob([JSON.stringify({ phone: userPhone })], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
     }
 });
 
@@ -923,7 +1040,19 @@ async function loadDashboard() {
                 sessionStorage.setItem('ecoflix_user_phone', userPhone);
             }
             window.currentSubscriptions = data.data;
-            
+
+            // Fetch current plan prices from server
+            try {
+                const plansResp = await fetch(`${API_BASE}/public/plans`);
+                const plansData = await plansResp.json();
+                if (plansData.success) {
+                    window._planPrices = {};
+                    Object.keys(plansData.data).forEach(k => {
+                        window._planPrices[k] = plansData.data[k].price;
+                    });
+                }
+            } catch (e) { /* use fallbacks */ }
+
             const container = document.getElementById('dashboard-content');
             container.innerHTML = '';
             
@@ -936,9 +1065,9 @@ async function loadDashboard() {
                 const planName = sub.plan === 'FAMILIA' ? 'Conta Família' : `Pessoal ${sub.plan}`;
                 const isManual = sub.is_manual ? '<span class="ml-2 text-[10px] bg-brand text-white px-2 py-0.5 rounded">Adicionada Manualmente</span>' : '';
                 
-                let planPrice = 4500;
-                if (sub.plan === 'ULTRA') planPrice = 6500;
-                else if (sub.plan === 'FAMILIA') planPrice = 18000;
+                // Use server prices if available, fallback to defaults
+                const planPrices = window._planPrices || {};
+                const planPrice = planPrices[sub.plan] || (sub.plan === 'ULTRA' ? 7000 : sub.plan === 'FAMILIA' ? 18000 : 5000);
 
                 const html = `
                     <div class="mb-10 pb-10 border-b border-gray-800 last:border-b-0 last:pb-0">
@@ -1083,19 +1212,43 @@ function startRenewal(index) {
     const sub = window.currentSubscriptions[index];
     selectedPlanType = sub.plan;
     
-    if (sub.plan === 'ECONOMICO') selectedPlanPrice = 4500;
-    else if (sub.plan === 'ULTRA') selectedPlanPrice = 6500;
-    else selectedPlanPrice = 18000;
+    // Fetch current prices from server instead of using hardcoded values
+    fetch(`${API_BASE}/public/plans`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.data && data.data[selectedPlanType]) {
+                selectedPlanPrice = data.data[selectedPlanType].price;
+            } else {
+                // Fallback to defaults if server unavailable
+            if (selectedPlanType === 'ECONOMICO') selectedPlanPrice = 5000;
+            else if (selectedPlanType === 'ULTRA') selectedPlanPrice = 7000;
+            else selectedPlanPrice = 18000;
+        }
+        
+        isRenewal = true;
+        targetSubscriptionId = sub.id;
 
-    isRenewal = true;
-    targetSubscriptionId = sub.id;
+        document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
+        document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+        document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
 
-    document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
-    document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
-    document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
-
-    showScreen('step-payment-method');
-    showToast('Selecione o método de pagamento para renovar.', 'info');
+        showScreen('step-payment-method');
+        showToast('Selecione o método de pagamento para renovar.', 'info');
+    })
+    .catch(() => {
+        // Fallback on error
+        if (selectedPlanType === 'ECONOMICO') selectedPlanPrice = 5000;
+        else if (selectedPlanType === 'ULTRA') selectedPlanPrice = 7000;
+        else selectedPlanPrice = 18000;
+            
+            isRenewal = true;
+            targetSubscriptionId = sub.id;
+            document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
+            document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+            document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
+            showScreen('step-payment-method');
+            showToast('Selecione o método de pagamento para renovar.', 'info');
+        });
 }
 
 // === REPORT PROBLEM ===
@@ -1211,6 +1364,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (order) {
         await resumePendingOrder(order);
     }
+
+    fetchPlanStock();
 
     const lastScreen = sessionStorage.getItem('ecoflix_last_screen');
     const token = localStorage.getItem('ecoflix_token');

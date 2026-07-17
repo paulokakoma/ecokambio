@@ -130,7 +130,7 @@ const initPayment = async (req, res) => {
 // ============================================================================
 const quickOrder = async (req, res) => {
     try {
-        const { phone, plan_type, payment_method, is_renewal, target_subscription_id, duration } = req.body;
+        const { phone, plan_type, payment_method, is_renewal, target_subscription_id, duration, coupon_code } = req.body;
 
         const plans = await planService.getPlans();
 
@@ -139,7 +139,31 @@ const quickOrder = async (req, res) => {
         }
 
         const durationMonths = parseInt(duration) || 1;
-        const totalAmount = plans[plan_type].price * durationMonths;
+        let totalAmount = plans[plan_type].price * durationMonths;
+        let couponUsed = null;
+
+        // --- COUPON VALIDATION ---
+        if (coupon_code) {
+            const { data: coupon } = await supabase
+                .from('ecoflix_coupons')
+                .select('*')
+                .eq('code', coupon_code.toUpperCase())
+                .eq('status', 'ACTIVE')
+                .single();
+
+            if (coupon) {
+                if (coupon.inventory_tag) {
+                    const { data: stockCount } = await supabase.rpc('check_tagged_stock', { tag_name: coupon.inventory_tag });
+                    if (stockCount <= 0) {
+                        return res.status(400).json({ success: false, message: 'O lote deste código esgotou.' });
+                    }
+                }
+                if (coupon.discount_amount > 0) {
+                    totalAmount = Math.max(0, totalAmount - coupon.discount_amount);
+                }
+                couponUsed = coupon.code;
+            }
+        }
 
         // Pré-validação de Stock antes de gerar a cobrança (não aplicável para renovações)
         if (!is_renewal) {
@@ -156,20 +180,62 @@ const quickOrder = async (req, res) => {
                 }
                 const hasStock = accounts && accounts.some(acc => !acc.subscriptions || acc.subscriptions.filter(s => ['ACTIVE', 'SUSPENDED'].includes(s.status)).length === 0);
                 if (!hasStock) {
-                    return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
+                    let suggestedPlan = null;
+                    const { count: tvCount } = await supabase
+                        .from('ecoflix_profiles')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('type', 'TV')
+                        .eq('status', 'AVAILABLE');
+                    if (tvCount > 0) {
+                        suggestedPlan = 'ULTRA';
+                    } else {
+                        const { count: mobileCount } = await supabase
+                            .from('ecoflix_profiles')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('type', 'MOBILE')
+                            .eq('status', 'AVAILABLE');
+                        if (mobileCount > 0) suggestedPlan = 'ECONOMICO';
+                    }
+
+                    const response = { success: false, message: 'Stock esgotado para este plano no momento.' };
+                    if (suggestedPlan) {
+                        response.suggested_plan = suggestedPlan;
+                    }
+                    return res.status(400).json(response);
                 }
             } else {
+                const profileType = plan_type === 'ECONOMICO' ? 'MOBILE' : 'TV';
                 const { count, error } = await supabase
                     .from('ecoflix_profiles')
                     .select('*', { count: 'exact', head: true })
-                    .eq('type', plan_type === 'ECONOMICO' ? 'MOBILE' : 'TV')
+                    .eq('type', profileType)
                     .eq('status', 'AVAILABLE');
                 if (error) {
                     console.error("Supabase Error checking stock:", error);
                     return res.status(500).json({ success: false, message: `Erro interno ao verificar stock: ${error.message}` });
                 }
                 if (!count || count === 0) {
-                    return res.status(400).json({ success: false, message: 'Stock esgotado para este plano no momento. Tente novamente mais tarde.' });
+                    let suggestedPlan = null;
+                    if (plan_type === 'ECONOMICO') {
+                        const { count: tvCount } = await supabase
+                            .from('ecoflix_profiles')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('type', 'TV')
+                            .eq('status', 'AVAILABLE');
+                        if (tvCount > 0) suggestedPlan = 'ULTRA';
+                    } else if (plan_type === 'ULTRA') {
+                        const { count: mobileCount } = await supabase
+                            .from('ecoflix_profiles')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('type', 'MOBILE')
+                            .eq('status', 'AVAILABLE');
+                        if (mobileCount > 0) suggestedPlan = 'ECONOMICO';
+                    }
+                    const response = { success: false, message: 'Stock esgotado para este plano no momento.' };
+                    if (suggestedPlan) {
+                        response.suggested_plan = suggestedPlan;
+                    }
+                    return res.status(400).json(response);
                 }
             }
         }
@@ -223,7 +289,8 @@ const quickOrder = async (req, res) => {
                 payment_method: dbPaymentMethod,
                 subscription_action: is_renewal ? 'RENEWAL' : 'NEW',
                 target_subscription_id: is_renewal ? target_subscription_id : null,
-                duration_months: durationMonths
+                duration_months: durationMonths,
+                coupon_used: couponUsed
             })
             .select()
             .single();
@@ -237,7 +304,7 @@ const quickOrder = async (req, res) => {
                 order_id: order.id,
                 entity: paymentResult.entity,
                 reference: paymentResult.reference ? String(paymentResult.reference).replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') : null,
-                amount: plans[plan_type].price,
+                amount: totalAmount,
                 transaction_id: paymentResult.transaction_id,
                 payment_method: payment_method,
                 expires_at: order.expires_at,
@@ -246,7 +313,14 @@ const quickOrder = async (req, res) => {
         });
     } catch (error) {
         console.error('Quick order error:', error);
-        res.status(400).json({ success: false, message: error.message });
+        // Distinguish between validation errors, payment provider errors, and server errors
+        if (error.message.includes('Plano inválido') || error.message.includes('Stock esgotado') || error.message.includes('não suportado')) {
+            return res.status(400).json({ success: false, message: error.message });
+        }
+        if (error.message.includes('PayGo') || error.message.includes('API')) {
+            return res.status(502).json({ success: false, message: error.message });
+        }
+        res.status(500).json({ success: false, message: 'Erro interno do servidor. Tente novamente.' });
     }
 };
 
@@ -447,7 +521,7 @@ const renewSubscription = async (req, res) => {
         const targetSubId = isExpired ? null : sub.id;
 
         const plans = await planService.getPlans();
-        const amount = plans[sub.plan_type];
+        const amount = plans[sub.plan_type].price;
 
         // --- PAYMENT PROVIDER ---
         let paymentResult;
@@ -692,28 +766,42 @@ const paygoWebhook = async (req, res) => {
 // ============================================================================
 const simulateWebhook = async (req, res) => {
     try {
-        const { reference_id, amount } = req.body;
+        const { reference_id, transaction_id, amount } = req.body;
 
-        const { data: order } = await supabase
-            .from('ecoflix_orders')
-            .select('transaction_id, payment_method')
-            .eq('reference_id', reference_id.replace(/\s/g, ''))
-            .single();
+        // Lookup by reference_id first, then fallback to transaction_id
+        let order = null;
+        if (reference_id) {
+            const { data } = await supabase
+                .from('ecoflix_orders')
+                .select('transaction_id, payment_method')
+                .eq('reference_id', reference_id.replace(/\s/g, ''))
+                .single();
+            order = data;
+        }
+        if (!order && transaction_id) {
+            const { data } = await supabase
+                .from('ecoflix_orders')
+                .select('transaction_id, payment_method')
+                .eq('transaction_id', transaction_id)
+                .single();
+            order = data;
+        }
 
         if (!order) return res.status(404).json({ message: 'Order not found' });
 
+        const txId = order.transaction_id || reference_id;
+
         const payload = {
-            reference: reference_id.replace(/\s/g, ''),
+            reference: (reference_id || '').replace(/\s/g, ''),
             amount: amount,
-            transaction_id: order.transaction_id,
-            payment_id: order.transaction_id,
+            transaction_id: txId,
+            payment_id: txId,
             status: 'paid',
             simulated: true
         };
 
         const port = process.env.PORT || 3000;
-        const endpoint = 'paygooo';
-        const localUrl = `http://localhost:${port}/api/ecoflix/webhooks/${endpoint}`;
+        const localUrl = `http://localhost:${port}/api/ecoflix/webhooks/paygo`;
 
         try {
             const secret = process.env.PAYGOOO_WEBHOOK_SECRET;

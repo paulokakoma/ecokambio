@@ -26,6 +26,7 @@ const { sseConnect } = require('./controllers/sse.controller');
 
 // Password Authentication - HMAC Protected
 router.get('/public/plans', catchAsync(adminController.getPlans));
+router.get('/public/stock', catchAsync(adminController.getPublicStock));
 router.post('/auth/register-request', validateSignature, catchAsync(authController.registerRequest));
 router.post('/auth/register-verify', validateSignature, catchAsync(authController.registerVerify));
 router.post('/auth/login', validateSignature, catchAsync(authController.login));
@@ -35,7 +36,7 @@ router.post('/orders/create', validateSignature, catchAsync(authController.requi
 router.post('/orders/quick', validateSignature, catchAsync(paymentController.quickOrder));
 router.get('/orders/:ref/status', catchAsync(paymentController.checkPaymentStatus));
 router.post('/orders/:id/cancel', catchAsync(paymentController.cancelOrder));
-router.post('/coupons/validate', validateSignature, catchAsync(paymentController.validateCoupon));
+router.post('/coupons/validate', validateSignature, catchAsync(subscriptionController.validateCoupon));
 
 // Account / Credential Recovery (no auth needed — SMS-based)
 router.post('/account/recover', catchAsync(authController.recoverCredentials));

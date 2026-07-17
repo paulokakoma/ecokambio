@@ -50,7 +50,6 @@ module.exports = {
     getSettings: settingsController.getSettings,
     updateSettings: settingsController.updateSettings,
     updateInformalRates: settingsController.updateInformalRates,
-    updateVisaSettings: settingsController.updateVisaSettings,
 
     // Scraper Admin
     triggerScraper: scraperAdminController.triggerScraper,

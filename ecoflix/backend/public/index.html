@@ -47,7 +47,10 @@
     <nav class="glass-nav hidden lg:block fixed top-0 w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-5">
+                    <a href="/" class="text-gray-400 hover:text-white transition flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 active:scale-95" title="Voltar à EcoKambio">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
                     <div class="cursor-pointer active:scale-95 transition-transform" onclick="goHome()" title="Planos EcoFlix">
                         <h1 class="text-4xl font-black"
                             style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 2px 2px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
@@ -90,7 +93,10 @@
                         <!-- ECONÓMICO -->
                         <div class="swiper-slide">
                             <div class="card-inner bg-[#141414] border border-[#10B981]/40 rounded-[2rem] p-6 flex flex-col justify-between shadow-[0_0_40px_rgba(16,185,129,0.15)] relative">
-                                <div>
+                                <div id="stock-badge-mobile-ECONOMICO" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                                    Esgotado
+                                </div>
+                                <div class="mt-4">
                                     <div class="mb-4">
                                         <span class="bg-gray-800 text-gray-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Económico</span>
                                         <h2 class="text-2xl font-bold text-white mt-3">Pessoal</h2>
@@ -127,10 +133,13 @@
                         <!-- ULTRA -->
                         <div class="swiper-slide">
                             <div class="card-inner bg-gradient-to-br from-[#1a0809] to-[#141414] border border-[#E50914]/40 rounded-[2rem] p-6 flex flex-col justify-between relative shadow-[0_0_40px_rgba(229,9,20,0.15)]">
+                                <div id="stock-badge-mobile-ULTRA" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                                    Esgotado
+                                </div>
                                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E50914] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_4px_10px_rgba(229,9,20,0.4)] whitespace-nowrap">
                                     Recomendado
                                 </div>
-                                <div>
+                                <div class="mt-4">
                                     <div class="mb-4 mt-2">
                                         <span class="text-[#E50914] text-[10px] font-bold uppercase tracking-wider">4K Ultra HDR</span>
                                         <h2 class="text-2xl font-bold text-[#E50914] mt-1">Pessoal Ultra</h2>
@@ -165,7 +174,10 @@
                         <!-- FAMÍLIA -->
                         <div class="swiper-slide">
                             <div class="card-inner bg-[#141414] border border-[#F97316]/40 rounded-[2rem] p-6 flex flex-col justify-between shadow-[0_0_40px_rgba(249,115,22,0.15)] relative">
-                                <div>
+                                <div id="stock-badge-mobile-FAMILIA" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                                    Esgotado
+                                </div>
+                                <div class="mt-4">
                                     <div class="mb-4">
                                         <span class="bg-[#F97316]/10 text-[#F97316] text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider border border-[#F97316]/20">Família</span>
                                         <h2 class="text-2xl font-bold text-white mt-3">Conta Inteira</h2>
@@ -211,10 +223,13 @@
 
                 <!-- 1. PLANO ECONÓMICO -->
                 <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 border border-[#10B981]/40 shadow-[0_0_40px_rgba(16,185,129,0.10)]">
+                    <div id="stock-badge-ECONOMICO" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                        Esgotado
+                    </div>
                     <div
                         class="absolute top-0 right-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         ECONÓMICO</div>
-                    <div class="mb-4">
+                    <div class="mt-4 mb-4">
                         <h3 class="text-xl font-bold mb-1">Pessoal Económico</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
@@ -239,7 +254,7 @@
                         <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Qualidade
                                 Máxima (4K)</span></li>
                     </ul>
-                    <button id="btn-economico" onclick="selectPlan('ECONOMICO', 4500)"
+                    <button id="btn-economico" onclick="selectPlan('ECONOMICO')"
                         class="w-full border border-gray-500 text-muted hover:text-white hover:border-white font-bold py-3 rounded-sm shadow-sm transition hover:bg-gray-500/10 relative z-10 cursor-pointer">
                         Selecionar Económico
                     </button>
@@ -247,9 +262,12 @@
 
                 <!-- 2. PLANO RECOMENDADO (ULTRA) -->
                 <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 transform md:-translate-y-2 border-t-4 border-t-[#E50914] border border-[#E50914]/40 shadow-[0_0_40px_rgba(229,9,20,0.15)]">
+                    <div id="stock-badge-ULTRA" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                        Esgotado
+                    </div>
                     <div class="absolute top-0 right-0 bg-brand-color text-white text-[10px] font-bold px-3 py-1 rounded-bl"
                         style="background-color: var(--brand-color)">RECOMENDADO</div>
-                    <div class="mb-4">
+                    <div class="mt-4 mb-4">
                         <h3 class="text-2xl font-bold mb-1 text-brand">Pessoal Ultra</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
@@ -273,7 +291,7 @@
                         <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Funciona em
                                 Tudo</span></li>
                     </ul>
-                    <button id="btn-ultra" onclick="selectPlan('ULTRA', 6500)"
+                    <button id="btn-ultra" onclick="selectPlan('ULTRA')"
                         class="w-full bg-brand-color hover:bg-red-700 text-white font-bold py-3 rounded-sm shadow-lg shadow-brand-color/30 transition relative z-10 cursor-pointer text-lg"
                         style="background-color: var(--brand-color)">
                         Selecionar Ultra
@@ -282,10 +300,13 @@
 
                 <!-- 3. PLANO FAMÍLIA (PREMIUM) -->
                 <div class="netflix-card rounded-md relative overflow-hidden flex flex-col p-4 md:p-6 border border-[#F97316]/40 shadow-[0_0_40px_rgba(249,115,22,0.15)]">
+                    <div id="stock-badge-FAMILIA" class="hidden absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider z-20 shadow-lg">
+                        Esgotado
+                    </div>
                     <div
                         class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl">
                         FAMÍLIA</div>
-                    <div class="mb-4">
+                    <div class="mt-4 mb-4">
                         <h3 class="text-xl font-bold mb-1">Conta Inteira</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
@@ -309,7 +330,7 @@
                         <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Altere a
                                 senha</span></li>
                     </ul>
-                    <button id="btn-familia" onclick="selectPlan('FAMILIA', 18000)"
+                    <button id="btn-familia" onclick="selectPlan('FAMILIA')"
                         class="w-full bg-gray-900 text-white hover:bg-black font-bold py-3 rounded-sm shadow-sm transition cursor-pointer relative z-10">
                         Selecionar Família
                     </button>
@@ -854,6 +875,27 @@
         </div>
 
     </main>
+
+    <!-- MODAL: Plano Esgotado com Sugestão -->
+    <div id="stock-suggestion-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="netflix-card rounded-2xl p-10 h-[500px] w-[500px] shadow-2xl border border-white/10 flex flex-col justify-center items-center gap-6 text-center">
+            <div class="w-20 h-20 bg-red-500/15 rounded-full flex items-center justify-center">
+                <i class="fas fa-box-open text-4xl text-red-400"></i>
+            </div>
+            <h3 class="text-3xl font-bold text-white">Stock Esgotado</h3>
+            <p id="suggestion-message" class="text-gray-400 text-base leading-relaxed max-w-[380px]"></p>
+            <div class="flex gap-3 w-full max-w-[320px]">
+                <button id="btn-go-suggested" onclick="goToSuggestedPlan()"
+                    class="flex-1 bg-[#E50914] hover:bg-red-700 text-white font-bold text-lg py-3.5 rounded-xl transition-all active:scale-[0.98]">
+                    <span id="suggested-plan-btn-text"></span>
+                </button>
+            </div>
+            <button onclick="closeSuggestionModal()"
+                class="text-gray-500 hover:text-gray-300 font-medium text-sm transition-all">
+                Voltar ao Catálogo
+            </button>
+        </div>
+    </div>
 
     <footer class="mt-auto py-12 border-t border-gray-500/20">
         <div class="max-w-4xl mx-auto px-4">

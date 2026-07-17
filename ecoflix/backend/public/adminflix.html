@@ -170,10 +170,15 @@
                 class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium cursor-pointer">
                 <i class="fas fa-users w-5 text-center"></i> Clientes
             </div>
-            <div id="nav-suporte" onclick="switchTab('suporte')"
-                class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
-                <i class="fas fa-headset w-5 text-center"></i> Suporte
-            </div>
+        <div id="nav-suporte" onclick="switchTab('suporte')"
+            class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+            <i class="fas fa-headset w-5 text-center"></i> Suporte
+        </div>
+
+        <div id="nav-partners" onclick="switchTab('partners')"
+            class="nav-item text-gray-600 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+            <i class="fas fa-handshake w-5 text-center"></i> Parceiros
+        </div>
         </nav>
 
         <div class="p-4 border-t border-gray-100">
@@ -202,12 +207,13 @@
             <div onclick="switchTab('sales')" class="p-3 font-bold border-b">Vendas</div>
             <div onclick="switchTab('customers')" class="p-3 font-bold border-b">Clientes</div>
             <div onclick="switchTab('suporte')" class="p-3 font-bold border-b text-gray-600">Suporte</div>
+            <div onclick="switchTab('partners')" class="p-3 font-bold border-b">Parceiros</div>
             <div onclick="logout()" class="p-3 text-red-600 font-bold mt-4">Sair</div>
         </div>
     </div>
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
 
-        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50">
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-50 min-h-0">
 
             <!-- 1. DASHBOARD -->
             <div id="panel-dashboard" class="panel">
@@ -270,9 +276,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-800">Gráfico de Vendas</h3>
                         <select id="salesChartFilter" class="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500" onchange="updateChart()">
-                            <option value="daily">Últimos Dias (Diário)</option>
+                            <option value="daily" selected>Últimos Dias (Diário)</option>
                             <option value="weekly">Últimas Semanas (Semanal)</option>
-                            <option value="monthly" selected>Últimos Meses (Mensal)</option>
+                            <option value="monthly">Últimos Meses (Mensal)</option>
                             <option value="quarterly">Por Trimestre</option>
                             <option value="semiannual">Por Semestre</option>
                             <option value="annual">Anual</option>
@@ -479,6 +485,79 @@
             </div>
 
         </div>
+
+        <!-- PAINEL: PARCEIROS / INFLUENCIADORES -->
+        <div id="panel-partners" class="panel hidden min-w-0">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">Parceiros & Influenciadores</h1>
+                <button onclick="openPartnerModal()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-md transition-all flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Novo Parceiro
+                </button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-500">Total Parceiros</span>
+                        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><i class="fas fa-handshake text-blue-600 text-sm"></i></div>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="partner-count">0</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-500">Activos</span>
+                        <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center"><i class="fas fa-check-circle text-green-600 text-sm"></i></div>
+                    </div>
+                    <p class="text-2xl font-bold text-green-600" id="partner-active">0</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-500">Comissão Pendente</span>
+                        <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center"><i class="fas fa-dollar-sign text-red-600 text-sm"></i></div>
+                    </div>
+                    <p class="text-2xl font-bold text-red-600" id="partner-pending">0 Kz</p>
+                </div>
+            </div>
+
+            <!-- Sales Origin Chart -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                <h2 class="text-sm font-bold text-gray-800 mb-3"><i class="fas fa-chart-pie mr-2 text-gray-400"></i> Origem das Vendas</h2>
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="w-32 h-32 flex-shrink-0">
+                        <canvas id="salesOriginChart"></canvas>
+                    </div>
+                    <div id="sales-origin-legend" class="flex-1 space-y-1"></div>
+                </div>
+            </div>
+
+            <!-- Partners Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-users mr-2 text-gray-400"></i> Lista de Parceiros</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+                            <tr>
+                                <th class="px-6 py-3">Parceiro</th>
+                                <th class="px-6 py-3">Código</th>
+                                <th class="px-6 py-3 text-center">Vendas Mobile</th>
+                                <th class="px-6 py-3 text-center">Vendas TV</th>
+                                <th class="px-6 py-3 text-right">Comissão Devida</th>
+                                <th class="px-6 py-3 text-center">Último Pagamento</th>
+                                <th class="px-6 py-3 text-right">Acção</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partners-table-body" class="divide-y divide-gray-100">
+                            <tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">A carregar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </main>
 
             <!-- MODAL DE EDIÇÃO DE PERFIL -->
@@ -591,6 +670,54 @@
                         class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-4 py-2 rounded shadow">Salvar
                         Conta</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NOVO PARCEIRO -->
+    <div id="partnerModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0"
+            id="partnerModalContent">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Novo Parceiro / Influenciador</h3>
+                <button onclick="closePartnerModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Parceiro</label>
+                    <input type="text" id="partnerName" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                        placeholder="Ex: EcoKambio, João Silva">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código Promocional</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="partnerCode" class="flex-1 border border-gray-300 rounded-lg p-2.5 text-sm font-mono uppercase tracking-wider"
+                            placeholder="Clique no dado para gerar" maxlength="20" readonly>
+                        <button onclick="generatePartnerCode()" class="bg-gray-100 hover:bg-gray-200 px-3 rounded-lg border border-gray-300 text-sm font-bold" title="Gerar código a partir do nome">
+                            <i class="fas fa-dice"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Comissão Mobile (Kz)</label>
+                        <input type="number" id="partnerCommMobile" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                            value="500" min="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Comissão TV/Família (Kz)</label>
+                        <input type="number" id="partnerCommTV" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm"
+                            value="700" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                <button onclick="closePartnerModal()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-bold px-4 py-2 rounded-lg transition">Cancelar</button>
+                <button onclick="submitPartner()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Criar Parceiro
+                </button>
             </div>
         </div>
     </div>
@@ -1668,7 +1795,6 @@
                 <tr class="bg-white hover:bg-gray-50 transition">
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">${p.partner_name}</div>
-                        <div class="text-xs text-gray-400">${p.inventory_tag || 'Sem lote'}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="bg-gray-100 px-3 py-1 rounded font-mono font-bold text-gray-800">${p.code}</span>
@@ -1752,22 +1878,56 @@
             }
         }
 
+        // ============================================================================
+        // PARTNER MODAL
+        // ============================================================================
         function openPartnerModal() {
-            const code = prompt('Código do parceiro (ex: ECOKAMBIO):');
-            if (!code) return;
+            document.getElementById('partnerName').value = '';
+            document.getElementById('partnerCode').value = '';
+            document.getElementById('partnerCommMobile').value = '500';
+            document.getElementById('partnerCommTV').value = '700';
+            const modal = document.getElementById('partnerModal');
+            const content = document.getElementById('partnerModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
 
-            const name = prompt('Nome do parceiro (ex: EcoKambio):');
-            if (!name) return;
+        function closePartnerModal() {
+            const content = document.getElementById('partnerModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => document.getElementById('partnerModal').classList.add('hidden'), 200);
+        }
 
-            const commMobile = prompt('Comissão por venda Mobile (Kz):', '500');
-            const commTV = prompt('Comissão por venda TV (Kz):', '700');
+        function generatePartnerCode() {
+            const name = document.getElementById('partnerName').value.trim();
+            if (!name) { showToast('Insira o nome primeiro para gerar o código', 'error'); return; }
+            const slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z]/g, '').substring(0, 8).toUpperCase();
+            const digits = String(Math.floor(1000 + Math.random() * 9000));
+            document.getElementById('partnerCode').value = slug + digits;
+        }
 
-            createPartner(code, name, parseInt(commMobile) || 500, parseInt(commTV) || 700);
+        async function submitPartner() {
+            const name = document.getElementById('partnerName').value.trim();
+            const code = document.getElementById('partnerCode').value.trim().toUpperCase();
+            const commMobile = parseInt(document.getElementById('partnerCommMobile').value) || 500;
+            const commTV = parseInt(document.getElementById('partnerCommTV').value) || 700;
+
+            if (!name) { showToast('Insira o nome do parceiro', 'error'); return; }
+            if (!code) { showToast('Clique no dado para gerar o código', 'error'); return; }
+
+            await createPartner(code, name, commMobile, commTV);
+            closePartnerModal();
         }
 
         async function createPartner(code, partner_name, commission_mobile, commission_tv) {
             try {
-                await apiCall('/admin/partners', 'POST', { code, partner_name, commission_mobile, commission_tv });
+                await apiCall('/admin/partners', 'POST', {
+                    code, partner_name, commission_mobile, commission_tv
+                });
                 showToast('Parceiro criado com sucesso!', 'success');
                 loadPartners();
             } catch (e) {

@@ -6,8 +6,8 @@ const REDIS_KEY = 'ecoflix:plans';
 const FILE_PATH = path.join(__dirname, '../plans.json');
 
 const DEFAULT_PLANS = {
-    'ECONOMICO': { price: 4500, paygo_id: 'd13a142b-9d1f-4788-b227-a41235d04e85' },
-    'ULTRA': { price: 6500, paygo_id: '2d8240df-e851-4b10-aeaf-8054145a4de4' },
+    'ECONOMICO': { price: 5000, paygo_id: 'd13a142b-9d1f-4788-b227-a41235d04e85' },
+    'ULTRA': { price: 7000, paygo_id: '2d8240df-e851-4b10-aeaf-8054145a4de4' },
     'FAMILIA': { price: 18000, paygo_id: 'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2' }
 };
 

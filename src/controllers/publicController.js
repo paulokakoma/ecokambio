@@ -44,22 +44,7 @@ const logActivity = async (req, res) => {
     res.status(200).json({ success: true, message: 'Atividade registada.' });
 };
 
-// Public Visa Settings (for the card page)
-const getVisaSettings = async (req, res) => {
-    try {
-        const { data, error } = await supabase.from('site_settings').select('key, value').like('key', 'visa_%');
-        if (error) throw error;
 
-        const settingsObject = data.reduce((acc, { key, value }) => {
-            acc[key] = value;
-            return acc;
-        }, {});
-
-        res.status(200).json(settingsObject);
-    } catch (error) {
-        handleSupabaseError(error, res);
-    }
-};
 
 const getAffiliateDetails = async (req, res) => {
     const { id } = req.params;
@@ -149,5 +134,4 @@ const getScrapedRates = async (req, res) => {
         handleSupabaseError(error, res);
     }
 };
-
-module.exports = { getConfig, getInformalRates, logActivity, getVisaSettings, getAffiliateDetails, getStatus, getScrapedRates };
+module.exports = { getConfig, getInformalRates, logActivity, getAffiliateDetails, getStatus, getScrapedRates };

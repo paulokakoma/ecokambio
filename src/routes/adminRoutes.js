@@ -15,7 +15,6 @@ router.get('/currencies', adminController.getCurrencies);
 router.get('/settings', adminController.getSettings);
 router.post('/settings', adminController.updateSettings);
 router.post('/informal-rates', adminController.updateInformalRates);
-router.post('/visa-settings', upload.single('visa_image'), adminController.updateVisaSettings);
 router.post('/supporter', upload.single('banner_image'), adminController.createSupporter);
 router.get('/recent-activity', adminController.getRecentActivity);
 router.post('/notify-update', adminController.notifyUpdate);

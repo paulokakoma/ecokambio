@@ -64,49 +64,8 @@ const updateInformalRates = catchAsync(async (req, res) => {
     });
 });
 
-/**
- * POST /api/admin/visa-settings
- * Atualizar configurações VISA com upload de imagem
- */
-const updateVisaSettings = catchAsync(async (req, res) => {
-    const { visa_url, visa_description } = req.body;
-    const visaImage = req.file;
-
-    let updateData = {
-        visa_url,
-        visa_description,
-        updated_at: new Date().toISOString()
-    };
-
-    // Processar imagem se fornecida
-    if (visaImage) {
-        try {
-            const filename = `visa_${Date.now()}.png`;
-            const outputPath = path.join(process.cwd(), 'public', 'assets', filename);
-
-            await sharp(visaImage.buffer)
-                .resize(400, 300, { fit: 'inside', withoutEnlargement: true })
-                .toFile(outputPath);
-
-            updateData.visa_image = `/assets/${filename}`;
-        } catch (err) {
-            logger.error('Erro ao processar imagem VISA:', err);
-            throw new AppError('Erro ao processar imagem.', 500);
-        }
-    }
-
-    const data = await settingsService.updateVisaSettings(updateData);
-
-    res.status(200).json({
-        success: true,
-        message: 'Configurações VISA atualizadas com sucesso.',
-        data
-    });
-});
-
 module.exports = {
     getSettings,
     updateSettings,
-    updateInformalRates,
-    updateVisaSettings
+    updateInformalRates
 };

@@ -41,21 +41,6 @@ class SettingsService {
         }
     }
 
-    /**
-     * Atualizar configurações de VISA
-     */
-    async updateVisaSettings(visaData) {
-        try {
-            const settings = await this.getSettings();
-            return await this.updateSettings({
-                ...settings,
-                ...visaData
-            });
-        } catch (error) {
-            logger.error('Erro ao atualizar configurações VISA:', error);
-            throw error;
-        }
-    }
 }
 
 module.exports = new SettingsService();

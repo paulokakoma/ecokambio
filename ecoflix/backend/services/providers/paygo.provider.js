@@ -7,6 +7,8 @@ const PRODUCT_IDS = {
     'ECONOMICO': 'd13a142b-9d1f-4788-b227-a41235d04e85',
     'ULTRA':     '2d8240df-e851-4b10-aeaf-8054145a4de4',
     'FAMILIA':   'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
+    'COMPLETA':  'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
+    'INTEIRA':   'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
 };
 
 const API_METHOD = {
@@ -69,7 +71,16 @@ class PayGoProvider {
             const apiMsg = error.response?.data?.error || error.response?.data?.message;
             if (apiMsg) {
                 console.warn(`[PayGo] API Error: ${apiMsg}`);
-                throw new Error(apiMsg);
+                // Translate common English error messages to Portuguese
+                const translations = {
+                    'The payment was refused. Please try again later.': 'Pagamento recusado. Por favor, tente novamente mais tarde.',
+                    'Payment failed': 'Pagamento falhou',
+                    'Invalid phone number': 'Número de telefone inválido',
+                    'Insufficient funds': 'Saldo insuficiente',
+                    'Transaction declined': 'Transação recusada',
+                };
+                const translatedMsg = translations[apiMsg] || apiMsg;
+                throw new Error(translatedMsg);
             }
             throw error;
         }

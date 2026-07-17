@@ -1184,11 +1184,57 @@ const getClients = async (req, res) => {
     }
 };
 
+// ============================================================================
+// PUBLIC: Stock Availability (for catalog badges)
+// ============================================================================
+const getPublicStock = async (req, res) => {
+    try {
+        const { count: mobileCount } = await supabase
+            .from('ecoflix_profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('type', 'MOBILE')
+            .eq('status', 'AVAILABLE');
+
+        const { count: tvCount } = await supabase
+            .from('ecoflix_profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('type', 'TV')
+            .eq('status', 'AVAILABLE');
+
+        const { data: accounts } = await supabase
+            .from('ecoflix_master_accounts')
+            .select('id, subscriptions:ecoflix_subscriptions(status)')
+            .eq('type', 'EXCLUSIVE')
+            .eq('status', 'ACTIVE');
+
+        let exclusiveCount = 0;
+        if (accounts) {
+            exclusiveCount = accounts.filter(acc =>
+                !acc.subscriptions ||
+                acc.subscriptions.filter(s => ['ACTIVE', 'SUSPENDED'].includes(s.status)).length === 0
+            ).length;
+        }
+
+        res.json({
+            success: true,
+            data: {
+                ECONOMICO: { available: mobileCount > 0, count: mobileCount || 0 },
+                ULTRA: { available: tvCount > 0, count: tvCount || 0 },
+                FAMILIA: { available: exclusiveCount > 0, count: exclusiveCount }
+            }
+        });
+    } catch (error) {
+        console.error('Public stock check error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getPlans,
     updatePlans,
     getDashboard,
     getStock,
+    getPublicStock,
     createAccount,
     updateAccount,
     deleteAccount,
