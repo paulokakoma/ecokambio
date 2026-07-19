@@ -13,31 +13,41 @@ let countdownInterval = null;
 let planStock = { ECONOMICO: true, ULTRA: true, FAMILIA: true };
 let pendingSuggestedPlan = null;
 
-// === PERSISTÊNCIA DE SESSÃO (sessionStorage) ===
+// === PERSISTÊNCIA DE SESSÃO (localStorage — sobrevive a reload do browser mobile) ===
+const STORAGE_PREFIX = 'ecoflix_';
 function saveSession() {
-    sessionStorage.setItem('ecoflix_pending_order', JSON.stringify(currentOrder));
-    sessionStorage.setItem('ecoflix_user_phone', userPhone || '');
-    sessionStorage.setItem('ecoflix_selected_plan', selectedPlanType || '');
-    sessionStorage.setItem('ecoflix_selected_price', String(selectedPlanPrice || ''));
+    localStorage.setItem(STORAGE_PREFIX + 'pending_order', JSON.stringify(currentOrder));
+    localStorage.setItem(STORAGE_PREFIX + 'user_phone', userPhone || '');
+    localStorage.setItem(STORAGE_PREFIX + 'selected_plan', selectedPlanType || '');
+    localStorage.setItem(STORAGE_PREFIX + 'selected_price', String(selectedPlanPrice || ''));
+    localStorage.setItem(STORAGE_PREFIX + 'final_price', String(finalPrice || ''));
+    localStorage.setItem(STORAGE_PREFIX + 'applied_coupon', appliedCoupon || '');
+    localStorage.setItem(STORAGE_PREFIX + 'coupon_paygo_id', appliedCouponPaygoId || '');
 }
 
 function restoreSession() {
-    const saved = sessionStorage.getItem('ecoflix_pending_order');
+    const saved = localStorage.getItem(STORAGE_PREFIX + 'pending_order');
     if (!saved) return null;
     try {
         const order = JSON.parse(saved);
-        userPhone = sessionStorage.getItem('ecoflix_user_phone') || null;
-        selectedPlanType = sessionStorage.getItem('ecoflix_selected_plan') || null;
-        selectedPlanPrice = parseFloat(sessionStorage.getItem('ecoflix_selected_price')) || null;
+        userPhone = localStorage.getItem(STORAGE_PREFIX + 'user_phone') || null;
+        selectedPlanType = localStorage.getItem(STORAGE_PREFIX + 'selected_plan') || null;
+        selectedPlanPrice = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'selected_price')) || null;
+        finalPrice = parseFloat(localStorage.getItem(STORAGE_PREFIX + 'final_price')) || null;
+        appliedCoupon = localStorage.getItem(STORAGE_PREFIX + 'applied_coupon') || null;
+        appliedCouponPaygoId = localStorage.getItem(STORAGE_PREFIX + 'coupon_paygo_id') || null;
         return order;
     } catch { return null; }
 }
 
 function clearSession() {
-    sessionStorage.removeItem('ecoflix_pending_order');
-    sessionStorage.removeItem('ecoflix_user_phone');
-    sessionStorage.removeItem('ecoflix_selected_plan');
-    sessionStorage.removeItem('ecoflix_selected_price');
+    localStorage.removeItem(STORAGE_PREFIX + 'pending_order');
+    localStorage.removeItem(STORAGE_PREFIX + 'user_phone');
+    localStorage.removeItem(STORAGE_PREFIX + 'selected_plan');
+    localStorage.removeItem(STORAGE_PREFIX + 'selected_price');
+    localStorage.removeItem(STORAGE_PREFIX + 'final_price');
+    localStorage.removeItem(STORAGE_PREFIX + 'applied_coupon');
+    localStorage.removeItem(STORAGE_PREFIX + 'coupon_paygo_id');
     appliedCoupon = null;
     appliedCouponPaygoId = null;
     checkoutPendingMethod = null;
@@ -169,9 +179,9 @@ function showScreen(screenId) {
     updateMobileHeader(screenId);
 
     if (screenId === 'step-dashboard') {
-        sessionStorage.setItem('ecoflix_last_screen', screenId);
+        localStorage.setItem('ecoflix_last_screen', screenId);
     } else {
-        sessionStorage.removeItem('ecoflix_last_screen');
+        localStorage.removeItem('ecoflix_last_screen');
     }
     if (screenId === 'step-waiting-payment') {
         startPayTimer();
@@ -1166,7 +1176,7 @@ async function loadDashboard() {
         if (data.success && data.data && data.data.length > 0) {
             if (data.phone) {
                 userPhone = data.phone;
-                sessionStorage.setItem('ecoflix_user_phone', userPhone);
+                localStorage.setItem('ecoflix_user_phone', userPhone);
                 subscribeUserToWs();
             }
             window.currentSubscriptions = data.data;
@@ -1470,7 +1480,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     fetchPlanStock();
 
-    const lastScreen = sessionStorage.getItem('ecoflix_last_screen');
+    const lastScreen = localStorage.getItem('ecoflix_last_screen');
     const token = localStorage.getItem('ecoflix_token');
     if (lastScreen === 'step-dashboard' && token) {
         loadDashboard();
