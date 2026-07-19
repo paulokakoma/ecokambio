@@ -4,56 +4,72 @@
  */
 
 const clients = new Set();
+const clientIPs = new Map(); // ip → count
 
-// Heartbeat a cada 25s para manter a conexão viva (proxies cortam após 30s de silêncio)
 const HEARTBEAT_INTERVAL_MS = 25_000;
+const MAX_CONNECTIONS_PER_IP = 3;
 
 /**
  * Endpoint SSE: GET /admin/events
- * O browser conecta uma vez e fica à escuta. Reconecta automaticamente se cair.
  */
 const sseConnect = (req, res) => {
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+    const currentCount = clientIPs.get(ip) || 0;
+
+    if (currentCount >= MAX_CONNECTIONS_PER_IP) {
+        return res.status(429).json({ success: false, message: 'Limite de conexões SSE atingido' });
+    }
+
     res.set({
         'Content-Type':  'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection':    'keep-alive',
-        'X-Accel-Buffering': 'no', // Desactivar buffering no Nginx/proxy
+        'X-Accel-Buffering': 'no',
     });
     res.flushHeaders();
 
-    // Enviar evento de conexão inicial
     res.write('event: connected\ndata: {"ok":true}\n\n');
 
+    clientIPs.set(ip, currentCount + 1);
     clients.add(res);
 
-    // Heartbeat para manter a ligação viva
     const heartbeat = setInterval(() => {
-        res.write(': heartbeat\n\n');
+        try {
+            res.write(': heartbeat\n\n');
+        } catch {
+            clearInterval(heartbeat);
+            clients.delete(res);
+            clientIPs.set(ip, Math.max(0, (clientIPs.get(ip) || 1) - 1));
+        }
     }, HEARTBEAT_INTERVAL_MS);
 
-    // Limpar quando o cliente desliga
     req.on('close', () => {
         clearInterval(heartbeat);
         clients.delete(res);
+        clientIPs.set(ip, Math.max(0, (clientIPs.get(ip) || 1) - 1));
     });
 };
 
 /**
  * Envia um evento SSE para todos os admins ligados.
- * @param {string} event - Nome do evento (ex: 'new_order', 'order_paid')
- * @param {object} data  - Payload JSON
  */
 const broadcast = (event, data) => {
     if (clients.size === 0) return;
     const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+    let sent = 0;
+    let cleaned = 0;
     for (const client of clients) {
         try {
             client.write(payload);
+            sent++;
         } catch {
             clients.delete(client);
+            cleaned++;
         }
     }
-    console.log(`[SSE] broadcast "${event}" → ${clients.size} cliente(s)`);
+    if (cleaned > 0) {
+        console.warn(`[SSE] ${cleaned} cliente(s) morto(s) removido(s) no broadcast "${event}"`);
+    }
 };
 
 module.exports = { sseConnect, broadcast };

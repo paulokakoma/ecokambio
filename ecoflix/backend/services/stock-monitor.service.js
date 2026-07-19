@@ -30,7 +30,7 @@ const wasRecentlyNotified = async (key) => {
             return !!val;
         }
     } catch (e) {
-        console.error('[StockMonitor] Redis error on get:', e.message);
+        console.error('[StockMonitor] Erro Redis no get:', e.message);
     }
     const lastNotified = notificationCache.get(key);
     if (!lastNotified) return false;
@@ -43,7 +43,7 @@ const markNotified = async (key) => {
             await redisClient.setEx(`ecoflix:stock_alert:${key}`, NOTIFICATION_COOLDOWN_SEC, '1');
         }
     } catch (e) {
-        console.error('[StockMonitor] Redis error on set:', e.message);
+        console.error('[StockMonitor] Erro Redis no set:', e.message);
     }
     notificationCache.set(key, Date.now());
 };

@@ -346,9 +346,9 @@ app.get("/api/scraper/last-results", scraperController.getLastResults);
 // Rotas de API para o Scraper (Protegido - Apenas Admin)
 app.post("/api/scraper/trigger", isAdmin, scraperController.triggerScraper);
 
-// Integração Google Sheets - Exportação (Requer Token específico antes das regras normais do Admin)
+// Integração Google Sheets - Exportação (Requer Token específico + Admin)
 const adminController = require('./src/controllers/adminController');
-app.get('/api/admin/export-sales-auto', adminController.exportSalesAuto);
+app.get('/api/admin/export-sales-auto', isAdmin, adminController.exportSalesAuto);
 
 // Rotas exclusivas de Admin (Globais e protegidas pelo Middleware `isAdmin`)
 app.use("/api", isAdmin, adminRoutes);

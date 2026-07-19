@@ -3,6 +3,15 @@ const supabase = require("./config/supabase");
 
 let wss;
 
+// Normalize phone to 9-digit local format for consistent matching
+const normalizeWsPhone = (phone) => {
+    if (!phone) return '';
+    let clean = String(phone).replace(/[^0-9+]/g, '');
+    if (clean.startsWith('+244')) clean = clean.slice(4);
+    else if (clean.startsWith('244') && clean.length >= 12) clean = clean.slice(3);
+    return clean.replace(/[^0-9]/g, '');
+};
+
 const init = (server) => {
     wss = new WebSocketServer({ server });
 
@@ -12,7 +21,8 @@ const init = (server) => {
 
     wss.on("connection", (ws, req) => {
         const params = new URLSearchParams(req.url.slice(1));
-        ws.isAdmin = params.get('client') === 'admin';
+        const adminSecret = params.get('admin_secret');
+        ws.isAdmin = adminSecret && adminSecret === process.env.WS_ADMIN_SECRET;
         ws.subscribedOrderId = null; // New: tracking order subscriptions
         console.log(`Cliente WebSocket conectado ${ws.isAdmin ? '(Admin)' : '(Usuário)'}.`);
         broadcastUserCount();
@@ -25,6 +35,12 @@ const init = (server) => {
                 if (data.type === 'subscribe_order' && data.order_id) {
                     ws.subscribedOrderId = String(data.order_id);
                     console.log(`[WS] Client subscribed to order_id: ${ws.subscribedOrderId}`);
+                    return;
+                }
+
+                // Subscription for EcoFlix User Updates (by phone)
+                if (data.type === 'subscribe_user' && data.phone) {
+                    ws.subscribedPhone = normalizeWsPhone(data.phone);
                     return;
                 }
 
@@ -70,7 +86,7 @@ const broadcast = (data, target = 'all') => {
     const jsonData = JSON.stringify(data);
     wss.clients.forEach((client) => {
         if (client.readyState === client.OPEN) {
-            if (target === 'all' || (target === 'admin' && client.isAdmin)) {
+            if (target === 'all' || (target === 'admin' && client.isAdmin) || (target === 'users' && !client.isAdmin)) {
                 client.send(jsonData);
             }
         }
@@ -88,6 +104,17 @@ const broadcastToOrder = (orderId, data) => {
     });
 };
 
+const broadcastToPhone = (phone, data) => {
+    if (!wss || !phone) return;
+    const jsonData = JSON.stringify(data);
+    const targetPhone = normalizeWsPhone(phone);
+    wss.clients.forEach((client) => {
+        if (client.readyState === client.OPEN && client.subscribedPhone === targetPhone) {
+            client.send(jsonData);
+        }
+    });
+};
+
 const broadcastUserCount = () => {
     if (!wss) return;
     const userCount = Array.from(wss.clients).filter(c => !c.isAdmin).length;
@@ -99,4 +126,4 @@ const getOnlineUserCount = () => {
     return Array.from(wss.clients).filter(c => !c.isAdmin).length;
 };
 
-module.exports = { init, broadcast, broadcastToOrder, getOnlineUserCount };
+module.exports = { init, broadcast, broadcastToOrder, broadcastToPhone, getOnlineUserCount };

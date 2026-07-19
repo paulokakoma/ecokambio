@@ -10,7 +10,7 @@ const planService = require('../services/plan.service');
 const paymentService = require('../services/payment.service');
 const { redisClient } = require('../../../src/config/redis');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'ecoflix-super-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 const smsService = require('../services/sms.service');
 
 // Helper: Verify HMAC Signature (inline to avoid circular dependency)
@@ -26,13 +26,14 @@ const verifySignature = (payload, signature, secret) => {
 
 const PaymentProviderFactory = require('../services/payment_factory.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
+const { broadcastToOrder, broadcastToPhone } = require('../../../src/websocket');
 
 // ============================================================================
 // CUSTOMER: Init Payment (Reference or Push)
 // ============================================================================
 const initPayment = async (req, res) => {
     try {
-        const { plan_type, payment_method, coupon_code } = req.body; // method: REFERENCE, MCX_PUSH, UNITEL_MONEY, EXPRESS
+        const { plan_type, payment_method, coupon_code, coupon_paygo_id, final_price, duration } = req.body;
         const phone = smsService.normalizePhone(req.body.phone);
 
         // Validate plan
@@ -47,44 +48,17 @@ const initPayment = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Configuração do plano incompleta. Contacte o administrador.' });
         }
 
-        let amount = plans[plan_type].price;
-        let couponUsed = null;
-
-        // --- COUPON VALIDATION ---
-        if (coupon_code) {
-            const { data: coupon } = await supabase
-                .from('ecoflix_coupons')
-                .select('*')
-                .eq('code', coupon_code.toUpperCase())
-                .eq('status', 'ACTIVE')
-                .single();
-
-            if (coupon) {
-                // Check inventory tag if exists
-                if (coupon.inventory_tag) {
-                    const { data: stockCount } = await supabase.rpc('check_tagged_stock', { tag_name: coupon.inventory_tag });
-                    if (stockCount <= 0) {
-                        return res.status(400).json({ success: false, message: 'O lote deste código esgotou.' });
-                    }
-                }
-
-                // Apply Discount
-                const discType = coupon.discount_type || 'flat';
-                const discValue = parseFloat(coupon.discount_value) || 0;
-                if (discType === 'percent' && discValue > 0) {
-                    amount = Math.max(0, amount - (amount * discValue / 100));
-                } else if (discType === 'flat' && discValue > 0) {
-                    amount = Math.max(0, amount - discValue);
-                } else if (coupon.discount_amount > 0) {
-                    amount = Math.max(0, amount - coupon.discount_amount);
-                }
-
-                couponUsed = coupon.code;
-            }
-        }
+        const durationMonths = parseInt(duration) || 1;
+        let amount = parseInt(final_price) || (plans[plan_type].price * durationMonths);
+        let paygoId = coupon_paygo_id || plans[plan_type].paygo_id;
+        let couponUsed = coupon_code || null;
 
         // Get User
         const { data: user } = await supabase.from('ecoflix_users').select('id').eq('phone', phone).single();
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Utilizador não encontrado. Faça login ou registe-se.' });
+        }
 
         // --- PAIMENT GATEWAY INTEGRATION ---
         let paymentResult;
@@ -95,7 +69,7 @@ const initPayment = async (req, res) => {
                 phone,
                 plan_type,
                 payment_method,
-                paygo_id: plans[plan_type].paygo_id
+                paygo_id: paygoId
             });
         } catch (error) {
             return res.status(502).json({ success: false, message: error.message });
@@ -113,6 +87,7 @@ const initPayment = async (req, res) => {
                 amount,
                 phone,
                 payment_method: payment_method === 'EXPRESS' ? 'MCX_PUSH' : 'REFERENCE',
+                duration_months: durationMonths,
                 coupon_used: couponUsed
             })
             .select()
@@ -143,7 +118,7 @@ const initPayment = async (req, res) => {
 // ============================================================================
 const quickOrder = async (req, res) => {
     try {
-        const { plan_type, payment_method, is_renewal, target_subscription_id, duration, coupon_code } = req.body;
+        const { plan_type, payment_method, is_renewal, target_subscription_id, duration, coupon_code, coupon_paygo_id, final_price } = req.body;
         const phone = smsService.normalizePhone(req.body.phone);
 
         const plans = await planService.getPlans();
@@ -158,37 +133,9 @@ const quickOrder = async (req, res) => {
         }
 
         const durationMonths = parseInt(duration) || 1;
-        let totalAmount = plans[plan_type].price * durationMonths;
-        let couponUsed = null;
-
-        // --- COUPON VALIDATION ---
-        if (coupon_code) {
-            const { data: coupon } = await supabase
-                .from('ecoflix_coupons')
-                .select('*')
-                .eq('code', coupon_code.toUpperCase())
-                .eq('status', 'ACTIVE')
-                .single();
-
-            if (coupon) {
-                if (coupon.inventory_tag) {
-                    const { data: stockCount } = await supabase.rpc('check_tagged_stock', { tag_name: coupon.inventory_tag });
-                    if (stockCount <= 0) {
-                        return res.status(400).json({ success: false, message: 'O lote deste código esgotou.' });
-                    }
-                }
-                const discType = coupon.discount_type || 'flat';
-                const discValue = parseFloat(coupon.discount_value) || 0;
-                if (discType === 'percent' && discValue > 0) {
-                    totalAmount = Math.max(0, totalAmount - (totalAmount * discValue / 100));
-                } else if (discType === 'flat' && discValue > 0) {
-                    totalAmount = Math.max(0, totalAmount - discValue);
-                } else if (coupon.discount_amount > 0) {
-                    totalAmount = Math.max(0, totalAmount - coupon.discount_amount);
-                }
-                couponUsed = coupon.code;
-            }
-        }
+        let totalAmount = parseInt(final_price) || (plans[plan_type].price * durationMonths);
+        let paygoId = coupon_paygo_id || plans[plan_type].paygo_id;
+        let couponUsed = coupon_code || null;
 
         // Pré-validação de Stock antes de gerar a cobrança (não aplicável para renovações)
         if (!is_renewal) {
@@ -298,7 +245,7 @@ const quickOrder = async (req, res) => {
                 phone,
                 plan_type,
                 payment_method,
-                paygo_id: plans[plan_type].paygo_id
+                paygo_id: paygoId
             });
         } catch (error) {
             return res.status(502).json({ success: false, message: error.message });
@@ -398,8 +345,7 @@ const checkPaymentStatus = async (req, res) => {
         // Se a ordem ainda está PENDING no banco local, consultamos directamente o
         // provedor (PayGo) para ver se o webhook falhou ou atrasou.
         if (order.status === 'PENDING') {
-            const paymentFactory = require('../services/payment_factory.service');
-            const provider = paymentFactory.getProvider(order.payment_method);
+            const provider = PaymentProviderFactory.getProvider(order.payment_method);
             if (provider && provider.checkStatus) {
                 const txId = order.transaction_id || order.reference_id;
                 if (txId) {
@@ -408,7 +354,6 @@ const checkPaymentStatus = async (req, res) => {
                     console.log(`[Status] Provider returned: ${providerStatus.status}`);
 
                     if (providerStatus.status === 'PAID') {
-                        const paymentService = require('../services/payment.service');
                         const result = await paymentService.processPayment(order);
                         console.log(`[Status] processPayment result: success=${result.success}`);
 
@@ -463,7 +408,7 @@ const checkPaymentStatus = async (req, res) => {
                 password = sub.profile.master_account.password;
                 profileName = sub.profile.name;
                 profilePin = sub.profile.pin;
-                console.log(`[Status] Credentials via JOIN for order ${order.id}: email=${email}`);
+                console.log(`[Status] Credentials via JOIN for order ${order.id}: found=${!!email}`);
             }
 
             // --- Tentativa 2: query directa à subscrição (fallback robusto) ---
@@ -492,12 +437,49 @@ const checkPaymentStatus = async (req, res) => {
                     if (subData.profile.master_account) {
                         email = subData.profile.master_account.email;
                         password = subData.profile.master_account.password;
-                        console.log(`[Status] Credentials via fallback query: email=${email}`);
+                        console.log(`[Status] Credentials via fallback query: found=${!!email}`);
                     } else {
                         console.warn(`[Status] Profile found but master_account is null for order ${order.id}`);
                     }
                 } else {
                     console.warn(`[Status] No subscription found for order ${order.id}`);
+                }
+            }
+
+            // --- Tentativa 3: query direta subscription → master_account (para planos exclusivos) ---
+            if (!email) {
+                console.log(`[Status] Trying direct master_account lookup for order ${order.id}...`);
+                const { data: subDirect, error: subDirectErr } = await supabase
+                    .from('ecoflix_subscriptions')
+                    .select('master_account_id, profile:ecoflix_profiles!fk_subscriptions_profile(name, pin)')
+                    .eq('order_id', order.id)
+                    .single();
+
+                if (!subDirectErr && subDirect) {
+                    if (subDirect.profile) {
+                        profileName = subDirect.profile.name;
+                        profilePin = subDirect.profile.pin;
+                    }
+
+                    if (subDirect.master_account_id) {
+                        const { data: ma, error: maErr } = await supabase
+                            .from('ecoflix_master_accounts')
+                            .select('email, password')
+                            .eq('id', subDirect.master_account_id)
+                            .single();
+
+                        if (!maErr && ma) {
+                            email = ma.email;
+                            password = ma.password;
+                            console.log(`[Status] Credentials via direct master_account lookup: found=${!!email}`);
+                        } else {
+                            console.warn(`[Status] master_account not found for id=${subDirect.master_account_id}`);
+                        }
+                    } else {
+                        console.warn(`[Status] Subscription has no master_account_id for order ${order.id}`);
+                    }
+                } else {
+                    console.warn(`[Status] Direct lookup failed for order ${order.id}:`, subDirectErr?.message);
                 }
             }
 
@@ -530,7 +512,7 @@ const checkPaymentStatus = async (req, res) => {
 // ============================================================================
 const renewSubscription = async (req, res) => {
     try {
-        const { payment_method } = req.body;
+        const { payment_method, duration } = req.body;
         const userId = req.user.id;
 
         // Check Existing Sub
@@ -551,7 +533,8 @@ const renewSubscription = async (req, res) => {
         const targetSubId = isExpired ? null : sub.id;
 
         const plans = await planService.getPlans();
-        const amount = plans[sub.plan_type].price;
+        const durationMonths = parseInt(duration) || 1;
+        const amount = plans[sub.plan_type].price * durationMonths;
 
         // --- PAYMENT PROVIDER ---
         let paymentResult;
@@ -581,7 +564,8 @@ const renewSubscription = async (req, res) => {
                 phone: req.user.phone,
                 payment_method: payment_method === 'EXPRESS' ? 'MCX_PUSH' : 'REFERENCE',
                 subscription_action: action,
-                target_subscription_id: targetSubId
+                target_subscription_id: targetSubId,
+                duration_months: durationMonths
             })
             .select()
             .single();
@@ -627,6 +611,10 @@ const confirmPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Pedido já está pago' });
         }
 
+        if (order.status === 'PROCESSING') {
+            return res.status(409).json({ success: false, message: 'Pagamento já está a ser processado' });
+        }
+
         // Process the payment via Service
         const result = await paymentService.processPayment(order);
         if (result.success) {
@@ -639,6 +627,8 @@ const confirmPayment = async (req, res) => {
                 ts:       Date.now(),
             });
             sseBroadcast('refresh_admin', { reason: 'confirm_payment' });
+            broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
+            broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
         }
         res.json(result);
     } catch (error) {
@@ -672,7 +662,7 @@ const cancelOrder = async (req, res) => {
             const { phone } = req.body;
             const cleanPhone = smsService.normalizePhone(order.phone);
             const cleanInput = smsService.normalizePhone(phone);
-            if (!cleanInput || !cleanPhone.endsWith(cleanInput.slice(-9))) {
+            if (!cleanInput || cleanPhone !== cleanInput) {
                 return res.status(403).json({ success: false, message: 'Número de telemóvel não corresponde ao pedido' });
             }
         }
@@ -698,18 +688,24 @@ const paygoWebhook = async (req, res) => {
         const payload = req.body;
         const signature = req.headers['x-webhook-signature'];
 
-        console.log(`[PayGo Webhook] Received:`, payload);
+        const webhookPaymentId = payload.payment_id || payload.id || 'unknown';
+        console.log(`[PayGo Webhook] Received payment_id=${webhookPaymentId}`);
 
         // Security Check
         const secret = process.env.PAYGOOO_WEBHOOK_SECRET;
+        if (!secret) {
+            if (process.env.NODE_ENV === 'production') {
+                console.error('[PayGo Webhook] PAYGOOO_WEBHOOK_SECRET não definido em produção. Webhook rejeitado.');
+                return res.status(500).json({ success: false, message: 'Configuração de webhook em falta' });
+            }
+            console.warn('[PayGo Webhook] PAYGOOO_WEBHOOK_SECRET not set. Skipping signature verification (non-production).');
+        }
         if (secret) {
             const rawBody = JSON.stringify(req.body);
             if (!verifySignature(rawBody, signature, secret)) {
                 console.warn('[PayGo Webhook] Invalid Signature');
                 return res.status(401).json({ success: false, message: 'Invalid Signature' });
             }
-        } else {
-            console.warn('[PayGo Webhook] PAYGOOO_WEBHOOK_SECRET not set. Skipping signature verification.');
         }
 
         const status = payload.status || (payload.payment && payload.payment.status);
@@ -756,6 +752,8 @@ const paygoWebhook = async (req, res) => {
                             ts:       Date.now(),
                         });
                         sseBroadcast('refresh_admin', { reason: 'webhook_payment' });
+                        broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
+                        broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
                     }
@@ -781,6 +779,7 @@ const paygoWebhook = async (req, res) => {
                 if (order) {
                     sseBroadcast('payment_update', { order_id: order.id, status: 'CANCELLED', ts: Date.now() });
                     sseBroadcast('refresh_admin', { reason: 'payment_cancelled' });
+                    broadcastToOrder(order.id, { type: 'payment_update', status: 'CANCELLED' });
                 }
             }
         }
@@ -797,6 +796,13 @@ const paygoWebhook = async (req, res) => {
 // ============================================================================
 const simulateWebhook = async (req, res) => {
     try {
+        if (process.env.NODE_ENV === 'production' && process.env.SMS_PROVIDER !== 'FAKE') {
+            return res.status(403).json({ success: false, message: 'Endpoint indisponível em produção' });
+        }
+        if (!req.admin) {
+            return res.status(403).json({ success: false, message: 'Acesso negado' });
+        }
+
         const { reference_id, transaction_id, amount } = req.body;
 
         // Lookup by reference_id first, then fallback to transaction_id

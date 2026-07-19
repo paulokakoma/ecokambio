@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoFlix - Streaming Angola</title>
 
-    <!-- Tailwind CSS (Framework de Estilo) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (Local Build) -->
+    <link rel="stylesheet" href="/css/tailwind.min.css">
 
     <!-- Ícones (Font Awesome) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -112,8 +112,8 @@
                                     ECONÓMICO</div>
                                 <div class="mt-4">
                                     <div class="mb-4">
-                                        <span class="bg-gray-800 text-gray-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Económico</span>
-                                        <h2 class="text-2xl font-bold text-white mt-3">Pessoal</h2>
+                                        <h2 class="text-2xl font-bold text-white">Pessoal</h2>
+                                        <p class="text-brand text-[10px] font-bold mt-1">4K ULTRA HDR</p>
                                     </div>
                                     <div class="mb-6 flex items-baseline gap-1">
                                         <span id="mobile-price-economico" class="text-4xl font-black tracking-tighter"><span class="price-loading"></span></span>
@@ -153,9 +153,6 @@
                                 </div>
                                 <div class="absolute top-0 right-0 bg-[#E50914] text-white text-[10px] font-bold px-2 py-1 rounded-tr-[1.5rem]">
                                     ULTRA</div>
-                                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E50914] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_4px_10px_rgba(229,9,20,0.4)] whitespace-nowrap">
-                                    Recomendado
-                                </div>
                                 <div class="mt-4">
                                     <div class="mb-4 mt-2">
                                         <span class="text-[#E50914] text-[10px] font-bold uppercase tracking-wider">4K Ultra HDR</span>
@@ -199,6 +196,7 @@
                                 <div class="mt-4">
                                     <div class="mb-4">
                                         <h2 class="text-2xl font-bold text-white">Conta Inteira</h2>
+                                        <p class="text-[#F97316] text-[10px] font-bold mt-1">4K ULTRA HDR</p>
                                     </div>
                                     <div class="mb-6 flex items-baseline gap-1">
                                         <span id="mobile-price-familia" class="text-4xl font-black tracking-tighter"><span class="price-loading"></span></span>
@@ -206,18 +204,28 @@
                                     </div>
                                     <div class="h-px w-full bg-white/5 mb-6"></div>
                                     <div class="mb-6">
-                                        <div class="flex gap-4 justify-center">
-                                            <div class="flex items-center gap-2">
-                                                <i class="fas fa-users text-[#F97316]"></i>
-                                                <span class="text-white font-bold text-sm">5 Perfis</span>
+                                        <span class="text-[10px] font-bold text-[#F97316] uppercase tracking-wider block mb-3">Exclusividades:</span>
+                                        <div class="flex justify-between px-2">
+                                            <div class="flex flex-col items-center gap-2">
+                                                <i class="fas fa-user-circle text-2xl text-[#F97316]"></i>
+                                                <span class="text-white text-[11px] font-bold">5 Perfis</span>
                                             </div>
-                                            <div class="w-px h-6 bg-white/10"></div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fas fa-tv text-[#F97316]"></i>
-                                                <span class="text-white font-bold text-sm">4 Ecrãs</span>
+                                            <div class="flex flex-col items-center gap-2">
+                                                <i class="fas fa-users text-2xl text-[#F97316]"></i>
+                                                <span class="text-white text-[11px] font-bold">4 Ecrãs</span>
+                                            </div>
+                                            <div class="flex flex-col items-center gap-2">
+                                                <i class="fas fa-home text-2xl text-[#F97316]"></i>
+                                                <span class="text-white text-[11px] font-bold">Multi-Casa</span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="h-px w-full bg-white/5 mb-6"></div>
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Conta 100% Exclusiva</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Crie perfis para a família</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Altere a senha</span></li>
+                                    </ul>
                                 </div>
                                 <button onclick="selectPlan('FAMILIA')"
                                     class="btn-tap w-full mt-auto bg-[#202020] border border-white/10 text-white font-semibold py-4 rounded-2xl">
@@ -246,7 +254,7 @@
                         <h3 class="text-xl font-bold mb-1">Pessoal Económico</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
-                            <span id="display-price-economico" class="text-3xl font-bold opacity-80">4.500 Kz</span>
+                            <span id="display-price-economico" class="text-3xl font-bold opacity-80"><span class="price-loading"></span></span>
                             <span class="text-xs text-muted">/mês</span>
                         </div>
                     </div>
@@ -283,7 +291,7 @@
                         <h3 class="text-2xl font-bold mb-1 text-brand">Pessoal Ultra</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
-                            <span id="display-price-ultra" class="text-4xl font-bold">6.500 Kz</span>
+                            <span id="display-price-ultra" class="text-4xl font-bold"><span class="price-loading"></span></span>
                             <span class="text-xs text-muted">/mês</span>
                         </div>
                     </div>
@@ -321,7 +329,7 @@
                         <h3 class="text-xl font-bold mb-1">Conta Inteira</h3>
                         <p class="text-brand text-xs font-bold mb-3">4K ULTRA HDR</p>
                         <div class="flex items-baseline gap-1">
-                            <span id="display-price-familia" class="text-3xl font-bold opacity-80">18.000 Kz</span>
+                            <span id="display-price-familia" class="text-3xl font-bold opacity-80"><span class="price-loading"></span></span>
                             <span class="text-xs text-muted">/mês</span>
                         </div>
                     </div>
@@ -506,6 +514,10 @@
                                 class="bg-white/10 hover:bg-white/15 active:scale-95 text-white font-bold px-4 py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all flex-shrink-0">
                                 Aplicar
                             </button>
+                            <button onclick="removeCoupon()" id="btn-remove-coupon"
+                                class="hidden bg-red-600/80 hover:bg-red-600 active:scale-95 text-white font-bold px-3 py-2.5 md:py-3 rounded-xl text-sm md:text-base transition-all flex-shrink-0">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                         <p id="coupon-message" class="text-xs md:text-sm mt-2 hidden"></p>
                     </div>
@@ -582,13 +594,13 @@
                         <div class="flex justify-between items-center pb-4 border-b border-white/5">
                             <span class="text-gray-400 text-xs md:text-sm uppercase tracking-wider font-medium">Entidade</span>
                             <div class="flex items-center gap-3"><span class="font-mono text-lg md:text-xl font-bold text-white tracking-widest" id="ref-entity">...</span><i
-                                    onclick="copyToClip(document.getElementById('ref-entity').innerText)"
+                                    onclick="copyToClip(document.getElementById('ref-entity').innerText, event)"
                                     class="ph-bold ph-copy text-gray-400 hover:text-white cursor-pointer transition-colors text-lg active:scale-95"></i></div>
                         </div>
                     <div class="flex justify-between items-center pb-4 border-b border-white/5">
                         <span class="text-gray-400 text-xs md:text-sm uppercase tracking-wider font-medium">Referência</span>
                         <div class="flex items-center gap-3"><span class="font-mono text-lg md:text-xl font-bold text-[#E50914] tracking-widest"
-                                id="ref-display">...</span><i onclick="copyToClipRef()"
+                                id="ref-display">...</span><i onclick="copyToClipRef(event)"
                                 class="ph-bold ph-copy text-gray-400 hover:text-white cursor-pointer transition-colors text-lg active:scale-95"></i></div>
                     </div>
                     <div class="flex justify-between items-center">

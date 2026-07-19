@@ -106,7 +106,7 @@ const sendSms = async (to, text) => {
             }
         };
 
-        console.log(`[SMS-TelcoSMS] Enviando para ${recipient}...`);
+        console.log(`[SMS-TelcoSMS] Enviando SMS...`);
 
         const response = await axios.post(url, payload, {
             headers: { 'Content-Type': 'application/json' },
@@ -123,7 +123,7 @@ const sendSms = async (to, text) => {
             return { success: false, error: errMsg };
         }
 
-        console.log(`[SMS-TelcoSMS] ✅ Enviado para ${recipient}`);
+        console.log(`[SMS-TelcoSMS] ✅ Enviado com sucesso`);
         await logSmsToDb(recipient, cleanText, 'SENT');
         return { success: true, data };
 
@@ -188,18 +188,19 @@ const sendOtpSms = async (phone, code) => {
 const sendDeliverySms = async (phone, creds) => {
     let message =
         `Pagamento confirmado!\n\n` +
-        `Aqui estão seus dados de acesso:\n` +
-        `E-mail: ${creds.email}\n` +
-        `Senha: ${creds.password}\n`;
+        `Aqui estao seus dados de acesso:\n` +
+        `E-mail: ${creds.email || 'N/A'}\n` +
+        `Senha: ${creds.password || 'N/A'}`;
 
-    if (creds.pin !== 'N/A') {
-        message += `Perfil: ${creds.profile}\n` +
-            `Pin: ${creds.pin}`;
+    if (creds.profile) {
+        message += `\nPerfil: ${creds.profile}`;
     }
 
-    if (creds.pin !== 'N/A') {
-        message += `\nAVISO: Não mude a senha para evitar ser banido!`;
+    if (creds.pin && creds.pin !== 'N/A') {
+        message += `\nPIN: ${creds.pin}`;
     }
+
+    message += `\n\nAVISO: Nao mude a senha para evitar ser banido!`;
 
     return sendSms(phone, message);
 };

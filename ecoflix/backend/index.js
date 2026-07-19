@@ -13,9 +13,11 @@ const noCacheHeaders = (req, res, next) => {
 };
 
 module.exports = (app) => {
+    // 0. No-cache headers for admin routes
+    app.use('/api/ecoflix/admin', noCacheHeaders);
+
     // 1. API Routes
     app.use('/api/ecoflix', apiRoutes);
-    app.use('/api/ecoflix/admin', noCacheHeaders);
 
     // 2. View Routes (Standalone Microfrontend)
     app.use('/ecoflix', viewRoutes);

@@ -5,14 +5,17 @@
 
 const supabase = require('../../../src/config/supabase');
 const smsService = require('../services/sms.service');
+const planService = require('../services/plan.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
+const axios = require('axios');
+const { redisClient } = require('../../../src/config/redis');
 
 // ============================================================================
 // CUSTOMER: Validate Coupon
 // ============================================================================
 const validateCoupon = async (req, res) => {
     try {
-        const { code } = req.body;
+        const { code, plan_type, duration } = req.body;
         if (!code) return res.status(400).json({ success: false, message: 'Código obrigatório' });
 
         const { data: coupon, error } = await supabase
@@ -22,7 +25,6 @@ const validateCoupon = async (req, res) => {
             .single();
 
         if (error || !coupon) {
-            console.error('[Coupon] Lookup error:', error?.message, '| code:', code?.toUpperCase());
             return res.status(404).json({ success: false, message: 'Código inválido' });
         }
 
@@ -42,6 +44,97 @@ const validateCoupon = async (req, res) => {
             }
         }
 
+        // Calculate discounted price and create PayGo product
+        const plans = await planService.getPlans();
+        const durationMonths = parseInt(duration) || 1;
+
+        if (plan_type && plans[plan_type]) {
+            const basePrice = plans[plan_type].price * durationMonths;
+
+            let discount = 0;
+            const discType = coupon.discount_type || 'flat';
+            const discValue = parseFloat(coupon.discount_value) || 0;
+            if (discType === 'percent' && discValue > 0) {
+                discount = basePrice * (discValue / 100);
+            } else if (discType === 'flat' && discValue > 0) {
+                discount = discValue;
+            } else if (coupon.discount_amount > 0) {
+                discount = coupon.discount_amount;
+            }
+
+            discount = Math.min(discount, basePrice - (plans.ECONOMICO.price * durationMonths));
+            const finalPrice = basePrice - discount;
+
+            // Create PayGo product with discounted price
+            const PAYGO_API_KEY = process.env.PAYGOOO_API_KEY;
+            const PAYGO_BASE_URL = process.env.PAYGO_BASE_URL || 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
+
+            if (PAYGO_API_KEY && finalPrice !== basePrice) {
+                // Check cache first to avoid creating duplicate products
+                let newPaygoId = null;
+                if (redisClient) {
+                    const cacheKey = `ecoflix:coupon_paygo:${coupon.code}:${plan_type}:${durationMonths}`;
+                    newPaygoId = await redisClient.get(cacheKey);
+                }
+
+                if (!newPaygoId) {
+                    try {
+                        const { data: prod } = await axios.post(
+                            `${PAYGO_BASE_URL}/products`,
+                            {
+                                name: `EcoFlix ${plan_type} CUPOM`,
+                                price: finalPrice,
+                                thank_you_url: 'https://ecokambio.com',
+                                description: `Acesso EcoFlix ${plan_type} (${durationMonths}m) - Desconto ${coupon.code}`
+                            },
+                            { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
+                        );
+                        newPaygoId = prod?.product?.id || prod?.id;
+
+                        // Cache for 24h
+                        if (newPaygoId && redisClient) {
+                            const cacheKey = `ecoflix:coupon_paygo:${coupon.code}:${plan_type}:${durationMonths}`;
+                            await redisClient.set(cacheKey, newPaygoId, 'EX', 86400);
+                        }
+                    } catch (paygoErr) {
+                        console.error('[Coupon] Erro ao criar produto PayGo:', paygoErr.message);
+                    }
+                }
+
+                if (newPaygoId) {
+                    res.json({
+                        success: true,
+                        data: {
+                            code: coupon.code,
+                            discount_type: discType,
+                            discount_value: discValue,
+                            discount: discount,
+                            final_price: finalPrice,
+                            paygo_id: newPaygoId,
+                            message: `Código ${coupon.code} aplicado com sucesso!`
+                        }
+                    });
+                    return;
+                }
+            }
+
+            // Fallback: return without paygo_id (frontend calculates locally)
+            res.json({
+                success: true,
+                data: {
+                    code: coupon.code,
+                    discount_type: discType,
+                    discount_value: discValue,
+                    discount: discount,
+                    final_price: finalPrice,
+                    paygo_id: null,
+                    message: `Código ${coupon.code} aplicado com sucesso!`
+                }
+            });
+            return;
+        }
+
+        // Fallback: no plan_type provided (backward compatibility)
         res.json({
             success: true,
             data: {
@@ -49,6 +142,8 @@ const validateCoupon = async (req, res) => {
                 discount_type: coupon.discount_type || 'flat',
                 discount_value: parseFloat(coupon.discount_value) || 0,
                 discount: coupon.discount_amount,
+                final_price: null,
+                paygo_id: null,
                 message: `Código ${coupon.code} aplicado com sucesso!`
             }
         });
@@ -89,7 +184,7 @@ const getSubscriptionCredentials = async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) {
-            return res.status(500).json({ success: false, message: 'Erro ao buscar assinaturas: ' + error.message });
+            return res.status(500).json({ success: false, message: 'Erro ao buscar assinaturas.' });
         }
 
         let allSubs = [];
@@ -179,6 +274,16 @@ const getSubscriptionCredentials = async (req, res) => {
 // ============================================================================
 const reportIssue = async (req, res) => {
     try {
+        // Rate limiting: max 3 issues per 10 minutes per user
+        if (redisClient) {
+            const rlKey = `ecoflix:issue_rl:${req.user.id}`;
+            const count = await redisClient.incr(rlKey);
+            if (count === 1) await redisClient.expire(rlKey, 600);
+            if (count > 3) {
+                return res.status(429).json({ success: false, message: 'Demasiados pedidos. Aguarde alguns minutos.' });
+            }
+        }
+
         const { subscription_id, issue_type, description } = req.body;
         // issue_type: 'PASSWORD_INCORRECT', 'SCREEN_LIMIT', 'LOCKED', 'OTHER'
 
@@ -225,12 +330,23 @@ const recoverCredentials = async (req, res) => {
         }
 
         const cleanPhone = smsService.normalizePhone(phone);
-        const fullPhone = '+244' + cleanPhone;
+
+        // Rate limiting: max 3 SMS per 10 minutes per phone
+        if (redisClient) {
+            const rlKey = `ecoflix:recover_rl:${cleanPhone}`;
+            const count = await redisClient.incr(rlKey);
+            if (count === 1) {
+                await redisClient.expire(rlKey, 600);
+            }
+            if (count > 3) {
+                return res.status(429).json({ success: false, message: 'Demasiados pedidos. Aguarde alguns minutos e tente novamente.' });
+            }
+        }
 
         const { data: user } = await supabase
             .from('ecoflix_users')
             .select('id')
-            .eq('phone', fullPhone)
+            .eq('phone', cleanPhone)
             .single();
 
         if (!user) {
@@ -288,7 +404,7 @@ const recoverCredentials = async (req, res) => {
                 message: 'Credenciais enviadas por SMS!',
                 data: {
                     sent: true,
-                    phone: fullPhone
+                    phone: '+244' + cleanPhone
                 }
             });
         }
@@ -311,7 +427,7 @@ const recoverCredentials = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Credenciais enviadas por SMS para ' + fullPhone
+            message: 'Credenciais enviadas por SMS!'
         });
 
     } catch (error) {
@@ -334,6 +450,17 @@ const publicReportIssue = async (req, res) => {
         }
 
         const cleanPhone = smsService.normalizePhone(phone);
+
+        // Rate limiting: max 3 issues per 10 minutes per phone
+        if (redisClient) {
+            const rlKey = `ecoflix:issue_rl:pub:${cleanPhone}`;
+            const count = await redisClient.incr(rlKey);
+            if (count === 1) await redisClient.expire(rlKey, 600);
+            if (count > 3) {
+                return res.status(429).json({ success: false, message: 'Demasiados pedidos. Aguarde alguns minutos.' });
+            }
+        }
+
         const finalDesc = `[Suporte Público | Tel: ${cleanPhone}] ` + (description || '');
 
         const { data, error } = await supabase

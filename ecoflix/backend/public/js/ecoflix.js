@@ -6,6 +6,7 @@ let selectedPlanType = null;
 let selectedPlanPrice = null;
 let finalPrice = null;
 let appliedCoupon = null;
+let appliedCouponPaygoId = null;
 let userPhone = null;
 let pollingInterval = null;
 let countdownInterval = null;
@@ -37,8 +38,12 @@ function clearSession() {
     sessionStorage.removeItem('ecoflix_user_phone');
     sessionStorage.removeItem('ecoflix_selected_plan');
     sessionStorage.removeItem('ecoflix_selected_price');
+    appliedCoupon = null;
+    appliedCouponPaygoId = null;
     checkoutPendingMethod = null;
     checkoutPendingCardElement = null;
+    const removeBtn = document.getElementById('btn-remove-coupon');
+    if (removeBtn) removeBtn.classList.add('hidden');
 }
 
 function cancelCheckoutOtp() {
@@ -471,9 +476,10 @@ function formatPhoneNumber(input) {
     input.value = value;
 }
 
-function copyToClip(text) {
+function copyToClip(text, event) {
     navigator.clipboard.writeText(text);
-    const el = event.currentTarget || event.target;
+    const el = event?.currentTarget || event?.target;
+    if (!el) return;
     el.style.color = '#46d369';
     setTimeout(() => { el.style.color = ''; }, 1000);
 }
@@ -484,9 +490,9 @@ function copyText(elementId) {
     showToast('Copiado!', 'success');
 }
 
-function copyToClipRef() {
+function copyToClipRef(event) {
     const text = document.getElementById('ref-display').innerText.replace(/\s/g, '');
-    copyToClip(text);
+    copyToClip(text, event);
 }
 
 function toggleFaq(element) {
@@ -514,6 +520,7 @@ async function submitPhone() {
     }
 
     userPhone = '+244' + phoneClean;
+    subscribeUserToWs();
 
     const durationSelect = document.getElementById('duration-select');
     const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
@@ -565,7 +572,7 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
         }
 
         const durationSelect = document.getElementById('duration-select');
-        const duration = durationSelect ? durationSelect.value : 1;
+        const duration = durationSelect ? parseInt(durationSelect.value) || 1 : 1;
 
         const requestData = {
             phone: userPhone,
@@ -574,7 +581,9 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
             is_renewal: isRenewal,
             target_subscription_id: targetSubscriptionId,
             duration: duration,
-            coupon_code: appliedCoupon || null
+            coupon_code: appliedCoupon || null,
+            coupon_paygo_id: appliedCouponPaygoId || null,
+            final_price: finalPrice || null
         };
 
         const hmacHeaders = await window.HMACSign.signRequest(requestData);
@@ -599,6 +608,10 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
 
         currentOrder = result.data;
         saveSession();
+
+        if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+            wsClient.send(JSON.stringify({ type: 'subscribe_order', order_id: currentOrder.order_id }));
+        }
 
         if (result.data.message && method !== 'EXPRESS') {
             showToast(result.data.message, 'info');
@@ -635,10 +648,33 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
 }
 
 // === COUPON LOGIC ===
+function removeCoupon() {
+    const input = document.getElementById('coupon-input');
+    const msg = document.getElementById('coupon-message');
+    const removeBtn = document.getElementById('btn-remove-coupon');
+
+    appliedCoupon = null;
+    appliedCouponPaygoId = null;
+    const durationSelect = document.getElementById('duration-select');
+    const duration = durationSelect ? parseInt(durationSelect.value) || 1 : 1;
+    const basePrice = selectedPlanPrice * duration;
+    finalPrice = basePrice;
+
+    document.getElementById('summary-original-price').innerText = formatKz(basePrice);
+    updateSummary(finalPrice);
+    removeDiscountDisplay();
+    input.value = '';
+    input.classList.remove('border-[#46d369]');
+    msg.className = 'text-xs mt-2 hidden';
+    removeBtn.classList.add('hidden');
+    document.getElementById('btn-apply-coupon').disabled = false;
+}
+
 async function applyCoupon() {
     const input = document.getElementById('coupon-input');
     const msg = document.getElementById('coupon-message');
     const btn = document.getElementById('btn-apply-coupon');
+    const removeBtn = document.getElementById('btn-remove-coupon');
     const code = input.value.trim().toUpperCase();
 
     if (!code) return;
@@ -648,7 +684,9 @@ async function applyCoupon() {
     msg.className = 'text-xs mt-2 hidden';
 
     try {
-        const data = { code };
+        const durationSelect = document.getElementById('duration-select');
+        const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
+        const data = { code, plan_type: selectedPlanType, duration };
         const hmacHeaders = await window.HMACSign.signRequest(data);
 
         const response = await fetch(`${API_BASE}/coupons/validate`, {
@@ -669,27 +707,18 @@ async function applyCoupon() {
             msg.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${result.data.message}`;
 
             appliedCoupon = result.data.code;
+            appliedCouponPaygoId = result.data.paygo_id || null;
             input.classList.add('border-[#46d369]');
+            removeBtn.classList.remove('hidden');
 
-            if (result.data.discount_value > 0 || result.data.discount > 0) {
-                const durationSelect = document.getElementById('duration-select');
-                const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
+            if (result.data.final_price != null) {
                 const currentBase = selectedPlanPrice * duration;
-
-                let discount = 0;
-                if (result.data.discount_value > 0) {
-                    if (result.data.discount_type === 'percent') {
-                        discount = currentBase * (result.data.discount_value / 100);
-                    } else {
-                        discount = result.data.discount_value * duration;
-                    }
-                } else {
-                    discount = parseFloat(result.data.discount);
-                }
-
-                finalPrice = Math.max(0, currentBase - discount);
+                const discount = currentBase - result.data.final_price;
+                finalPrice = result.data.final_price;
                 updateSummary(finalPrice);
-                updateDiscountDisplay(currentBase, discount);
+                if (discount > 0) {
+                    updateDiscountDisplay(currentBase, discount);
+                }
             }
         } else {
             msg.classList.remove('text-[#46d369]');
@@ -697,10 +726,12 @@ async function applyCoupon() {
             msg.innerHTML = `<i class="fas fa-times-circle mr-1"></i> ${result.message}`;
 
             appliedCoupon = null;
-            finalPrice = selectedPlanPrice;
+            appliedCouponPaygoId = null;
+            finalPrice = selectedPlanPrice * duration;
             updateSummary(finalPrice);
             removeDiscountDisplay();
             input.classList.remove('border-[#46d369]');
+            removeBtn.classList.add('hidden');
         }
     } catch (error) {
         console.error('Coupon error:', error);
@@ -744,6 +775,12 @@ function removeDiscountDisplay() {
 // ============================================================================
 let wsClient = null;
 
+function subscribeUserToWs() {
+    if (wsClient && wsClient.readyState === WebSocket.OPEN && userPhone) {
+        wsClient.send(JSON.stringify({ type: 'subscribe_user', phone: userPhone }));
+    }
+}
+
 function initUserWebSocket() {
     if (wsClient && wsClient.readyState !== WebSocket.CLOSED) return;
 
@@ -756,6 +793,9 @@ function initUserWebSocket() {
         if (orderId) {
             wsClient.send(JSON.stringify({ type: 'subscribe_order', order_id: orderId }));
         }
+        if (userPhone) {
+            wsClient.send(JSON.stringify({ type: 'subscribe_user', phone: userPhone }));
+        }
     };
 
     wsClient.onmessage = async (event) => {
@@ -766,7 +806,37 @@ function initUserWebSocket() {
                 fetchPlanPrices();
                 fetchPlanStock();
             }
+            else if (data.type === 'plan_update') {
+                fetchPlanPrices();
+                fetchPlanStock();
+            }
+            else if (data.type === 'subscription_update') {
+                const isPaymentConfirmed = data.reason === 'payment_confirmed';
+                if (userPhone && (localStorage.getItem('ecoflix_token') || isPaymentConfirmed)) {
+                    if (localStorage.getItem('ecoflix_token')) {
+                        loadDashboard();
+                    }
+                    const reasons = {
+                        credentials_changed: 'As suas credenciais foram atualizadas. Verifique o painel.',
+                        profile_revoked: 'Acesso revogado. Contacte o suporte.',
+                        profile_suspended: 'Acesso suspenso. Contacte o suporte.',
+                        profile_restored: 'Acesso restaurado com sucesso!',
+                        account_suspended: 'A conta foi suspensa.',
+                        account_restored: 'Conta reativada com sucesso!',
+                        account_deleted: 'A conta foi removida.',
+                        payment_confirmed: 'Pagamento confirmado! A verificar credenciais...'
+                    };
+                    const msg = reasons[data.reason] || 'Dados atualizados.';
+                    const type = ['profile_restored', 'account_restored', 'payment_confirmed'].includes(data.reason) ? 'success' : 'info';
+                    showToast(msg, type);
+                }
+            }
             else if (data.type === 'payment_update' && currentOrder) {
+                if (data.status === 'PAID' && data.credentials && data.credentials.email) {
+                    clearSession();
+                    showPaymentSuccess(data.credentials);
+                    return;
+                }
                 const txId = currentOrder.transaction_id || currentOrder.reference;
                 const checkStatus = await fetch(`${API_BASE}/orders/${txId}/status`);
                 const statusData = await checkStatus.json();
@@ -1015,13 +1085,7 @@ async function cancelOrder() {
     showToast('Pedido cancelado.', 'info');
 }
 
-window.addEventListener('beforeunload', function (e) {
-    if (currentOrder && currentOrder.order_id) {
-        const url = `${API_BASE}/orders/${currentOrder.order_id}/cancel`;
-        const blob = new Blob([JSON.stringify({ phone: userPhone })], { type: 'application/json' });
-        navigator.sendBeacon(url, blob);
-    }
-});
+// Order cancellation relies on server-side expiration (orders expire after 5 min)
 
 function showPaymentSuccess(credentials) {
     stopPayTimer();
@@ -1103,6 +1167,7 @@ async function loadDashboard() {
             if (data.phone) {
                 userPhone = data.phone;
                 sessionStorage.setItem('ecoflix_user_phone', userPhone);
+                subscribeUserToWs();
             }
             window.currentSubscriptions = data.data;
 
@@ -1276,44 +1341,26 @@ function logout() {
 function startRenewal(index) {
     const sub = window.currentSubscriptions[index];
     selectedPlanType = sub.plan;
-    
-    // Fetch current prices from server instead of using hardcoded values
+
+    const proceedWithRenewal = () => {
+        isRenewal = true;
+        targetSubscriptionId = sub.id;
+        document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
+        document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+        document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
+        showScreen('step-payment-method');
+        showToast('Selecione o método de pagamento para renovar.', 'info');
+    };
+
     fetch(`${API_BASE}/public/plans`)
         .then(r => r.json())
         .then(data => {
             if (data.success && data.data && data.data[selectedPlanType]) {
                 selectedPlanPrice = data.data[selectedPlanType].price;
-            } else {
-                // Fallback to defaults if server unavailable
-            if (selectedPlanType === 'ECONOMICO') selectedPlanPrice = 5000;
-            else if (selectedPlanType === 'ULTRA') selectedPlanPrice = 7000;
-            else selectedPlanPrice = 18000;
-        }
-        
-        isRenewal = true;
-        targetSubscriptionId = sub.id;
-
-        document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
-        document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
-        document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
-
-        showScreen('step-payment-method');
-        showToast('Selecione o método de pagamento para renovar.', 'info');
-    })
-    .catch(() => {
-        // Fallback on error
-        if (selectedPlanType === 'ECONOMICO') selectedPlanPrice = 5000;
-        else if (selectedPlanType === 'ULTRA') selectedPlanPrice = 7000;
-        else selectedPlanPrice = 18000;
-            
-            isRenewal = true;
-            targetSubscriptionId = sub.id;
-            document.getElementById('summary-plan-name').innerText = 'Renovação ' + selectedPlanType;
-            document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
-            document.getElementById('summary-total-price').innerText = formatKz(selectedPlanPrice);
-            showScreen('step-payment-method');
-            showToast('Selecione o método de pagamento para renovar.', 'info');
-        });
+            }
+            proceedWithRenewal();
+        })
+        .catch(() => proceedWithRenewal());
 }
 
 // === REPORT PROBLEM ===
@@ -1374,13 +1421,6 @@ async function submitIssue() {
 }
 
 // === MODAL DE TERMOS ===
-localStorage.setItem('ecoflix_terms_accepted', 'true');
-
-function checkTermsAcceptance() {
-    localStorage.setItem('ecoflix_terms_accepted', 'true');
-    return;
-}
-
 function acceptTerms() {
     localStorage.setItem('ecoflix_terms_accepted', 'true');
     const modal = document.getElementById('terms-modal');
@@ -1422,8 +1462,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (declineBtn) {
         declineBtn.addEventListener('click', declineTerms);
     }
-
-    localStorage.setItem('ecoflix_terms_accepted', 'true');
 
     const order = restoreSession();
     if (order) {

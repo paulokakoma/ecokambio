@@ -9,18 +9,21 @@ const jwt = require('jsonwebtoken');
 const smsService = require('../services/sms.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const OTP_COOLDOWN_SECONDS = 86400; // 24 hours between OTP sends per phone
+if (!JWT_SECRET) {
+    console.error('[Auth] JWT_SECRET não definido no .env. Tokens não funcionarão.');
+}
+const OTP_COOLDOWN_SECONDS = 60; // 60 seconds between OTP sends per phone
 
 // ============================================================================
 // CUSTOMER: Register (Step 1: Request OTP)
 // ============================================================================
 const registerRequest = async (req, res) => {
     try {
-        const { phone } = req.body;
-
-        if (!phone) {
+        const rawPhone = req.body.phone;
+        if (!rawPhone) {
             return res.status(400).json({ success: false, message: 'Telefone é obrigatório' });
         }
+        const phone = smsService.normalizePhone(rawPhone);
 
         // Check if user already exists
         const { data: existingUser } = await supabase
@@ -57,9 +60,10 @@ const registerRequest = async (req, res) => {
             const sentAt = new Date(recentOtp.created_at);
             const secondsElapsed = Math.floor((Date.now() - sentAt.getTime()) / 1000);
             const secondsRemaining = OTP_COOLDOWN_SECONDS - secondsElapsed;
+            const minutes = Math.ceil(secondsRemaining / 60);
             return res.status(429).json({
                 success: false,
-                message: `Aguarde ${secondsRemaining} segundos antes de solicitar um novo código.`,
+                message: `Aguarde ${minutes} minuto${minutes > 1 ? 's' : ''} antes de solicitar um novo código.`,
                 retryAfter: secondsRemaining
             });
         }
@@ -82,15 +86,13 @@ const registerRequest = async (req, res) => {
         // Send SMS
         const smsResponse = await smsService.sendOtpSms(phone, code);
         
-        let devCode = null;
-        if (process.env.SMS_PROVIDER === 'FAKE' || process.env.NODE_ENV !== 'production') {
-            devCode = code; // Only for local testing convenience
-        }
+        // devCode only in FAKE mode — never leaked in production
+        const isFakeMode = process.env.SMS_PROVIDER === 'FAKE';
+        const devCode = isFakeMode ? code : null;
 
         if (smsResponse.success) {
             res.json({ success: true, message: 'Código SMS enviado', devCode });
         } else {
-            // Se falhar o SMS mas quisermos permitir teste:
             res.json({ success: true, message: 'Erro no SMS, mas código gerado.', devCode });
         }
 
@@ -105,33 +107,29 @@ const registerRequest = async (req, res) => {
 // ============================================================================
 const registerVerify = async (req, res) => {
     try {
-        const { phone, code } = req.body;
+        const rawPhone = req.body.phone;
+        const { code } = req.body;
 
-        if (!phone || !code) {
+        if (!rawPhone || !code) {
             return res.status(400).json({ success: false, message: 'Telefone e código são obrigatórios.' });
         }
+        const phone = smsService.normalizePhone(rawPhone);
 
-        // Verify OTP (Aceita 0000 como código mestre para ultrapassar falhas de SMS)
-        let query = supabase
+        // Verify OTP
+        const { data: otpRecord, error: otpError } = await supabase
             .from('ecoflix_otp_codes')
             .select('*')
             .eq('phone', phone)
+            .eq('code', code)
             .eq('verified', false)
             .gte('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false })
-            .limit(1);
+            .limit(1)
+            .single();
 
-        if (code !== '0000') {
-            query = query.eq('code', code);
-        }
-
-        const { data: otpRecords, error: otpError } = await query;
-
-        if (otpError || !otpRecords || otpRecords.length === 0) {
+        if (otpError || !otpRecord) {
             return res.status(400).json({ success: false, message: 'Código inválido ou expirado.' });
         }
-
-        const otpRecord = otpRecords[0];
 
         // Mark OTP as verified
         await supabase
@@ -174,11 +172,13 @@ const registerVerify = async (req, res) => {
 // ============================================================================
 const login = async (req, res) => {
     try {
-        const { phone, password } = req.body;
+        const rawPhone = req.body.phone;
+        const { password } = req.body;
 
-        if (!phone || !password) {
+        if (!rawPhone || !password) {
             return res.status(400).json({ success: false, message: 'Telefone e senha são obrigatórios' });
         }
+        const phone = smsService.normalizePhone(rawPhone);
 
         // Find user
         const { data: user, error } = await supabase
@@ -191,6 +191,11 @@ const login = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Número ou senha inválidos.' });
         }
 
+        // Verify if account is active FIRST (don't leak password validity)
+        if (user.verified_at === null) {
+            return res.status(403).json({ success: false, errorCode: 'UNVERIFIED', message: 'Conta não verificada. Por favor conclua o registo com o código SMS.' });
+        }
+
         // If user has no password (old OTP user), prompt them to set a password via register flow
         if (!user.password) {
             return res.status(400).json({ success: false, errorCode: 'NO_PASSWORD', message: 'Conta sem senha. Crie uma palavra-passe para continuar.' });
@@ -200,11 +205,6 @@ const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Número ou senha inválidos.' });
-        }
-
-        // Verify if account is active
-        if (user.verified_at === null) {
-            return res.status(403).json({ success: false, errorCode: 'UNVERIFIED', message: 'Conta não verificada. Por favor conclua o registo com o código SMS.' });
         }
 
         // Generate JWT
@@ -237,7 +237,23 @@ const requireOtpAuth = async (req, res, next) => {
 
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
-            req.user = decoded; // Attach user to request
+
+            // Verify user still exists and is active
+            const { data: user, error } = await supabase
+                .from('ecoflix_users')
+                .select('id, phone, verified_at')
+                .eq('id', decoded.id)
+                .single();
+
+            if (error || !user) {
+                return res.status(401).json({ success: false, message: 'Utilizador não encontrado.' });
+            }
+
+            if (!user.verified_at) {
+                return res.status(403).json({ success: false, message: 'Conta não verificada.' });
+            }
+
+            req.user = { id: user.id, phone: user.phone };
             next();
         } catch (err) {
             return res.status(403).json({ success: false, message: 'Sessão expirada. Verifique o código novamente.' });

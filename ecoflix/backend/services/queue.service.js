@@ -22,7 +22,7 @@ if (redisUrl) {
     startFamilyPlanWorker = () => {
         return new Worker(FAMILY_PLAN_QUEUE, async (job) => {
         const { orderId } = job.data;
-        console.log(`[Queue] Processing Family Plan Order: ${orderId}`);
+        console.log(`[Queue] A processar Family Plan Order: ${orderId}`);
 
         try {
             // Fetch Order
@@ -33,11 +33,11 @@ if (redisUrl) {
                 .single();
 
             if (orderError || !order) {
-                throw new Error('Order not found');
+                throw new Error('Pedido não encontrado');
             }
 
             if (order.status !== 'PENDING') {
-                console.log(`[Queue] Order ${orderId} already processed.`);
+                console.log(`[Queue] Order ${orderId} já processado.`);
                 return;
             }
 
@@ -51,17 +51,17 @@ if (redisUrl) {
             });
 
             if (rpcError) {
-                console.error(`[Queue] Fatal RPC Error for order ${orderId}:`, rpcError.message);
+                console.error(`[Queue] Erro Fatal RPC para order ${orderId}:`, rpcError.message);
                 throw rpcError;
             }
 
             if (!result.success) {
                 if (result.message === 'CONCURRENCY_LOCKED') {
                     // O BullMQ cuida do retry com exponential backoff se lançarmos erro
-                    throw new Error('CONCURRENCY_LOCKED - Database locked, retrying via BullMQ');
+                    throw new Error('CONCURRENCY_LOCKED - Base de dados bloqueada, a tentar novamente via BullMQ');
                 }
                 
-                console.warn(`[Queue] Out of stock for Family Plan (Order ${orderId}): ${result.message}`);
+                console.warn(`[Queue] Stock esgotado para Family Plan (Order ${orderId}): ${result.message}`);
                 await handleOutOfStock(order);
                 return;
             }
@@ -70,10 +70,10 @@ if (redisUrl) {
             
             // 5. Enviar SMS
             await smsService.sendDeliverySms(order.phone, result.credentials);
-            console.log(`[Queue] Order ${orderId} completed.`);
+            console.log(`[Queue] Order ${orderId} concluída.`);
 
         } catch (error) {
-            console.error(`[Queue] Error processing order ${orderId}:`, error);
+            console.error(`[Queue] Erro ao processar order ${orderId}:`, error);
             throw error;
         }
 

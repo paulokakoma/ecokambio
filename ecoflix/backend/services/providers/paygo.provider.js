@@ -38,7 +38,7 @@ class PayGoProvider {
             customer_phone: cleanPhone,
         };
 
-        console.log(`[PayGo] POST /payments method=${apiMethod} product=${payload.product_id} amount=${payload.amount} phone=${cleanPhone}`);
+        console.log(`[PayGo] POST /payments method=${apiMethod} product=${payload.product_id} amount=${payload.amount}`);
 
         try {
             const { data } = await axios.post(`${PAYGO_BASE_URL}/payments`, payload, { headers: this.headers });

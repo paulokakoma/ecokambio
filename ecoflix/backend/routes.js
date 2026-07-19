@@ -47,8 +47,10 @@ router.post('/subscription/renew', validateSignature, catchAsync(authController.
 router.post('/subscription/report', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(subscriptionController.reportIssue));
 router.post('/support/public-report', validateSignature, catchAsync(subscriptionController.publicReportIssue));
 
-// Testing
-router.post('/test/simulate-webhook', catchAsync(paymentController.simulateWebhook));
+// Testing (only in non-production)
+if (process.env.NODE_ENV !== 'production') {
+    router.post('/test/simulate-webhook', catchAsync(paymentController.simulateWebhook));
+}
 
 
 // ============================================================================
@@ -56,9 +58,9 @@ router.post('/test/simulate-webhook', catchAsync(paymentController.simulateWebho
 // ============================================================================
 
 // Dashboard Analytics
-router.get('/admin/inventory-stats', catchAsync(adminController.getInventoryStatus));
-router.get('/admin/export-csv', catchAsync(adminController.getExportCSV));
-router.get('/admin/export-sales-auto', catchAsync(adminController.exportSalesAuto)); // Token Protected Query
+router.get('/admin/inventory-stats', isAdmin, catchAsync(adminController.getInventoryStatus));
+router.get('/admin/export-csv', isAdmin, catchAsync(adminController.getExportCSV));
+router.get('/admin/export-sales-auto', isAdmin, catchAsync(adminController.exportSalesAuto));
 
 // Dashboard (Old/Shared)
 router.get('/admin/dashboard', isAdmin, catchAsync(adminController.getDashboard));

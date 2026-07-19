@@ -8,6 +8,7 @@ const { redisClient } = require('../../../src/config/redis');
 const smsService = require('../services/sms.service');
 const planService = require('../services/plan.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
+const { broadcastToPhone, broadcast: wsBroadcast } = require('../../../src/websocket');
 
 // Helper: Generate random PIN
 const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
@@ -268,7 +269,13 @@ const updateAccount = async (req, res) => {
         const { id } = req.params;
         const { email, password, renewal_date, type, status, notes, notify_users, recovery_email, recovery_password } = req.body;
 
-        const updatePayload = { email, password, renewal_date, type, status, notes, updated_at: new Date() };
+        const updatePayload = { updated_at: new Date() };
+        if (email !== undefined) updatePayload.email = email;
+        if (password !== undefined) updatePayload.password = password;
+        if (renewal_date !== undefined) updatePayload.renewal_date = renewal_date;
+        if (type !== undefined) updatePayload.type = type;
+        if (status !== undefined) updatePayload.status = status;
+        if (notes !== undefined) updatePayload.notes = notes;
         if (recovery_email !== undefined) updatePayload.recovery_email = recovery_email || null;
         if (recovery_password !== undefined) updatePayload.recovery_password = recovery_password || null;
 
@@ -314,11 +321,12 @@ const updateAccount = async (req, res) => {
                 
                 // Se não estiver vendida, podemos alterar para SHARED.
                 // Criamos apenas 4 perfis, pois o 5º perfil é o principal da conta (não é vendido).
+                const randomPin = () => Math.floor(1000 + Math.random() * 9000).toString();
                 const profilesToInsert = [
-                    { master_account_id: id, name: 'Perfil 1', pin: '1111', type: 'TV', status: 'AVAILABLE' },
-                    { master_account_id: id, name: 'Perfil 2', pin: '2222', type: 'TV', status: 'AVAILABLE' },
-                    { master_account_id: id, name: 'Perfil 3', pin: '3333', type: 'TV', status: 'AVAILABLE' },
-                    { master_account_id: id, name: 'Perfil 4', pin: '4444', type: 'MOBILE', status: 'AVAILABLE' }
+                    { master_account_id: id, name: 'Perfil 1', pin: randomPin(), type: 'TV', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 2', pin: randomPin(), type: 'MOBILE', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 3', pin: randomPin(), type: 'MOBILE', status: 'AVAILABLE' },
+                    { master_account_id: id, name: 'Perfil 4', pin: randomPin(), type: 'MOBILE', status: 'AVAILABLE' }
                 ];
                 await supabase.from('ecoflix_profiles').insert(profilesToInsert);
             }
@@ -334,7 +342,8 @@ const updateAccount = async (req, res) => {
         if (error) throw error;
 
         // Notify users if requested and password actually changed
-        if (notify_users && originalAccount && originalAccount.password !== password) {
+        const affectedPhones = new Set();
+        if (notify_users && originalAccount && password && originalAccount.password !== password) {
             if (account.type === 'SHARED') {
                 const { data: profiles } = await supabase
                     .from('ecoflix_profiles')
@@ -345,6 +354,7 @@ const updateAccount = async (req, res) => {
                 
                 if (profiles && profiles.length > 0) {
                     for (const p of profiles) {
+                        affectedPhones.add(p.client_phone);
                         await smsService.sendPasswordUpdateSms(p.client_phone, {
                             email: account.email,
                             password: account.password,
@@ -363,6 +373,7 @@ const updateAccount = async (req, res) => {
                 if (subs && subs.length > 0) {
                     for (const sub of subs) {
                         if (sub.ecoflix_orders && sub.ecoflix_orders.phone) {
+                            affectedPhones.add(sub.ecoflix_orders.phone);
                             await smsService.sendPasswordUpdateSms(sub.ecoflix_orders.phone, {
                                 email: account.email,
                                 password: account.password
@@ -375,6 +386,9 @@ const updateAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'update_account' });
         sseBroadcast('refresh_admin', { reason: 'update_account' });
+        for (const phone of affectedPhones) {
+            broadcastToPhone(phone, { type: 'subscription_update', reason: 'credentials_changed' });
+        }
         res.json({ success: true, data: account });
     } catch (error) {
         console.error('Update account error:', error);
@@ -389,11 +403,21 @@ const deleteAccount = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Fetch all profiles for this account
+        // Fetch affected phones before deletion
         const { data: profiles } = await supabase
             .from('ecoflix_profiles')
-            .select('id')
+            .select('id, client_phone')
             .eq('master_account_id', id);
+
+        const { data: exclusiveSubs } = await supabase
+            .from('ecoflix_subscriptions')
+            .select('ecoflix_orders(phone)')
+            .eq('master_account_id', id)
+            .is('profile_id', null);
+
+        const affectedPhones = new Set();
+        if (profiles) profiles.forEach(p => { if (p.client_phone) affectedPhones.add(p.client_phone); });
+        if (exclusiveSubs) exclusiveSubs.forEach(s => { if (s.ecoflix_orders?.phone) affectedPhones.add(s.ecoflix_orders.phone); });
 
         if (profiles && profiles.length > 0) {
             const profileIds = profiles.map(p => p.id);
@@ -410,6 +434,14 @@ const deleteAccount = async (req, res) => {
             .delete()
             .eq('master_account_id', id);
 
+        // Delete all profiles linked to this master account
+        if (profiles && profiles.length > 0) {
+            await supabase
+                .from('ecoflix_profiles')
+                .delete()
+                .eq('master_account_id', id);
+        }
+
         const { error } = await supabase
             .from('ecoflix_master_accounts')
             .delete()
@@ -419,6 +451,9 @@ const deleteAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'delete_account' });
         sseBroadcast('refresh_admin', { reason: 'delete_account' });
+        for (const phone of affectedPhones) {
+            broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_deleted' });
+        }
         res.json({ success: true, message: 'Conta apagada com sucesso' });
     } catch (error) {
         console.error('Delete account error:', error);
@@ -714,7 +749,6 @@ const getInventoryStatus = async (req, res) => {
             });
         }
 
-        sseBroadcast('refresh_admin', { reason: 'resolve_issue' });
         res.json({
             success: true,
             data: {
@@ -964,14 +998,15 @@ const markPartnerPaid = async (req, res) => {
         const { amount_paid } = req.body;
 
         const { error: rpcError } = await supabase.rpc('mark_partner_paid', {
-            p_coupon_code: id
+            p_coupon_code: id,
+            p_amount: amount_paid || 0
         });
 
         if (rpcError) {
             const { error: updateError } = await supabase
                 .from('ecoflix_coupons')
                 .update({
-                    total_commission_due: 0,
+                    total_commission_due: Math.max(0, (amount_paid || 0)),
                     last_paid_at: new Date().toISOString()
                 })
                 .or(`code.eq.${id},id.eq.${id}`);
@@ -1256,6 +1291,7 @@ const updatePlans = async (req, res) => {
         
         const updatedPlans = await planService.updatePlans(plansToSave);
         sseBroadcast('refresh_admin', { reason: 'update_plans' });
+        wsBroadcast({ type: 'plan_update', reason: 'prices_updated' }, 'users');
         res.json({ success: true, data: updatedPlans, message: 'Preços atualizados com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar planos:', error);
@@ -1358,7 +1394,9 @@ const getPublicStock = async (req, res) => {
             data: {
                 ECONOMICO: { available: mobileCount > 0, count: mobileCount || 0 },
                 ULTRA: { available: tvCount > 0, count: tvCount || 0 },
-                FAMILIA: { available: exclusiveCount > 0, count: exclusiveCount }
+                FAMILIA: { available: exclusiveCount > 0, count: exclusiveCount },
+                COMPLETA: { available: exclusiveCount > 0, count: exclusiveCount },
+                INTEIRA: { available: exclusiveCount > 0, count: exclusiveCount }
             }
         });
     } catch (error) {
@@ -1462,6 +1500,9 @@ const revokeProfile = async (req, res) => {
         console.log(`[Revoke] Profile ${id} revoked. client_phone=${clientPhone || 'unknown'}`);
         sseBroadcast('stock_update', { reason: 'revoke_profile' });
         sseBroadcast('refresh_admin', { reason: 'revoke_profile' });
+        if (clientPhone) {
+            broadcastToPhone(clientPhone, { type: 'subscription_update', reason: 'profile_revoked' });
+        }
         res.json({ success: true, message: 'Perfil revogado com sucesso. O utilizador foi desconectado.' });
     } catch (error) {
         console.error('Revoke profile error:', error);
@@ -1502,6 +1543,9 @@ const suspendProfile = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'suspend_profile' });
         sseBroadcast('refresh_admin', { reason: 'suspend_profile' });
+        if (profile.client_phone) {
+            broadcastToPhone(profile.client_phone, { type: 'subscription_update', reason: 'profile_suspended' });
+        }
         res.json({ success: true, message: 'Perfil suspenso.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1538,6 +1582,9 @@ const restoreProfile = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'return_profile' });
         sseBroadcast('refresh_admin', { reason: 'return_profile' });
+        if (profile.client_phone) {
+            broadcastToPhone(profile.client_phone, { type: 'subscription_update', reason: 'profile_restored' });
+        }
         res.json({ success: true, message: 'Perfil devolvido/restaurado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1603,8 +1650,11 @@ const getSupportClients = async (req, res) => {
 const resendSms = async (req, res) => {
     try {
         const { phone, email, password, profile, pin } = req.body;
+        if (!phone || !email || !password) {
+            return res.status(400).json({ success: false, message: 'Telefone, email e senha são obrigatórios.' });
+        }
         const smsService = require('../services/sms.service');
-        await smsService.sendDeliverySms(phone, { email, password, profile, pin });
+        await smsService.sendDeliverySms(phone, { email, password, profile: profile || 'N/A', pin: pin || 'N/A' });
         res.json({ success: true, message: 'SMS reenviado com sucesso.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1625,6 +1675,9 @@ const suspendAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'suspend_account' });
         sseBroadcast('refresh_admin', { reason: 'suspend_account' });
+        if (phone) {
+            broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_suspended' });
+        }
         res.json({ success: true, message: 'Conta suspensa e cliente notificado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1658,18 +1711,41 @@ const restoreAccount = async (req, res) => {
             .update({ status: 'ACTIVE' })
             .eq('id', subscription_id);
 
-        await supabase
-            .from('ecoflix_profiles')
-            .update({ status: 'SOLD' })
-            .eq('id', sub.profile_id);
+        if (sub.profile_id) {
+            await supabase
+                .from('ecoflix_profiles')
+                .update({ status: 'SOLD' })
+                .eq('id', sub.profile_id);
+        }
 
         const smsService = require('../services/sms.service');
         if (phone) {
             await smsService.sendRestoreSms(phone);
         }
 
+        // Reenviar credenciais se for conta exclusiva (sem profile_id)
+        if (!sub.profile_id && phone) {
+            const { data: subFull } = await supabase
+                .from('ecoflix_subscriptions')
+                .select('master_account:ecoflix_master_accounts(email, password)')
+                .eq('id', subscription_id)
+                .single();
+
+            if (subFull?.master_account) {
+                await smsService.sendDeliverySms(phone, {
+                    email: subFull.master_account.email,
+                    password: subFull.master_account.password,
+                    profile: 'Conta Exclusiva',
+                    pin: 'N/A'
+                });
+            }
+        }
+
         sseBroadcast('stock_update', { reason: 'reactivate_account' });
         sseBroadcast('refresh_admin', { reason: 'reactivate_account' });
+        if (phone) {
+            broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_restored' });
+        }
         res.json({ success: true, message: 'Conta reativada com sucesso e SMS enviado.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1679,11 +1755,34 @@ const restoreAccount = async (req, res) => {
 const resetPassword = async (req, res) => {
     try {
         const { master_account_id, new_password } = req.body;
-        
+
+        // Fetch affected phones before updating
+        const { data: profiles } = await supabase
+            .from('ecoflix_profiles')
+            .select('client_phone')
+            .eq('master_account_id', master_account_id)
+            .eq('status', 'SOLD')
+            .not('client_phone', 'is', null);
+
+        const { data: exclusiveSubs } = await supabase
+            .from('ecoflix_subscriptions')
+            .select('ecoflix_orders(phone)')
+            .eq('master_account_id', master_account_id)
+            .is('profile_id', null);
+
+        const affectedPhones = new Set();
+        if (profiles) profiles.forEach(p => { if (p.client_phone) affectedPhones.add(p.client_phone); });
+        if (exclusiveSubs) exclusiveSubs.forEach(s => { if (s.ecoflix_orders?.phone) affectedPhones.add(s.ecoflix_orders.phone); });
+
         await supabase
             .from('ecoflix_master_accounts')
             .update({ password: new_password })
             .eq('id', master_account_id);
+
+        sseBroadcast('refresh_admin', { reason: 'reset_password' });
+        for (const phone of affectedPhones) {
+            broadcastToPhone(phone, { type: 'subscription_update', reason: 'credentials_changed' });
+        }
 
         res.json({ success: true, message: 'Palavra-passe atualizada com sucesso.' });
     } catch (error) {
@@ -1753,7 +1852,7 @@ const searchSupportClient = async (req, res) => {
                     )
                 )
             `)
-            .like('phone', `%${phone}%`)
+            .ilike('phone', `%${phone}%`)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -1787,6 +1886,8 @@ const searchSupportClient = async (req, res) => {
 module.exports.searchSupportClient = searchSupportClient;
 module.exports.getSupportClients = getSupportClients;
 module.exports.resendSms = resendSms;
+module.exports.suspendProfile = suspendProfile;
+module.exports.restoreProfile = restoreProfile;
 module.exports.suspendAccount = suspendAccount;
 module.exports.restoreAccount = restoreAccount;
 module.exports.resetPassword = resetPassword;

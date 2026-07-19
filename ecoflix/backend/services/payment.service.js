@@ -25,14 +25,14 @@ const sendCredentialsSms = async (phone, credentials, orderId) => {
     if (redisClient && redisClient.status === 'ready') {
         const alreadySent = await redisClient.get(guardKey);
         if (alreadySent) {
-            console.log(`[SMS] Duplicate prevented for order=${orderId}, phone=${phone}`);
+            console.log(`[SMS] Duplicado prevenido para order=${orderId}`);
             return { success: true, duplicate: true };
         }
         await redisClient.set(guardKey, '1', 'EX', 3600); // 1 hour TTL
     } else {
         // Fallback to in-memory guard
         if (smsSentGuard.has(guardKey)) {
-            console.log(`[SMS] Duplicate prevented (memory) for order=${orderId}, phone=${phone}`);
+            console.log(`[SMS] Duplicado prevenido (memória) para order=${orderId}, phone=${phone}`);
             return { success: true, duplicate: true };
         }
         smsSentGuard.add(guardKey);
@@ -40,7 +40,7 @@ const sendCredentialsSms = async (phone, credentials, orderId) => {
         setTimeout(() => smsSentGuard.delete(guardKey), 3600000);
     }
 
-    console.log(`[SMS] Sending credentials to ${phone} for order=${orderId}`);
+    console.log(`[SMS] A enviar credenciais para order=${orderId}`);
 
     if (smsQueue) {
         await smsQueue.add('enviar-credencial', { phone, credentials }, {
@@ -49,7 +49,7 @@ const sendCredentialsSms = async (phone, credentials, orderId) => {
         });
     } else {
         const result = await smsService.sendDeliverySms(phone, credentials);
-        console.log(`[SMS] Result for ${phone}: success=${result.success} ${result.error || ''}`);
+        console.log(`[SMS] Resultado: success=${result.success} ${result.error || ''}`);
     }
 };
 
@@ -67,8 +67,8 @@ const handleOutOfStock = async (order) => {
 // Post-payment sync: Guarantees all records are consistent
 // Runs after any successful payment assignment.
 // ============================================================================
-const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscriptionId, phone, expiresAt, amount }) => {
-    console.log(`[Sync] Running post-payment sync for order=${orderId}`);
+const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscriptionId, phone, expiresAt, amount, credentials }) => {
+    console.log(`[Sync] Executando sincronização pós-pagamento para order=${orderId}`);
 
     const updates = [];
 
@@ -117,7 +117,7 @@ const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscript
     let syncSuccess = true;
     results.forEach((r, i) => {
         if (r.status === 'rejected') {
-            console.error(`[Sync] Update #${i} failed:`, r.reason?.message);
+            console.error(`[Sync] Atualização #${i} falhou:`, r.reason?.message);
             syncSuccess = false;
         }
     });
@@ -126,7 +126,7 @@ const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscript
         websocket.broadcastToOrder(orderId, { type: 'payment_update', status: 'PAID' });
     }
 
-    console.log(`[Sync] Done for order=${orderId}`);
+    console.log(`[Sync] Concluído para order=${orderId}`);
 };
 
 // ============================================================================
@@ -175,7 +175,8 @@ const assignProfile = async (order, attempt = 1) => {
         subscriptionId: result.subscription_id,
         phone: order.phone,
         expiresAt,
-        amount: order.amount
+        amount: order.amount,
+        credentials: result.credentials
     });
 
     await sendCredentialsSms(order.phone, result.credentials, order.id);
@@ -206,7 +207,7 @@ const assignExclusiveAccount = async (order, attempt = 1) => {
     if (!result.success) {
         if (result.message === 'CONCURRENCY_LOCKED') {
             if (attempt <= 3) {
-                console.warn(`[AssignExclusive] Bloqueio transacional detetado para order=${order.id}. Retrying em 200ms...`);
+                console.warn(`[AssignExclusive] Bloqueio transacional detetado para order=${order.id}. A tentar novamente em 200ms...`);
                 await new Promise(res => setTimeout(res, 200));
                 return assignExclusiveAccount(order, attempt + 1);
             }
@@ -227,7 +228,8 @@ const assignExclusiveAccount = async (order, attempt = 1) => {
         subscriptionId: result.subscription_id,
         phone: order.phone,
         expiresAt,
-        amount: order.amount
+        amount: order.amount,
+        credentials: result.credentials
     });
 
     await sendCredentialsSms(order.phone, result.credentials, order.id);
@@ -292,7 +294,7 @@ const addPartnerCommission = async (couponCode, planType) => {
             })
             .eq('code', couponCode);
     } catch (err) {
-        console.warn('[Commission] Error:', err.message);
+        console.warn('[Commission] Erro:', err.message);
     }
 };
 
@@ -301,7 +303,7 @@ const addPartnerCommission = async (couponCode, planType) => {
 // ============================================================================
 const processPayment = async (order) => {
     try {
-        console.log(`[ProcessPayment] order=${order.id} plan=${order.plan_type} action=${order.subscription_action || 'NEW'}`);
+        console.log(`[ProcessPayment] order=${order.id} plano=${order.plan_type} ação=${order.subscription_action || 'NOVA'}`);
 
         // IDEMPOTENCY: Only process PENDING orders. Check + mark atomically.
         const { data: locked, error: lockErr } = await supabase
@@ -314,7 +316,7 @@ const processPayment = async (order) => {
             .single();
 
         if (lockErr || !locked) {
-            console.log(`[ProcessPayment] Order ${order.id} already processed or locked. Skipping.`);
+            console.log(`[ProcessPayment] Order ${order.id} já processado ou bloqueado. A ignorar.`);
             return { success: false, message: 'Pedido já processado' };
         }
 
@@ -351,14 +353,14 @@ const processPayment = async (order) => {
         return { success: true, credentials: result.credentials };
 
     } catch (error) {
-        console.error('[ProcessPayment] Error:', error.message);
+        console.error('[ProcessPayment] Erro:', error.message);
         // Revert to PENDING on unexpected error
         await supabase
             .from('ecoflix_orders')
             .update({ status: 'PENDING', updated_at: new Date() })
             .eq('id', order.id)
             .eq('status', 'PROCESSING');
-        return { success: false, message: error.message };
+        return { success: false, message: 'Erro ao processar pagamento' };
     }
 };
 

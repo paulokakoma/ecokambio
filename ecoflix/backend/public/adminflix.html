@@ -12,7 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <meta name="robots" content="noindex, nofollow">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/tailwind.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1009,6 +1009,49 @@
             });
         }
 
+        function showInputDialog(message, defaultValue = '') {
+            return new Promise(resolve => {
+                const dialog = document.getElementById('app-dialog');
+                const iconEl = document.getElementById('app-dialog-icon');
+                const msgEl = document.getElementById('app-dialog-message');
+                const okBtn = document.getElementById('app-dialog-ok');
+                const cancelBtn = document.getElementById('app-dialog-cancel');
+
+                iconEl.className = 'w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-blue-500';
+                iconEl.innerHTML = '<i class="fas fa-keyboard text-xl text-white"></i>';
+                msgEl.innerHTML = `<p class="mb-3">${message}</p><input id="app-dialog-input" type="text" value="${defaultValue}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Digite aqui..." autofocus />`;
+                cancelBtn.classList.remove('hidden');
+                okBtn.textContent = 'Confirmar';
+                okBtn.className = 'bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+
+                dialog.classList.remove('hidden');
+
+                setTimeout(() => {
+                    const input = document.getElementById('app-dialog-input');
+                    if (input) {
+                        input.focus();
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') close(input.value.trim());
+                            if (e.key === 'Escape') close(null);
+                        });
+                    }
+                }, 100);
+
+                const close = (val) => {
+                    dialog.classList.add('hidden');
+                    okBtn.className = 'bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(val);
+                };
+                okBtn.onclick = () => {
+                    const input = document.getElementById('app-dialog-input');
+                    close(input ? input.value.trim() : null);
+                };
+                cancelBtn.onclick = () => close(null);
+            });
+        }
+
         // ============================================================================
         // API HELPERS
         // ============================================================================
@@ -1952,7 +1995,7 @@
         }
 
         async function supportResetPassword(masterId) {
-            const newPassword = prompt('Introduza a nova senha da Netflix:');
+            const newPassword = await showInputDialog('Introduza a nova senha da Netflix:');
             if(!newPassword) return;
 
             if(!await showConfirm('ATENÇÃO: Isto vai enviar um SMS para TODOS os clientes ativos nesta conta. Continuar?')) return;
@@ -2038,6 +2081,15 @@
             }
         }
 
+        function copyPartnerCode(code, btn) {
+            navigator.clipboard.writeText(code).then(() => {
+                const icon = btn.querySelector('i');
+                if (icon) { icon.className = 'ph ph-check text-sm text-green-600'; }
+                showToast('Código copiado!');
+                setTimeout(() => { if (icon) icon.className = 'ph ph-copy text-sm'; }, 1500);
+            }).catch(() => showToast('Erro ao copiar', 'error'));
+        }
+
         function formatKz(val) {
             return new Intl.NumberFormat('pt-AO').format(val) + ' Kz';
         }
@@ -2058,7 +2110,12 @@
                         <div class="font-medium text-gray-900 text-sm">${p.partner_name}</div>
                     </td>
                     <td class="px-4 py-3">
-                        <span class="bg-gray-100 px-2 py-0.5 rounded font-mono font-bold text-gray-800 text-xs">${p.code}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="bg-gray-100 px-2 py-0.5 rounded font-mono font-bold text-gray-800 text-xs">${p.code}</span>
+                            <button onclick="event.stopPropagation(); copyPartnerCode('${p.code}', this)" title="Copiar código" class="text-gray-400 hover:text-green-600 transition p-0.5">
+                                <i class="ph ph-copy text-sm"></i>
+                            </button>
+                        </div>
                     </td>
                     <td class="px-4 py-3 text-center text-sm">
                         <span class="font-bold">${p.sales_mobile || 0}</span>
