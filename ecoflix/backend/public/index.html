@@ -536,20 +536,15 @@
                 <p class="text-center text-[10px] md:text-xs font-bold text-gray-600 uppercase tracking-[0.15em] mb-3 stagger-card">Escolha o método</p>
 
                 <div class="grid grid-cols-2 gap-3 md:gap-4 mb-5 md:mb-8">
-                    <!-- Express -->
-                    <button onclick="selectPaymentMethod('EXPRESS', this)"
-                        class="stagger-card relative bg-gradient-to-br from-[#FF8C42] via-[#F0731A] to-[#D85D0A] p-4 md:p-5 rounded-2xl text-left overflow-hidden group transition-all duration-300 active:scale-[0.96] hover:shadow-[0_8px_30px_rgba(255,140,66,0.25)] border border-white/10">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-white opacity-[0.12] rounded-full blur-2xl group-hover:opacity-20 transition-opacity"></div>
-                        <div class="absolute -left-4 -bottom-4 w-20 h-20 bg-white opacity-[0.06] rounded-full blur-xl"></div>
+                    <!-- Express (DESATIVADO) -->
+                    <button onclick="showToast('Multicaixa Express em manutenção. Use Referência.', 'info')"
+                        class="stagger-card relative bg-gradient-to-br from-[#FF8C42]/30 via-[#F0731A]/30 to-[#D85D0A]/30 p-4 md:p-5 rounded-2xl text-left overflow-hidden group transition-all duration-300 active:scale-[0.96] border border-white/5 opacity-50 cursor-not-allowed">
                         <div class="relative z-10">
-                            <div class="w-11 h-11 md:w-12 md:h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 border border-white/30 shadow-inner">
-                                <img src="assets/payment-methods/express_logo.svg" alt="Express" class="w-7 h-7 md:w-8 md:h-8 object-contain drop-shadow-md">
+                            <div class="w-11 h-11 md:w-12 md:h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 border border-white/10">
+                                <img src="assets/payment-methods/express_logo.svg" alt="Express" class="w-7 h-7 md:w-8 md:h-8 object-contain grayscale">
                             </div>
-                            <p class="text-white font-bold text-[14px] md:text-base leading-tight mb-1.5">Multicaixa Express</p>
-                            <div class="flex items-center gap-1.5">
-                                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                                <span class="text-white/80 text-[11px] md:text-xs font-medium">Instantâneo</span>
-                            </div>
+                            <p class="text-white/60 font-bold text-[14px] md:text-base leading-tight mb-1.5">Multicaixa Express</p>
+                            <span class="text-gray-500 text-[11px] md:text-xs font-medium">Em manutenção</span>
                         </div>
                     </button>
 
