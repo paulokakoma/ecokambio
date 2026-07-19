@@ -136,87 +136,71 @@ const syncAfterPayment = async ({ orderId, profileId, masterAccountId, subscript
 };
 
 // ============================================================================
-// enrichCredentials — fetch missing fields from DB when RPC returns incomplete data
+// fetchCredentials — buscar credenciais completas da DB
 // ============================================================================
-const enrichCredentials = async (credentials, subscriptionId, profileId, masterAccountId) => {
-    if (credentials.email && credentials.password && credentials.profile && credentials.pin) {
-        return credentials; // already complete
-    }
+const fetchCredentials = async (orderId, profileId, masterAccountId) => {
+    try {
+        // 1. Via profile_id
+        if (profileId) {
+            const { data } = await supabase
+                .from('ecoflix_profiles')
+                .select('name, pin, master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)')
+                .eq('id', profileId)
+                .single();
 
-    console.log(`[Enrich] Credenciais incompletas do RPC: email=${!!credentials.email} password=${!!credentials.password} profile=${!!credentials.profile} pin=${!!credentials.pin}`);
-
-    let email = credentials.email;
-    let password = credentials.password;
-    let profileName = credentials.profile;
-    let pin = credentials.pin;
-
-    // Try via profile_id → master_account
-    if (profileId && (!password || !profileName || !pin)) {
-        const { data: profile } = await supabase
-            .from('ecoflix_profiles')
-            .select('name, pin, master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)')
-            .eq('id', profileId)
-            .single();
-
-        if (profile) {
-            if (!profileName) profileName = profile.name;
-            if (!pin) pin = profile.pin;
-            if (!email && profile.master_account) email = profile.master_account.email;
-            if (!password && profile.master_account) password = profile.master_account.password;
-        }
-    }
-
-    // Try via subscription → profile → master_account
-    if (subscriptionId && (!email || !password)) {
-        const { data: sub } = await supabase
-            .from('ecoflix_subscriptions')
-            .select(`
-                profile:ecoflix_profiles!fk_subscriptions_profile(
-                    name, pin,
-                    master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)
-                ),
-                account:ecoflix_master_accounts(email, password)
-            `)
-            .eq('id', subscriptionId)
-            .single();
-
-        if (sub) {
-            const master = sub.account || sub.profile?.master_account;
-            if (master) {
-                if (!email) email = master.email;
-                if (!password) password = master.password;
+            if (data?.master_account) {
+                return {
+                    email: data.master_account.email,
+                    password: data.master_account.password,
+                    profile: data.name,
+                    pin: data.pin
+                };
             }
-            if (!profileName && sub.profile) profileName = sub.profile.name;
-            if (!pin && sub.profile) pin = sub.profile.pin;
         }
-    }
 
-    // Try via master_account_id directly
-    if (masterAccountId && (!email || !password)) {
-        const { data: ma } = await supabase
-            .from('ecoflix_master_accounts')
-            .select('email, password')
-            .eq('id', masterAccountId)
-            .single();
+        // 2. Via master_account_id (contas exclusivas)
+        if (masterAccountId) {
+            const { data } = await supabase
+                .from('ecoflix_master_accounts')
+                .select('email, password')
+                .eq('id', masterAccountId)
+                .single();
 
-        if (ma) {
-            if (!email) email = ma.email;
-            if (!password) password = ma.password;
+            if (data) {
+                return { email: data.email, password: data.password, profile: null, pin: null };
+            }
         }
-    }
 
-    if (!email || !password) {
-        console.error(`[Enrich] FALHA: credenciais ainda incompletas após fallbacks: email=${!!email} password=${!!password}`);
-    } else {
-        console.log(`[Enrich] Credenciais completadas com sucesso`);
-    }
+        // 3. Via subscription → order_id
+        if (orderId) {
+            const { data } = await supabase
+                .from('ecoflix_subscriptions')
+                .select(`
+                    profile:ecoflix_profiles!fk_subscriptions_profile(
+                        name, pin,
+                        master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)
+                    ),
+                    account:ecoflix_master_accounts(email, password)
+                `)
+                .eq('order_id', orderId)
+                .single();
 
-    return {
-        email: email || credentials.email || 'N/A',
-        password: password || credentials.password || 'N/A',
-        profile: profileName || credentials.profile || 'N/A',
-        pin: pin || credentials.pin || 'N/A'
-    };
+            if (data) {
+                const master = data.account || data.profile?.master_account;
+                if (master) {
+                    return {
+                        email: master.email,
+                        password: master.password,
+                        profile: data.profile?.name || null,
+                        pin: data.profile?.pin || null
+                    };
+                }
+            }
+        }
+    } catch (err) {
+        console.error(`[FetchCreds] Erro:`, err.message);
+    }
+    return null;
 };
 
 // ============================================================================
@@ -258,15 +242,14 @@ const assignProfile = async (order, attempt = 1) => {
 
     const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Enriquecer credenciais incompletas do RPC com dados da DB
-    let enrichedCredentials = await enrichCredentials(
-        result.credentials || {},
-        result.subscription_id,
-        result.profile_id,
-        null
-    );
-    enrichedCredentials.plan_type = order.plan_type;
-    enrichedCredentials.expires_at = expiresAt;
+    // Buscar credenciais completas da DB (o RPC pode retornar só o email)
+    let credentials = await fetchCredentials(order.id, result.profile_id, null);
+    if (!credentials) {
+        // Fallback: usar o que o RPC retornou
+        credentials = result.credentials || {};
+    }
+    credentials.plan_type = order.plan_type;
+    credentials.expires_at = expiresAt;
 
     // Sincronização pós-pagamento (Garante métricas de faturação e Websockets)
     await syncAfterPayment({
@@ -276,12 +259,12 @@ const assignProfile = async (order, attempt = 1) => {
         phone: order.phone,
         expiresAt,
         amount: order.amount,
-        credentials: enrichedCredentials
+        credentials: credentials
     });
 
-    await sendCredentialsSms(order.phone, enrichedCredentials, order.id);
+    await sendCredentialsSms(order.phone, credentials, order.id);
 
-    return { success: true, credentials: enrichedCredentials };
+    return { success: true, credentials: credentials };
 };
 
 // ============================================================================
@@ -320,15 +303,13 @@ const assignExclusiveAccount = async (order, attempt = 1) => {
 
     const expiresAt = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Enriquecer credenciais incompletas do RPC com dados da DB
-    let enrichedCredentials = await enrichCredentials(
-        result.credentials || {},
-        result.subscription_id,
-        null,
-        result.master_account_id
-    );
-    enrichedCredentials.plan_type = order.plan_type;
-    enrichedCredentials.expires_at = expiresAt;
+    // Buscar credenciais completas da DB
+    let credentials = await fetchCredentials(order.id, null, result.master_account_id);
+    if (!credentials) {
+        credentials = result.credentials || {};
+    }
+    credentials.plan_type = order.plan_type;
+    credentials.expires_at = expiresAt;
 
     // Sync — no profile for exclusive, mas order e faturação atualizam
     await syncAfterPayment({
@@ -339,12 +320,12 @@ const assignExclusiveAccount = async (order, attempt = 1) => {
         phone: order.phone,
         expiresAt,
         amount: order.amount,
-        credentials: enrichedCredentials
+        credentials: credentials
     });
 
-    await sendCredentialsSms(order.phone, enrichedCredentials, order.id);
+    await sendCredentialsSms(order.phone, credentials, order.id);
 
-    return { success: true, credentials: enrichedCredentials };
+    return { success: true, credentials: credentials };
 };
 
 // ============================================================================

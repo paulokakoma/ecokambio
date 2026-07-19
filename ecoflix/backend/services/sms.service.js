@@ -16,10 +16,34 @@
 
 const axios = require('axios');
 const supabase = require('../../../src/config/supabase');
+const fs = require('fs');
+const path = require('path');
 
 const TELCO_BASE_URL = 'https://www.telcosms.co.ao/api/v2';
 const TELCO_API_KEY = process.env.TELCO_API_KEY;
 const SMS_PROVIDER = (process.env.SMS_PROVIDER || 'TELCO').toUpperCase();
+
+const SETTINGS_FILE = path.join(__dirname, '../settings.json');
+
+// Zero-width space (U+200B) — invisível, mas força o TelcoSMS a usar Unicode (UCS-2).
+// Em GSM-7, o @ mapeia para 0x00 (null terminator) e o gateway corta a mensagem.
+// Com Unicode, o @ chega inteiro. Mensagens ficam limitadas a 70 caracteres por SMS.
+const UNICODE_MARKER = '\u200B';
+
+const getSupportNumber = () => {
+    try {
+        if (fs.existsSync(SETTINGS_FILE)) {
+            const settings = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+            if (settings.SUPPORT_WHATSAPP) {
+                const num = settings.SUPPORT_WHATSAPP.replace('+', '');
+                return '+' + num;
+            }
+        }
+    } catch (e) {
+        console.error('[SMS] Erro ao ler settings.json:', e.message);
+    }
+    return '+244927862935'; // Default fallback
+};
 
 // ============================================================================
 // Phone Normalization
@@ -67,9 +91,11 @@ const logSmsToDb = async (phone, message, status, errorMsg = null) => {
  * @param {string} text - Corpo da mensagem
  * @returns {Promise<{ success: boolean, messageId?: string, error?: string }>}
  */
-const sendSms = async (to, text) => {
-    // Remove accents to avoid forcing UCS-2 encoding (70 chars limit) which causes double billing
-    const cleanText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const sendSms = async (to, text, { forceUnicode = false } = {}) => {
+    let cleanText = text;
+    if (forceUnicode) {
+        cleanText += UNICODE_MARKER;
+    }
 
     // FAKE mode — apenas para desenvolvimento local
     if (SMS_PROVIDER === 'FAKE') {
@@ -176,7 +202,7 @@ const checkBalance = async () => {
  * @param {string} code - Código de 4 dígitos
  */
 const sendOtpSms = async (phone, code) => {
-    const message = `EcoFlix: Seu codigo de verificacao e: ${code}. Valido por 10 minutos.`;
+    const message = `EcoFlix: O seu código é ${code}. Válido por 10 min.`;
     return sendSms(phone, message);
 };
 
@@ -186,22 +212,11 @@ const sendOtpSms = async (phone, code) => {
  * @param {{ email: string, password: string, profile: string, pin: string, plan_type: string, expires_at: string }} creds
  */
 const sendDeliverySms = async (phone, creds) => {
-    let message =
-        `EcoFlix Netflix\n\n` +
-        `E-mail: ${creds.email || 'N/A'}\n` +
-        `Senha: ${creds.password || 'N/A'}`;
-
-    if (creds.profile) {
-        message += `\nPerfil: ${creds.profile}`;
-    }
-
-    if (creds.pin && creds.pin !== 'N/A') {
-        message += `\nPIN: ${creds.pin}`;
-    }
-
-    message += `\n\nNao mude a senha! Suporte: +244927862935`;
-
-    return sendSms(phone, message);
+    let message = `Pagamento confirmado!\nEmail: ${creds.email || 'N/A'}`;
+    message += `\nSenha: ${creds.password || 'N/A'}`;
+    if (creds.profile) message += `\nPerfil: ${creds.profile}`;
+    if (creds.pin && creds.pin !== 'N/A') message += `\nPIN: ${creds.pin}`;
+    return sendSms(phone, message, { forceUnicode: true });
 };
 
 
@@ -211,12 +226,7 @@ const sendDeliverySms = async (phone, creds) => {
  * @param {string} planType - Tipo de plano comprado
  */
 const sendStockOutSms = async (phone, planType = 'N/A') => {
-    const message =
-        `EcoFlix\n\n` +
-        `Pagamento confirmado! Estamos sem stock no momento.\n` +
-        `As credenciais serao enviadas em breve.\n\n` +
-        `Duvidas: +244927862935`;
-
+    const message = `EcoFlix: Sem stock. Aguarde as credenciais. Ajuda: ${getSupportNumber()}`;
     return sendSms(phone, message);
 };
 
@@ -227,11 +237,7 @@ const sendStockOutSms = async (phone, planType = 'N/A') => {
  */
 const sendRenewalSms = async (phone, newExpiry) => {
     const date = new Date(newExpiry).toLocaleDateString('pt-PT');
-    const message =
-        `EcoFlix - Renovação Concluida!\n\n` +
-        `A sua subscrição foi renovada com sucesso.\n` +
-        `Nova Validade: ${date}\n\n` +
-        `Obrigado pela sua preferência!`;
+    const message = `EcoFlix: Renovação concluída! Nova validade: ${date}`;
     return sendSms(phone, message);
 };
 
@@ -241,16 +247,9 @@ const sendRenewalSms = async (phone, newExpiry) => {
  * @param {{ email: string, password: string, pin?: string }} creds
  */
 const sendPasswordUpdateSms = async (phone, creds) => {
-    let message =
-        `EcoFlix - Alerta de Segurança\n\n` +
-        `A senha da sua conta Netflix foi atualizada.\n` +
-        `Email: ${creds.email}\n` +
-        `Nova Senha: ${creds.password}\n`;
-
-    if (creds.pin) {
-        message += `O seu PIN mantem-se: ${creds.pin}\n`;
-    }
-    return sendSms(phone, message);
+    let message = `Senha alterada!\n${creds.email}\nS: ${creds.password}`;
+    if (creds.pin) message += `\nPIN: ${creds.pin}`;
+    return sendSms(phone, message, { forceUnicode: true });
 };
 
 /**
@@ -258,11 +257,7 @@ const sendPasswordUpdateSms = async (phone, creds) => {
  * @param {string} phone 
  */
 const sendRevokeSms = async (phone, reason = 'Violação de Termos') => {
-    const message =
-        `EcoFlix - Alerta de Conta\n\n` +
-        `A sua subscrição foi revogada.\n` +
-        `Motivo: ${reason}\n\n` +
-        `Contacte o suporte se julga ser um erro.`;
+    const message = `EcoFlix: Conta revogada. Motivo: ${reason}`;
     return sendSms(phone, message);
 };
 
@@ -310,8 +305,8 @@ module.exports.send5DaysExpirySms = send5DaysExpirySms;
 module.exports.sendFinalDayExpirySms = sendFinalDayExpirySms;
 
 const sendAdminPinExpiredSms = async (adminPhone, email, profileName, newPin) => {
-    const message = `🚨 ALERTA ECOFLIX:\nO perfil '${profileName}' da conta '${email}' expirou.\nO sistema gerou o novo PIN: ${newPin}.\nAltere na Netflix imediatamente!`;
-    return sendSms(adminPhone, message);
+    const message = `ALERTA ECOFLIX!\nPerfil '${profileName}' expirou.\nNovo PIN: ${newPin}\nAltere na Netflix!`;
+    return sendSms(adminPhone, message, { forceUnicode: true });
 };
 module.exports.sendAdminPinExpiredSms = sendAdminPinExpiredSms;
 

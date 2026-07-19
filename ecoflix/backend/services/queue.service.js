@@ -68,17 +68,45 @@ if (redisUrl) {
 
             // O RPC atualizou os profiles, criou a subscrição e atualizou a order com sucesso.
             
-            // 5. Enriquecer credenciais com plano e validade para o SMS
+            // 5. Buscar credenciais completas da DB
             const durationMonthsQ = order.duration_months || 1;
             const expiresAtQ = new Date(Date.now() + durationMonthsQ * 30 * 24 * 60 * 60 * 1000).toISOString();
-            const enrichedCreds = {
-                ...result.credentials,
-                plan_type: order.plan_type,
-                expires_at: expiresAtQ
-            };
+
+            let creds = null;
+            try {
+                const { data: sub } = await supabase
+                    .from('ecoflix_subscriptions')
+                    .select(`
+                        profile:ecoflix_profiles!fk_subscriptions_profile(
+                            name, pin,
+                            master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)
+                        ),
+                        account:ecoflix_master_accounts(email, password)
+                    `)
+                    .eq('order_id', orderId)
+                    .single();
+
+                if (sub) {
+                    const master = sub.account || sub.profile?.master_account;
+                    if (master) {
+                        creds = {
+                            email: master.email,
+                            password: master.password,
+                            profile: sub.profile?.name || null,
+                            pin: sub.profile?.pin || null
+                        };
+                    }
+                }
+            } catch (e) {
+                console.error(`[Queue] Erro ao buscar credenciais: ${e.message}`);
+            }
+
+            if (!creds) creds = result.credentials || {};
+            creds.plan_type = order.plan_type;
+            creds.expires_at = expiresAtQ;
 
             // 6. Enviar SMS
-            await smsService.sendDeliverySms(order.phone, enrichedCreds);
+            await smsService.sendDeliverySms(order.phone, creds);
             console.log(`[Queue] Order ${orderId} concluída.`);
 
         } catch (error) {

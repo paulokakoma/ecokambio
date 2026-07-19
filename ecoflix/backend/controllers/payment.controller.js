@@ -60,6 +60,40 @@ const initPayment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Utilizador não encontrado. Faça login ou registe-se.' });
         }
 
+        // --- PRE-FLIGHT STOCK CHECK ---
+        let hasStock = false;
+        try {
+            if (['ECONOMICO', 'ULTRA'].includes(plan_type)) {
+                const pType = plan_type === 'ECONOMICO' ? 'MOBILE' : 'TV';
+                const { count } = await supabase
+                    .from('ecoflix_profiles')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('type', pType)
+                    .eq('status', 'AVAILABLE');
+                hasStock = count > 0;
+            } else {
+                const { data: accounts } = await supabase
+                    .from('ecoflix_master_accounts')
+                    .select('id, subscriptions:ecoflix_subscriptions(status)')
+                    .eq('type', 'EXCLUSIVE')
+                    .eq('status', 'ACTIVE');
+                if (accounts) {
+                    const available = accounts.filter(acc =>
+                        !acc.subscriptions ||
+                        acc.subscriptions.filter(s => ['ACTIVE', 'SUSPENDED'].includes(s.status)).length === 0
+                    );
+                    hasStock = available.length > 0;
+                }
+            }
+        } catch (e) {
+            console.error('[StockCheck] Erro pre-flight:', e.message);
+            hasStock = true; // Em caso de erro de DB, deixar prosseguir e o RPC falha com STOCK_ESGOTADO depois
+        }
+
+        if (!hasStock) {
+            return res.status(400).json({ success: false, message: 'Stock esgotado para o plano selecionado. Tente mais tarde.' });
+        }
+
         // --- PAIMENT GATEWAY INTEGRATION ---
         let paymentResult;
         try {
@@ -784,12 +818,26 @@ const paygoWebhook = async (req, res) => {
 
             console.log(`[PayGo Webhook] Payment confirmed for TX: ${transaction_id}`);
 
-            // Find Order
-            const { data: order } = await supabase
+            // Find Order by transaction_id
+            let { data: order, error: orderErr } = await supabase
                 .from('ecoflix_orders')
                 .select('*')
                 .eq('transaction_id', transaction_id.toString())
-                .single();
+                .maybeSingle();
+
+            if (!order) {
+                // If paid via "Pending Payments" in Express, transaction_id might differ. Check reference.
+                const ref = payload.reference || payload.reference_number || (payload.payment && (payload.payment.reference || payload.payment.reference_number));
+                const searchRef = ref || transaction_id;
+                
+                const { data: orderRef } = await supabase
+                    .from('ecoflix_orders')
+                    .select('*')
+                    .eq('reference_id', searchRef.toString())
+                    .maybeSingle();
+                
+                order = orderRef;
+            }
 
             if (order) {
                 if (order.status === 'PENDING') {
