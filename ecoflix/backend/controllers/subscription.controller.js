@@ -96,7 +96,7 @@ const getSubscriptionCredentials = async (req, res) => {
 
         // FALLBACK: check if admin manually assigned a profile to this user's phone
         const userPhone = req.user.phone || '';
-        const cleanPhone = userPhone.replace(/[^0-9]/g, '').replace(/^244/, '');
+        const cleanPhone = smsService.normalizePhone(userPhone);
 
         const { data: manualProfiles } = await supabase
             .from('ecoflix_profiles')
@@ -224,7 +224,7 @@ const recoverCredentials = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Número de telemóvel obrigatório' });
         }
 
-        const cleanPhone = phone.replace(/[^0-9]/g, '').replace(/^244/, '');
+        const cleanPhone = smsService.normalizePhone(phone);
         const fullPhone = '+244' + cleanPhone;
 
         const { data: user } = await supabase
@@ -333,7 +333,7 @@ const publicReportIssue = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Telefone obrigatório.' });
         }
 
-        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const cleanPhone = smsService.normalizePhone(phone);
         const finalDesc = `[Suporte Público | Tel: ${cleanPhone}] ` + (description || '');
 
         const { data, error } = await supabase

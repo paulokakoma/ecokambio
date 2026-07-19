@@ -859,7 +859,8 @@ const getInfluencerStats = async (req, res) => {
                 id: coupon.id,
                 code: coupon.code,
                 influencer_name: coupon.partner_name,
-                discount_amount: coupon.discount_amount,
+                discount_type: coupon.discount_type || 'flat',
+                discount_value: parseFloat(coupon.discount_value) || 0,
                 status: coupon.status,
                 total_sales: coupon.usage_count || sales.length,
                 total_revenue: totalRevenue,
@@ -1222,7 +1223,7 @@ const updatePlans = async (req, res) => {
 
         const plansToSave = {};
         const PAYGO_API_KEY = process.env.PAYGOOO_API_KEY;
-        const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
+        const PAYGO_BASE_URL = process.env.PAYGO_BASE_URL || 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
         const axios = require('axios');
 
         for (const [key, current] of Object.entries(currentPlans)) {

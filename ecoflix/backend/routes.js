@@ -39,7 +39,7 @@ router.post('/orders/:id/cancel', catchAsync(paymentController.cancelOrder));
 router.post('/coupons/validate', validateSignature, catchAsync(subscriptionController.validateCoupon));
 
 // Account / Credential Recovery (no auth needed — SMS-based)
-router.post('/account/recover', catchAsync(authController.recoverCredentials));
+router.post('/account/recover', catchAsync(subscriptionController.recoverCredentials));
 
 // Subscriptions - HMAC Protected
 router.get('/subscription/credentials', catchAsync(authController.requireOtpAuth), catchAsync(subscriptionController.getSubscriptionCredentials));
@@ -54,9 +54,6 @@ router.post('/test/simulate-webhook', catchAsync(paymentController.simulateWebho
 // ============================================================================
 // ADMIN ROUTES (Protected)
 // ============================================================================
-
-// Auth
-router.post('/admin/login', catchAsync(adminController.adminLogin));
 
 // Dashboard Analytics
 router.get('/admin/inventory-stats', catchAsync(adminController.getInventoryStatus));

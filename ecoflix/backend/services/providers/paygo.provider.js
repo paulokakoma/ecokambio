@@ -1,19 +1,13 @@
 const axios = require('axios');
+const smsService = require('../sms.service');
 
-const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
-
-// IDs de produtos fixos no PayGo por plano
-const PRODUCT_IDS = {
-    'ECONOMICO': 'd13a142b-9d1f-4788-b227-a41235d04e85',
-    'ULTRA':     '2d8240df-e851-4b10-aeaf-8054145a4de4',
-    'FAMILIA':   'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
-    'COMPLETA':  'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
-    'INTEIRA':   'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2',
-};
+const PAYGO_BASE_URL = process.env.PAYGO_BASE_URL || 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
 
 const API_METHOD = {
+    EXPRESS:    'multicaixa',
     express:    'multicaixa',
     referencia: 'reference',
+    REFERENCIA: 'reference',
 };
 
 class PayGoProvider {
@@ -33,7 +27,7 @@ class PayGoProvider {
         }
 
         const apiMethod  = API_METHOD[this.paymentMethod] || 'reference';
-        const cleanPhone = (order.phone || '').replace(/[^0-9]/g, '').replace(/^244/, '');
+        const cleanPhone = smsService.normalizePhone(order.phone);
 
         const payload = {
             payment_method: apiMethod,
@@ -80,7 +74,7 @@ class PayGoProvider {
                     'Transaction declined': 'Transação recusada',
                 };
                 const translatedMsg = translations[apiMsg] || apiMsg;
-                throw new Error(translatedMsg);
+                throw new Error(`PayGo: ${translatedMsg}`);
             }
             throw error;
         }

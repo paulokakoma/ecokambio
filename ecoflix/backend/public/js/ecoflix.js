@@ -117,6 +117,29 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+function showConfirm(message) {
+    return new Promise(resolve => {
+        const dialog = document.getElementById('app-dialog');
+        const msgEl = document.getElementById('app-dialog-message');
+        const okBtn = document.getElementById('app-dialog-ok');
+        const cancelBtn = document.getElementById('app-dialog-cancel');
+        msgEl.textContent = message;
+        cancelBtn.classList.remove('hidden');
+        okBtn.textContent = 'Confirmar';
+        okBtn.className = 'bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+        dialog.classList.remove('hidden');
+        const close = (val) => {
+            dialog.classList.add('hidden');
+            okBtn.className = 'bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition';
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            resolve(val);
+        };
+        okBtn.onclick = () => close(true);
+        cancelBtn.onclick = () => close(false);
+    });
+}
+
 // === NAVEGAÇÃO E UX ===
 const formatKz = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " Kz";
 
@@ -492,11 +515,15 @@ async function submitPhone() {
 
     userPhone = '+244' + phoneClean;
 
+    const durationSelect = document.getElementById('duration-select');
+    const duration = durationSelect ? (parseInt(durationSelect.value) || 1) : 1;
+    const baseTotal = selectedPlanPrice * duration;
+
     if (!appliedCoupon) {
-        finalPrice = selectedPlanPrice;
+        finalPrice = baseTotal;
     }
     document.getElementById('summary-plan-name').innerText = document.getElementById('selected-plan-name').innerText;
-    document.getElementById('summary-original-price').innerText = formatKz(selectedPlanPrice);
+    document.getElementById('summary-original-price').innerText = formatKz(baseTotal);
     document.getElementById('summary-total-price').innerText = formatKz(finalPrice);
 
     showScreen('step-payment-method');
@@ -510,7 +537,7 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
     let originalContent = '';
     try {
         if (currentOrder) {
-            const resume = confirm('Já existe um pedido pendente. Voltar a ele?');
+            const resume = await showConfirm('Já existe um pedido pendente. Voltar a ele?');
             if (resume) {
                 showToast('A restaurar o pedido anterior...', 'info');
                 if (currentOrder.reference) {
@@ -1363,8 +1390,8 @@ function acceptTerms() {
     showToast('Termos aceitos. Bem-vindo ao EcoFlix!', 'success');
 }
 
-function declineTerms() {
-    if (confirm('Você precisa aceitar os Termos para continuar. Deseja sair?')) {
+async function declineTerms() {
+    if (await showConfirm('Você precisa aceitar os Termos para continuar. Deseja sair?')) {
         window.location.href = 'about:blank';
     }
 }

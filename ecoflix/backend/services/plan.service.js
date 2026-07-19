@@ -7,8 +7,8 @@ const FILE_PATH = path.join(__dirname, '../plans.json');
 
 const DEFAULT_PLANS = {
     'ECONOMICO': { price: 5000, paygo_id: '21000741-6784-421c-b2bc-7607518f4419' },
-    'ULTRA': { price: 7000, paygo_id: '2d8240df-e851-4b10-aeaf-8054145a4de4' },
-    'FAMILIA': { price: 18000, paygo_id: 'f88a0f69-03ba-432e-b6b7-ed30f96fc7e2' }
+    'ULTRA': { price: 7000, paygo_id: '6f68d941-c1e3-4831-a8e4-a53aa9ae644a' },
+    'FAMILIA': { price: 18000, paygo_id: '59f18155-3cff-435d-8ba4-974f91acb5b9' }
 };
 
 const parseData = (dataStr) => {
@@ -45,7 +45,7 @@ const getPlans = async () => {
                 if (data) plans = parseData(data);
             }
         }
-        if (!plans) plans = { ...DEFAULT_PLANS };
+        if (!plans) plans = Object.fromEntries(Object.entries(DEFAULT_PLANS).map(([k, v]) => [k, { ...v }]));
         for (const [k, v] of Object.entries(plans)) {
             console.log(`[Plans] ${k}: price=${v.price} paygo_id=${v.paygo_id || 'MISSING'}`);
         }
@@ -54,7 +54,7 @@ const getPlans = async () => {
         console.error('Erro ao ler planos:', e.message);
     }
     // Fallback para defaults
-    return { ...DEFAULT_PLANS };
+    return Object.fromEntries(Object.entries(DEFAULT_PLANS).map(([k, v]) => [k, { ...v }]));
 };
 
 /**

@@ -30,12 +30,11 @@ const SMS_PROVIDER = (process.env.SMS_PROVIDER || 'TELCO').toUpperCase();
  * TelcoSMS é um provedor local — aceita números angolanos sem prefixo +244.
  */
 const normalizePhone = (phone) => {
-    let clean = phone.replace(/[\s\-]/g, '');
-
-    if (clean.startsWith('+244')) return clean.slice(4);  // remove +244
-    if (clean.startsWith('244') && clean.length === 12) return clean.slice(3); // remove 244
-    if (clean.length === 9) return clean;           // já está correto
-    return clean;
+    if (!phone) return '';
+    let clean = phone.replace(/[^0-9+]/g, '');
+    if (clean.startsWith('+244')) return clean.slice(4);
+    if (clean.startsWith('244') && clean.length === 12) return clean.slice(3);
+    return clean.replace(/[^0-9]/g, '');
 };
 
 // ============================================================================
@@ -69,17 +68,20 @@ const logSmsToDb = async (phone, message, status, errorMsg = null) => {
  * @returns {Promise<{ success: boolean, messageId?: string, error?: string }>}
  */
 const sendSms = async (to, text) => {
+    // Remove accents to avoid forcing UCS-2 encoding (70 chars limit) which causes double billing
+    const cleanText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
     // FAKE mode — apenas para desenvolvimento local
     if (SMS_PROVIDER === 'FAKE') {
-        console.log(`[SMS-FAKE] 📨 To: ${to} | Body: "${text}"`);
-        await logSmsToDb(to, text, 'SENT');
+        console.log(`[SMS-FAKE] 📨 To: ${to} | Body: "${cleanText}"`);
+        await logSmsToDb(to, cleanText, 'SENT');
         return { success: true, messageId: 'fake_' + Date.now() };
     }
 
     if (!TELCO_API_KEY) {
         const err = '[SMS-TelcoSMS] TELCO_API_KEY não configurado no .env';
         console.error(err);
-        await logSmsToDb(to, text, 'FAILED', err);
+        await logSmsToDb(to, cleanText, 'FAILED', err);
         return { success: false, error: err };
     }
 
@@ -89,7 +91,7 @@ const sendSms = async (to, text) => {
     if (!/^\d{9}$/.test(recipient)) {
         const err = `[SMS] Número inválido: "${to}" → normalizado para "${recipient}". A ignorar envio.`;
         console.error(err);
-        await logSmsToDb(to, text, 'FAILED', err);
+        await logSmsToDb(to, cleanText, 'FAILED', err);
         return { success: false, error: err };
     }
 
@@ -100,7 +102,7 @@ const sendSms = async (to, text) => {
             message: {
                 api_key_app: TELCO_API_KEY,
                 phone_number: recipient,
-                message_body: text
+                message_body: cleanText
             }
         };
 
@@ -117,12 +119,12 @@ const sendSms = async (to, text) => {
         if (response.status !== 200 || data?.error || data?.status === 'error') {
             const errMsg = data?.message || data?.error || 'TelcoSMS erro desconhecido';
             console.error(`[SMS-TelcoSMS] ❌ Erro: ${errMsg}`);
-            await logSmsToDb(recipient, text, 'FAILED', errMsg);
+            await logSmsToDb(recipient, cleanText, 'FAILED', errMsg);
             return { success: false, error: errMsg };
         }
 
         console.log(`[SMS-TelcoSMS] ✅ Enviado para ${recipient}`);
-        await logSmsToDb(recipient, text, 'SENT');
+        await logSmsToDb(recipient, cleanText, 'SENT');
         return { success: true, data };
 
     } catch (error) {
@@ -132,7 +134,7 @@ const sendSms = async (to, text) => {
 
         console.error(`[SMS-TelcoSMS] ❌ Falha:`, errMsg);
         const errorString = typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg);
-        await logSmsToDb(recipient, text, 'FAILED', errorString);
+        await logSmsToDb(recipient, cleanText, 'FAILED', errorString);
         return {
             success: false,
             error: errorString
@@ -250,6 +252,7 @@ const sendRevokeSms = async (phone, reason = 'Violação de Termos') => {
 };
 
 module.exports = {
+    normalizePhone,
     sendSms,
     sendOtpSms,
     sendDeliverySms,

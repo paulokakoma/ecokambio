@@ -10,25 +10,41 @@
 
 const supabase = require('../../../src/config/supabase');
 const smsService = require('./sms.service');
+const { redisClient } = require('../../../src/config/redis');
 
 const ADMIN_PHONE = process.env.ADMIN_PHONE || '+244938948994';
 const STOCK_THRESHOLD = 1;
 const SMS_BALANCE_THRESHOLD = 20;
 
-// Cache para evitar spam de notificações (6 horas)
+// Cache para evitar spam de notificações (12 horas)
 const notificationCache = new Map();
-const NOTIFICATION_COOLDOWN_MS = 6 * 60 * 60 * 1000;
+const NOTIFICATION_COOLDOWN_SEC = 12 * 60 * 60; // 12 horas em segundos
 
 /**
  * Verifica se já notificou recentemente para evitar spam
  */
-const wasRecentlyNotified = (key) => {
+const wasRecentlyNotified = async (key) => {
+    try {
+        if (redisClient && redisClient.isOpen) {
+            const val = await redisClient.get(`ecoflix:stock_alert:${key}`);
+            return !!val;
+        }
+    } catch (e) {
+        console.error('[StockMonitor] Redis error on get:', e.message);
+    }
     const lastNotified = notificationCache.get(key);
     if (!lastNotified) return false;
-    return Date.now() - lastNotified < NOTIFICATION_COOLDOWN_MS;
+    return Date.now() - lastNotified < (NOTIFICATION_COOLDOWN_SEC * 1000);
 };
 
-const markNotified = (key) => {
+const markNotified = async (key) => {
+    try {
+        if (redisClient && redisClient.isOpen) {
+            await redisClient.setEx(`ecoflix:stock_alert:${key}`, NOTIFICATION_COOLDOWN_SEC, '1');
+        }
+    } catch (e) {
+        console.error('[StockMonitor] Redis error on set:', e.message);
+    }
     notificationCache.set(key, Date.now());
 };
 
@@ -93,16 +109,16 @@ const notifyAdmin = async (message) => {
 const checkAndNotify = async () => {
     console.log('[StockMonitor] Verificando stock...');
 
+    const alerts = [];
+    const keysToMark = [];
+
     // 1. Verificar contas EXCLUSIVE
     const exclusiveAvailable = await getExclusiveAvailable();
     if (exclusiveAvailable <= STOCK_THRESHOLD) {
         const key = 'exclusive_stock';
-        if (!wasRecentlyNotified(key)) {
-            await notifyAdmin(
-                `⚠️ ALERTA ECOFLIX: Apenas ${exclusiveAvailable} conta(s) EXCLUSIVE disponível(s)! ` +
-                `Adicione mais contas para evitar perda de vendas.`
-            );
-            markNotified(key);
+        if (!(await wasRecentlyNotified(key))) {
+            alerts.push(`EXCLUSIVE: ${exclusiveAvailable} disp.`);
+            keysToMark.push(key);
         }
     }
 
@@ -110,12 +126,9 @@ const checkAndNotify = async () => {
     const mobileAvailable = await getProfilesAvailable('MOBILE');
     if (mobileAvailable <= STOCK_THRESHOLD) {
         const key = 'mobile_stock';
-        if (!wasRecentlyNotified(key)) {
-            await notifyAdmin(
-                `⚠️ ALERTA ECOFLIX: Apenas ${mobileAvailable} perfil(is) MOBILE disponível(is)! ` +
-                `Adicione mais perfis para evitar perda de vendas.`
-            );
-            markNotified(key);
+        if (!(await wasRecentlyNotified(key))) {
+            alerts.push(`MOBILE: ${mobileAvailable} disp.`);
+            keysToMark.push(key);
         }
     }
 
@@ -123,12 +136,9 @@ const checkAndNotify = async () => {
     const tvAvailable = await getProfilesAvailable('TV');
     if (tvAvailable <= STOCK_THRESHOLD) {
         const key = 'tv_stock';
-        if (!wasRecentlyNotified(key)) {
-            await notifyAdmin(
-                `⚠️ ALERTA ECOFLIX: Apenas ${tvAvailable} perfil(is) TV disponível(is)! ` +
-                `Adicione mais perfis para evitar perda de vendas.`
-            );
-            markNotified(key);
+        if (!(await wasRecentlyNotified(key))) {
+            alerts.push(`TV: ${tvAvailable} disp.`);
+            keysToMark.push(key);
         }
     }
 
@@ -136,12 +146,18 @@ const checkAndNotify = async () => {
     const smsBalance = await getSmsBalance();
     if (smsBalance !== null && smsBalance <= SMS_BALANCE_THRESHOLD) {
         const key = 'sms_balance';
-        if (!wasRecentlyNotified(key)) {
-            await notifyAdmin(
-                `⚠️ ALERTA ECOFLIX: Saldo SMS baixo! Apenas ${smsBalance} SMS disponível(is). ` +
-                `Recarregue a conta TelcoSMS para continuar enviando notificações.`
-            );
-            markNotified(key);
+        if (!(await wasRecentlyNotified(key))) {
+            alerts.push(`SMS: ${smsBalance} restantes.`);
+            keysToMark.push(key);
+        }
+    }
+
+    if (alerts.length > 0) {
+        const message = `🚨 ALERTA ECOFLIX - BAIXO STOCK:\n${alerts.map(a => '- ' + a).join('\n')}\nRecarregue no painel admin!`;
+        await notifyAdmin(message);
+
+        for (const k of keysToMark) {
+            await markNotified(k);
         }
     }
 

@@ -11,6 +11,7 @@ const paymentService = require('../services/payment.service');
 const { redisClient } = require('../../../src/config/redis');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'ecoflix-super-secret-key';
+const smsService = require('../services/sms.service');
 
 // Helper: Verify HMAC Signature (inline to avoid circular dependency)
 const verifySignature = (payload, signature, secret) => {
@@ -26,40 +27,13 @@ const verifySignature = (payload, signature, secret) => {
 const PaymentProviderFactory = require('../services/payment_factory.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
 
-// Helper to get correct PayGo product ID dynamically if amount differs from base plan
-const getDynamicPaygoId = async (plan_type, amount, plans) => {
-    const basePlan = plans[plan_type];
-    if (!basePlan || !basePlan.paygo_id) return null;
-    if (amount === basePlan.price) return basePlan.paygo_id;
-    
-    try {
-        const PAYGO_API_KEY = process.env.PAYGOOO_API_KEY;
-        const PAYGO_BASE_URL = 'https://rouxavcvorjiwhpjhsye.supabase.co/functions/v1/api-v1';
-        if (!PAYGO_API_KEY) return basePlan.paygo_id;
-
-        const { data: prod } = await axios.post(
-            `${PAYGO_BASE_URL}/products`,
-            { 
-                name: `EcoFlix ${plan_type} Custom`, 
-                price: amount, 
-                thank_you_url: 'https://ecokambio.com', 
-                description: `Acesso EcoFlix ${plan_type} (${amount} Kz)` 
-            },
-            { headers: { 'x-api-key': PAYGO_API_KEY, 'Content-Type': 'application/json' } }
-        );
-        return prod?.product?.id || prod?.id || basePlan.paygo_id;
-    } catch (err) {
-        console.error('[Payment] Erro ao criar produto PayGo dinâmico:', err.message);
-        return basePlan.paygo_id;
-    }
-};
-
 // ============================================================================
 // CUSTOMER: Init Payment (Reference or Push)
 // ============================================================================
 const initPayment = async (req, res) => {
     try {
-        const { phone, plan_type, payment_method, coupon_code } = req.body; // method: REFERENCE, MCX_PUSH, UNITEL_MONEY, EXPRESS
+        const { plan_type, payment_method, coupon_code } = req.body; // method: REFERENCE, MCX_PUSH, UNITEL_MONEY, EXPRESS
+        const phone = smsService.normalizePhone(req.body.phone);
 
         // Validate plan
         const plans = await planService.getPlans();
@@ -95,7 +69,13 @@ const initPayment = async (req, res) => {
                 }
 
                 // Apply Discount
-                if (coupon.discount_amount > 0) {
+                const discType = coupon.discount_type || 'flat';
+                const discValue = parseFloat(coupon.discount_value) || 0;
+                if (discType === 'percent' && discValue > 0) {
+                    amount = Math.max(0, amount - (amount * discValue / 100));
+                } else if (discType === 'flat' && discValue > 0) {
+                    amount = Math.max(0, amount - discValue);
+                } else if (coupon.discount_amount > 0) {
                     amount = Math.max(0, amount - coupon.discount_amount);
                 }
 
@@ -109,14 +89,13 @@ const initPayment = async (req, res) => {
         // --- PAIMENT GATEWAY INTEGRATION ---
         let paymentResult;
         try {
-            const dynamicPaygoId = await getDynamicPaygoId(plan_type, amount, plans);
             const provider = PaymentProviderFactory.getProvider(payment_method);
             paymentResult = await provider.initiatePayment({
                 amount,
                 phone,
                 plan_type,
                 payment_method,
-                paygo_id: dynamicPaygoId
+                paygo_id: plans[plan_type].paygo_id
             });
         } catch (error) {
             return res.status(502).json({ success: false, message: error.message });
@@ -164,7 +143,8 @@ const initPayment = async (req, res) => {
 // ============================================================================
 const quickOrder = async (req, res) => {
     try {
-        const { phone, plan_type, payment_method, is_renewal, target_subscription_id, duration, coupon_code } = req.body;
+        const { plan_type, payment_method, is_renewal, target_subscription_id, duration, coupon_code } = req.body;
+        const phone = smsService.normalizePhone(req.body.phone);
 
         const plans = await planService.getPlans();
 
@@ -310,15 +290,19 @@ const quickOrder = async (req, res) => {
             .eq('user_id', user.id)
             .eq('status', 'PENDING');
 
-        const dynamicPaygoId = await getDynamicPaygoId(plan_type, totalAmount, plans);
-        const provider = PaymentProviderFactory.getProvider(payment_method);
-        const paymentResult = await provider.initiatePayment({
-            amount: totalAmount,
-            phone,
-            plan_type,
-            payment_method,
-            paygo_id: dynamicPaygoId
-        });
+        let paymentResult;
+        try {
+            const provider = PaymentProviderFactory.getProvider(payment_method);
+            paymentResult = await provider.initiatePayment({
+                amount: totalAmount,
+                phone,
+                plan_type,
+                payment_method,
+                paygo_id: plans[plan_type].paygo_id
+            });
+        } catch (error) {
+            return res.status(502).json({ success: false, message: error.message });
+        }
 
         const dbPaymentMethod = payment_method === 'EXPRESS' ? 'MCX_PUSH' : 'REFERENCE';
 
@@ -572,14 +556,13 @@ const renewSubscription = async (req, res) => {
         // --- PAYMENT PROVIDER ---
         let paymentResult;
         try {
-            const dynamicPaygoId = await getDynamicPaygoId(sub.plan_type, amount, plans);
             const provider = PaymentProviderFactory.getProvider(payment_method);
             paymentResult = await provider.initiatePayment({
                 amount,
                 phone: req.user.phone,
                 plan_type: sub.plan_type,
                 payment_method,
-                paygo_id: dynamicPaygoId
+                paygo_id: plans[sub.plan_type].paygo_id
             });
         } catch (e) {
             return res.status(502).json({ success: false, message: e.message });
@@ -596,7 +579,7 @@ const renewSubscription = async (req, res) => {
                 plan_type: sub.plan_type,
                 amount,
                 phone: req.user.phone,
-                payment_method,
+                payment_method: payment_method === 'EXPRESS' ? 'MCX_PUSH' : 'REFERENCE',
                 subscription_action: action,
                 target_subscription_id: targetSubId
             })
@@ -687,8 +670,8 @@ const cancelOrder = async (req, res) => {
 
         if (!req.admin) {
             const { phone } = req.body;
-            const cleanPhone = order.phone.replace(/[^0-9]/g, '');
-            const cleanInput = (phone || '').replace(/[^0-9]/g, '');
+            const cleanPhone = smsService.normalizePhone(order.phone);
+            const cleanInput = smsService.normalizePhone(phone);
             if (!cleanInput || !cleanPhone.endsWith(cleanInput.slice(-9))) {
                 return res.status(403).json({ success: false, message: 'Número de telemóvel não corresponde ao pedido' });
             }
