@@ -68,8 +68,17 @@ if (redisUrl) {
 
             // O RPC atualizou os profiles, criou a subscrição e atualizou a order com sucesso.
             
-            // 5. Enviar SMS
-            await smsService.sendDeliverySms(order.phone, result.credentials);
+            // 5. Enriquecer credenciais com plano e validade para o SMS
+            const durationMonthsQ = order.duration_months || 1;
+            const expiresAtQ = new Date(Date.now() + durationMonthsQ * 30 * 24 * 60 * 60 * 1000).toISOString();
+            const enrichedCreds = {
+                ...result.credentials,
+                plan_type: order.plan_type,
+                expires_at: expiresAtQ
+            };
+
+            // 6. Enviar SMS
+            await smsService.sendDeliverySms(order.phone, enrichedCreds);
             console.log(`[Queue] Order ${orderId} concluída.`);
 
         } catch (error) {
@@ -94,6 +103,11 @@ const handleOutOfStock = async (order) => {
     await supabase.from('ecoflix_orders').update({ status: 'STOCK_OUT' }).eq('id', order.id);
     const websocket = require('../../../src/websocket');
     websocket.broadcastToOrder(order.id, { type: 'payment_update', status: 'STOCK_OUT' });
+
+    // Notificar o cliente por SMS que o stock está esgotado
+    await smsService.sendStockOutSms(order.phone, order.plan_type).catch(err => {
+        console.error(`[SMS] Falha ao enviar SMS de stock esgotado (queue): ${err.message}`);
+    });
 };
 
 module.exports = {

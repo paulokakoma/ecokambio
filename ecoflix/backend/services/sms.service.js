@@ -183,12 +183,11 @@ const sendOtpSms = async (phone, code) => {
 /**
  * Envia credenciais Netflix após pagamento confirmado.
  * @param {string} phone
- * @param {{ email: string, password: string, profile: string, pin: string }} creds
+ * @param {{ email: string, password: string, profile: string, pin: string, plan_type: string, expires_at: string }} creds
  */
 const sendDeliverySms = async (phone, creds) => {
     let message =
-        `Pagamento confirmado!\n\n` +
-        `Aqui estao seus dados de acesso:\n` +
+        `EcoFlix Netflix\n\n` +
         `E-mail: ${creds.email || 'N/A'}\n` +
         `Senha: ${creds.password || 'N/A'}`;
 
@@ -200,11 +199,26 @@ const sendDeliverySms = async (phone, creds) => {
         message += `\nPIN: ${creds.pin}`;
     }
 
-    message += `\n\nAVISO: Nao mude a senha para evitar ser banido!`;
+    message += `\n\nNao mude a senha! Suporte: +244927862935`;
 
     return sendSms(phone, message);
 };
 
+
+/**
+ * Envia notificação de stock esgotado ao cliente.
+ * @param {string} phone
+ * @param {string} planType - Tipo de plano comprado
+ */
+const sendStockOutSms = async (phone, planType = 'N/A') => {
+    const message =
+        `EcoFlix\n\n` +
+        `Pagamento confirmado! Estamos sem stock no momento.\n` +
+        `As credenciais serao enviadas em breve.\n\n` +
+        `Duvidas: +244927862935`;
+
+    return sendSms(phone, message);
+};
 
 /**
  * Envia confirmação de renovação de subscrição.
@@ -257,6 +271,7 @@ module.exports = {
     sendSms,
     sendOtpSms,
     sendDeliverySms,
+    sendStockOutSms,
     sendRenewalSms,
     sendPasswordUpdateSms,
     sendRevokeSms,

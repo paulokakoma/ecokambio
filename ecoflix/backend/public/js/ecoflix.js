@@ -847,29 +847,52 @@ function initUserWebSocket() {
                     showPaymentSuccess(data.credentials);
                     return;
                 }
-                const txId = currentOrder.transaction_id || currentOrder.reference;
-                const checkStatus = await fetch(`${API_BASE}/orders/${txId}/status`);
-                const statusData = await checkStatus.json();
-                
-                if (statusData.success) {
-                    if (statusData.status === 'PAID') {
-                        clearSession();
-                        if (statusData.token) {
-                            localStorage.setItem('ecoflix_token', statusData.token);
-                            loadDashboard();
-                            showToast('Pagamento confirmado!', 'success');
-                        } else {
-                            showPaymentSuccess(statusData.credentials);
+                if (data.status === 'PAID') {
+                    const txId = currentOrder.transaction_id || currentOrder.reference;
+                    let retries = 0;
+                    const maxRetries = 3;
+                    const fetchStatus = async () => {
+                        try {
+                            const checkStatus = await fetch(`${API_BASE}/orders/${txId}/status`);
+                            const statusData = await checkStatus.json();
+                            if (statusData.success && statusData.status === 'PAID') {
+                                clearSession();
+                                if (statusData.token) {
+                                    localStorage.setItem('ecoflix_token', statusData.token);
+                                    loadDashboard();
+                                    showToast('Pagamento confirmado!', 'success');
+                                } else if (statusData.credentials && statusData.credentials.email) {
+                                    showPaymentSuccess(statusData.credentials);
+                                } else {
+                                    showPaymentSuccess(null);
+                                }
+                            } else if (statusData.success && statusData.status === 'STOCK_OUT') {
+                                clearSession();
+                                showScreen('step-catalog');
+                                showToast('Pagamento confirmado! Sem stock no momento. As credenciais serao enviadas por SMS em breve.', 'info');
+                            } else if (statusData.success && ['FAILED', 'CANCELED', 'CANCELLED'].includes(statusData.status)) {
+                                clearSession();
+                                showScreen('step-catalog');
+                                showToast('Pagamento falhou ou foi cancelado.', 'error');
+                            } else if (retries < maxRetries) {
+                                retries++;
+                                setTimeout(fetchStatus, 2000);
+                            } else {
+                                clearSession();
+                                showPaymentSuccess(null);
+                            }
+                        } catch (e) {
+                            if (retries < maxRetries) {
+                                retries++;
+                                setTimeout(fetchStatus, 2000);
+                            } else {
+                                clearSession();
+                                showPaymentSuccess(null);
+                            }
                         }
-                    } else if (statusData.status === 'STOCK_OUT') {
-                        clearSession();
-                        showScreen('step-catalog');
-                        showToast('Pagamento recebido, mas estamos sem stock!', 'error');
-                    } else if (['FAILED', 'CANCELED', 'CANCELLED'].includes(statusData.status)) {
-                        clearSession();
-                        showScreen('step-catalog');
-                        showToast('Pagamento falhou ou foi cancelado.', 'error');
-                    }
+                    };
+                    fetchStatus();
+                    return;
                 }
             }
         } catch (e) {
@@ -900,15 +923,17 @@ function startPaymentPolling(referenceRaw) {
                         localStorage.setItem('ecoflix_token', data.token);
                         loadDashboard();
                         showToast('Pagamento confirmado!', 'success');
-                    } else {
+                    } else if (data.credentials && data.credentials.email) {
                         showPaymentSuccess(data.credentials);
+                    } else {
+                        showPaymentSuccess(null);
                     }
                     return;
                 } else if (data.status === 'STOCK_OUT') {
                     if (pollingInterval) clearInterval(pollingInterval);
                     clearSession();
                     showScreen('step-catalog');
-                    showToast('Pagamento recebido, mas estamos sem stock!', 'error');
+                    showToast('Pagamento confirmado! Sem stock no momento. As credenciais serao enviadas por SMS em breve.', 'info');
                     return;
                 } else if (['FAILED', 'CANCELED', 'CANCELLED'].includes(data.status)) {
                     if (pollingInterval) clearInterval(pollingInterval);
@@ -919,7 +944,7 @@ function startPaymentPolling(referenceRaw) {
                 }
             }
         } catch (e) {
-            console.error('Initial check error:', e);
+            console.error('Polling check error:', e);
         }
 
         const orderId = currentOrder && (currentOrder.order_id || currentOrder.id);

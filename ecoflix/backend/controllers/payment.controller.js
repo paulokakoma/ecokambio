@@ -402,7 +402,7 @@ const checkPaymentStatus = async (req, res) => {
             let email, password, profileName, profilePin;
 
             // --- Tentativa 1: via JOIN na ordem (dados já carregados acima) ---
-            const sub = order.subscription?.[0];
+            const sub = Array.isArray(order.subscription) ? order.subscription[0] : order.subscription;
             if (sub?.profile?.master_account) {
                 email = sub.profile.master_account.email;
                 password = sub.profile.master_account.password;
@@ -480,6 +480,59 @@ const checkPaymentStatus = async (req, res) => {
                     }
                 } else {
                     console.warn(`[Status] Direct lookup failed for order ${order.id}:`, subDirectErr?.message);
+                }
+            }
+
+            // --- Tentativa 4: query directa por master_account_id na subscrição (exclusivos) ---
+            if (!email) {
+                console.log(`[Status] Trying exclusive account fallback for order ${order.id}...`);
+                const { data: subExclusive } = await supabase
+                    .from('ecoflix_subscriptions')
+                    .select('master_account_id')
+                    .eq('order_id', order.id)
+                    .single();
+
+                if (subExclusive?.master_account_id) {
+                    const { data: maDirect } = await supabase
+                        .from('ecoflix_master_accounts')
+                        .select('email, password')
+                        .eq('id', subExclusive.master_account_id)
+                        .single();
+                    if (maDirect) {
+                        email = maDirect.email;
+                        password = maDirect.password;
+                        console.log(`[Status] Credentials via exclusive fallback: found=${!!email}`);
+                    }
+                }
+            }
+
+            // --- Tentativa 5: query por order.user_id no ecoflix_subscriptions ---
+            if (!email && order.user_id) {
+                console.log(`[Status] Trying user_id fallback for order ${order.id}...`);
+                const { data: subByUser } = await supabase
+                    .from('ecoflix_subscriptions')
+                    .select(`
+                        profile:ecoflix_profiles!fk_subscriptions_profile(
+                            name, pin,
+                            master_account:ecoflix_master_accounts!ecoflix_profiles_master_account_id_fkey(email, password)
+                        ),
+                        account:ecoflix_master_accounts(email, password)
+                    `)
+                    .eq('user_id', order.user_id)
+                    .eq('status', 'ACTIVE')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (subByUser) {
+                    const master = subByUser.account || subByUser.profile?.master_account;
+                    if (master) {
+                        email = master.email;
+                        password = master.password;
+                        profileName = subByUser.profile?.name || 'Exclusiva';
+                        profilePin = subByUser.profile?.pin || 'N/A';
+                        console.log(`[Status] Credentials via user_id fallback: found=${!!email}`);
+                    }
                 }
             }
 
@@ -752,7 +805,7 @@ const paygoWebhook = async (req, res) => {
                             ts:       Date.now(),
                         });
                         sseBroadcast('refresh_admin', { reason: 'webhook_payment' });
-                        broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
+                        broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID', credentials: result.credentials });
                         broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
