@@ -25,6 +25,18 @@
 
 <body class="flex flex-col min-h-screen">
     <div id="toast-container" class="toast-container"></div>
+    <div id="app-dialog" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div id="app-dialog-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-500">
+                <i class="fas fa-exclamation-triangle text-xl text-white"></i>
+            </div>
+            <p id="app-dialog-message" class="text-gray-700 text-sm leading-relaxed"></p>
+            <div class="mt-6 flex justify-center gap-3">
+                <button id="app-dialog-cancel" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-bold px-5 py-2 rounded-lg transition hidden">Cancelar</button>
+                <button id="app-dialog-ok" class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2 rounded-lg transition">OK</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MOBILE HEADER (NATIVE APP STYLE) -->
     <header id="mobile-header" class="mobile-header visible lg:!hidden">
@@ -118,7 +130,7 @@
                                         </div>
                                     </div>
                                     <ul class="space-y-3 mb-8">
-                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#10B981] mt-0.5 text-base"></i><span>1 Ecrã de cada vez</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#10B981] mt-0.5 text-base"></i><span>Apenas um ecrã por conta</span></li>
                                         <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#10B981] mt-0.5 text-base"></i><span>Qualidade Máxima (4K)</span></li>
                                         <li class="flex items-start gap-3 text-sm text-gray-300 opacity-50"><i class="ph-bold ph-x text-gray-500 mt-0.5 text-base"></i><span>Sem acesso à TV</span></li>
                                     </ul>
@@ -159,7 +171,7 @@
                                         </div>
                                     </div>
                                     <ul class="space-y-3 mb-8">
-                                        <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>1 Ecrã de cada vez</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>Apenas um ecrã por conta</span></li>
                                         <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>Funciona em Smart TV</span></li>
                                         <li class="flex items-start gap-3 text-sm text-gray-200"><i class="ph-bold ph-check text-[#E50914] mt-0.5 text-base"></i><span>Resolução 4K Max</span></li>
                                     </ul>
@@ -202,7 +214,7 @@
                                     </div>
                                     <ul class="space-y-3 mb-8">
                                         <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Conta 100% Exclusiva</span></li>
-                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Partilha Multi-Casa</span></li>
+                                        <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Partilha Com a família</span></li>
                                         <li class="flex items-start gap-3 text-sm text-gray-300"><i class="ph-bold ph-check text-[#F97316] mt-0.5 text-base"></i><span>Controlo Parental</span></li>
                                     </ul>
                                 </div>
@@ -284,8 +296,7 @@
                         </div>
                     </div>
                     <ul class="space-y-2 text-xs text-muted mb-6 flex-grow border-t border-gray-700/20 pt-4">
-                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>1 Ecrã de cada
-                                vez</span></li>
+                        <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Apenas um ecrã por conta</span></li>
                         <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>PIN de Perfil
                                 Privado</span></li>
                         <li class="flex items-start"><i class="fas fa-check check-icon mt-0.5"></i> <span>Funciona em
@@ -993,7 +1004,7 @@
                         suporte técnico.</p>
 
                     <div class="space-y-3">
-                        <a href="https://wa.me/${data.support_whatsapp || '244927862935'}" target="_blank"
+                        <a id="help-whatsapp-link" href="https://wa.me/244927862935" target="_blank"
                             class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 rounded transition relative z-10 cursor-pointer">
                             <i class="fab fa-whatsapp text-xl"></i> <span>Conversar no WhatsApp</span>
                         </a>
