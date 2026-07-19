@@ -82,21 +82,26 @@ async function resumePendingOrder(order) {
     currentOrder = order;
     const ref = (currentOrder.reference || currentOrder.transaction_id || '').toString().replace(/\s/g, '');
     if (ref) {
-        try {
-            const resp = await fetch(`${API_BASE}/orders/${ref}/status`);
-            const data = await resp.json();
-            if (data.success && data.status === 'PAID') {
-                clearSession();
-                showPaymentSuccess(data.credentials);
-                return;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                const resp = await fetch(`${API_BASE}/orders/${ref}/status`);
+                const data = await resp.json();
+                if (data.success && data.status === 'PAID') {
+                    clearSession();
+                    showPaymentSuccess(data.credentials);
+                    return;
+                }
+                if (data.success && data.status !== 'PENDING') {
+                    clearSession();
+                    showScreen('step-catalog');
+                    showToast('O pedido anterior expirou ou foi cancelado.', 'info');
+                    return;
+                }
+                break;
+            } catch {
+                if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
             }
-            if (data.success && data.status !== 'PENDING') {
-                clearSession();
-                showScreen('step-catalog');
-                showToast('O pedido anterior expirou ou foi cancelado.', 'info');
-                return;
-            }
-        } catch {}
+        }
     }
     const isPush = currentOrder.payment_method === 'EXPRESS' || currentOrder.payment_method === 'MCX_PUSH';
     if (!isPush && currentOrder.reference) {
@@ -286,6 +291,7 @@ function startPayTimer() {
     timerEl.className = 'text-sm font-bold text-red-500 tabular-nums';
 
     _payTimerInterval = setInterval(() => {
+        if (_payTimerPausedAt) return;
         timeLeft--;
         const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
         const s = (timeLeft % 60).toString().padStart(2, '0');
@@ -530,6 +536,7 @@ async function submitPhone() {
     }
 
     userPhone = '+244' + phoneClean;
+    localStorage.setItem(STORAGE_PREFIX + 'user_phone', userPhone);
     subscribeUserToWs();
 
     const durationSelect = document.getElementById('duration-select');
@@ -645,8 +652,13 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
 
     } catch (error) {
         console.error(error);
-        showToast(error.message, 'error');
-        showScreen('step-payment-method');
+        if (method === 'EXPRESS' && (error.message.includes('Load failed') || error.message.includes('Failed to fetch') || error.message.includes('Network') || error.message.includes('network'))) {
+            showScreen('step-waiting-payment');
+            showToast('Conexão instável. Se já confirmou o pagamento no Multicaixa Express, por favor aguarde...', 'info');
+        } else {
+            showToast(error.message, 'error');
+            showScreen('step-payment-method');
+        }
     } finally {
         document.getElementById('global-loader').classList.add('hidden');
         document.getElementById('global-loader').classList.remove('flex');
@@ -784,6 +796,7 @@ function removeDiscountDisplay() {
 // REAL-TIME WEBSOCKETS (User)
 // ============================================================================
 let wsClient = null;
+let wsReconnectAttempts = 0;
 
 function subscribeUserToWs() {
     if (wsClient && wsClient.readyState === WebSocket.OPEN && userPhone) {
@@ -799,6 +812,7 @@ function initUserWebSocket() {
     wsClient = new WebSocket(wsUrl);
 
     wsClient.onopen = () => {
+        wsReconnectAttempts = 0;
         const orderId = currentOrder && (currentOrder.order_id || currentOrder.id);
         if (orderId) {
             wsClient.send(JSON.stringify({ type: 'subscribe_order', order_id: orderId }));
@@ -841,14 +855,19 @@ function initUserWebSocket() {
                     showToast(msg, type);
                 }
             }
-            else if (data.type === 'payment_update' && currentOrder) {
+            else if (data.type === 'payment_update') {
                 if (data.status === 'PAID' && data.credentials && data.credentials.email) {
                     clearSession();
                     showPaymentSuccess(data.credentials);
                     return;
                 }
                 if (data.status === 'PAID') {
-                    const txId = currentOrder.transaction_id || currentOrder.reference;
+                    const txId = currentOrder ? (currentOrder.transaction_id || currentOrder.reference) : null;
+                    if (!txId) {
+                        clearSession();
+                        showPaymentSuccess(data.credentials || null);
+                        return;
+                    }
                     let retries = 0;
                     const maxRetries = 3;
                     const fetchStatus = async () => {
@@ -901,11 +920,95 @@ function initUserWebSocket() {
     };
 
     wsClient.onclose = () => {
-        setTimeout(initUserWebSocket, 5000);
+        const reconnectDelay = (wsReconnectAttempts < 3) ? 1000 : 5000;
+        wsReconnectAttempts++;
+        setTimeout(initUserWebSocket, reconnectDelay);
     };
+
+    wsClient.onerror = () => {};
 }
 
 initUserWebSocket();
+
+// ============================================================================
+// MOBILE: Re-verificar pagamento quando o utilizador volta à aba
+// ============================================================================
+// Quando o utilizador sai para o Multicaixa Express e volta, o browser mobile
+// suspende a aba: WebSocket morre, setInterval é throttled, fetch pode falhar.
+// Este handler garante que ao voltar, o pagamento é verificado imediatamente.
+
+let _payTimerPausedAt = null;
+
+function immediatePaymentCheck() {
+    if (!currentOrder) return;
+    const ref = (currentOrder.transaction_id || currentOrder.reference || '').toString().replace(/\s/g, '');
+    if (!ref) return;
+
+    if (wsClient && wsClient.readyState !== WebSocket.OPEN) {
+        wsClient = null;
+        initUserWebSocket();
+    }
+
+    fetch(`${API_BASE}/orders/${ref}/status`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.status === 'PAID') {
+                if (pollingInterval) clearInterval(pollingInterval);
+                clearSession();
+                if (data.credentials && data.credentials.email) {
+                    showPaymentSuccess(data.credentials);
+                } else if (data.token) {
+                    localStorage.setItem('ecoflix_token', data.token);
+                    loadDashboard();
+                } else {
+                    showPaymentSuccess(null);
+                }
+            } else if (data.success && ['FAILED', 'CANCELED', 'CANCELLED'].includes(data.status)) {
+                if (pollingInterval) clearInterval(pollingInterval);
+                clearSession();
+                showScreen('step-catalog');
+                showToast('Pagamento falhou ou foi cancelado.', 'error');
+            } else if (data.success && data.status === 'STOCK_OUT') {
+                if (pollingInterval) clearInterval(pollingInterval);
+                clearSession();
+                showScreen('step-catalog');
+                showToast('Pagamento confirmado! Sem stock. Credenciais enviadas por SMS.', 'info');
+            }
+        })
+        .catch(() => {});
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (_payTimerInterval && _payTimerPausedAt === null) {
+            _payTimerPausedAt = Date.now();
+        }
+    } else {
+        if (_payTimerPausedAt !== null) {
+            _payTimerPausedAt = null;
+        }
+        if (currentOrder) {
+            immediatePaymentCheck();
+            if (pollingInterval) clearInterval(pollingInterval);
+            const ref = currentOrder.transaction_id || currentOrder.reference;
+            if (ref) startPaymentPolling(ref);
+        }
+        if (wsClient && wsClient.readyState !== WebSocket.OPEN) {
+            wsClient = null;
+            initUserWebSocket();
+        }
+    }
+});
+
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted && currentOrder) {
+        immediatePaymentCheck();
+        if (wsClient && wsClient.readyState !== WebSocket.OPEN) {
+            wsClient = null;
+            initUserWebSocket();
+        }
+    }
+});
 
 function startPaymentPolling(referenceRaw) {
     const reference = referenceRaw.toString().replace(/\s/g, '');

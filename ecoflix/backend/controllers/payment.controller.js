@@ -855,6 +855,7 @@ const paygoWebhook = async (req, res) => {
                         sseBroadcast('refresh_admin', { reason: 'webhook_payment' });
                         broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID', credentials: result.credentials });
                         broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
+                        broadcastToPhone(order.phone, { type: 'payment_update', status: 'PAID', credentials: result.credentials });
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
                     }
