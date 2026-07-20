@@ -109,56 +109,33 @@ const notifyAdmin = async (message) => {
 const checkAndNotify = async () => {
     console.log('[StockMonitor] Verificando stock...');
 
-    const alerts = [];
-    const keysToMark = [];
-
-    // 1. Verificar contas EXCLUSIVE
     const exclusiveAvailable = await getExclusiveAvailable();
-    if (exclusiveAvailable <= STOCK_THRESHOLD) {
-        const key = 'exclusive_stock';
-        if (!(await wasRecentlyNotified(key))) {
-            alerts.push(`EXCLUSIVE: ${exclusiveAvailable} disp.`);
-            keysToMark.push(key);
-        }
-    }
-
-    // 2. Verificar perfis MOBILE
     const mobileAvailable = await getProfilesAvailable('MOBILE');
-    if (mobileAvailable <= STOCK_THRESHOLD) {
-        const key = 'mobile_stock';
-        if (!(await wasRecentlyNotified(key))) {
-            alerts.push(`MOBILE: ${mobileAvailable} disp.`);
-            keysToMark.push(key);
-        }
-    }
-
-    // 3. Verificar perfis TV
     const tvAvailable = await getProfilesAvailable('TV');
-    if (tvAvailable <= STOCK_THRESHOLD) {
-        const key = 'tv_stock';
-        if (!(await wasRecentlyNotified(key))) {
-            alerts.push(`TV: ${tvAvailable} disp.`);
-            keysToMark.push(key);
-        }
+    const smsBalance = await getSmsBalance();
+
+    // Só alertar quando TODOS os tipos de stock esgotaram
+    const allStockedOut = exclusiveAvailable === 0 && mobileAvailable === 0 && tvAvailable === 0;
+    const key = 'all_stock';
+    const alerts = [];
+
+    if (allStockedOut && !(await wasRecentlyNotified(key))) {
+        alerts.push(`Stock esgotado: EXCLUSIVE=${exclusiveAvailable}, MOBILE=${mobileAvailable}, TV=${tvAvailable}`);
     }
 
-    // 4. Verificar saldo SMS
-    const smsBalance = await getSmsBalance();
+    // Saldo SMS continua a alertar independentemente
     if (smsBalance !== null && smsBalance <= SMS_BALANCE_THRESHOLD) {
-        const key = 'sms_balance';
-        if (!(await wasRecentlyNotified(key))) {
+        const smsKey = 'sms_balance';
+        if (!(await wasRecentlyNotified(smsKey))) {
             alerts.push(`SMS: ${smsBalance} restantes.`);
-            keysToMark.push(key);
+            await markNotified(smsKey);
         }
     }
 
     if (alerts.length > 0) {
-        const message = `🚨 ALERTA ECOFLIX - BAIXO STOCK:\n${alerts.map(a => '- ' + a).join('\n')}\nRecarregue no painel admin!`;
+        const message = `🚨 ALERTA ECOFLIX:\n${alerts.map(a => '- ' + a).join('\n')}\nRecarregue no painel admin!`;
         await notifyAdmin(message);
-
-        for (const k of keysToMark) {
-            await markNotified(k);
-        }
+        if (allStockedOut) await markNotified(key);
     }
 
     return {

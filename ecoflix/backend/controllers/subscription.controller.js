@@ -9,6 +9,9 @@ const planService = require('../services/plan.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
 const axios = require('axios');
 const { redisClient } = require('../../../src/config/redis');
+const eventService = require('../services/event.service');
+
+const emitEvent = (promise) => promise.catch(err => console.warn('[EcoFlix Events]', err.message));
 
 // ============================================================================
 // CUSTOMER: Validate Coupon
@@ -310,6 +313,11 @@ const reportIssue = async (req, res) => {
 
         sseBroadcast('new_issue', { issue: data });
         sseBroadcast('refresh_admin', { reason: 'new_issue' });
+        emitEvent(eventService.emitAdmin('issue_created', {
+            issue_id: data.id,
+            issue_type,
+            subscription_id: finalSubId
+        }));
 
         res.json({ success: true, message: 'Problema reportado. A nossa equipa irá verificar em breve.' });
 
@@ -398,6 +406,7 @@ const recoverCredentials = async (req, res) => {
             };
 
             await smsService.sendDeliverySms(cleanPhone, creds);
+            emitEvent(eventService.emitUser(cleanPhone, 'credentials_recovered', { sent: true }));
 
             return res.json({
                 success: true,
@@ -424,6 +433,7 @@ const recoverCredentials = async (req, res) => {
         };
 
         await smsService.sendDeliverySms(cleanPhone, creds);
+        emitEvent(eventService.emitUser(cleanPhone, 'credentials_recovered', { sent: true }));
 
         res.json({
             success: true,
@@ -478,6 +488,12 @@ const publicReportIssue = async (req, res) => {
 
         sseBroadcast('new_issue', { issue: data });
         sseBroadcast('refresh_admin', { reason: 'public_issue' });
+        emitEvent(eventService.emitAdmin('issue_created', {
+            issue_id: data.id,
+            issue_type,
+            phone: cleanPhone,
+            source: 'public'
+        }));
 
         res.json({ success: true, message: 'Pedido de suporte enviado com sucesso.' });
 

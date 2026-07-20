@@ -9,6 +9,9 @@ const smsService = require('../services/sms.service');
 const planService = require('../services/plan.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
 const { broadcastToPhone, broadcast: wsBroadcast } = require('../../../src/websocket');
+const eventService = require('../services/event.service');
+
+const emitEvent = (promise) => promise.catch(err => console.warn('[EcoFlix Events]', err.message));
 
 // Helper: Generate random PIN
 const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
@@ -253,6 +256,10 @@ const createAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'add_stock' });
         sseBroadcast('refresh_admin', { reason: 'add_stock' });
+        emitEvent(eventService.emitAdmin('stock_updated', {
+            reason: 'add_stock',
+            account_id: account.id
+        }));
 
         res.status(201).json({ success: true, data: fullAccount });
     } catch (error) {
@@ -386,8 +393,15 @@ const updateAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'update_account' });
         sseBroadcast('refresh_admin', { reason: 'update_account' });
+        emitEvent(eventService.emitAdmin('stock_updated', {
+            reason: 'update_account',
+            account_id: account.id
+        }));
         for (const phone of affectedPhones) {
             broadcastToPhone(phone, { type: 'subscription_update', reason: 'credentials_changed' });
+            emitEvent(eventService.emitUser(phone, 'credentials_changed', {
+                account_id: account.id
+            }));
         }
         res.json({ success: true, data: account });
     } catch (error) {
@@ -451,8 +465,15 @@ const deleteAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'delete_account' });
         sseBroadcast('refresh_admin', { reason: 'delete_account' });
+        emitEvent(eventService.emitAdmin('stock_updated', {
+            reason: 'delete_account',
+            account_id: id
+        }));
         for (const phone of affectedPhones) {
             broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_deleted' });
+            emitEvent(eventService.emitUser(phone, 'account_deleted', {
+                account_id: id
+            }));
         }
         res.json({ success: true, message: 'Conta apagada com sucesso' });
     } catch (error) {
@@ -554,6 +575,17 @@ const updateProfile = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'update_profile' });
         sseBroadcast('refresh_admin', { reason: 'approve_order' });
+        emitEvent(eventService.emitAdmin('profile_updated', {
+            profile_id: profile.id,
+            status: profile.status,
+            reason: 'update_profile'
+        }));
+        if (profile.client_phone) {
+            emitEvent(eventService.emitUser(profile.client_phone, 'profile_updated', {
+                profile_id: profile.id,
+                status: profile.status
+            }));
+        }
         res.json({ success: true, data: profile });
     } catch (error) {
         console.error('Update profile error:', error);
@@ -688,6 +720,7 @@ const resolveIssue = async (req, res) => {
 
         if (error) throw error;
 
+        emitEvent(eventService.emitAdmin('issue_resolved', { issue_id: data.id }));
         res.json({ success: true, data });
     } catch (error) {
         console.error('Resolve issue error:', error);
@@ -1292,6 +1325,8 @@ const updatePlans = async (req, res) => {
         const updatedPlans = await planService.updatePlans(plansToSave);
         sseBroadcast('refresh_admin', { reason: 'update_plans' });
         wsBroadcast({ type: 'plan_update', reason: 'prices_updated' }, 'users');
+        emitEvent(eventService.emitAdmin('plans_updated', { plans: Object.keys(plansToSave) }));
+        emitEvent(eventService.emit({ audience: 'all', type: 'plans_updated', payload: { plans: Object.keys(plansToSave) } }));
         res.json({ success: true, data: updatedPlans, message: 'Preços atualizados com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar planos:', error);
@@ -1500,8 +1535,16 @@ const revokeProfile = async (req, res) => {
         console.log(`[Revoke] Profile ${id} revoked. client_phone=${clientPhone || 'unknown'}`);
         sseBroadcast('stock_update', { reason: 'revoke_profile' });
         sseBroadcast('refresh_admin', { reason: 'revoke_profile' });
+        emitEvent(eventService.emitAdmin('profile_revoked', {
+            profile_id: id,
+            phone: clientPhone || null
+        }));
         if (clientPhone) {
             broadcastToPhone(clientPhone, { type: 'subscription_update', reason: 'profile_revoked' });
+            emitEvent(eventService.emitUser(clientPhone, 'profile_revoked', {
+                profile_id: id,
+                reason
+            }));
         }
         res.json({ success: true, message: 'Perfil revogado com sucesso. O utilizador foi desconectado.' });
     } catch (error) {
@@ -1543,8 +1586,16 @@ const suspendProfile = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'suspend_profile' });
         sseBroadcast('refresh_admin', { reason: 'suspend_profile' });
+        emitEvent(eventService.emitAdmin('profile_suspended', {
+            profile_id: id,
+            phone: profile.client_phone || null
+        }));
         if (profile.client_phone) {
             broadcastToPhone(profile.client_phone, { type: 'subscription_update', reason: 'profile_suspended' });
+            emitEvent(eventService.emitUser(profile.client_phone, 'profile_suspended', {
+                profile_id: id,
+                reason: reason || null
+            }));
         }
         res.json({ success: true, message: 'Perfil suspenso.' });
     } catch (error) {
@@ -1582,8 +1633,15 @@ const restoreProfile = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'return_profile' });
         sseBroadcast('refresh_admin', { reason: 'return_profile' });
+        emitEvent(eventService.emitAdmin('profile_restored', {
+            profile_id: id,
+            phone: profile.client_phone || null
+        }));
         if (profile.client_phone) {
             broadcastToPhone(profile.client_phone, { type: 'subscription_update', reason: 'profile_restored' });
+            emitEvent(eventService.emitUser(profile.client_phone, 'profile_restored', {
+                profile_id: id
+            }));
         }
         res.json({ success: true, message: 'Perfil devolvido/restaurado.' });
     } catch (error) {
@@ -1655,6 +1713,7 @@ const resendSms = async (req, res) => {
         }
         const smsService = require('../services/sms.service');
         await smsService.sendDeliverySms(phone, { email, password, profile: profile || 'N/A', pin: pin || 'N/A' });
+        emitEvent(eventService.emitUser(phone, 'credentials_resent', { sent: true }));
         res.json({ success: true, message: 'SMS reenviado com sucesso.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -1675,8 +1734,15 @@ const suspendAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'suspend_account' });
         sseBroadcast('refresh_admin', { reason: 'suspend_account' });
+        emitEvent(eventService.emitAdmin('account_suspended', {
+            subscription_id,
+            phone: phone || null
+        }));
         if (phone) {
             broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_suspended' });
+            emitEvent(eventService.emitUser(phone, 'account_suspended', {
+                subscription_id
+            }));
         }
         res.json({ success: true, message: 'Conta suspensa e cliente notificado.' });
     } catch (error) {
@@ -1743,8 +1809,15 @@ const restoreAccount = async (req, res) => {
 
         sseBroadcast('stock_update', { reason: 'reactivate_account' });
         sseBroadcast('refresh_admin', { reason: 'reactivate_account' });
+        emitEvent(eventService.emitAdmin('account_restored', {
+            subscription_id,
+            phone: phone || null
+        }));
         if (phone) {
             broadcastToPhone(phone, { type: 'subscription_update', reason: 'account_restored' });
+            emitEvent(eventService.emitUser(phone, 'account_restored', {
+                subscription_id
+            }));
         }
         res.json({ success: true, message: 'Conta reativada com sucesso e SMS enviado.' });
     } catch (error) {
@@ -1782,7 +1855,14 @@ const resetPassword = async (req, res) => {
         sseBroadcast('refresh_admin', { reason: 'reset_password' });
         for (const phone of affectedPhones) {
             broadcastToPhone(phone, { type: 'subscription_update', reason: 'credentials_changed' });
+            emitEvent(eventService.emitUser(phone, 'credentials_changed', {
+                master_account_id
+            }));
         }
+        emitEvent(eventService.emitAdmin('credentials_changed', {
+            master_account_id,
+            affected_count: affectedPhones.size
+        }));
 
         res.json({ success: true, message: 'Palavra-passe atualizada com sucesso.' });
     } catch (error) {
@@ -1818,6 +1898,7 @@ const updateSettings = async (req, res) => {
 
         currentSettings[key] = value;
         fs.writeFileSync(SETTINGS_FILE, JSON.stringify(currentSettings, null, 4));
+        emitEvent(eventService.emitAdmin('settings_updated', { key }));
 
         res.json({ success: true, message: 'Configuração atualizada com sucesso.' });
     } catch (error) {
@@ -1893,4 +1974,3 @@ module.exports.restoreAccount = restoreAccount;
 module.exports.resetPassword = resetPassword;
 module.exports.getSettings = getSettings;
 module.exports.updateSettings = updateSettings;
-

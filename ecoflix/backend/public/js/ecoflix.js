@@ -966,11 +966,11 @@ function immediatePaymentCheck() {
             if (data.success && data.status === 'PAID') {
                 if (pollingInterval) clearInterval(pollingInterval);
                 clearSession();
+                if (data.token) {
+                    localStorage.setItem('ecoflix_token', data.token);
+                }
                 if (data.credentials && data.credentials.email) {
                     showPaymentSuccess(data.credentials);
-                } else if (data.token) {
-                    localStorage.setItem('ecoflix_token', data.token);
-                    loadDashboard();
                 } else {
                     showPaymentSuccess(null);
                 }
@@ -1083,9 +1083,8 @@ function startPaymentPolling(referenceRaw) {
                     clearSession();
                     if (data.token) {
                         localStorage.setItem('ecoflix_token', data.token);
-                        loadDashboard();
-                        showToast('Pagamento confirmado!', 'success');
-                    } else if (data.credentials && data.credentials.email) {
+                    }
+                    if (data.credentials && data.credentials.email) {
                         showPaymentSuccess(data.credentials);
                     } else {
                         showPaymentSuccess(null);
@@ -1292,18 +1291,9 @@ function showPaymentSuccess(credentials) {
     const bgGlow = document.getElementById('pay-bg-glow');
 
     if (loadingState && successState) {
-        loadingState.classList.add('pay-fade-out');
         if (bgGlow) bgGlow.style.background = 'radial-gradient(circle at 50% 50%, rgba(34,197,94,0.15) 0%, transparent 50%)';
-
-        setTimeout(() => {
-            loadingState.style.display = 'none';
-            successState.classList.remove('pay-hidden');
-            successState.classList.add('pay-fade-in');
-
-            setTimeout(() => {
-                _finishSuccess(credentials);
-            }, 2000);
-        }, 500);
+        loadingState.style.display = 'none';
+        _finishSuccess(credentials);
     } else {
         _finishSuccess(credentials);
     }

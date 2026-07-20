@@ -407,8 +407,43 @@ const processPayment = async (order) => {
             .single();
 
         if (lockErr || !locked) {
-            console.log(`[ProcessPayment] Order ${order.id} já processado ou bloqueado. A ignorar.`);
-            return { success: false, message: 'Pedido já processado' };
+            // Check if stale lock — paid_at set but order stuck for >120s
+            const { data: stuckOrder } = await supabase
+                .from('ecoflix_orders')
+                .select('paid_at, updated_at')
+                .eq('id', order.id)
+                .single();
+
+            if (stuckOrder?.paid_at && stuckOrder?.updated_at) {
+                const stuckMs = Date.now() - new Date(stuckOrder.updated_at).getTime();
+                if (stuckMs > 120000) {
+                    console.warn(`[ProcessPayment] Order ${order.id} stuck for ${Math.round(stuckMs / 1000)}s. Resetting paid_at.`);
+                    await supabase
+                        .from('ecoflix_orders')
+                        .update({ paid_at: null, updated_at: new Date() })
+                        .eq('id', order.id);
+                    // Retry lock
+                    const { data: retryLock } = await supabase
+                        .from('ecoflix_orders')
+                        .update({ paid_at: new Date(), updated_at: new Date() })
+                        .eq('id', order.id)
+                        .eq('status', 'PENDING')
+                        .is('paid_at', null)
+                        .select('id')
+                        .single();
+                    if (retryLock) {
+                        console.log(`[ProcessPayment] Stale lock recovered for order ${order.id}. Retrying.`);
+                    } else {
+                        return { success: false, message: 'Pedido já processado' };
+                    }
+                } else {
+                    console.log(`[ProcessPayment] Order ${order.id} locked ${Math.round(stuckMs / 1000)}s ago. Waiting.`);
+                    return { success: false, message: 'Pedido já processado' };
+                }
+            } else {
+                console.log(`[ProcessPayment] Order ${order.id} já processado ou bloqueado.`);
+                return { success: false, message: 'Pedido já processado' };
+            }
         }
 
         if (order.subscription_action === 'RENEWAL' && order.target_subscription_id) {
@@ -425,7 +460,7 @@ const processPayment = async (order) => {
             // Revert to PENDING so it can be retried
             await supabase
                 .from('ecoflix_orders')
-                .update({ status: 'PENDING', updated_at: new Date() })
+                .update({ status: 'PENDING', paid_at: null, updated_at: new Date() })
                 .eq('id', order.id);
             return result.message === 'STOCK_ESGOTADO'
                 ? handleOutOfStock(order)
@@ -445,12 +480,11 @@ const processPayment = async (order) => {
 
     } catch (error) {
         console.error('[ProcessPayment] Erro:', error.message);
-        // Revert to PENDING on unexpected error
+        // Revert to PENDING on unexpected error — clear paid_at so lock can retry
         await supabase
             .from('ecoflix_orders')
-            .update({ status: 'PENDING', updated_at: new Date() })
-            .eq('id', order.id)
-            .eq('status', 'PROCESSING');
+            .update({ paid_at: null, updated_at: new Date() })
+            .eq('id', order.id);
         return { success: false, message: 'Erro ao processar pagamento' };
     }
 };

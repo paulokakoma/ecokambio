@@ -12,6 +12,7 @@ const { redisClient } = require('../../../src/config/redis');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const smsService = require('../services/sms.service');
+const eventService = require('../services/event.service');
 
 // Helper: Verify HMAC Signature (inline to avoid circular dependency)
 const verifySignature = (payload, signature, secret) => {
@@ -27,6 +28,8 @@ const verifySignature = (payload, signature, secret) => {
 const PaymentProviderFactory = require('../services/payment_factory.service');
 const { broadcast: sseBroadcast } = require('./sse.controller');
 const { broadcastToOrder, broadcastToPhone } = require('../../../src/websocket');
+
+const emitEvent = (promise) => promise.catch(err => console.warn('[EcoFlix Events]', err.message));
 
 // ============================================================================
 // CUSTOMER: Init Payment (Reference or Push)
@@ -308,6 +311,13 @@ const quickOrder = async (req, res) => {
 
         if (error) throw error;
         sseBroadcast('refresh_admin', { reason: 'new_order' });
+        emitEvent(eventService.emitAdmin('order_created', {
+            order_id: order.id,
+            phone,
+            plan_type,
+            amount: totalAmount,
+            payment_method: dbPaymentMethod
+        }));
 
         res.status(201).json({
             success: true,
@@ -716,6 +726,17 @@ const confirmPayment = async (req, res) => {
             sseBroadcast('refresh_admin', { reason: 'confirm_payment' });
             broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID' });
             broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
+            emitEvent(eventService.emitAdmin('order_paid', {
+                order_id: order.id,
+                phone: order.phone,
+                plan_type: order.plan_type,
+                amount: order.amount,
+                source: 'admin'
+            }));
+            emitEvent(eventService.emitUser(order.phone, 'payment_confirmed', {
+                order_id: order.id,
+                plan_type: order.plan_type
+            }));
         }
         res.json(result);
     } catch (error) {
@@ -760,6 +781,13 @@ const cancelOrder = async (req, res) => {
             .eq('id', id);
 
         sseBroadcast('refresh_admin', { reason: 'cancel_order' });
+        emitEvent(eventService.emitAdmin('order_cancelled', {
+            order_id: order.id,
+            phone: order.phone
+        }));
+        emitEvent(eventService.emitUser(order.phone, 'order_cancelled', {
+            order_id: order.id
+        }));
         res.json({ success: true, message: 'Pedido cancelado' });
     } catch (error) {
         console.error('Cancel order error:', error);
@@ -772,8 +800,16 @@ const cancelOrder = async (req, res) => {
 // ============================================================================
 const paygoWebhook = async (req, res) => {
     try {
-        const payload = req.body;
+        const payloadBuffer = req.body;
         const signature = req.headers['x-webhook-signature'];
+
+        let payload;
+        try {
+            payload = JSON.parse(payloadBuffer.toString('utf8'));
+        } catch (e) {
+            console.error('[PayGo Webhook] Invalid JSON payload:', e);
+            return res.status(400).json({ success: false, message: 'Invalid JSON payload' });
+        }
 
         const webhookPaymentId = payload.payment_id || payload.id || 'unknown';
         console.log(`[PayGo Webhook] Received payment_id=${webhookPaymentId}`);
@@ -788,8 +824,7 @@ const paygoWebhook = async (req, res) => {
             console.warn('[PayGo Webhook] PAYGOOO_WEBHOOK_SECRET not set. Skipping signature verification (non-production).');
         }
         if (secret) {
-            const rawBody = JSON.stringify(req.body);
-            if (!verifySignature(rawBody, signature, secret)) {
+            if (!verifySignature(payloadBuffer, signature, secret)) {
                 console.warn('[PayGo Webhook] Invalid Signature');
                 return res.status(401).json({ success: false, message: 'Invalid Signature' });
             }
@@ -856,6 +891,17 @@ const paygoWebhook = async (req, res) => {
                         broadcastToOrder(order.id, { type: 'payment_update', status: 'PAID', credentials: result.credentials });
                         broadcastToPhone(order.phone, { type: 'subscription_update', reason: 'payment_confirmed' });
                         broadcastToPhone(order.phone, { type: 'payment_update', status: 'PAID', credentials: result.credentials });
+                        emitEvent(eventService.emitAdmin('order_paid', {
+                            order_id: order.id,
+                            phone: order.phone,
+                            plan_type: order.plan_type,
+                            amount: order.amount,
+                            source: 'webhook'
+                        }));
+                        emitEvent(eventService.emitUser(order.phone, 'payment_confirmed', {
+                            order_id: order.id,
+                            plan_type: order.plan_type
+                        }));
                     } else if (!result.success && result.message.includes('Sem stock')) {
                         console.warn(`[PayGo Webhook] Stock issue for order ${order.id}`);
                     }
@@ -882,6 +928,15 @@ const paygoWebhook = async (req, res) => {
                     sseBroadcast('payment_update', { order_id: order.id, status: 'CANCELLED', ts: Date.now() });
                     sseBroadcast('refresh_admin', { reason: 'payment_cancelled' });
                     broadcastToOrder(order.id, { type: 'payment_update', status: 'CANCELLED' });
+                    emitEvent(eventService.emitAdmin('order_cancelled', {
+                        order_id: order.id,
+                        phone: order.phone,
+                        reason: rejectionReason
+                    }));
+                    emitEvent(eventService.emitUser(order.phone, 'order_cancelled', {
+                        order_id: order.id,
+                        reason: rejectionReason
+                    }));
                 }
             }
         }
@@ -962,8 +1017,31 @@ const simulateWebhook = async (req, res) => {
     }
 };
 
+// ============================================================================
+// RECOVERY: Get Latest Order by Phone
+// ============================================================================
+const getLatestOrder = async (req, res) => {
+    try {
+        const { phone } = req.params;
+        const cleanPhone = smsService.normalizePhone(phone);
+        const { data: order, error } = await supabase
+            .from('ecoflix_orders')
+            .select('id, reference_id, transaction_id, status, amount, plan_type, payment_method')
+            .eq('phone', cleanPhone)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error || !order) return res.json({ success: false, message: 'Order not found' });
+        return res.json({ success: true, order });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
+    }
+};
+
 module.exports = {
     initPayment,
+    getLatestOrder,
     quickOrder,
     checkPaymentStatus,
     renewSubscription,

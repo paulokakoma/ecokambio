@@ -17,6 +17,7 @@ const authController = require('./controllers/auth.controller');
 const paymentController = require('./controllers/payment.controller');
 const subscriptionController = require('./controllers/subscription.controller');
 const cronController = require('./controllers/cron.controller');
+const eventController = require('./controllers/event.controller');
 const { sseConnect } = require('./controllers/sse.controller');
 
 
@@ -34,6 +35,7 @@ router.post('/auth/login', validateSignature, catchAsync(authController.login));
 // Orders and Payments - HMAC Protected
 router.post('/orders/create', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(paymentController.initPayment));
 router.post('/orders/quick', validateSignature, catchAsync(paymentController.quickOrder));
+router.get('/orders/latest/:phone', catchAsync(paymentController.getLatestOrder));
 router.get('/orders/:ref/status', catchAsync(paymentController.checkPaymentStatus));
 router.post('/orders/:id/cancel', catchAsync(paymentController.cancelOrder));
 router.post('/coupons/validate', validateSignature, catchAsync(subscriptionController.validateCoupon));
@@ -46,6 +48,7 @@ router.get('/subscription/credentials', catchAsync(authController.requireOtpAuth
 router.post('/subscription/renew', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(paymentController.renewSubscription));
 router.post('/subscription/report', validateSignature, catchAsync(authController.requireOtpAuth), catchAsync(subscriptionController.reportIssue));
 router.post('/support/public-report', validateSignature, catchAsync(subscriptionController.publicReportIssue));
+router.get('/events/poll', catchAsync(eventController.pollUserEvents));
 
 // Testing (only in non-production)
 if (process.env.NODE_ENV !== 'production') {
@@ -118,6 +121,7 @@ router.get('/admin/sales-origin-chart', isAdmin, catchAsync(adminController.getS
 
 // SSE — Actualizações em tempo real para o painel admin
 router.get('/admin/events', isAdmin, sseConnect);
+router.get('/admin/events/poll', isAdmin, catchAsync(eventController.pollAdminEvents));
 
 // ============================================================================
 // CRON JOBS (Internal / Automated)
