@@ -81,8 +81,10 @@ function changeDuration() {
 async function resumePendingOrder(order) {
     currentOrder = order;
     const ref = (currentOrder.reference || currentOrder.transaction_id || '').toString().replace(/\s/g, '');
+
     if (ref) {
-        for (let attempt = 0; attempt < 3; attempt++) {
+        const delays = [1000, 2000, 4000, 8000, 16000];
+        for (let attempt = 0; attempt < 5; attempt++) {
             try {
                 const resp = await fetch(`${API_BASE}/orders/${ref}/status`);
                 const data = await resp.json();
@@ -99,21 +101,25 @@ async function resumePendingOrder(order) {
                 }
                 break;
             } catch {
-                if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+                if (attempt < 4) await new Promise(r => setTimeout(r, delays[attempt]));
             }
         }
     }
+
     const isPush = currentOrder.payment_method === 'EXPRESS' || currentOrder.payment_method === 'MCX_PUSH';
-    if (!isPush && currentOrder.reference) {
+    if (isPush || (!currentOrder.reference && currentOrder.transaction_id)) {
+        showScreen('step-waiting-payment');
+    } else if (currentOrder.reference) {
         const entity = currentOrder.entity || '00024';
         document.getElementById('ref-entity').innerText = /^\d{3,5}$/.test(entity) ? entity : '00024';
         document.getElementById('ref-display').innerText = currentOrder.reference;
         document.getElementById('pay-amount').innerText = formatKz(currentOrder.amount);
         showScreen('step-payment-ref');
-        startPaymentPolling(currentOrder.reference);
-    } else {
-        showScreen('step-waiting-payment');
-        startPaymentPolling(currentOrder.transaction_id || currentOrder.reference);
+    }
+    startPaymentPolling(currentOrder.transaction_id || currentOrder.reference);
+
+    if (isPush) {
+        immediatePaymentCheck();
     }
 }
 
@@ -300,7 +306,10 @@ function startPayTimer() {
         if (timeLeft <= 0) {
             stopPayTimer();
             timerEl.innerText = 'Expirado';
-            cancelOrder();
+            const isExpress = currentOrder && (currentOrder.payment_method === 'EXPRESS' || currentOrder.payment_method === 'MCX_PUSH');
+            if (!isExpress) {
+                cancelOrder();
+            }
         }
     }, 1000);
 }
@@ -472,6 +481,7 @@ function goBack(screenId) {
 function goHome(toSiteRoot = false) {
     isRenewal = false;
     targetSubscriptionId = null;
+    closeTutorial();
     if (toSiteRoot) {
         window.location.href = '/';
         return;
@@ -655,6 +665,7 @@ async function selectPaymentMethod(method, cardElement, skipOtp = false) {
         if (method === 'EXPRESS' && (error.message.includes('Load failed') || error.message.includes('Failed to fetch') || error.message.includes('Network') || error.message.includes('network'))) {
             showScreen('step-waiting-payment');
             showToast('Conexão instável. Se já confirmou o pagamento no Multicaixa Express, por favor aguarde...', 'info');
+            startRecoveryPolling(userPhone);
         } else {
             showToast(error.message, 'error');
             showScreen('step-payment-method');
@@ -1010,6 +1021,54 @@ window.addEventListener('pageshow', (e) => {
     }
 });
 
+window.addEventListener('online', () => {
+    if (currentOrder) {
+        immediatePaymentCheck();
+        if (wsClient && wsClient.readyState !== WebSocket.OPEN) {
+            wsClient = null;
+            initUserWebSocket();
+        }
+    }
+});
+
+let recoveryPollingInterval = null;
+
+function startRecoveryPolling(phone) {
+    if (recoveryPollingInterval) clearInterval(recoveryPollingInterval);
+    
+    recoveryPollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`${API_BASE}/orders/latest/${encodeURIComponent(phone)}`);
+            const data = await response.json();
+            
+            if (data.success && data.order) {
+                const order = data.order;
+                // Resume normal polling if we found a valid recent order
+                if (['PENDING', 'PROCESSING', 'PAID'].includes(order.status)) {
+                    clearInterval(recoveryPollingInterval);
+                    
+                    currentOrder = {
+                        order_id: order.id,
+                        reference: order.reference_id,
+                        transaction_id: order.transaction_id,
+                        amount: order.amount,
+                        payment_method: order.payment_method || 'EXPRESS'
+                    };
+                    saveSession();
+                    
+                    if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+                        wsClient.send(JSON.stringify({ type: 'subscribe_order', order_id: currentOrder.order_id }));
+                    }
+
+                    startPaymentPolling(currentOrder.transaction_id || currentOrder.reference);
+                }
+            }
+        } catch (e) {
+            console.warn('Recovery polling failed:', e);
+        }
+    }, 5000);
+}
+
 function startPaymentPolling(referenceRaw) {
     const reference = referenceRaw.toString().replace(/\s/g, '');
 
@@ -1279,6 +1338,23 @@ function closeHelpModal() {
 function scrollToFaq() {
     closeHelpModal();
     document.querySelector('.mt-16').scrollIntoView({ behavior: 'smooth' });
+}
+
+// === MODAL TUTORIAL NETFLIX ===
+function openTutorial() {
+    const modal = document.getElementById('tutorial-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const video = modal.querySelector('video');
+    if (video) { video.currentTime = 0; video.play().catch(() => {}); }
+}
+
+function closeTutorial() {
+    const modal = document.getElementById('tutorial-modal');
+    const video = modal.querySelector('video');
+    if (video) video.pause();
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 let isRenewal = false;

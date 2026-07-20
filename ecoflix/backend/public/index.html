@@ -742,6 +742,9 @@
                     </div>
 
                     <div class="mt-8 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                        <button onclick="openTutorial()" class="bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base border border-white/10 w-full flex items-center justify-center gap-2 transition-all">
+                            <i class="ph-fill ph-question text-lg md:text-xl"></i> Como Usar na Netflix
+                        </button>
                         <a href="https://www.netflix.com/br/login" target="_blank" class="bg-white hover:bg-gray-200 active:scale-95 text-black font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full flex items-center justify-center gap-2 transition-all">
                             <i class="ph-fill ph-play-circle text-lg md:text-xl"></i> Assistir na Netflix
                         </a>
@@ -1029,6 +1032,49 @@
                             class="text-white font-mono hover:text-brand hover:underline transition-colors">+244 938 948
                             994</a>
                     </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TUTORIAL NETFLIX -->
+    <div id="tutorial-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeTutorial()"></div>
+        <div class="relative w-full max-w-md">
+            <div class="netflix-card rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
+                <div class="bg-gray-800/50 p-4 flex justify-between items-center border-b border-gray-700">
+                    <h3 class="font-bold text-lg">Como Usar na Netflix</h3>
+                    <button onclick="closeTutorial()" class="text-gray-400 hover:text-white transition cursor-pointer"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="p-4">
+                    <div class="rounded-xl overflow-hidden mb-4 bg-black">
+                        <video src="assets/tutorialecoflix.mp4" controls autoplay muted loop class="w-full rounded-xl"></video>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold">1</span>
+                            <p class="text-gray-300">Aceda a <strong class="text-white">netflix.com/login</strong></p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold">2</span>
+                            <p class="text-gray-300">Insira o <strong class="text-white">email</strong> fornecido</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold">3</span>
+                            <p class="text-gray-300">Clique em <strong class="text-white">"Precisa de ajuda?"</strong> para aceder ao campo de senha</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold">4</span>
+                            <p class="text-gray-300">Insira a <strong class="text-white">senha</strong> e selecione o perfil</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 bg-[#E50914] rounded-full flex items-center justify-center text-white text-xs font-bold">5</span>
+                            <p class="text-gray-300">Insira o <strong class="text-white">PIN</strong> quando solicitado</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-700">
+                    <button onclick="closeTutorial()" class="w-full bg-[#E50914] hover:bg-[#f6121d] text-white font-bold py-3 rounded-xl transition active:scale-95">Entendido</button>
                 </div>
             </div>
         </div>
