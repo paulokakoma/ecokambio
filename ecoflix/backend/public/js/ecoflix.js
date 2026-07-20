@@ -54,6 +54,8 @@ function clearSession() {
     checkoutPendingCardElement = null;
     const removeBtn = document.getElementById('btn-remove-coupon');
     if (removeBtn) removeBtn.classList.add('hidden');
+    currentOrder = null;
+    userPhone = null;
 }
 
 function cancelCheckoutOtp() {
@@ -489,9 +491,14 @@ function goHome(toSiteRoot = false) {
     if (pollingInterval) clearInterval(pollingInterval);
     if (countdownInterval) clearInterval(countdownInterval);
     currentOrder = null;
-    userPhone = null;
-    clearSession();
-    showScreen('step-catalog');
+    
+    if (localStorage.getItem('ecoflix_token')) {
+        loadDashboard();
+    } else {
+        userPhone = null;
+        clearSession();
+        showScreen('step-catalog');
+    }
 }
 
 function formatPhoneNumber(input) {
@@ -889,9 +896,9 @@ function initUserWebSocket() {
                                 clearSession();
                                 if (statusData.token) {
                                     localStorage.setItem('ecoflix_token', statusData.token);
-                                    loadDashboard();
-                                    showToast('Pagamento confirmado!', 'success');
-                                } else if (statusData.credentials && statusData.credentials.email) {
+                                }
+                                showToast('Pagamento confirmado!', 'success');
+                                if (statusData.credentials && statusData.credentials.email) {
                                     showPaymentSuccess(statusData.credentials);
                                 } else {
                                     showPaymentSuccess(null);
@@ -969,6 +976,7 @@ function immediatePaymentCheck() {
                 if (data.token) {
                     localStorage.setItem('ecoflix_token', data.token);
                 }
+                showToast('Pagamento confirmado!', 'success');
                 if (data.credentials && data.credentials.email) {
                     showPaymentSuccess(data.credentials);
                 } else {
@@ -1492,6 +1500,14 @@ async function loadDashboard() {
                                 </div>
                             </div>
                             `}
+                        </div>
+
+                        <div class="mb-4">
+                            <button onclick="openTutorial()"
+                                class="netflix-card w-full p-4 rounded hover:bg-gray-800 transition flex items-center justify-center gap-3 border border-gray-700 hover:border-blue-500">
+                                <i class="fas fa-question-circle text-blue-500 text-xl"></i>
+                                <span class="font-bold">Como Usar na Netflix (Vídeo Tutorial)</span>
+                            </button>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
