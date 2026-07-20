@@ -4,7 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoFlix - Streaming Angola</title>
+    <title>EcoFlix — Streaming e Netflix em Angola | Contas Premium Baratas</title>
+    <meta name="description" content="EcoFlix Angola — Compre contas Netflix premium, partilhadas e exclusivas aos melhores preços. Pagamento via Multicaixa Express, referência bancária e USDT. Entrega imediata por SMS.">
+    <meta name="keywords" content="netflix angola, conta netflix, streaming angola, ecoflix, netflix barato, conta partilhada, serie angola, filme angola, multicaixa express, premium netflix">
+    <meta name="author" content="EcoFlix">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://ecokambio.com/ecoflix/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ecokambio.com/ecoflix/">
+    <meta property="og:title" content="EcoFlix — Streaming e Netflix em Angola | Contas Premium Baratas">
+    <meta property="og:description" content="Compre contas Netflix premium e partilhadas aos melhores preços. Pagamento fácil via Multicaixa Express e referência. Entrega imediata.">
+    <meta property="og:image" content="https://ecokambio.com/ecoflix/assets/preview.svg">
+    <meta property="og:locale" content="pt_AO">
+    <meta property="og:site_name" content="EcoFlix">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="EcoFlix — Netflix em Angola | Contas Premium Baratas">
+    <meta name="twitter:description" content="Compre contas Netflix premium e partilhadas aos melhores preços. Entrega imediata por SMS.">
+    <meta name="twitter:image" content="https://ecokambio.com/ecoflix/assets/preview.svg">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "EcoFlix",
+        "url": "https://ecokambio.com/ecoflix/",
+        "description": "Plataforma de streaming — contas Netflix premium e partilhadas em Angola.",
+        "inLanguage": "pt-AO",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://ecokambio.com/ecoflix/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
 
     <!-- Tailwind CSS (Local Build) -->
     <link rel="stylesheet" href="/css/tailwind.min.css">
@@ -64,10 +101,10 @@
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <div class="cursor-pointer active:scale-95 transition-transform" onclick="goHome()" title="Planos EcoFlix">
-                        <h1 class="text-4xl font-black"
+                        <span class="text-4xl font-black"
                             style="font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; letter-spacing: 0.1em; text-shadow: 2px 2px 0px rgba(0,0,0,0.4); font-weight: 900; transform: scaleY(1.1);">
                             <span style="color: #E50914;">ECOFLIX</span>
-                        </h1>
+                        </span>
                     </div>
                 </div>
                 <div class="flex items-center gap-6">
@@ -541,7 +578,7 @@
                         class="stagger-card relative bg-gradient-to-br from-[#FF8C42]/30 via-[#F0731A]/30 to-[#D85D0A]/30 p-4 md:p-5 rounded-2xl text-left overflow-hidden group transition-all duration-300 active:scale-[0.96] border border-white/5 opacity-50 cursor-not-allowed">
                         <div class="relative z-10">
                             <div class="w-11 h-11 md:w-12 md:h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 border border-white/10">
-                                <img src="assets/payment-methods/express_logo.svg" alt="Express" class="w-7 h-7 md:w-8 md:h-8 object-contain grayscale">
+                                <img src="assets/payment-methods/express_logo.svg" alt="Logo Multicaixa Express" class="w-7 h-7 md:w-8 md:h-8 object-contain grayscale">
                             </div>
                             <p class="text-white/60 font-bold text-[14px] md:text-base leading-tight mb-1.5">Multicaixa Express</p>
                             <span class="text-gray-500 text-[11px] md:text-xs font-medium">Em manutenção</span>
@@ -554,7 +591,7 @@
                         <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500 opacity-[0.08] rounded-full blur-2xl group-hover:opacity-15 transition-opacity"></div>
                         <div class="relative z-10">
                             <div class="w-11 h-11 md:w-12 md:h-12 bg-white/[0.06] backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/[0.08]">
-                                <img src="assets/payment-methods/multicaixa_logo.png" alt="REF" class="w-7 h-7 md:w-8 md:h-8 object-contain opacity-90">
+                                <img src="assets/payment-methods/multicaixa_logo.png" alt="Logo Referência de Pagamento" class="w-7 h-7 md:w-8 md:h-8 object-contain opacity-90">
                             </div>
                             <p class="text-white font-bold text-[14px] md:text-base leading-tight mb-1.5">Referência</p>
                             <span class="text-gray-400 text-[11px] md:text-xs font-medium">ATM ou NetBanking</span>
@@ -745,7 +782,7 @@
                         <button onclick="openTutorial()" class="bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base border border-white/10 w-full flex items-center justify-center gap-2 transition-all">
                             <i class="ph-fill ph-question text-lg md:text-xl"></i> Como Usar na Netflix
                         </button>
-                        <a href="https://www.netflix.com/br/login" target="_blank" class="bg-white hover:bg-gray-200 active:scale-95 text-black font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full flex items-center justify-center gap-2 transition-all">
+                        <a href="https://www.netflix.com/br/login" target="_blank" rel="noopener noreferrer" class="bg-white hover:bg-gray-200 active:scale-95 text-black font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full flex items-center justify-center gap-2 transition-all">
                             <i class="ph-fill ph-play-circle text-lg md:text-xl"></i> Assistir na Netflix
                         </a>
                         <button onclick="goHome()" class="bg-[#E50914] hover:bg-[#f6121d] active:scale-95 text-white font-bold py-3 md:py-3.5 px-6 rounded-xl text-sm md:text-base shadow-lg w-full transition-all">
@@ -1014,7 +1051,7 @@
                         suporte técnico.</p>
 
                     <div class="space-y-3">
-                        <a id="help-whatsapp-link" href="https://wa.me/244927862935" target="_blank"
+                        <a id="help-whatsapp-link" href="https://wa.me/244927862935" target="_blank" rel="noopener noreferrer"
                             class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 rounded transition relative z-10 cursor-pointer">
                             <i class="fab fa-whatsapp text-xl"></i> <span>Conversar no WhatsApp</span>
                         </a>
@@ -1120,7 +1157,7 @@
                              Referência.<br><br>
                             <strong style="color: white;">4. Responsabilidades:</strong> Você é responsável pela
                             confidencialidade das credenciais.<br><br>
-                            <a href="termos.html" target="_blank"
+                            <a href="/ecoflix/termos.html" target="_blank" rel="noopener noreferrer"
                                 style="color: #e50914; text-decoration: underline; cursor: pointer;">Ver termos
                                 completos →</a>
                         </p>
@@ -1132,7 +1169,7 @@
                         <input type="checkbox" id="terms-checkbox"
                             style="width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #e50914;">
                         <span style="color: #d1d5db; font-size: 14px; cursor: pointer; user-select: none;">
-                            Li e concordo com os <a href="termos.html" target="_blank"
+                            Li e concordo com os <a href="/ecoflix/termos.html" target="_blank" rel="noopener noreferrer"
                                 style="color: #e50914; text-decoration: underline;">Termos de Uso</a>
                         </span>
                     </label>

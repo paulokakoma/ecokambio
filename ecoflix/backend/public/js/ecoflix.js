@@ -1501,7 +1501,7 @@ async function loadDashboard() {
                                 <span class="font-bold">Renovar / Estender (+30 Dias)</span>
                             </button>
 
-                            <a href="https://wa.me/${data.support_whatsapp || '244927862935'}?text=${encodeURIComponent('Olá, estou com problemas na minha subscrição #')}${sub.id.split('-')[0]}" target="_blank"
+                            <a href="https://wa.me/${data.support_whatsapp || '244927862935'}?text=${encodeURIComponent('Olá, estou com problemas na minha subscrição #')}${sub.id.split('-')[0]}" target="_blank" rel="noopener noreferrer"
                                 class="netflix-card p-4 rounded hover:bg-gray-800 transition flex items-center justify-center gap-3 border border-gray-700 hover:border-gray-500">
                                 <i class="fab fa-whatsapp text-[#25D366] text-xl"></i>
                                 <span class="font-bold text-muted">Reportar Problema</span>
